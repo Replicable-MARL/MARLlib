@@ -1,7 +1,12 @@
-# SMAC_Ray
+# Scaling up MARL in Ray
 
-### pip install ray=1.8.0
-### annotate the ray.rllib.evaluation.rollout_worker line 508
+This is **SMAC** environment built for **ray[rllib]**
+> pip install ray=1.8.0 # version is important
+
+Please annotate one line source code to avoid parallel env seed bug
+> ray.rllib.evaluation.rollout_worker.py line 508 
+
+
 ### current support algo
 - R2D2(IQL)
 - VDN
@@ -17,3 +22,17 @@
 - GRU
 - LSTM
 - UPDeT
+
+# TODO
+### incorporate more env
+- Neural-mmo (have instance in Ray)
+- Meta-Drive (have instance in Ray)
+- LBF
+- RWARE
+- MPE
+- MALMO
+- Pommerman
+- DM Lab
+- Derk's Gym
+- Hanabi
+
