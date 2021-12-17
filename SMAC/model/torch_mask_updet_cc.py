@@ -1,4 +1,4 @@
-from torch_mask_updet import *
+from SMAC.model.torch_mask_updet import *
 
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()

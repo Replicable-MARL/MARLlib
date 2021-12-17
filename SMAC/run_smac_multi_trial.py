@@ -89,7 +89,7 @@ def run_parallel(args):
         "seed": tune.grid_search([i * + 0 for i in range(args.num_seeds)]),
     }
 
-    if args.run in ["VDN", "QMIX"]:  # policy and model are implemented as source code is
+    if args.run in ["VDN", "QMIX"]:  # policy are implemented as source code is
 
         if args.neural_arch not in ["GRU", "UPDeT"]:
             assert NotImplementedError
