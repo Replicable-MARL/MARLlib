@@ -31,8 +31,8 @@ from model.torch_mask_gru import *
 from model.torch_mask_gru_cc import *
 from model.torch_mask_updet import *
 from model.torch_mask_updet_cc import *
-from marl_util.mappo_tools import *
-from marl_util.maa2c_tools import *
+from cc_util.mappo_tools import *
+from cc_util.maa2c_tools import *
 from metric.smac_callback import *
 from model.torch_mask_r2d2 import *
 from model.torch_qmix import *

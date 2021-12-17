@@ -9,7 +9,7 @@ from ray.rllib.models.torch.torch_modelv2 import TorchModelV2
 from ray.rllib.utils.annotations import override
 from ray.rllib.utils.framework import try_import_torch
 from ray.rllib.agents.qmix.qmix import *
-from model.torch_mask_updet import Transformer
+from torch_mask_updet import Transformer
 
 torch, nn = try_import_torch()
 
