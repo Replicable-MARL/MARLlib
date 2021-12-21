@@ -1,7 +1,7 @@
 # Scaling up MARL in Ray
 
 This is fast MARL baseline built for **ray[rllib]**
-> pip install ray=1.8.0 # version is important
+> pip install ray==1.8.0 # version is important
 
 Please annotate one line source code to avoid parallel env seed bug
 > ray.rllib.evaluation.rollout_worker.py line 508 
@@ -26,9 +26,9 @@ Please annotate one line source code to avoid parallel env seed bug
 ### current support env
 - SMAC
 - MPE
+- Neural-MMO (simple version)
 
 ### incorporate more env
-- Neural-mmo (have instance in Ray)
 - Meta-Drive (have instance in Ray)
 - LBF
 - RWARE
