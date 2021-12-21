@@ -3,7 +3,7 @@
 This is Neural-MMO baseline with **ray[rllib]**
 
 - Remove unnecessary features/functions, only keep core function, 
-- Easier to read and extend compared to original version in https://github.com/NeuralMMO/environment
+- Easier to read and extend compared to original version in https://gitlab.aicrowd.com/neural-mmo/neural-mmo-starter-kit
 
 > pip install neural-mmo[rllib]==1.5.2.2 # version is important # this will force install Ray==1.4.0
 
