@@ -26,8 +26,8 @@ from model.torch_gru import *
 from model.torch_gru_cc import *
 from model.torch_lstm import *
 from model.torch_lstm_cc import *
-from cc_utils.mappo_tools import *
-from cc_utils.maa2c_tools import *
+from utils.mappo_tools import *
+from utils.maa2c_tools import *
 
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
