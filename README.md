@@ -1,6 +1,9 @@
 # MARL in One Repository
+This is fast multi-agent reinforcement learning (MARL) baseline built based on **ray[rllib]**, 
+containing most of the popular multi-agent system (MAS) and providing available MARL algorithms of each environment.
 
-This is fast MARL baseline built based on **ray[rllib]**
+## Getting started on Linux
+Install Ray
 > pip install ray==1.8.0 # version is important
 
 Please annotate one line source code to avoid parallel env seed bug (some env need this)
@@ -33,7 +36,7 @@ In **ray/rllib/policy/rnn_sequencing.py** about line 130-150
                     "max_seq_len": max_seq_len,
                 })))
 
-### current support algo
+## current support algo
 - R2D2(IQL)
 - VDN
 - QMIX
@@ -49,7 +52,7 @@ In **ray/rllib/policy/rnn_sequencing.py** about line 130-150
 - LSTM
 - UPDeT
 
-### current support env
+## current support env
 - SMAC
 - MPE
 - Neural-MMO (easy version)
