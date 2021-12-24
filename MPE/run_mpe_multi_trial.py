@@ -11,7 +11,7 @@ from ray.rllib.agents.ppo.ppo_tf_policy import PPOTFPolicy
 from ray.rllib.agents.a3c.a3c_tf_policy import A3CTFPolicy
 from ray.rllib.agents.a3c.a3c_torch_policy import A3CTorchPolicy
 from ray.rllib.agents.a3c.a2c import A2CTrainer
-from ray.rllib.agents.a3c.a3c import DEFAULT_CONFIG as A3C_CONFIG
+from ray.rllib.agents.a3c.a2c import A2C_DEFAULT_CONFIG as A2C_CONFIG
 
 from ray.rllib.agents.dqn.r2d2 import DEFAULT_CONFIG, R2D2Trainer
 from ray.rllib.agents.dqn.r2d2_torch_policy import R2D2TorchPolicy
@@ -69,9 +69,8 @@ def run_parallel(args):
         env = simple_speaker_listener_v3.env()
 
     else:
-        assert NotImplementedError
         print("Scenario {} not exists in pettingzoo".format(args.map))
-        sys.exit()
+        raise ValueError()
 
     # keep obs and action dim same across agents
     # pad_action_space_v0 will auto mask the padding actions
@@ -117,7 +116,7 @@ def run_parallel(args):
                 "adversarial agents contained in this MPE scenario. "
                 "Not suitable for cooperative only algo {}".format(args.run)
             )
-            sys.exit()
+            raise ValueError()
         else:
             print(
                 "PettingZooEnv step function only return one agent info, "
@@ -126,46 +125,7 @@ def run_parallel(args):
                 "\nwe are working on wrapping the PettingZooEnv"
                 "to support some cooperative scenario based on Ray"
             )
-            sys.exit()
-
-            # grouping = {
-            #     "group_1": [i for i in range(n_agents)],
-            # }
-            # ## obs state setting here
-            # from gym.spaces import Dict as GymDict, Box, Tuple
-            #
-            # obs_space = Tuple([
-            #                       GymDict({
-            #                           "obs": obs_space,
-            #                       })] * n_agents
-            #                   )
-            # act_space = Tuple([
-            #                       act_space
-            #                   ] * n_agents)
-            #
-            # # QMIX/VDN need grouping
-            # register_env(
-            #     "grouped_mpe",
-            #     lambda config: PettingZooEnv(env).with_agent_groups(
-            #         grouping, obs_space=obs_space, act_space=act_space))
-            #
-            # config = {
-            #     "env": "grouped_mpe",
-            #     "rollout_fragment_length": 30,
-            #     "train_batch_size": 1000,
-            #     "exploration_config": {
-            #         "epsilon_timesteps": 5000,
-            #         "final_epsilon": 0.05,
-            #     },
-            #     "mixer": "qmix" if args.run == "QMIX" else None,  # VDN has no mixer network
-            #
-            #     # Use GPUs iff `RLLIB_NUM_GPUS` env var set to > 0.
-            #     "num_gpus": int(os.environ.get("RLLIB_NUM_GPUS", "1")),
-            #     "num_workers": 0,
-            # }
-            #
-            # results = tune.run(QMixTrainer, name=args.run + "_" + args.neural_arch + "_" + args.map, stop=stop,
-            #                    config=config, verbose=1)
+            raise ValueError()
 
     elif args.run in ["R2D2"]:  # similar to IQL in recurrent/POMDP mode
 
@@ -235,7 +195,7 @@ def run_parallel(args):
 
         MAA2CTorchPolicy = A3CTorchPolicy.with_updates(
             name="MAA2CTorchPolicy",
-            get_default_config=lambda: A3C_CONFIG,
+            get_default_config=lambda: A2C_CONFIG,
             postprocess_fn=centralized_critic_postprocessing,
             loss_fn=loss_with_central_critic_a2c,
             mixins=[
@@ -324,5 +284,9 @@ def run_parallel(args):
                            stop=stop,
                            config=config,
                            verbose=1)
+
+    else:
+        print("args.run illegal")
+        raise ValueError()
 
     ray.shutdown()

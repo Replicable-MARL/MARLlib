@@ -11,7 +11,7 @@ from ray.rllib.agents.ppo.ppo_tf_policy import PPOTFPolicy
 from ray.rllib.agents.a3c.a3c_tf_policy import A3CTFPolicy
 from ray.rllib.agents.a3c.a3c_torch_policy import A3CTorchPolicy
 from ray.rllib.agents.a3c.a2c import A2CTrainer
-from ray.rllib.agents.a3c.a3c import DEFAULT_CONFIG as A3C_CONFIG
+from ray.rllib.agents.a3c.a2c import A2C_DEFAULT_CONFIG as A2C_CONFIG
 
 from ray.rllib.agents.dqn.r2d2 import DEFAULT_CONFIG, R2D2Trainer
 from ray.rllib.agents.dqn.r2d2_torch_policy import R2D2TorchPolicy
@@ -67,9 +67,8 @@ def run(args):
         env = simple_speaker_listener_v3.env()
 
     else:
-        assert NotImplementedError
         print("Scenario {} not exists in pettingzoo".format(args.map))
-        sys.exit()
+        raise ValueError()
 
     # keep obs and action dim same across agents
     # pad_action_space_v0 will auto mask the padding actions
@@ -114,7 +113,7 @@ def run(args):
                 "adversarial agents contained in this MPE scenario. "
                 "Not suitable for cooperative only algo {}".format(args.run)
             )
-            sys.exit()
+            raise ValueError()
         else:
             print(
                 "PettingZooEnv step function only return one agent info, "
@@ -123,7 +122,7 @@ def run(args):
                 "\nwe are working on wrapping the PettingZooEnv"
                 "to support some cooperative scenario based on Ray"
             )
-            sys.exit()
+            raise ValueError()
 
             # grouping = {
             #     "group_1": [i for i in range(n_agents)],
@@ -232,7 +231,7 @@ def run(args):
 
         MAA2CTorchPolicy = A3CTorchPolicy.with_updates(
             name="MAA2CTorchPolicy",
-            get_default_config=lambda: A3C_CONFIG,
+            get_default_config=lambda: A2C_CONFIG,
             postprocess_fn=centralized_critic_postprocessing,
             loss_fn=loss_with_central_critic_a2c,
             mixins=[
@@ -322,5 +321,9 @@ def run(args):
                            stop=stop,
                            config=config,
                            verbose=1)
+
+    else:
+        print("args.run illegal")
+        raise ValueError()
 
     ray.shutdown()
