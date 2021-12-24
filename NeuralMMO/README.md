@@ -1,4 +1,4 @@
-# Lighter Neural-MMO in Ray
+# Neural-MMO in Ray
 
 This is Neural-MMO baseline with **ray[rllib]**
 

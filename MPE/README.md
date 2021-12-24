@@ -1,6 +1,6 @@
-# Scaling up MPE in Ray
+# MPE in Ray
 
-This is MPE baseline built for **ray[rllib]**
+This is MPE baseline built with **ray[rllib]**
 > pip install ray==1.8.0 # version is important
 
 Please annotate one line source code to avoid parallel env seed bug (some env need this)
