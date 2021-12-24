@@ -1,7 +1,9 @@
 # MARL in One Repository
+This is fast multi-agent reinforcement learning (MARL) baseline built based on **ray[rllib]**, 
+containing most of the popular multi-agent system (MAS) and providing available MARL algorithms of each environment.
 
 ## Getting started on Linux
-This is fast MARL baseline built based on **ray[rllib]**
+Install Ray
 > pip install ray==1.8.0 # version is important
 
 Please annotate one line source code to avoid parallel env seed bug (some env need this)

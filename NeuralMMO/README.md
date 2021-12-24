@@ -5,6 +5,7 @@ This is Neural-MMO baseline with **ray[rllib]**
 - Remove unnecessary features/functions, only keep core function, 
 - Easier to read and extend compared to original version in https://gitlab.aicrowd.com/neural-mmo/neural-mmo-starter-kit
 
+## Getting Started
 > pip install neural-mmo[rllib]==1.5.2.2 # version is important # this will force install Ray==1.4.0
 
 > pip uninstall ray # remove old version 1.4.0
@@ -20,7 +21,7 @@ at ray.rllib.evaluation.rollout_worker.py line 508
 > _update_env_seed_if_necessary(self.env, seed, worker_index, 0)
 
 
-### current support algo
+## current support algo
 - PG
 - A2C
 - A3C

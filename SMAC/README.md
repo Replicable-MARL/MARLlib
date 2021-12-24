@@ -1,6 +1,8 @@
 # Scaling up SMAC in Ray
-
 This is SMAC baseline built for **ray[rllib]**
+
+## Getting Started
+Install Ray
 > pip install ray==1.8.0 # version is important
 
 Please annotate one line source code to avoid parallel env seed bug (some env need this)
@@ -33,7 +35,7 @@ In **ray/rllib/policy/rnn_sequencing.py** about line 130-150
                     "max_seq_len": max_seq_len,
                 })))
 
-### current support algo
+## current support algo
 - R2D2(IQL)
 - VDN
 - QMIX
