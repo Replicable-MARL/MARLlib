@@ -11,11 +11,13 @@ This is Neural-MMO baseline with **ray[rllib]**
 
 > pip install ray==1.8.0 # version is important
 
-Please annotate one line source code to avoid parallel env seed bug
-> ray.rllib.evaluation.rollout_worker.py line 508 
-
 Please add one line source code in **copy.py** according to
 https://bugs.python.org/issue38293 to avoid copy bug of @property
+
+Please annotate one line source code to avoid parallel env seed bug (some env need this)
+at ray.rllib.evaluation.rollout_worker.py line 508
+
+> _update_env_seed_if_necessary(self.env, seed, worker_index, 0)
 
 
 ### current support algo
