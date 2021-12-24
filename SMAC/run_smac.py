@@ -19,7 +19,7 @@ from ray.rllib.agents.ppo.ppo_tf_policy import PPOTFPolicy
 from ray.rllib.agents.a3c.a3c_tf_policy import A3CTFPolicy
 from ray.rllib.agents.a3c.a3c_torch_policy import A3CTorchPolicy
 from ray.rllib.agents.a3c.a2c import A2CTrainer
-from ray.rllib.agents.a3c.a3c import DEFAULT_CONFIG as A3C_CONFIG
+from ray.rllib.agents.a3c.a2c import A2C_DEFAULT_CONFIG as A2C_CONFIG
 from ray.rllib.agents.dqn.dqn_torch_model import DQNTorchModel
 from ray.rllib.agents.dqn.r2d2 import DEFAULT_CONFIG
 from ray.rllib.agents.trainer_template import build_trainer
@@ -232,7 +232,7 @@ def run(args):
         config.update(common_config)
 
         MAA2C_CONFIG = merge_dicts(
-            A3C_CONFIG,
+            A2C_CONFIG,
             {
                 "agent_num": n_ally,
                 "state_dim": state_shape,
@@ -356,15 +356,13 @@ def run(args):
                            verbose=1)
 
     else:
-        config = {}
-        results = {}
-        group = False
-        assert NotImplementedError
+        print("args.run illegal")
+        raise ValueError()
 
     # if args.as_test:
     #     config["seed"] = 1234
 
-    if args.as_test:
-        check_learning_achieved(results, args.stop_reward)
+    # if args.as_test:
+    #     check_learning_achieved(results, args.stop_reward)
 
     ray.shutdown()

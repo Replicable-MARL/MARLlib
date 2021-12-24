@@ -10,7 +10,7 @@ def get_train_parser():
         help="Init Ray in local mode for easier debugging.")
     parser.add_argument(
         "--parallel",
-        default=True,
+        default=False,
         type=bool,
         help="Whether use tune grid research")
     parser.add_argument(
@@ -20,17 +20,28 @@ def get_train_parser():
         help="The RLlib-registered algorithm to use.")
     parser.add_argument(
         "--map",
-        type=str,
-        default="3s_vs_5z",
-        help="Maps should be registered")
+        choices=["Bottleneck", "ParkingLot", "Intersection", "Roundabout", "Tollgate"],
+        default="Bottleneck",
+        help="Envs should be registered")
     parser.add_argument(
-        "--token-dim",
+        "--num-agents",
         type=int,
-        default=6,
-        help="Maps should be registered")
+        default=20,
+        help="Car number in one map")
+    parser.add_argument(
+        "--num-neighbours",
+        type=int,
+        default=4,
+        help="neighbours number")
+    parser.add_argument(
+        "--fuse-mode",
+        choices=["mf", "concat"],
+        type=str,
+        default="mf",
+        help="Agent Neural Architecture")
     parser.add_argument(
         "--neural-arch",
-        choices=["LSTM", "GRU", "UPDeT", ],
+        choices=["LSTM", "GRU"],
         type=str,
         default="GRU",
         help="Agent Neural Architecture")
@@ -63,9 +74,9 @@ def get_train_parser():
         type=float,
         default=0.1)
     parser.add_argument(
-        "--num-seeds",
-        type=int,
-        default=3)
+        "--num-gpus-per-trial",
+        type=float,
+        default=1)
     parser.add_argument(
         "--stop-iters",
         type=int,
@@ -82,16 +93,6 @@ def get_train_parser():
         default=99999,
         help="Reward at which we stop training.")
     parser.add_argument(
-        "--exp-name-prefix",
-        type=str,
-        default="")
-    parser.add_argument(
         "--test",
         action="store_true")
-    parser.add_argument(
-        "--as-test",
-        action="store_true",
-        help="Whether this script should be run as a test: --stop-reward must "
-             "be achieved within --stop-timesteps AND --stop-iters.")
-
     return parser

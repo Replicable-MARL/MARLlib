@@ -16,6 +16,7 @@ from NeuralMMO.trainer.a3c_trainer import Customized_A3CTrainer as A3CTrainer
 from NeuralMMO.trainer.pg_trainer import Customized_PGTrainer as PGTrainer
 
 import sys
+
 # from ray.rllib.agents.ppo.ppo import PPOTrainer
 
 if __name__ == '__main__':
@@ -77,15 +78,18 @@ if __name__ == '__main__':
     name = customized_game_config.__class__.__name__ + "_" + args.run + "_" + args.neural_arch
 
     if args.run in ["QMIX", "VDN"]:
-        assert NotImplementedError
-        print("Neural-MMO is competitive/cooperative mixing setting environment"
-              "\n Joint Q learning algos like not QMIX and VDN are not suitable under this setting")
-        sys.exit()
+        print(
+            "Neural-MMO is competitive/cooperative mixing setting environment"
+            "\n Joint Q learning algos like not QMIX and VDN are "
+            "not suitable under this setting")
+        raise ValueError()
 
     elif args.run in ["R2D2"]:
-        assert NotImplementedError
-        print("Action space (MultiAction) of Neural-MMO is not supported for Q function based algo like DQN and R2D2 in Ray/RLlib")
-        sys.exit()
+        print(
+            "Action space (MultiAction) of Neural-MMO is not supported for "
+            "Q function based algo like DQN and R2D2 in Ray/RLlib"
+        )
+        raise ValueError()
 
     elif args.run in ["PG", "A2C", "A3C"]:
         config = {
@@ -130,3 +134,9 @@ if __name__ == '__main__':
                  name=name,
                  stop={'training_iteration': customized_game_config.TRAINING_ITERATIONS},
                  verbose=customized_game_config.LOG_LEVEL)
+
+    else:
+        print("args.run illegal")
+        raise ValueError()
+
+    ray.shutdown()
