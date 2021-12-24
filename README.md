@@ -1,5 +1,6 @@
 # MARL in One Repository
 
+## Getting started on Linux
 This is fast MARL baseline built based on **ray[rllib]**
 > pip install ray==1.8.0 # version is important
 
@@ -33,7 +34,7 @@ In **ray/rllib/policy/rnn_sequencing.py** about line 130-150
                     "max_seq_len": max_seq_len,
                 })))
 
-### current support algo
+## current support algo
 - R2D2(IQL)
 - VDN
 - QMIX
@@ -49,7 +50,7 @@ In **ray/rllib/policy/rnn_sequencing.py** about line 130-150
 - LSTM
 - UPDeT
 
-### current support env
+## current support env
 - SMAC
 - MPE
 - Neural-MMO (easy version)
