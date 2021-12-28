@@ -53,10 +53,11 @@ In **ray/rllib/policy/rnn_sequencing.py** about line 130-150
 - UPDeT
 
 ## current support env
-- SMAC
 - MPE
-- Neural-MMO (easy version)
+- SMAC
+- Neural-MMO (AICrowd version)
 - Meta-Drive
+- Google-Football
 
 ### incorporate more env
 - LBF
