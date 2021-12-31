@@ -19,40 +19,36 @@ from ray.rllib.agents.a3c.a3c_torch_policy import A3CTorchPolicy
 from ray.rllib.agents.a3c.a2c import A2CTrainer
 from ray.rllib.agents.a3c.a3c import DEFAULT_CONFIG as A3C_CONFIG
 
-from LBF.config_lbf import get_train_parser
-from LBF.env.lbf_rllib import RllibLBF
-from LBF.env.lbf_rllib_qmix import RllibLBF_QMIX
+from RWARE.config_rware import get_train_parser
+from RWARE.env.rware_rllib import RllibRWARE
+from RWARE.env.rware_rllib_qmix import RllibRWARE_QMIX
 
-from LBF.model.torch_gru import *
-from LBF.model.torch_gru_cc import *
-from LBF.model.torch_lstm import *
-from LBF.model.torch_lstm_cc import *
-from LBF.util.mappo_tools import *
-from LBF.util.maa2c_tools import *
+from RWARE.model.torch_gru import *
+from RWARE.model.torch_gru_cc import *
+from RWARE.model.torch_lstm import *
+from RWARE.model.torch_lstm_cc import *
+from RWARE.util.mappo_tools import *
+from RWARE.util.maa2c_tools import *
 
 if __name__ == "__main__":
     args = get_train_parser().parse_args()
     ray.init(local_mode=args.local_mode)
 
-    agent_num = args.agent_num
+    agent_num = args.agents_num
 
     env_config = {
-        "num_agents": args.agent_num,
-        "field_size": args.field_size,
-        "max_food": args.max_food,
-        "sight": args.sight,
-        "force_coop": args.force_coop,
+        "agents_num": args.agents_num,
+        "map_size": args.map_size,
+        "difficulty": args.difficulty,
     }
 
-    map_name = "Foraging-{4}s-{0}x{0}-{1}p-{2}f{3}".format(
-        args.field_size,
-        args.agent_num,
-        args.max_food,
-        "-coop" if args.force_coop else "",
-        args.sight
+    map_name = "rware-{0}-{1}ag-{2}".format(
+        args.map_size,
+        args.agents_num,
+        args.difficulty,
     )
 
-    register_env("lbf", lambda _: RllibLBF(env_config))
+    register_env("rware", lambda _: RllibRWARE(env_config))
 
     # Independent
     ModelCatalog.register_custom_model(
@@ -78,39 +74,30 @@ if __name__ == "__main__":
             print("{} arch not supported for QMIX/VDN".format(args.neural_arch))
             raise ValueError()
 
-        if not args.force_coop:
-            print("competitive settings are not suitable for QMIX/VDN")
-            raise ValueError()
-
-        single_env = RllibLBF_QMIX(env_config)
+        single_env = RllibRWARE_QMIX(env_config)
         obs_space = single_env.observation_space
         act_space = single_env.action_space
 
         obs_space = Tuple([obs_space] * agent_num)
         act_space = Tuple([act_space] * agent_num)
 
-        # align with LBF/env/lbf_rllib_qmix.py reset() function in line 41-50
+        # align with RWARE/env/rware_rllib_qmix.py reset() function in line 41-50
         grouping = {
             "group_1": ["agent_{}".format(i) for i in range(agent_num)],
         }
 
         # QMIX/VDN algo needs grouping env
         register_env(
-            "grouped_lbf",
-            lambda _: RllibLBF_QMIX(env_config).with_agent_groups(
+            "grouped_rware",
+            lambda _: RllibRWARE_QMIX(env_config).with_agent_groups(
                 grouping, obs_space=obs_space, act_space=act_space))
 
         config = {
-            "env": "grouped_lbf",
+            "env": "grouped_rware",
             "train_batch_size": 32,
             "exploration_config": {
                 "epsilon_timesteps": 5000,
                 "final_epsilon": 0.05,
-            },
-            "model": {
-                "custom_model_config": {
-                    "neural_arch": args.neural_arch,
-                },
             },
             "mixer": "qmix" if args.run == "QMIX" else None,  # None for VDN, which has no mixer
             "num_gpus": args.num_gpus,
@@ -127,7 +114,7 @@ if __name__ == "__main__":
 
     else:  # "PG", "A2C", "A3C", "R2D2", "PPO"
 
-        single_env = RllibLBF(env_config)
+        single_env = RllibRWARE(env_config)
         obs_space = single_env.observation_space
         act_space = single_env.action_space
 
@@ -137,7 +124,7 @@ if __name__ == "__main__":
         policy_ids = list(policies.keys())
 
         common_config = {
-            "env": "lbf",
+            "env": "rware",
             "num_gpus_per_worker": args.num_gpus_per_worker,
             "train_batch_size": 1000,
             "num_workers": args.num_workers,
@@ -171,11 +158,12 @@ if __name__ == "__main__":
 
             config = {"num_sgd_iter": 5, }
 
-            config.update({
-                "model": {
-                    "custom_model": "{}_IndependentCritic".format(args.neural_arch),
-                },
-            })
+            if "_" in args.neural_arch:
+                config.update({
+                    "model": {
+                        "custom_model": "{}_IndependentCritic".format(args.neural_arch),
+                    },
+                })
 
             config.update(common_config)
             results = tune.run(args.run,
