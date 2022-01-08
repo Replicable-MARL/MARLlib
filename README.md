@@ -58,7 +58,8 @@ In **ray/rllib/policy/rnn_sequencing.py** about line 130-150
 - MPE
 - SMAC
 - Neural-MMO (AICrowd version)
-- Meta-Drive- Pommerman
+- Meta-Drive
+- Pommerman
 - Google-Football
 
 ### incorporate more env
