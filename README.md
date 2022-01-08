@@ -58,13 +58,12 @@ In **ray/rllib/policy/rnn_sequencing.py** about line 130-150
 - MPE
 - SMAC
 - Neural-MMO (AICrowd version)
-- Meta-Drive
+- Meta-Drive- Pommerman
 - Google-Football
 
 ### incorporate more env
 
 - MALMO
-- Pommerman
 - DM Lab
 - Derk's Gym
 - Hanabi
