@@ -60,12 +60,12 @@ In **ray/rllib/policy/rnn_sequencing.py** about line 130-150
 - Neural-MMO (AICrowd version)
 - Meta-Drive
 - Pommerman
+- Derk's Gym
 - Google-Football
 
 ### incorporate more env
 
 - MALMO
 - DM Lab
-- Derk's Gym
 - Hanabi
 
