@@ -1,4 +1,4 @@
-# LBF in Ray
+# Derk's Gym in Ray
 
 This is [Derk's Gym](https://gym.derkgame.comnump) baseline built with **ray[rllib]**
 
@@ -31,7 +31,7 @@ at ray.rllib.evaluation.rollout_worker.py line 508
 please refer to:
 - http://docs.gym.derkgame.com/#creature-config
 - http://docs.gym.derkgame.com/#items
-- line 11-14 in derk_rllib.py
+- modify line 11-14 in derk_rllib.py
 
       self.env = DerkEnv(
         n_arenas=1,
