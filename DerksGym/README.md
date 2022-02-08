@@ -1,6 +1,6 @@
 # Derk's Gym in Ray
 
-This is [Derk's Gym](https://gym.derkgame.comnump) baseline built with **ray[rllib]**
+This is [Derk's Gym](https://gym.derkgame.com) baseline built with **ray[rllib]**
 
 ## Getting Started
 
