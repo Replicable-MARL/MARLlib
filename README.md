@@ -43,7 +43,7 @@ These will help you dive into the basic usage of RLLIB.
 
 ### Part II. Environment
 
-##### I. Motivation
+#### I. Motivation
 
 RL Community has boomed thanks to some great works like [**OpenAI**](https://openai.com/)'s [**Gym**](https://github.com/openai/gym) and [**RLLIB**](https://github.com/ray-project/ray/tree/master/rllib) under [**Anyscale**](https://www.anyscale.com/)'s [**Ray**](https://github.com/ray-project/ray) framework. **Gym** provides a unified style of RL environment interface. **RLLIB** makes the RL training more scalable and efficient.
 
@@ -61,7 +61,7 @@ So It is nearly impossible for one MARL algorithm to be directly applied to all 
 
 From this perspective, the way of fairly comparing the performance of different MARL algorithms should be treated much more seriously.  We will discuss this later in **Part III. Algorithms**.
 
-##### II. What we did in this benchmark
+#### II. What we did in this benchmark
 
 In this benchmark, we incorporate the characteristics of both Gym and RLLIB.
 
@@ -71,7 +71,7 @@ We make full use of RLLIB to provide a standard but extendable MARL training pip
 
 Some multi-agent tasks may cost weeks of training. But thanks to RAY, the training process can be easily paralleled with only slight configure file modification. RAY is good at allocating your computing resources for the best training/sampling efficiency.
 
-##### III. Supported Multi-agent System / Tasks
+#### III. Supported Multi-agent System / Tasks
 
 Most of the popular environment in MARL research has been incorporated in this benchmark:
 
