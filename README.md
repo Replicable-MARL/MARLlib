@@ -1,24 +1,23 @@
-
- #  White Paper for [MARL in One](https://github.com/Theohhhu/SMAC_Ray) Benchmark
+#  White Paper for [MARL in One](https://github.com/Theohhhu/[SMAC](HTTPS://GITHUB.COM/OXWHIRL/SMAC)_Ray) Benchmark
 -- multi-agent tasks and baselines under a unified framework
 
 ### Part I. Overview
 
-We collected most of the existing multi-agent environment and multi-agent reinforcement learning algorithms with different model architecture under one framework based on Ray's RLlib to boost the MARL research. 
+We collected most of the existing multi-agent environment and multi-agent reinforcement learning algorithms with different model architecture under one framework based on [**Ray**](https://github.com/ray-project/ray)'s [**RLlib**](https://github.com/ray-project/ray/tree/master/rllib) to boost the MARL research. 
 
-The code is simple and easy to understand. The common MARL baselines **including independence learning (IA2C, IQL, IPPO, IPG)**, **centralized critic learning (MAPPO, MAA2C)** and **joint Q learning (QMIX, VDN)** are all implemented as simple but slightly different to satisfy the various setting of the collected multi-agent systems.
+The code is simple and easy to understand. The most common MARL baselines include **independence learning (IQL, IA2C, IPPO, IPG)**, **centralized critic learning (MAPPO, MAA2C)** and **joint Q learning (QMIX, VDN)** are all implemented as simple as possible. The same algorithm under different tasks can be a bit different to satisfy the various settings of multi-agent systems. But once you are familiar with one task, it will be easy to move to another.
 
 We hope everyone in the MARL research community can be benefited from this benchmark.
 
-The basic structure of the repository. Here take **SMAC** as an example (name may be slightly different)
+The basic structure of the repository. Here we take **[SMAC](HTTPS://GITHUB.COM/OXWHIRL/SMAC)** task as an example (name may be slightly different)
 
 ```
 /
 └───SMAC
-        └───env
+        └───env     [**wrap the original env to make it compatible with RLLIB**]
                 └───starcraft2_rllib.py
                 └───starcraft2_rllib_qmix.py
-        └───model
+        └───model   [**agent architecture, cc represents for centralized critic**]
                 └───gru.py
                 └───gru_cc.py
                 └───lstm.py
@@ -27,73 +26,74 @@ The basic structure of the repository. Here take **SMAC** as an example (name ma
                 └───updet_cc.py
                 └───qmix.py
                 └───r2d2.py
-        └───utils
+        └───utils   [**centralized critic tools**]
                 └───mappo_tools.py
                 └───maa2c_tools.py
-        └───metrics
-                └───smac_callback.py
+        └───metrics [**customized metrics for logging**]
+                └───SMAC_callback.py
         └───README.md
         └───run_env.py
         └───config_env.py 
 
 ```
 
-All codes are built on RLLIB with the necessary extension. The tutorial of rllib can be found in https://docs.ray.io/en/latest/rllib/index.html.
-Examples can be found in https://docs.ray.io/en/latest/rllib-examples.html. 
-These will help you fast learn the basic usage of RLLIB.
+All codes are built based on RLLIB with some necessary extensions. The tutorial of RLLIB can be found in https://docs.ray.io/en/latest/rllib/index.html.
+Fast examples can be found in https://docs.ray.io/en/latest/rllib-examples.html. 
+These will help you dive into the basic usage of RLLIB.
 
 ### Part II. Environment
 
 ##### I. Motivation
 
-RL Community has boomed thanks to some great works like OpenAI's Gym and RLLIB under Anyscale's RAY framework. Gym provides a unified style of RL environment interface. RLLIB makes the RL training more scalable and efficient.
+RL Community has boomed thanks to some great works like [**OpenAI**](https://openai.com/)'s [**Gym**](https://github.com/openai/gym) and [**RLLIB**](https://github.com/ray-project/ray/tree/master/rllib) under [**Anyscale**](https://www.anyscale.com/)'s [**Ray**](https://github.com/ray-project/ray) framework. **Gym** provides a unified style of RL environment interface. **RLLIB** makes the RL training more scalable and efficient.
 
-But unlike the single-agent RL tasks, multi-agent RL tasks various a lot. 
+But unlike the single-agent RL tasks, multi-agent RL have its unique challenge. 
+For example, if you look into the task settings of following multi-agent tasks, you will find so many differences in...
 
-Instance:
-- **Game Process**: Turn-based (Go, Hanabi)/ Simultaneously (StarcarftII, Pommerman)
--  **Learning Mode**: Cooperative (SMAC) / Collaborative (RWARE) / Competitve (Neural MMO) / Mixed (Pommerman)
--  **Observability**: Full observation (Pommerman) / Partial observation (SMAC)
--  **Action Space**: Discrete (SMAC) / Continuous  (MPE) / Mixed (Derk's Gym) / Multi-Discrete (Neural MMO)
--  **Action Mask**: Provided (Hanabi, SMAC) / None (MPE, Pommerman)
--  **Global State**: Provided (SMAC) / None (Neural MMO)
+- **Game Process**: Turn-based (Go, [Hanabi](https://github.com/deepmind/hanabi-learning-environment))/ Simultaneously ([StarcarftII]( https://github.com/deepmind/pysc2), [Pommerman](https://github.com/MultiAgentLearning/playground))
+-  **Learning Mode**: Cooperative ([SMAC](HTTPS://GITHUB.COM/OXWHIRL/SMAC)) / Collaborative ([RWARE](https://github.com/semitable/robotic-warehouse)) / Competitve ([Neural-MMO](https://github.com/NeuralMMO/environment)) / Mixed ([Pommerman](https://github.com/MultiAgentLearning/playground))
+-  **Observability**: Full observation ([Pommerman](https://github.com/MultiAgentLearning/playground)) / Partial observation ([SMAC](https://github.com/oxwhirl/smac))
+-  **Action Space**: Discrete ([SMAC](https://github.com/oxwhirl/smac)) / Continuous  ([MPE](https://github.com/openai/multiagent-particle-envs)) / Mixed ([Derk's Gym](https://gym.derkgame.com/)) / Multi-Discrete ([Neural-MMO](https://github.com/NeuralMMO/environment))
+-  **Action Mask**: Provided ([Hanabi](https://github.com/deepmind/hanabi-learning-environment), [SMAC](https://github.com/oxwhirl/smac)) / None ([MPE](https://github.com/openai/multiagent-particle-envs), [Pommerman](https://github.com/MultiAgentLearning/playground))
+-  **Global State**: Provided ([SMAC](https://github.com/oxwhirl/smac)) / None ([Neural-MMO](https://github.com/NeuralMMO/environment))
 
-
-Algorithms proposed with papers titled "xxxx MARL xxxx" always claim their model performs better than existing. But given these significantly different attributes of multi-agent systems, many of them can only cover a very limited type of multi-agent tasks or are based on settings different from the standard one.  
+So It is nearly impossible for one MARL algorithm to be directly applied to all MARL tasks without some adjustment. Algorithms proposed with papers titled "xxxx MARL xxxx" always claim their model performs better than existing. But given these significantly different settings of multi-agent tasks, many of them can only cover a very limited type of multi-agent tasks or are they based on settings different from the standard one.  
 
 From this perspective, the way of fairly comparing the performance of different MARL algorithms should be treated much more seriously.  We will discuss this later in **Part III. Algorithms**.
 
 ##### II. What we did in this benchmark
 
+In this benchmark, we incorporate the characteristics of both Gym and RLLIB.
 
-In this benchmark, we corperate the characteristics of both Gym and RLLIB.
-Specifically, all the environments we collected are modified (if necessary) to provide Gym style interface for multi-agent interaction. The unified environments are then registered to RAY to be RLLIB compatible. 
+All the environments we collected are modified (if necessary) to provide Gym style interface for multi-agent interaction. The unified environments are then registered to RAY and should be RLLIB compatible. Algorithms like joint Q learning (QMIX, VDN) need a conforming return value for the step function. We have provided them for cooperative/collaborative multi-agent tasks like [Google-Football](https://github.com/google-research/football) and [Pommerman](https://github.com/MultiAgentLearning/playground).
 
-We make full use of RLLIB to provide a standard but extendable MARL training pipeline. All MARL algorithms (like Centralized Critic strategy) and agent's "brain" (Neural Network like CNN + RNN) can be easily customized. Environments like Neural MMO may cost weeks of training, but thanks to RAY, the training can be easily paralleled with slight modification on the configuration file.
+We make full use of RLLIB to provide a standard but extendable MARL training pipeline. All MARL algorithms (like Centralized Critic strategy) and agent's "brain" (Neural Network like CNN + RNN) can be easily customized under RLLIB's API. 
+
+Some multi-agent tasks may cost weeks of training. But thanks to RAY, the training process can be easily paralleled with only slight configure file modification. RAY is good at allocating your computing resources for the best training/sampling efficiency.
 
 ##### III. Supported Multi-agent System / Tasks
 
-Most of the popular environment in MARL research has been corperated in this benchmark:
+Most of the popular environment in MARL research has been incorporated in this benchmark:
 
 | Env Name | Learning Mode | Observability | Action Space | Observations |
 | ----------- | ----------- | ----------- | ----------- | ----------- |
-| LBF  | Mixed | Both | Discrete | Discrete |
-| RWARE  | Collaborative | Partial | Discrete | Discrete |
-| MPE  | Mixed | Both | Both | Continuous |
-| SMAC  | Cooperative | Partial | Discrete | Continuous |
-| Neural-MMO  | Competitive | Partial | Multi-Discrete | Continuous |
-| Meta-Drive  | Collaborative | Partial | Continuous | Continuous |
-| Pommerman  | Mixed | Both | Discrete | Discrete |
-| Google-Football  | Mixed | Full | Discrete | Continuous |
-| Derk's Gym  | Mixed | Partial | Mixed | Continuous |
-| Hanabi | Cooperative | Partial | Discrete | Discrete |
+| [LBF](https://github.com/semitable/lb-foraging)  | Mixed | Both | Discrete | Discrete |
+| [RWARE](https://github.com/semitable/robotic-warehouse)  | Collaborative | Partial | Discrete | Discrete |
+| [MPE](https://github.com/openai/multiagent-particle-envs)  | Mixed | Both | Both | Continuous |
+| [SMAC](https://github.com/oxwhirl/smac)  | Cooperative | Partial | Discrete | Continuous |
+| [Neural-MMO](https://github.com/NeuralMMO/environment)  | Competitive | Partial | Multi-Discrete | Continuous |
+| [Meta-Drive](https://github.com/decisionforce/metadrive)  | Collaborative | Partial | Continuous | Continuous |
+| [Pommerman](https://github.com/MultiAgentLearning/playground)  | Mixed | Both | Discrete | Discrete |
+| [Google-Football](https://github.com/google-research/football)  | Collaborative | Full | Discrete | Continuous |
+| [Derk's Gym](https://gym.derkgame.com/)  | Mixed | Partial | Mixed | Continuous |
+| [Hanabi](https://github.com/deepmind/hanabi-learning-environment) | Cooperative | Partial | Discrete | Discrete |
 
 
 Each environment has a top directory. No inter-dependency exists between two environments. If you are interested in one environment, all the related code is there, in one directory. 
 
-Each environment has a readme file, standing like instruction on env description, env install, supported algorithms, important notes, bugs shooting, etc.
+Each environment has a readme file, standing as the instruction for this task, talking about env settings, installation, supported algorithms, important notes, bugs shooting, etc.
 
-![#f03c15](https://via.placeholder.com/15/f03c15/000000?text=+) **TODO** We provide original environment link. Many of them have competition on AIcrowd for you to refer to. We also provide a list of algorithms that can be used in this environment. The detailed content of this part can be found in  **Part III. Algorithms**.
+![#f03c15](https://via.placeholder.com/15/f03c15/000000?text=+) **TODO** We provide original environment link. and a list of algorithms that can be used in this environment. The detailed content of this part can be found in  **Part III. Algorithms**.
 
 ### Part III. Algorithms
 ![#f03c15](https://via.placeholder.com/15/f03c15/000000?text=+) **TODO**
@@ -163,16 +163,13 @@ In **ray/rllib/policy/rnn_sequencing.py** about line 130-150
 - UPDeT
 
 ## current support env
-- LBF
-- RWARE
-- MPE
-- SMAC
-- Neural-MMO (CompetitionR1)
-- Meta-Drive
-- Pommerman
-- Derk's Gym
-- Google-Football
-- Hanabi
-
-
-
+- [LBF](https://github.com/semitable/lb-foraging)
+- [RWARE](https://github.com/semitable/robotic-warehouse)
+- [MPE]( https://github.com/openai/multiagent-particle-envs)
+- [SMAC]( https://github.com/oxwhirl/smac)
+- [Neural-MMO](https://github.com/NeuralMMO/environment) (CompetitionR1)
+- [Meta-Drive](https://github.com/decisionforce/metadrive)
+- [Pommerman](https://github.com/MultiAgentLearning/playground)
+- [Derk's Gym](https://gym.derkgame.com/)
+- [Google-Football](https://github.com/google-research/football)
+- [Hanabi](https://github.com/deepmind/hanabi-learning-environment)
