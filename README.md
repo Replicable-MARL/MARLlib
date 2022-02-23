@@ -1,6 +1,32 @@
 #  White Paper for [MARL in One](https://github.com/Theohhhu/[SMAC](HTTPS://GITHUB.COM/OXWHIRL/SMAC)_Ray) Benchmark
 -- multi-agent tasks and baselines under a unified framework
 
+### TODO
+
+**basic algorithms**
+- [ ] COMA
+- [ ] DDPG,MADDPG
+- [ ] VDAC
+- [ ] VDPPO
+
+
+**extensions**
+- [ ] Grouping
+- [ ] Message sending
+- [ ] Modelling others
+- [ ] Multi-task Learning
+
+**(optional) MARL environments**
+- [ ] Multi-agent Mujoco
+- [ ] Overcooked-AI
+- [ ] MAgent
+- [ ] Go-Bigger
+
+
+
+
+
+
 ### Part I. Overview
 
 We collected most of the existing multi-agent environment and multi-agent reinforcement learning algorithms with different model architecture under one framework based on [**Ray**](https://github.com/ray-project/ray)'s [**RLlib**](https://github.com/ray-project/ray/tree/master/rllib) to boost the MARL research. 
@@ -42,7 +68,7 @@ Fast examples can be found in https://docs.ray.io/en/latest/rllib-examples.html.
 These will help you easily dive into RLLIB.
 
 The following parts are organized as:
-- **Part II. Environment**: available environments with the description
+- **Part II.Environment**: available environments with the description
 - **Part III. Baseline Algorithms**: implemented baseline MARL algorithms cover **independent learning / centralized critic / value decomposition**
 - **Part IV. State of the Art**: existing works on the environments we provide, with topic annotation.
 - **Part V. Extensions**: general module that can be applied to most of the environments/baseline algorithms
@@ -129,16 +155,16 @@ Here is a chart describing the characteristics of each algorithm:
 | IQL  | Mixed | No | Discrete | Independent Learning |
 | IPG  | Mixed | No | Both | Independent Learning |
 | IAC  | Mixed | No | Both | Independent Learning |
-| IDDPG  | Mixed | No | Continuous | Independent Learning |
+| IDDPG*  | Mixed | No | Continuous | Independent Learning |
 | IPPO  | Mixed | No | Both | Independent Learning |
-| COMA  | Mixed | No | Both | Centralized Critic |
-| MADDPG  | Mixed | No | Continuous | Centralized Critic |
+| COMA*  | Mixed | No | Both | Centralized Critic |
+| MADDPG*  | Mixed | No | Continuous | Centralized Critic |
 | MAAC  | Mixed | No | Both | Centralized Critic |
 | MAPPO  | Mixed | No | Both | Centralized Critic |
 | VDN | Cooperative | No | Discrete | Value Decomposition |
 | QMIX  | Cooperative | Yes | Discrete | Value Decomposition |
-| VDAC  | Cooperative | Yes | Both | Value Decomposition |
-| VDPPO | Cooperative | Yes | Both | Value Decomposition |
+| VDAC*  | Cooperative | Yes | Both | Value Decomposition |
+| VDPPO* | Cooperative | Yes | Both | Value Decomposition |
 
 
 
@@ -157,113 +183,120 @@ Here is a chart describing the characteristics of each algorithm:
 **[MT]** Multi-task
 
 #### **MPE**
-- Multi-Agent Actor-Critic for Mixed Cooperative-Competitive Environments **[B][2017]**
-- Learning attentional communication for multi-agent cooperation **[S][2018]**
-- learning when to communicate at scale in multiagent cooperative and competitive tasks **[S][2018]**
-- Qtran: Learning to factorize with transformation for cooperative multi-agent reinforcement learning **[B][2019]**
-- Robust multi-agent reinforcement learning via minimax deep deterministic policy gradient **[R][2019]**
-- Tarmac: Targeted multi-agent communication **[S][2019]**
-- Learning Individually Inferred Communication for Multi-Agent Cooperation **[S][2020]**
-- Multi-Agent Game Abstraction via Graph Attention Neural Network **[G+S][2020]**
-- Promoting Coordination through Policy Regularization in Multi-Agent Deep Reinforcement Learning **[E][2020]**
-- Robust Multi-Agent Reinforcement Learning with Model Uncertainty **[R][2020]**
-- Shared Experience Actor-Critic for Multi-Agent Reinforcement Learning **[B][2020]**
-- Weighted QMIX Expanding Monotonic Value Function Factorisation for Deep Multi-Agent Reinforcement Learning **[B][2020]**
-- Cooperative Exploration for Multi-Agent Deep Reinforcement Learning **[E][2021]**
-- Multiagent Adversarial Collaborative Learning via Mean-Field Theory **[R][2021]**
-- The Surprising Effectiveness of PPO in Cooperative, Multi-Agent Games **[B][2021]**
+- [Multi-Agent Actor-Critic for Mixed Cooperative-Competitive Environments](https://proceedings.neurips.cc/paper/2017/file/68a9750337a418a86fe06c1991a1d64c-Paper.pdf) **[B][2017]**
+- [Learning attentional communication for multi-agent cooperation](https://proceedings.neurips.cc/paper/2018/file/6a8018b3a00b69c008601b8becae392b-Paper.pdf) **[S][2018]**
+- [learning when to communicate at scale in multiagent cooperative and competitive tasks](https://arxiv.org/pdf/1812.09755) **[S][2018]**
+- [Qtran: Learning to factorize with transformation for cooperative multi-agent reinforcement learning](http://proceedings.mlr.press/v97/son19a/son19a.pdf) **[B][2019]**
+- [Robust multi-agent reinforcement learning via minimax deep deterministic policy gradient](https://ojs.aaai.org/index.php/AAAI/article/view/4327/4205) **[R][2019]**
+- [Tarmac: Targeted multi-agent communication](http://proceedings.mlr.press/v97/das19a/das19a.pdf) **[S][2019]**
+- [Learning Individually Inferred Communication for Multi-Agent Cooperation](https://proceedings.neurips.cc/paper/2020/file/fb2fcd534b0ff3bbed73cc51df620323-Paper.pdf) **[S][2020]**
+- [Multi-Agent Game Abstraction via Graph Attention Neural Network](https://ojs.aaai.org/index.php/AAAI/article/view/6211/6067) **[G+S][2020]**
+- [Promoting Coordination through Policy Regularization in Multi-Agent Deep Reinforcement Learning](https://proceedings.neurips.cc/paper/2020/file/b628386c9b92481fab68fbf284bd6a64-Paper.pdf) **[E][2020]**
+- [Robust Multi-Agent Reinforcement Learning with Model Uncertainty](https://proceedings.neurips.cc/paper/2020/file/774412967f19ea61d448977ad9749078-Paper.pdf) **[R][2020]**
+- [Shared Experience Actor-Critic for Multi-Agent Reinforcement Learning](https://proceedings.neurips.cc/paper/2020/file/7967cc8e3ab559e68cc944c44b1cf3e8-Paper.pdf) **[B][2020]**
+- [Weighted QMIX Expanding Monotonic Value Function Factorisation for Deep Multi-Agent Reinforcement Learning](https://proceedings.neurips.cc/paper/2020/file/73a427badebe0e32caa2e1fc7530b7f3-Paper.pdf) **[B][2020]**
+- [Cooperative Exploration for Multi-Agent Deep Reinforcement Learning](http://proceedings.mlr.press/v139/liu21j/liu21j.pdf) **[E][2021]**
+- [Multiagent Adversarial Collaborative Learning via Mean-Field Theory](https://ieeexplore.ieee.org/iel7/6221036/9568742/09238422.pdf?casa_token=43-7BP8rsWgAAAAA:ESpZx5Nunchu6Un6vIaVljiJQrSj7tYGWVgx1x3tGvCMkSktx55ZCopEW8VC4SwfjX6RU_KT_c8) **[R][2021]**
+- [The Surprising Effectiveness of PPO in Cooperative, Multi-Agent Games](https://arxiv.org/pdf/2103.01955?ref=https://githubhelp.com) **[B][2021]**
 
 #### **SMAC**
-- Value-Decomposition Networks For Cooperative Multi-Agent Learning **[B][2017]**
-- Counterfactual Multi-Agent Policy Gradients **[B][2018]**
-- Multi-Agent Common Knowledge Reinforcement Learning **[RG+S][2018]**
-- QMIX: Monotonic Value Function Factorisation for Deep Multi-Agent Reinforcement Learning **[B][2018]**
-- Efficient Communication in Multi-Agent Reinforcement Learning via Variance Based Control **[S][2019]**
-- Exploration with Unreliable Intrinsic Reward in Multi-Agent Reinforcement Learning **[P+E][2019]**
-- Learning nearly decomposable value functions via communication minimization **[S][2019]**
-- Liir: Learning individual intrinsic reward in multi-agent reinforcement learning **[P][2019]**
-- MAVEN: Multi-Agent Variational Exploration **[E][2019]**
-- Adaptive learning A new decentralized reinforcement learning approach for cooperative multiagent systems **[B][2020]**
-- Counterfactual Multi-Agent Reinforcement Learning with Graph Convolution Communication **[S+G][2020]**
-- Deep implicit coordination graphs for multi-agent reinforcement learning **[G][2020]**
-- DOP: Off-policy multi-agent decomposed policy gradients **[B][2020]**
-- F2a2: Flexible fully-decentralized approximate actor-critic for cooperative multi-agent reinforcement learning **[B][2020]**
-- From few to more Large-scale dynamic multiagent curriculum learning **[MT][2020]**
-- Learning structured communication for multi-agent reinforcement learning **[S+G][2020]**
-- Learning efficient multi-agent communication: An information bottleneck approach **[S][2020]**
-- On the robustness of cooperative multi-agent reinforcement learning **[R][2020]**
-- Qatten: A general framework for cooperative multiagent reinforcement learning **[B][2020]**
-- Revisiting parameter sharing in multi-agent deep reinforcement learning **[RG][2020]**
-- Qplex: Duplex dueling multi-agent q-learning **[B][2020]**
-- ROMA: Multi-Agent Reinforcement Learning with Emergent Roles **[RG][2020]**
-- Towards Understanding Cooperative Multi-Agent Q-Learning with Value Factorization **[B][2021]**
-- Contrasting centralized and decentralized critics in multi-agent reinforcement learning **[B][2021]**
-- Learning in nonzero-sum stochastic games with potentials **[B][2021]**
-- Natural emergence of heterogeneous strategies in artificially intelligent competitive teams **[S+G][2021]**
-- Rode: Learning roles to decompose multi-agent tasks **[RG][2021]**
-- SMIX(λ): Enhancing Centralized Value Functions for Cooperative Multiagent Reinforcement Learning **[B][2021]**
-- Tesseract: Tensorised Actors for Multi-Agent Reinforcement Learning **[B][2021]**
-- The Surprising Effectiveness of PPO in Cooperative, Multi-Agent Games **[B][2021]**
-- UPDeT: Universal Multi-agent Reinforcement Learning via Policy Decoupling with Transformers **[MT][2021]**
-- Randomized Entity-wise Factorization for Multi-Agent Reinforcement Learning **[MT][2021]**
-- Cooperative Multi-Agent Transfer Learning with Level-Adaptive Credit Assignment **[MT][2021]**
-- Uneven: Universal value exploration for multi-agent reinforcement learning **[B][2021]**
-- Value-decomposition multi-agent actor-critics **[B][2021]**
+- [Value-Decomposition Networks For Cooperative Multi-Agent Learning](https://arxiv.org/pdf/1706.05296?ref=https://githubhelp.com) **[B][2017]**
+- [Counterfactual Multi-Agent Policy Gradients](https://ojs.aaai.org/index.php/AAAI/article/download/11794/11653) **[B][2018]**
+- [Multi-Agent Common Knowledge Reinforcement Learning](https://proceedings.neurips.cc/paper/2019/file/f968fdc88852a4a3a27a81fe3f57bfc5-Paper.pdf) **[RG+S][2018]**
+- [QMIX: Monotonic Value Function Factorisation for Deep Multi-Agent Reinforcement Learning](http://proceedings.mlr.press/v80/rashid18a/rashid18a.pdf) **[B][2018]**
+- [Efficient Communication in Multi-Agent Reinforcement Learning via Variance Based Control](https://proceedings.neurips.cc/paper/2019/file/14cfdb59b5bda1fc245aadae15b1984a-Paper.pdf) **[S][2019]**
+- [Exploration with Unreliable Intrinsic Reward in Multi-Agent Reinforcement Learning](https://arxiv.org/pdf/1906.02138) **[P+E][2019]**
+- [Learning nearly decomposable value functions via communication minimization](https://arxiv.org/pdf/1910.05366) **[S][2019]**
+- [Liir: Learning individual intrinsic reward in multi-agent reinforcement learning](https://proceedings.neurips.cc/paper/2019/file/07a9d3fed4c5ea6b17e80258dee231fa-Paper.pdf)**[P][2019]**
+- [MAVEN: Multi-Agent Variational Exploration](https://proceedings.neurips.cc/paper/2019/file/f816dc0acface7498e10496222e9db10-Paper.pdf) **[E][2019]**
+- [Adaptive learning A new decentralized reinforcement learning approach for cooperative multiagent systems](https://ieeexplore.ieee.org/iel7/6287639/8948470/09102277.pdf) **[B][2020]**
+- [Counterfactual Multi-Agent Reinforcement Learning with Graph Convolution Communication](https://arxiv.org/pdf/2004.00470) **[S+G][2020]**
+- [Deep implicit coordination graphs for multi-agent reinforcement learning](https://arxiv.org/pdf/2006.11438) **[G][2020]**
+- [DOP: Off-policy multi-agent decomposed policy gradients](https://openreview.net/pdf?id=6FqKiVAdI3Y) **[B][2020]**
+- [F2a2: Flexible fully-decentralized approximate actor-critic for cooperative multi-agent reinforcement learning](https://arxiv.org/pdf/2004.11145) **[B][2020]**
+- [From few to more Large-scale dynamic multiagent curriculum learning](https://ojs.aaai.org/index.php/AAAI/article/view/6221/6083) **[MT][2020]**
+- [Learning structured communication for multi-agent reinforcement learning](https://arxiv.org/pdf/2002.04235) **[S+G][2020]**
+- [Learning efficient multi-agent communication: An information bottleneck approach](http://proceedings.mlr.press/v119/wang20i/wang20i.pdf) **[S][2020]**
+- [On the robustness of cooperative multi-agent reinforcement learning](https://ieeexplore.ieee.org/iel7/9283745/9283819/09283830.pdf?casa_token=k2lORHebFEUAAAAA:kmTJ2M4Q67hwRz8fh6LhgoXgwZLPy_idCgBmXDxBjzcJBgnYuLmCc7iDS8KTjbVcRPmal-jV9sM) **[R][2020]**
+- [Qatten: A general framework for cooperative multiagent reinforcement learning](https://arxiv.org/pdf/2002.03939) **[B][2020]**
+- [Revisiting parameter sharing in multi-agent deep reinforcement learning](https://arxiv.org/pdf/2005.13625) **[RG][2020]**
+- [Qplex: Duplex dueling multi-agent q-learning](https://arxiv.org/pdf/2008.01062) **[B][2020]**
+- [ROMA: Multi-Agent Reinforcement Learning with Emergent Roles](https://arxiv.org/pdf/2003.08039) **[RG][2020]**
+- [Towards Understanding Cooperative Multi-Agent Q-Learning with Value Factorization](https://proceedings.neurips.cc/paper/2021/file/f3f1fa1e4348bfbebdeee8c80a04c3b9-Paper.pdf) **[B][2021]**
+- [Contrasting centralized and decentralized critics in multi-agent reinforcement learning](https://arxiv.org/pdf/2102.04402) **[B][2021]**
+- [Learning in nonzero-sum stochastic games with potentials](http://proceedings.mlr.press/v139/mguni21a/mguni21a.pdf) **[B][2021]**
+- [Natural emergence of heterogeneous strategies in artificially intelligent competitive teams](https://arxiv.org/pdf/2007.03102) **[S+G][2021]**
+- [Rode: Learning roles to decompose multi-agent tasks](https://arxiv.org/pdf/2010.01523?ref=https://githubhelp.com) **[RG][2021]**
+- [SMIX(λ): Enhancing Centralized Value Functions for Cooperative Multiagent Reinforcement Learning](https://ieeexplore.ieee.org/iel7/5962385/6104215/09466372.pdf?casa_token=TdedVHwLvL4AAAAA:kGSnPCM1wQMte1gloaEBUhgD9kUP1FA3mf1TZ931e7W1RqFAr0ewePlhHkEEEArHva6SikWDFA4) **[B][2021]**
+- [Tesseract: Tensorised Actors for Multi-Agent Reinforcement Learning](http://proceedings.mlr.press/v139/mahajan21a/mahajan21a.pdf) **[B][2021]**
+- [The Surprising Effectiveness of PPO in Cooperative, Multi-Agent Games](https://arxiv.org/pdf/2103.01955?ref=https://githubhelp.com) **[B][2021]**
+- [UPDeT: Universal Multi-agent Reinforcement Learning via Policy Decoupling with Transformers](https://openreview.net/pdf?id=v9c7hr9ADKx) **[MT][2021]**
+- [Randomized Entity-wise Factorization for Multi-Agent Reinforcement Learning](http://proceedings.mlr.press/v139/iqbal21a/iqbal21a.pdf) **[MT][2021]**
+- [Cooperative Multi-Agent Transfer Learning with Level-Adaptive Credit Assignment](https://arxiv.org/pdf/2106.00517?ref=https://githubhelp.com) **[MT][2021]**
+- [Uneven: Universal value exploration for multi-agent reinforcement learning](http://proceedings.mlr.press/v139/gupta21a/gupta21a.pdf) **[B][2021]**
+- [Value-decomposition multi-agent actor-critics](https://www.aaai.org/AAAI21Papers/AAAI-2412.SuJ.pdf) **[B][2021]**
 
 
 #### **Pommerman**
-- Using Monte Carlo Tree Search as a Demonstrator within Asynchronous Deep RL **[I+T][2018]**
-- Accelerating Training in Pommerman with Imitation and Reinforcement Learning **[I][2019]**
-- Agent Modeling as Auxiliary Task for Deep Reinforcement Learning **[S][2019]**
-- Backplay man muss immer umkehren **[I][2019]**
-- Terminal Prediction as an Auxiliary Task for Deep Reinforcement Learning **[B][2019]**
-- Adversarial Soft Advantage Fitting Imitation Learning without Policy Optimization **[B][2020]**
-- Evolutionary Reinforcement Learning for Sample-Efficient Multiagent Coordination **[B][2020]**
+- [Using Monte Carlo Tree Search as a Demonstrator within Asynchronous Deep RL](https://arxiv.org/pdf/1812.00045) **[I+T][2018]**
+- [Accelerating Training in Pommerman with Imitation and Reinforcement Learning](https://arxiv.org/pdf/1911.04947) **[I][2019]**
+- [Agent Modeling as Auxiliary Task for Deep Reinforcement Learning](https://ojs.aaai.org/index.php/AIIDE/article/download/5221/5077/) **[S][2019]**
+- [Backplay: man muss immer umkehren](https://arxiv.org/pdf/1807.06919.pdf%20http://arxiv.org/abs/1807.06919) **[I][2019]**
+- [Terminal Prediction as an Auxiliary Task for Deep Reinforcement Learning](https://ojs.aaai.org/index.php/AIIDE/article/download/5222/5078) **[B][2019]**
+- [Adversarial Soft Advantage Fitting Imitation Learning without Policy Optimization](https://proceedings.neurips.cc/paper/2020/file/9161ab7a1b61012c4c303f10b4c16b2c-Paper.pdf) **[B][2020]**
+- [Evolutionary Reinforcement Learning for Sample-Efficient Multiagent Coordination](http://proceedings.mlr.press/v119/majumdar20a/majumdar20a.pdf) **[B][2020]**
 
 
 #### **Hanabi**
-- Bayesian Action Decoder for Deep Multi-Agent Reinforcement Learning **[B][2019]**
-- Re-determinizing MCTS in Hanabi **[S+T][2019]**
-- Joint Policy Search for Multi-agent Collaboration with Imperfect Information **[T][20209]**
-- Off-Belief Learning **[B][2021]**
-- The Surprising Effectiveness of PPO in Cooperative Multi-Agent Games **[B][2021]**
+- [Bayesian Action Decoder for Deep Multi-Agent Reinforcement Learning](http://proceedings.mlr.press/v97/foerster19a/foerster19a.pdf) **[B][2019]**
+- [Re-determinizing MCTS in Hanabi](https://ieeexplore.ieee.org/iel7/8844551/8847948/08848097.pdf?casa_token=nZ3ZAeyS1-kAAAAA:3FBwAb2lMlQ_ClJIlycoVsensDQFE0pqMeQ8PvMc15Bzoam9inGlWBJmT6D9bKjF1WUL7k5IkS0) **[S+T][2019]**
+- [Diverse Agents for Ad-Hoc Cooperation in Hanabi](https://ieeexplore.ieee.org/iel7/8844551/8847948/08847944.pdf?casa_token=oDFhRxwd0XIAAAAA:Vq6oBEA6fotbST9N-RkThJjY5URVVvnwQ8Y0mt1JiD9uLXmXMxt7k8Dqt-VghWJzK8fOgdXFbH0) **[B][2019]**
+- [Joint Policy Search for Multi-agent Collaboration with Imperfect Information](https://proceedings.neurips.cc/paper/2020/file/e64f346817ce0c93d7166546ac8ce683-Paper.pdf) **[T][20209]**
+- [Off-Belief Learning](http://proceedings.mlr.press/v139/hu21c/hu21c.pdf) **[B][2021]**
+- [The Surprising Effectiveness of PPO in Cooperative Multi-Agent Games](https://arxiv.org/pdf/2103.01955?ref=https://githubhelp.com) **[B][2021]**
+- [2021 Trajectory Diversity for Zero-Shot Coordination](http://proceedings.mlr.press/v139/lupu21a/lupu21a.pdf) **[B][2021]**
 
 #### **GRF**
-- Adaptive Inner-reward Shaping in Sparse Reward Games **[P][2020]**
-- Factored action spaces in deep reinforcement learning **[B][2021]**
-- TiKick: Towards Playing Multi-agent Football Full Games from Single-agent Demonstrations **[F][2021]**
+- [Adaptive Inner-reward Shaping in Sparse Reward Games](https://ieeexplore.ieee.org/iel7/9200848/9206590/09207302.pdf?casa_token=T6Xp9_s07OwAAAAA:ECy-wfIOoMq60Mkk3qfitWlSzslNTC5mBkHtVLu1SmJ9STDErl7OYjoptRKU6PMsqh7_4cbP6Jk) **[P][2020]**
+- [Factored action spaces in deep reinforcement learning](https://openreview.net/pdf?id=naSAkn2Xo46) **[B][2021]**
+- [Semantic Tracklets An Object-Centric Representation for Visual Multi-Agent Reinforcement Learning](https://ieeexplore.ieee.org/iel7/9635848/9635849/09636592.pdf?casa_token=x8RsQf74KUUAAAAA:lp6vsCBIaMlYbhP4xoIM2279USMn3-KW73DxyhejGOz-hiG2kDRqQIrNSABy6IlAYdU4BvRqAnc) **[B][2021]**
+- [TiKick: Towards Playing Multi-agent Football Full Games from Single-agent Demonstrations](https://arxiv.org/pdf/2110.04507) **[F][2021]**
 
 
 #### **LBF & RWARE**
-- Shared Experience Actor-Critic for Multi-Agent Reinforcement Learning **[B][2020]**
-- Benchmarking Multi-Agent Deep Reinforcement Learning Algorithms in Cooperative Tasks **[B][2021]**
-- Learning Altruistic Behaviors in Reinforcement Learning without External Rewards **[B][2021]**
-- Scaling Multi-Agent Reinforcement Learning with Selective Parameter Sharing **[RG][2021]**
+- [Shared Experience Actor-Critic for Multi-Agent Reinforcement Learning](https://proceedings.neurips.cc/paper/2020/file/7967cc8e3ab559e68cc944c44b1cf3e8-Paper.pdf) **[B][2020]**
+- [Benchmarking Multi-Agent Deep Reinforcement Learning Algorithms in Cooperative Tasks](https://arxiv.org/pdf/2006.07869) **[B][2021]**
+- [Learning Altruistic Behaviors in Reinforcement Learning without External Rewards](https://arxiv.org/pdf/2107.09598) **[B][2021]**
+- [Scaling Multi-Agent Reinforcement Learning with Selective Parameter Sharing](http://proceedings.mlr.press/v139/christianos21a/christianos21a.pdf) **[RG][2021]**
 
 #### **MetaDrive**
-- Learning to Simulate Self-Driven Particles System with Coordinated Policy Optimization **[B][2021]**
-- Safe Driving via Expert Guided Policy Optimization **[I][2021]**
+- [Learning to Simulate Self-Driven Particles System with Coordinated Policy Optimization](https://proceedings.neurips.cc/paper/2021/file/594ca7adb3277c51a998252e2d4c906e-Paper.pdf) **[B][2021]**
+- [Safe Driving via Expert Guided Policy Optimization](https://proceedings.mlr.press/v164/peng22a/peng22a.pdf) **[I][2021]**
 
 #### **NeuralMMO**
-- Neural MMO: A Massively Multiagent Game Environment for Training and Evaluating Intelligent Agents **[B][2021]**
+- [Neural MMO: A Massively Multiagent Game Environment for Training and Evaluating Intelligent Agents](https://arxiv.org/pdf/1903.00784) **[B][2019]**
+- [The Neural MMO Platform for Massively Multiagent Research](https://arxiv.org/pdf/2110.07594) **[B][2021]**
+
 
 **(Note: this is not a comprehensive list. Only representative papers are selected.)**
 
 ### **Part V. Extensions**
 
 - **Grouping / Parameter Sharing**:
-  - Fully Sharing
-  - Partly Sharing (Selectively Sharing)
-  - No Sharing
+  - Fully sharing (All in one group)
+  - Selectively sharing (Several groups)
+  - No sharing (No group)
 
-- **Communication / Information Sharing**:
-  - Sending Message
-  - Modeling Others
+- **Communication / Information Exchange**:
+  - Sending Message (Explicit communication)
+  - Modeling Others (Predict teammates/opponents action)
 
-- **Multi-task Learning / Transfer Learning**
+- **Multi-task Learning / Transfer Learning / Continue learning**
   - RNN
   - Transformer
+  - 
 
+## Acknowledgement
 
 
 ----------------------------
