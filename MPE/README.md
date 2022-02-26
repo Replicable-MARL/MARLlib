@@ -17,6 +17,8 @@ at ray.rllib.evaluation.rollout_worker.py line 508
 - A2C
 - A3C
 - MAA2C
+- DDPG
+- MADDPG  
 - PPO
 - MAPPO
   

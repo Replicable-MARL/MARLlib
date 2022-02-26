@@ -10,13 +10,13 @@ def get_train_parser():
         help="Init Ray in local mode for easier debugging.")
     parser.add_argument(
         "--parallel",
-        default=True,
+        default=False,
         type=bool,
         help="Whether use tune grid research")
     parser.add_argument(
         "--run",
-        choices=["QMIX", "VDN", "R2D2", "PG", "A2C", "A3C", "MAA2C", "PPO", "MAPPO"],  # "APPO" "IMPALA"
-        default="MAA2C",
+        choices=["QMIX", "VDN", "R2D2", "PG", "A2C", "A3C", "DDPG", "MADDPG", "MAA2C", "PPO", "MAPPO"],  # "APPO" "IMPALA"
+        default="MADDPG",
         help="The RLlib-registered algorithm to use.")
     parser.add_argument(
         "--map",
@@ -25,10 +25,15 @@ def get_train_parser():
         default="simple_spread",
         help="Maps should be registered")
     parser.add_argument(
+        "--continues",
+        default=True,
+        type=bool,
+        help="MPE continue/discrete action space")
+    parser.add_argument(
         "--neural-arch",
         choices=["LSTM", "GRU"],
         type=str,
-        default="LSTM",
+        default="GRU",
         help="Agent Neural Architecture")
     parser.add_argument(
         "--framework",

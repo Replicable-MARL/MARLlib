@@ -25,7 +25,9 @@ from ray.rllib.policy.torch_policy import LearningRateSchedule as TorchLR, \
     EntropyCoeffSchedule as TorchEntropyCoeffSchedule
 from ray.rllib.utils.tf_ops import explained_variance, make_tf_callable
 from ray.rllib.utils.torch_ops import convert_to_torch_tensor
-
+from gym.spaces.box import Box
+from ray.rllib.evaluation.postprocessing import adjust_nstep
+from ray.rllib.utils.numpy import convert_to_numpy
 import numpy as np
 from ray.rllib.utils.framework import try_import_tf, try_import_torch
 
@@ -53,7 +55,8 @@ def centralized_critic_postprocessing(policy,
     pytorch = policy.config["framework"] == "torch"
     n_agents = policy.config["model"]["custom_model_config"]["agent_num"]
     opponent_agents_num = n_agents - 1
-    action_dim = policy.action_space.n
+    continues = True if policy.action_space.__class__ == Box else False
+    # action_dim = policy.action_space.n
     if (pytorch and hasattr(policy, "compute_central_vf")) or \
             (not pytorch and policy.loss_initialized()):
         assert other_agent_batches is not None
@@ -98,28 +101,53 @@ def centralized_critic_postprocessing(policy,
         sample_batch["opponent_obs"] = np.zeros(
             (sample_batch["obs"].shape[0], opponent_agents_num, sample_batch["obs"].shape[1]),
             dtype=sample_batch["obs"].dtype)
-        sample_batch["opponent_action"] = np.zeros_like(
-            sample_batch["actions"])
-        sample_batch["opponent_action"] = np.zeros(
-            (sample_batch["actions"].shape[0], opponent_agents_num),
-            dtype=sample_batch["actions"].dtype)
+        if not continues:
+            sample_batch["opponent_action"] = np.zeros(
+                (sample_batch["actions"].shape[0], opponent_agents_num),
+                dtype=sample_batch["actions"].dtype)
+        else:
+            sample_batch["opponent_action"] = np.zeros(
+                (sample_batch["actions"].shape[0], opponent_agents_num, sample_batch["actions"].shape[1]),
+                dtype=sample_batch["actions"].dtype)
         sample_batch["vf_preds"] = np.zeros_like(
             sample_batch["rewards"], dtype=np.float32)
 
-    completed = sample_batch["dones"][-1]
-    if completed:
-        last_r = 0.0
-    else:
-        last_r = sample_batch["vf_preds"][-1]
+    if "DDPG" in str(policy.__class__): # MADDPG
+        ## copied from postprocess_nstep_and_prio in DDPGTorchPolicy
+        if policy.config["n_step"] > 1:
+            adjust_nstep(policy.config["n_step"], policy.config["gamma"], sample_batch)
 
-    train_batch = compute_advantages(
-        sample_batch,
-        last_r,
-        policy.config["gamma"],
-        policy.config["lambda"],
-        use_gae=policy.config["use_gae"])
+        # Create dummy prio-weights (1.0) in case we don't have any in
+        # the batch.
+        PRIO_WEIGHTS = "weights"
+        if PRIO_WEIGHTS not in sample_batch:
+            sample_batch[PRIO_WEIGHTS] = np.ones_like(sample_batch[SampleBatch.REWARDS])
 
-    return train_batch
+        # Prioritize on the worker side.
+        if sample_batch.count > 0 and policy.config["worker_side_prioritization"]:
+            td_errors = policy.compute_td_error(
+                sample_batch[SampleBatch.OBS], sample_batch[SampleBatch.ACTIONS],
+                sample_batch[SampleBatch.REWARDS], sample_batch[SampleBatch.NEXT_OBS],
+                sample_batch[SampleBatch.DONES], sample_batch[PRIO_WEIGHTS])
+            new_priorities = (np.abs(convert_to_numpy(td_errors)) +
+                              policy.config["prioritized_replay_eps"])
+            sample_batch[PRIO_WEIGHTS] = new_priorities
+
+    else:  # MAAC MAPPO
+        completed = sample_batch["dones"][-1]
+        if completed:
+            last_r = 0.0
+        else:
+            last_r = sample_batch["vf_preds"][-1]
+
+        sample_batch = compute_advantages(
+            sample_batch,
+            last_r,
+            policy.config["gamma"],
+            policy.config["lambda"],
+            use_gae=policy.config["use_gae"])
+
+    return sample_batch
 
 
 # Copied from PPO but optimizing the central value function.
@@ -163,4 +191,3 @@ def central_vf_stats_ppo(policy, train_batch, grads):
             train_batch[Postprocessing.VALUE_TARGETS],
             policy._central_value_out)
     }
-
