@@ -5,7 +5,7 @@
 
 **basic algorithms**
 - [ ] COMA
-- [ ] DDPG,MADDPG
+- [x] DDPG,MADDPG
 - [ ] VDAC
 - [ ] VDPPO
 

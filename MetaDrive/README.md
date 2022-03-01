@@ -22,6 +22,8 @@ Install dependencies including(version is not strict)
 - PG
 - A2C
 - MAA2C
+- DDPG
+- MADDPG
 - PPO
 - MAPPO
   

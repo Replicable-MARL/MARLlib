@@ -15,8 +15,8 @@ def get_train_parser():
         help="Whether use tune grid research")
     parser.add_argument(
         "--run",
-        choices=["QMIX", "VDN", "R2D2", "PG", "A2C", "A3C", "MAA2C", "PPO", "MAPPO"],  # "APPO" "IMPALA"
-        default="MAA2C",
+        choices=["QMIX", "VDN", "R2D2", "PG", "A2C", "A3C", "DDPG", "MADDPG", "MAA2C", "PPO", "MAPPO"],  # "APPO" "IMPALA"
+        default="MADDPG",
         help="The RLlib-registered algorithm to use.")
     parser.add_argument(
         "--map",
@@ -26,7 +26,7 @@ def get_train_parser():
     parser.add_argument(
         "--num-agents",
         type=int,
-        default=20,
+        default=5,
         help="Car number in one map")
     parser.add_argument(
         "--num-neighbours",

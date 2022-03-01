@@ -19,13 +19,13 @@ from MetaDrive.env.meta_drive_rllib import *
 if __name__ == "__main__":
     args = get_train_parser().parse_args()
 
-    ray.init(local_mode=args.local_mode)
+    ray.init(local_mode=True)
 
     # env setup
     if args.map == "Bottleneck":
         Env_Class = Bottleneck_RLlib_Centralized_Critic if "MA" in args.run else Bottleneck_RLlib
     elif args.map == "ParkingLot":
-        Env_Class = ParkingLot_RLlib_Centralized_Critic if "MA" in args.run else Bottleneck_RLlib
+        Env_Class = ParkingLot_RLlib_Centralized_Critic if "MA" in args.run else ParkingLot_RLlib
     elif args.map == "Intersection":
         Env_Class = Intersection_RLlib_Centralized_Critic if "MA" in args.run else Intersection_RLlib
     elif args.map == "Roundabout":
@@ -50,8 +50,8 @@ if __name__ == "__main__":
         "LSTM_CentralizedCritic", Torch_LSTM_CentralizedCritic_Model)
 
     env_config = {
-        "start_seed": 123,
-        "num_agents": args.num_agents,
+        "start_seed": 1234,
+        "num_agents": 5,
         "crash_done": True
     }
 
@@ -64,10 +64,8 @@ if __name__ == "__main__":
     common_config = {
         "env": args.map,
         "env_config": env_config,
-        "num_gpus_per_worker": args.num_gpus_per_worker,
         "num_gpus": args.num_gpus,
-        "num_workers": args.num_workers if not args.local_mode else 1,
-        # meta-drive can only have one env one process in local mode
+        "num_workers": 1,
         "train_batch_size": 1000,
         "multiagent": {
             "policies": {
@@ -98,6 +96,7 @@ if __name__ == "__main__":
             "based algo like DQN and R2D2 in Ray/RLlib, only Discrete supported"
         )
         raise ValueError()
+
 
     elif args.run in ["A3C"]:
         print(
@@ -145,8 +144,8 @@ if __name__ == "__main__":
             "counterfactual": False,
             "centralized_critic_obs_dim": -1,
             "num_neighbours": args.num_neighbours,
-            "framework": args.framework,
-            "fuse_mode": args.fuse_mode,
+            "framework": "torch",
+            "fuse_mode": "mf",  # In ["concat", "mf"]
             "mf_nei_distance": 10,
         }
 
@@ -183,8 +182,100 @@ if __name__ == "__main__":
                  config=config,
                  verbose=1)
 
-    elif args.run in ["PPO"]:
+    elif args.run == "DDPG":
 
+        tune.run(
+            args.run,
+            name=args.run + "_" + args.neural_arch + "_" + args.map,
+            stop=stop,
+            config=common_config,
+            verbose=1
+        )
+
+    elif args.run == "MADDPG":
+
+        from ray.rllib.agents.ddpg.ddpg import DDPGTrainer
+        from ray.rllib.agents.ddpg.ddpg_torch_policy import DDPGTorchPolicy, ComputeTDErrorMixin
+        from ray.rllib.agents.ddpg.ddpg_tf_policy import DDPGTFPolicy
+        from ray.rllib.agents.ddpg.ddpg import DEFAULT_CONFIG as DDPG_CONFIG
+        from MetaDrive.util.maddpg_tools import loss_with_central_critic_ddpg
+        from ray.rllib.agents.sac.sac_torch_policy import TargetNetworkMixin
+        from MetaDrive.model.torch_maddpg import DDPGCentralizedCriticModel
+
+        ModelCatalog.register_custom_model(
+            "torch_maddpg", DDPGCentralizedCriticModel)
+
+        MADDPG_CONFIG = {
+            "real_parameter_sharing": True,
+            "counterfactual": False,
+            "centralized_critic_obs_dim": -1,
+            "num_neighbours": args.num_neighbours,
+            "framework": "torch",
+            "fuse_mode": "mf",  # In ["concat", "mf"]
+            "mf_nei_distance": 10,
+        }
+
+        centralized_critic_obs_dim = get_centralized_critic_obs_dim(
+            obs_space, act_space, MADDPG_CONFIG["counterfactual"], MADDPG_CONFIG["num_neighbours"],
+            MADDPG_CONFIG["fuse_mode"]
+        )
+
+        config = {
+            "model": {
+                "custom_model": "torch_maddpg",
+                "custom_model_config": {
+                    "centralized_critic_obs_dim": centralized_critic_obs_dim
+                },
+            },
+        }
+        config.update(common_config)
+
+
+        MADDPG_CONFIG.update(DDPG_CONFIG)
+
+        MADDPG_CONFIG["centralized_critic_obs_dim"] = centralized_critic_obs_dim
+
+        MADDPGTFPolicy = DDPGTFPolicy.with_updates(
+            name="MADDPGTFPolicy",
+            postprocess_fn=centralized_critic_postprocessing,
+            loss_fn=loss_with_central_critic_ddpg,
+            mixins=[
+                TargetNetworkMixin,
+                ComputeTDErrorMixin,
+                CentralizedValueMixin
+            ])
+
+        MADDPGTorchPolicy = DDPGTorchPolicy.with_updates(
+            name="MADDPGTorchPolicy",
+            get_default_config=lambda: MADDPG_CONFIG,
+            postprocess_fn=centralized_critic_postprocessing,
+            loss_fn=loss_with_central_critic_ddpg,
+            mixins=[
+                TargetNetworkMixin,
+                ComputeTDErrorMixin,
+                CentralizedValueMixin
+            ])
+
+        def get_policy_class(config_):
+            if config_["framework"] == "torch":
+                return MADDPGTorchPolicy
+
+
+        MADDPGTrainer = DDPGTrainer.with_updates(
+            name="MADDPGTrainer",
+            default_config=MADDPG_CONFIG,
+            default_policy=MADDPGTorchPolicy,
+            get_policy_class=get_policy_class,
+        )
+
+        results = tune.run(MADDPGTrainer,
+                           name=args.run + "_" + args.map,
+                           stop=stop,
+                           config=config,
+                           verbose=1)
+
+
+    elif args.run in ["PPO"]:
         config = {
             "model": {
                 "custom_model": "{}_IndependentCritic".format(args.neural_arch),
@@ -223,8 +314,8 @@ if __name__ == "__main__":
             "counterfactual": False,
             "centralized_critic_obs_dim": -1,
             "num_neighbours": args.num_neighbours,
-            "framework": args.framework,
-            "fuse_mode": args.fuse_mode,
+            "framework": "torch",
+            "fuse_mode": "mf",  # In ["concat", "mf"]
             "mf_nei_distance": 10,
         }
 
@@ -261,9 +352,3 @@ if __name__ == "__main__":
                  stop=stop,
                  config=config,
                  verbose=1)
-
-    else:
-        print("args.run illegal")
-        raise ValueError()
-
-    ray.shutdown()
