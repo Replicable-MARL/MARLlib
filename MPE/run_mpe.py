@@ -12,6 +12,12 @@ from ray.rllib.agents.a3c.a3c_tf_policy import A3CTFPolicy
 from ray.rllib.agents.a3c.a3c_torch_policy import A3CTorchPolicy
 from ray.rllib.agents.a3c.a2c import A2CTrainer
 from ray.rllib.agents.a3c.a3c import DEFAULT_CONFIG as A3C_CONFIG
+from ray.rllib.agents.ddpg.ddpg import DDPGTrainer
+from ray.rllib.agents.ddpg.ddpg_torch_policy import DDPGTorchPolicy, ComputeTDErrorMixin
+from ray.rllib.agents.ddpg.ddpg_tf_policy import DDPGTFPolicy
+from ray.rllib.agents.ddpg.ddpg import DEFAULT_CONFIG as DDPG_CONFIG
+
+from ray.rllib.agents.sac.sac_torch_policy import TargetNetworkMixin
 
 from ray.rllib.agents.dqn.r2d2 import DEFAULT_CONFIG, R2D2Trainer
 from ray.rllib.agents.dqn.r2d2_torch_policy import R2D2TorchPolicy
@@ -28,6 +34,7 @@ from MPE.model.torch_lstm import *
 from MPE.model.torch_lstm_cc import *
 from MPE.utils.mappo_tools import *
 from MPE.utils.maa2c_tools import *
+from MPE.utils.maddpg_tools import *
 
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
@@ -119,8 +126,7 @@ def run(args):
         else:
             print(
                 "PettingZooEnv step function only return one agent info, "
-                "not currently good for joint Q learning algo like QMIX/VDN"
-                "and not compatible with rllib built-in algo"
+                "not compatible with rllib built-in algo QMIX and VDN"
                 "\nwe are working on wrapping the PettingZooEnv"
                 "to support some cooperative scenario based on Ray"
             )
@@ -201,9 +207,9 @@ def run(args):
             )
             sys.exit()
 
-        from MPE.model.torch_maddpg import DDPGCentralizedCriticModel
+        from MPE.model.torch_maddpg import MADDPGTorchModel
         ModelCatalog.register_custom_model(
-            "torch_maddpg", DDPGCentralizedCriticModel)
+            "torch_maddpg", MADDPGTorchModel)
 
         config = {
             "model": {
@@ -215,20 +221,10 @@ def run(args):
         }
         config.update(common_config)
 
-        from ray.rllib.agents.ddpg.ddpg import DDPGTrainer
-        from ray.rllib.agents.ddpg.ddpg_torch_policy import DDPGTorchPolicy, ComputeTDErrorMixin
-        from ray.rllib.agents.ddpg.ddpg_tf_policy import DDPGTFPolicy
-        from ray.rllib.agents.ddpg.ddpg import DEFAULT_CONFIG as DDPG_CONFIG
-        from MPE.utils.maddpg_tools import loss_with_central_critic_ddpg
-        from ray.rllib.agents.sac.sac_torch_policy import TargetNetworkMixin
-
-        # from ray.tune.registry import register_trainable
-        # register_trainable("MADDPG", MADDPGTrainer)
-
         MADDPGTFPolicy = DDPGTFPolicy.with_updates(
             name="MADDPGTFPolicy",
-            postprocess_fn=centralized_critic_postprocessing,
-            loss_fn=loss_with_central_critic_ddpg,
+            postprocess_fn=maddpg_centralized_critic_postprocessing,
+            loss_fn=maddpg_actor_critic_loss,
             mixins=[
                 TargetNetworkMixin,
                 ComputeTDErrorMixin,
@@ -238,8 +234,9 @@ def run(args):
         MADDPGTorchPolicy = DDPGTorchPolicy.with_updates(
             name="MADDPGTorchPolicy",
             get_default_config=lambda: DDPG_CONFIG,
-            postprocess_fn=centralized_critic_postprocessing,
-            loss_fn=loss_with_central_critic_ddpg,
+            postprocess_fn=maddpg_centralized_critic_postprocessing,
+            make_model_and_action_dist=build_maddpg_models_and_action_dist,
+            loss_fn=maddpg_actor_critic_loss,
             mixins=[
                 TargetNetworkMixin,
                 ComputeTDErrorMixin,
