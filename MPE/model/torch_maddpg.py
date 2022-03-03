@@ -69,9 +69,6 @@ class MADDPGTorchModel(TorchModelV2, nn.Module):
         super(MADDPGTorchModel, self).__init__(obs_space, action_space,
                                              num_outputs, model_config, name)
 
-        self.model = TorchFC(obs_space, action_space, num_outputs,
-                             model_config, name)
-
         self.bounded = np.logical_and(self.action_space.bounded_above,
                                       self.action_space.bounded_below).any()
         self.action_dim = np.product(self.action_space.shape)
@@ -234,6 +231,5 @@ class MADDPGTorchModel(TorchModelV2, nn.Module):
 
     @override(ModelV2)
     def forward(self, input_dict, state, seq_lens):
-        model_out, _ = self.model(input_dict, state, seq_lens)
-        return model_out, []
+        return input_dict["obs_flat"].float(), state
 

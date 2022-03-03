@@ -234,14 +234,10 @@ def central_vf_stats_ddpg(policy, train_batch, grads):
 def build_maddpg_models(policy: Policy, observation_space: gym.spaces.Space,
                         action_space: gym.spaces.Space,
                         config: TrainerConfigDict) -> ModelV2:
-    if policy.config["use_state_preprocessor"]:
-        default_model = None  # catalog decides
-        num_outputs = 256  # arbitrary
-        config["model"]["no_final_linear"] = True
-    else:
-        default_model = TorchNoopModel if config["framework"] == "torch" \
-            else NoopModel
-        num_outputs = int(np.product(observation_space.shape))
+
+    default_model = TorchNoopModel if config["framework"] == "torch" \
+        else NoopModel
+    num_outputs = int(np.product(observation_space.shape))
 
     policy.model = ModelCatalog.get_model_v2(
         obs_space=observation_space,
