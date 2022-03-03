@@ -16,7 +16,7 @@ def get_train_parser():
     parser.add_argument(
         "--run",
         choices=["QMIX", "VDN", "R2D2", "PG", "A2C", "A3C", "DDPG", "MADDPG", "MAA2C", "PPO", "MAPPO"],  # "APPO" "IMPALA"
-        default="MADDPG",
+        default="DDPG",
         help="The RLlib-registered algorithm to use.")
     parser.add_argument(
         "--map",
@@ -31,7 +31,7 @@ def get_train_parser():
     parser.add_argument(
         "--num-neighbours",
         type=int,
-        default=4,
+        default=3,
         help="neighbours number")
     parser.add_argument(
         "--fuse-mode",

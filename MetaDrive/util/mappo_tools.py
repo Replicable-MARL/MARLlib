@@ -128,40 +128,18 @@ def centralized_critic_postprocessing(policy, sample_batch, other_agent_batches=
         )
         sample_batch[SampleBatch.VF_PREDS] = np.zeros_like(sample_batch[SampleBatch.REWARDS], dtype=np.float32)
 
-    if "DDPG" in str(policy.__class__): # MADDPG
-        ## copied from postprocess_nstep_and_prio in DDPGTorchPolicy
-        if policy.config["n_step"] > 1:
-            adjust_nstep(policy.config["n_step"], policy.config["gamma"], sample_batch)
+    completed = sample_batch["dones"][-1]
+    if completed:
+        last_r = 0.0
+    else:
+        last_r = sample_batch["vf_preds"][-1]
 
-        # Create dummy prio-weights (1.0) in case we don't have any in
-        # the batch.
-        PRIO_WEIGHTS = "weights"
-        if PRIO_WEIGHTS not in sample_batch:
-            sample_batch[PRIO_WEIGHTS] = np.ones_like(sample_batch[SampleBatch.REWARDS])
-
-        # Prioritize on the worker side.
-        if sample_batch.count > 0 and policy.config["worker_side_prioritization"]:
-            td_errors = policy.compute_td_error(
-                sample_batch[SampleBatch.OBS], sample_batch[SampleBatch.ACTIONS],
-                sample_batch[SampleBatch.REWARDS], sample_batch[SampleBatch.NEXT_OBS],
-                sample_batch[SampleBatch.DONES], sample_batch[PRIO_WEIGHTS])
-            new_priorities = (np.abs(convert_to_numpy(td_errors)) +
-                              policy.config["prioritized_replay_eps"])
-            sample_batch[PRIO_WEIGHTS] = new_priorities
-
-    else:  # MAAC MAPPO
-        completed = sample_batch["dones"][-1]
-        if completed:
-            last_r = 0.0
-        else:
-            last_r = sample_batch["vf_preds"][-1]
-
-        sample_batch = compute_advantages(
-            sample_batch,
-            last_r,
-            policy.config["gamma"],
-            policy.config["lambda"],
-            use_gae=policy.config["use_gae"])
+    sample_batch = compute_advantages(
+        sample_batch,
+        last_r,
+        policy.config["gamma"],
+        policy.config["lambda"],
+        use_gae=policy.config["use_gae"])
 
     return sample_batch
 
