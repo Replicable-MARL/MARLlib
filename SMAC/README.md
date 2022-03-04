@@ -45,6 +45,7 @@ In **ray/rllib/policy/rnn_sequencing.py** about line 130-150
 - MAA2C
 - PPO
 - MAPPO
+- COMA
   
 ### with neural arch
 - GRU

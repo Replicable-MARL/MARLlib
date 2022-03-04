@@ -25,6 +25,7 @@ at ray.rllib.evaluation.rollout_worker.py line 508
 - MAA2C
 - PPO
 - MAPPO
+- COMA
 
   
 ### with neural arch

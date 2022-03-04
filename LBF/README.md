@@ -25,6 +25,7 @@ at ray.rllib.evaluation.rollout_worker.py line 508
 - MAA2C
 - PPO
 - MAPPO
+- COMA
 
 Note: VDN and QMIX only work with setting *coop-force = True* in **config_lbf.py** or script command
   
