@@ -9,7 +9,7 @@ from ray.rllib.models.torch.torch_modelv2 import TorchModelV2
 from ray.rllib.utils.annotations import override
 from ray.rllib.utils.framework import try_import_torch
 from ray.rllib.agents.qmix.qmix import *
-from GoogleFootball.model.torch_cnn_updet import Transformer
+# from GoogleFootball.model.torch_cnn_updet import Transformer
 
 torch, nn = try_import_torch()
 
@@ -79,99 +79,7 @@ class Torch_CNN_GRU_Model(TorchModelV2, nn.Module):
         return q, [h]
 
 
-# not used
-class Torch_CNN_UPDeT_Model(TorchModelV2, nn.Module):
-    """The UDPeT for QMIX."""
 
-    def __init__(
-            self,
-            obs_space,
-            action_space,
-            num_outputs,
-            model_config,
-            name,
-            emb=32,
-            heads=3,
-            depth=2,
-    ):
-        self.conv_emb = 4 * 7 * 7
-        self.trans_emb = emb
-        self.heads = heads
-        self.depth = depth
-        self.n_agents = model_config["n_agents"]
-
-        nn.Module.__init__(self)
-        super().__init__(obs_space, action_space, num_outputs, model_config,
-                         name)
-
-        # Build the Module from Conv + FC + GRU + 2xfc (action + value outs).
-        self.conv1 = nn.Sequential(  # input shape (1, 28, 28)
-            nn.Conv2d(
-                in_channels=1,
-                out_channels=2,  # n_filters
-                kernel_size=5,  # filter size
-                stride=1,  # filter movement/step
-                padding=2,
-            ),
-            nn.ReLU(),  # activation
-            nn.MaxPool2d(kernel_size=3),  # choose max value in 2x2 area, output shape (16, 14, 14)
-        )
-        self.conv2 = nn.Sequential(
-            nn.Conv2d(
-                in_channels=2,
-                out_channels=4,
-                kernel_size=5,
-                stride=1,
-                padding=2,
-            ),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2),  # choose max value in 2x2 area, output shape (16, 14, 14)
-        )
-        self.fc1 = nn.Linear(self.conv_emb, self.trans_emb)  # fully connected layer, output 10 classes
-
-        self._features = None
-
-        # Build the Module from Transformer / regard as RNN
-        self.transformer = Transformer(self.trans_emb, self.heads, self.depth, self.trans_emb)
-        self.action_branch = nn.Linear(self.trans_emb, num_outputs)
-
-    @override(ModelV2)
-    def get_initial_state(self):
-        # Place hidden states on same device as model.
-        h = [
-            self.action_branch.weight.new(self.n_agents, self.trans_emb).zero_().squeeze(0),
-        ]
-        return h
-
-    @override(ModelV2)
-    def forward(self, input_dict, hidden_state, seq_lens):
-        b = input_dict["obs_flat"].shape[0]
-        x = input_dict["obs_flat"].view(b, 42, 42, 4)
-        x = x.permute(0, 3, 1, 2).reshape(-1, 1, 42, 42)
-        x = self.conv1(x)
-        x = self.conv2(x)
-        x = self.fc1(x.view(4 * b, -1))
-        x = x.view(b, 4, self.trans_emb)
-
-        # inputs = self._build_inputs_transformer(inputs)
-        outputs, _ = self.transformer(x, hidden_state[0], None)
-
-        # last dim for hidden state
-        h = outputs[:, -1:, :]
-
-        # record self._features
-        self._features = torch.max(outputs[:, :-1, :], 1)[0]
-        logits = self.action_branch(self._features)
-
-        # Return masked logits.
-        return logits, [torch.squeeze(h, 1)]
-
-    def _build_inputs_transformer(self, inputs):
-        pos = 4 - self.token_dim  # 5 for -1 6 for -2
-        arranged_obs = torch.cat((inputs[:, pos:], inputs[:, :pos]), 1)
-        reshaped_obs = arranged_obs.view(-1, 1 + (self.enemy_num - 1) + self.ally_num, self.token_dim)
-
-        return reshaped_obs
 
 
 def _get_size(obs_space):
@@ -219,7 +127,7 @@ class Customized_QMixTorchPolicy(QMixTorchPolicy):
             config["model"],
             framework="torch",
             name="model",
-            default_model=Torch_CNN_GRU_Model if "GRU" in neural_arch else Torch_CNN_UPDeT_Model).to(self.device)
+            default_model=Torch_CNN_GRU_Model if "GRU" in neural_arch else None).to(self.device)
 
         self.target_model = ModelCatalog.get_model_v2(
             agent_obs_space,
@@ -228,7 +136,7 @@ class Customized_QMixTorchPolicy(QMixTorchPolicy):
             config["model"],
             framework="torch",
             name="target_model",
-            default_model=Torch_CNN_GRU_Model if "GRU" in neural_arch else Torch_CNN_UPDeT_Model).to(self.device)
+            default_model=Torch_CNN_GRU_Model if "GRU" in neural_arch else None).to(self.device)
 
         self.exploration = self._create_exploration()
 
@@ -274,3 +182,99 @@ QMixTrainer = GenericOffPolicyTrainer.with_updates(
     default_policy=Customized_QMixTorchPolicy,
     get_policy_class=None,
     execution_plan=execution_plan)
+
+
+
+# not used
+# class Torch_CNN_UPDeT_Model(TorchModelV2, nn.Module):
+#     """The UDPeT for QMIX."""
+#
+#     def __init__(
+#             self,
+#             obs_space,
+#             action_space,
+#             num_outputs,
+#             model_config,
+#             name,
+#             emb=32,
+#             heads=3,
+#             depth=2,
+#     ):
+#         self.conv_emb = 4 * 7 * 7
+#         self.trans_emb = emb
+#         self.heads = heads
+#         self.depth = depth
+#         self.n_agents = model_config["n_agents"]
+#
+#         nn.Module.__init__(self)
+#         super().__init__(obs_space, action_space, num_outputs, model_config,
+#                          name)
+#
+#         # Build the Module from Conv + FC + GRU + 2xfc (action + value outs).
+#         self.conv1 = nn.Sequential(  # input shape (1, 28, 28)
+#             nn.Conv2d(
+#                 in_channels=1,
+#                 out_channels=2,  # n_filters
+#                 kernel_size=5,  # filter size
+#                 stride=1,  # filter movement/step
+#                 padding=2,
+#             ),
+#             nn.ReLU(),  # activation
+#             nn.MaxPool2d(kernel_size=3),  # choose max value in 2x2 area, output shape (16, 14, 14)
+#         )
+#         self.conv2 = nn.Sequential(
+#             nn.Conv2d(
+#                 in_channels=2,
+#                 out_channels=4,
+#                 kernel_size=5,
+#                 stride=1,
+#                 padding=2,
+#             ),
+#             nn.ReLU(),
+#             nn.MaxPool2d(kernel_size=2),  # choose max value in 2x2 area, output shape (16, 14, 14)
+#         )
+#         self.fc1 = nn.Linear(self.conv_emb, self.trans_emb)  # fully connected layer, output 10 classes
+#
+#         self._features = None
+#
+#         # Build the Module from Transformer / regard as RNN
+#         self.transformer = Transformer(self.trans_emb, self.heads, self.depth, self.trans_emb)
+#         self.action_branch = nn.Linear(self.trans_emb, num_outputs)
+#
+#     @override(ModelV2)
+#     def get_initial_state(self):
+#         # Place hidden states on same device as model.
+#         h = [
+#             self.action_branch.weight.new(self.n_agents, self.trans_emb).zero_().squeeze(0),
+#         ]
+#         return h
+#
+#     @override(ModelV2)
+#     def forward(self, input_dict, hidden_state, seq_lens):
+#         b = input_dict["obs_flat"].shape[0]
+#         x = input_dict["obs_flat"].view(b, 42, 42, 4)
+#         x = x.permute(0, 3, 1, 2).reshape(-1, 1, 42, 42)
+#         x = self.conv1(x)
+#         x = self.conv2(x)
+#         x = self.fc1(x.view(4 * b, -1))
+#         x = x.view(b, 4, self.trans_emb)
+#
+#         # inputs = self._build_inputs_transformer(inputs)
+#         outputs, _ = self.transformer(x, hidden_state[0], None)
+#
+#         # last dim for hidden state
+#         h = outputs[:, -1:, :]
+#
+#         # record self._features
+#         self._features = torch.max(outputs[:, :-1, :], 1)[0]
+#         logits = self.action_branch(self._features)
+#
+#         # Return masked logits.
+#         return logits, [torch.squeeze(h, 1)]
+#
+#     def _build_inputs_transformer(self, inputs):
+#         pos = 4 - self.token_dim  # 5 for -1 6 for -2
+#         arranged_obs = torch.cat((inputs[:, pos:], inputs[:, :pos]), 1)
+#         reshaped_obs = arranged_obs.view(-1, 1 + (self.enemy_num - 1) + self.ally_num, self.token_dim)
+#
+#         return reshaped_obs

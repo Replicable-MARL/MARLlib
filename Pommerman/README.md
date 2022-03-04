@@ -42,10 +42,11 @@ Pattern: source package file -> replace file
 - MAA2C
 - PPO
 - MAPPO
+- COMA
 
 Note: 
 - VDN and QMIX only work with map **PommeTeamCompetition-v0**
-- MAPPO and MAA2C can not work with rule-based agent (require all the agents to be trainable)
+- COMA, MAPPO and MAA2C can not work with rule-based agent (require all the agents to be trainable)
 - Additional restrictions on trainable/human-rule/random agents' specification on different maps. You will learn from the error log printed. 
   
 ### with neural arch
