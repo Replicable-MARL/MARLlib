@@ -29,6 +29,7 @@ from RWARE.model.torch_lstm import *
 from RWARE.model.torch_lstm_cc import *
 from RWARE.util.mappo_tools import *
 from RWARE.util.maa2c_tools import *
+import sys
 
 if __name__ == "__main__":
     args = get_train_parser().parse_args()
@@ -271,6 +272,56 @@ if __name__ == "__main__":
                                stop=stop,
                                config=config,
                                verbose=1)
+        elif args.run == "COMA":
+
+            config = {
+                "model": {
+                    "custom_model": "{}_CentralizedCritic".format(args.neural_arch),
+                    "custom_model_config": {
+                        "agent_num": agent_num,
+                        "coma": True
+                    },
+                },
+            }
+            config.update(common_config)
+
+            from RWARE.util.coma_tools import loss_with_central_critic_coma, central_vf_stats_coma, COMATorchPolicy
+
+            # not used
+            COMATFPolicy = A3CTFPolicy.with_updates(
+                name="MAA2CTFPolicy",
+                postprocess_fn=centralized_critic_postprocessing,
+                loss_fn=loss_with_central_critic_coma,
+                grad_stats_fn=central_vf_stats_coma,
+                mixins=[
+                    CentralizedValueMixin
+                ])
+
+            COMATorchPolicy = COMATorchPolicy.with_updates(
+                name="MAA2CTorchPolicy",
+                loss_fn=loss_with_central_critic_coma,
+                mixins=[
+                    CentralizedValueMixin
+                ])
+
+
+            def get_policy_class(config_):
+                if config_["framework"] == "torch":
+                    return COMATorchPolicy
+
+
+            COMATrainer = A2CTrainer.with_updates(
+                name="COMATrainer",
+                default_policy=COMATFPolicy,
+                get_policy_class=get_policy_class,
+            )
+
+            tune.run(COMATrainer,
+                     name=args.run + "_" + args.neural_arch + "_" + map_name,
+                     stop=stop,
+                     config=config,
+                     verbose=1)
+
         else:
             print("{} algo not supported".format(args.run))
             raise ValueError()

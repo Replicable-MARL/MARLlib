@@ -4,7 +4,7 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
-
+import sys
 from ray.rllib.models.catalog import ModelCatalog
 from gym.spaces import Dict as GymDict, Tuple, Box, Discrete
 from ray.rllib.utils.test_utils import check_learning_achieved
@@ -283,6 +283,57 @@ if __name__ == "__main__":
                                stop=stop,
                                config=config,
                                verbose=1)
+
+        elif args.run == "COMA":
+
+            config = {
+                "model": {
+                    "custom_model": "{}_CentralizedCritic".format(args.neural_arch),
+                    "custom_model_config": {
+                        "agent_num": agent_num,
+                        "coma": True
+                    },
+                },
+            }
+            config.update(common_config)
+
+            from LBF.util.coma_tools import loss_with_central_critic_coma, central_vf_stats_coma, COMATorchPolicy
+
+            # not used
+            COMATFPolicy = A3CTFPolicy.with_updates(
+                name="MAA2CTFPolicy",
+                postprocess_fn=centralized_critic_postprocessing,
+                loss_fn=loss_with_central_critic_coma,
+                grad_stats_fn=central_vf_stats_coma,
+                mixins=[
+                    CentralizedValueMixin
+                ])
+
+            COMATorchPolicy = COMATorchPolicy.with_updates(
+                name="MAA2CTorchPolicy",
+                loss_fn=loss_with_central_critic_coma,
+                mixins=[
+                    CentralizedValueMixin
+                ])
+
+
+            def get_policy_class(config_):
+                if config_["framework"] == "torch":
+                    return COMATorchPolicy
+
+
+            COMATrainer = A2CTrainer.with_updates(
+                name="COMATrainer",
+                default_policy=COMATFPolicy,
+                get_policy_class=get_policy_class,
+            )
+
+            tune.run(COMATrainer,
+                     name=args.run + "_" + args.neural_arch + "_" + map_name,
+                     stop=stop,
+                     config=config,
+                     verbose=1)
+
         else:
             print("{} algo not supported".format(args.run))
             raise ValueError()

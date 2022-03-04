@@ -9,7 +9,7 @@ import os
 from random import randint
 from time import strftime
 
-# from gym.utils import reraise
+# from gym.util import reraise
 import numpy as np
 from PIL import Image
 

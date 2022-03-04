@@ -26,8 +26,8 @@ from MPE.model.torch_gru import *
 from MPE.model.torch_gru_cc import *
 from MPE.model.torch_lstm import *
 from MPE.model.torch_lstm_cc import *
-from MPE.utils.mappo_tools import *
-from MPE.utils.maa2c_tools import *
+from MPE.util.mappo_tools import *
+from MPE.util.maa2c_tools import *
 
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
@@ -219,7 +219,7 @@ def run(args):
         from ray.rllib.agents.ddpg.ddpg_torch_policy import DDPGTorchPolicy, ComputeTDErrorMixin
         from ray.rllib.agents.ddpg.ddpg_tf_policy import DDPGTFPolicy
         from ray.rllib.agents.ddpg.ddpg import DEFAULT_CONFIG as DDPG_CONFIG
-        from MPE.utils.maddpg_tools import maddpg_actor_critic_loss, build_maddpg_models_and_action_dist,maddpg_centralized_critic_postprocessing
+        from MPE.util.maddpg_tools import maddpg_actor_critic_loss, build_maddpg_models_and_action_dist,maddpg_centralized_critic_postprocessing
         from ray.rllib.agents.sac.sac_torch_policy import TargetNetworkMixin
         # from ray.tune.registry import register_trainable
         # register_trainable("MADDPG", MADDPGTrainer)
@@ -393,7 +393,7 @@ def run(args):
         }
         config.update(common_config)
 
-        from MPE.utils.coma_tools import loss_with_central_critic_coma, central_vf_stats_coma, COMATorchPolicy
+        from MPE.util.coma_tools import loss_with_central_critic_coma, central_vf_stats_coma, COMATorchPolicy
 
         # not used
         COMATFPolicy = A3CTFPolicy.with_updates(

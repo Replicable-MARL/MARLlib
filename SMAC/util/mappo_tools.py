@@ -75,7 +75,7 @@ def centralized_critic_postprocessing(policy,
                     sample_batch["state"], policy.device), ) \
                 .cpu().detach().numpy()
         else:
-            assert NotImplementedError
+            raise NotImplementedError()
 
     else:
         # Policy hasn't been initialized yet, use zeros.
