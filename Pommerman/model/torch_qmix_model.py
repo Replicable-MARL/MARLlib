@@ -9,7 +9,7 @@ from ray.rllib.models.torch.torch_modelv2 import TorchModelV2
 from ray.rllib.utils.annotations import override
 from ray.rllib.utils.framework import try_import_torch
 from ray.rllib.agents.qmix.qmix import *
-from ex_football.model.torch_cnn_updet import Transformer
+from GoogleFootball.model.torch_cnn_updet import Transformer
 
 torch, nn = try_import_torch()
 
