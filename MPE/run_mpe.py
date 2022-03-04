@@ -28,13 +28,7 @@ from MPE.model.torch_lstm import *
 from MPE.model.torch_lstm_cc import *
 from MPE.utils.mappo_tools import *
 from MPE.utils.maa2c_tools import *
-from ray.rllib.agents.ddpg.ddpg import DDPGTrainer
-from ray.rllib.agents.ddpg.ddpg_torch_policy import DDPGTorchPolicy, ComputeTDErrorMixin
-from ray.rllib.agents.ddpg.ddpg_tf_policy import DDPGTFPolicy
-from ray.rllib.agents.ddpg.ddpg import DEFAULT_CONFIG as DDPG_CONFIG
-from MPE.utils.maddpg_tools import maddpg_actor_critic_loss, build_maddpg_models_and_action_dist, \
-    maddpg_centralized_critic_postprocessing
-from ray.rllib.agents.sac.sac_torch_policy import TargetNetworkMixin
+
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
 
@@ -221,6 +215,15 @@ def run(args):
         }
         config.update(common_config)
 
+        from ray.rllib.agents.ddpg.ddpg import DDPGTrainer
+        from ray.rllib.agents.ddpg.ddpg_torch_policy import DDPGTorchPolicy, ComputeTDErrorMixin
+        from ray.rllib.agents.ddpg.ddpg_tf_policy import DDPGTFPolicy
+        from ray.rllib.agents.ddpg.ddpg import DEFAULT_CONFIG as DDPG_CONFIG
+        from MPE.utils.maddpg_tools import maddpg_actor_critic_loss, build_maddpg_models_and_action_dist,maddpg_centralized_critic_postprocessing
+        from ray.rllib.agents.sac.sac_torch_policy import TargetNetworkMixin
+        # from ray.tune.registry import register_trainable
+        # register_trainable("MADDPG", MADDPGTrainer)
+
         MADDPGTFPolicy = DDPGTFPolicy.with_updates(
             name="MADDPGTFPolicy",
             postprocess_fn=maddpg_centralized_critic_postprocessing,
@@ -373,5 +376,56 @@ def run(args):
                            config=config,
                            verbose=1)
 
+    elif args.run == "COMA":
+
+        if args.continues:
+            print("continues action space not supported in COMA")
+            sys.exit()
+
+        config = {
+            "model": {
+                "custom_model": "{}_CentralizedCritic".format(args.neural_arch),
+                "custom_model_config": {
+                    "agent_num": n_agents,
+                    "coma": True
+                },
+            },
+        }
+        config.update(common_config)
+
+        from MPE.utils.coma_tools import loss_with_central_critic_coma, central_vf_stats_coma, COMATorchPolicy
+
+        # not used
+        COMATFPolicy = A3CTFPolicy.with_updates(
+            name="MAA2CTFPolicy",
+            postprocess_fn=centralized_critic_postprocessing,
+            loss_fn=loss_with_central_critic_coma,
+            grad_stats_fn=central_vf_stats_coma,
+            mixins=[
+                CentralizedValueMixin
+            ])
+
+        COMATorchPolicy = COMATorchPolicy.with_updates(
+            name="MAA2CTorchPolicy",
+            loss_fn=loss_with_central_critic_coma,
+            mixins=[
+                CentralizedValueMixin
+            ])
+
+        def get_policy_class(config_):
+            if config_["framework"] == "torch":
+                return COMATorchPolicy
+
+        COMATrainer = A2CTrainer.with_updates(
+            name="COMATrainer",
+            default_policy=COMATFPolicy,
+            get_policy_class=get_policy_class,
+        )
+
+        tune.run(COMATrainer,
+                           name=args.run + "_" + args.neural_arch + "_" + args.map,
+                           stop=stop,
+                           config=config,
+                           verbose=1)
 
     ray.shutdown()

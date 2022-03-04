@@ -15,8 +15,8 @@ def get_train_parser():
         help="Whether use tune grid research")
     parser.add_argument(
         "--run",
-        choices=["QMIX", "VDN", "R2D2", "PG", "A2C", "A3C", "DDPG", "MADDPG", "MAA2C", "PPO", "MAPPO"],  # "APPO" "IMPALA"
-        default="MADDPG",
+        choices=["QMIX", "VDN", "R2D2", "PG", "A2C", "A3C", "DDPG", "MADDPG", "MAA2C", "PPO", "MAPPO", "COMA"],  # "APPO" "IMPALA"
+        default="PPO",
         help="The RLlib-registered algorithm to use.")
     parser.add_argument(
         "--map",
@@ -26,14 +26,14 @@ def get_train_parser():
         help="Maps should be registered")
     parser.add_argument(
         "--continues",
-        default=True,
+        default=False,
         type=bool,
         help="MPE continue/discrete action space")
     parser.add_argument(
         "--neural-arch",
         choices=["LSTM", "GRU"],
         type=str,
-        default="GRU",
+        default="LSTM",
         help="Agent Neural Architecture")
     parser.add_argument(
         "--framework",

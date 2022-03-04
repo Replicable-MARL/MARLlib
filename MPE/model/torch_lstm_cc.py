@@ -54,6 +54,15 @@ class Torch_LSTM_CentralizedCritic_Model(TorchRNN, nn.Module):
             SlimFC(16, 1),
         )
 
+        # coma needs a central_vf with action number output
+        self.coma_flag = False
+        if "coma" in model_config["custom_model_config"]:
+            self.coma_flag = True
+            self.central_vf = nn.Sequential(
+                SlimFC(input_size, 16, activation_fn=nn.Tanh),
+                SlimFC(16, num_outputs),
+            )
+
     @override(ModelV2)
     def get_initial_state(self):
         h = [
@@ -118,4 +127,7 @@ class Torch_LSTM_CentralizedCritic_Model(TorchRNN, nn.Module):
                 obs, torch.flatten(opponent_obs, start_dim=1),
                 torch.flatten(opponent_actions, start_dim=1)], 1)
 
-        return torch.reshape(self.central_vf(input_), [-1])
+        if self.coma_flag:
+            return torch.reshape(self.central_vf(input_), [-1, self.num_outputs])
+        else:
+            return torch.reshape(self.central_vf(input_), [-1])
