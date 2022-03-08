@@ -3,7 +3,7 @@ from ray.rllib.agents.a3c.a3c_torch_policy import actor_critic_loss as torch_los
 from ray.rllib.evaluation.postprocessing import Postprocessing
 from ray.rllib.utils.tf_ops import explained_variance
 from ray.rllib.utils.framework import try_import_tf, try_import_torch
-from Hanabi.utils.mappo_tools import CentralizedValueMixin
+from Hanabi.util.mappo_tools import CentralizedValueMixin
 
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()

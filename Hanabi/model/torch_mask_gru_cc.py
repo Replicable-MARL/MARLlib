@@ -57,6 +57,15 @@ class Torch_ActionMask_GRU_CentralizedCritic_Model(TorchRNN, nn.Module):
             SlimFC(16, 1),
         )
 
+        # coma needs a central_vf with action number output
+        self.coma_flag = False
+        if "coma" in model_config["custom_model_config"]:
+            self.coma_flag = True
+            self.central_vf = nn.Sequential(
+                SlimFC(self.input_size, 16, activation_fn=nn.Tanh),
+                SlimFC(16, num_outputs),
+            )
+
     @override(TorchRNN)
     def get_initial_state(self):
         # Place hidden states on same device as model.
@@ -109,7 +118,10 @@ class Torch_ActionMask_GRU_CentralizedCritic_Model(TorchRNN, nn.Module):
         input_ = torch.cat([
                                obs, torch.flatten(opponent_obs, start_dim=1),
                            ] + opponent_actions_ls, 1)
-        return torch.reshape(self.central_vf(input_), [-1])
+        if self.coma_flag:
+            return torch.reshape(self.central_vf(input_), [-1, self.num_outputs])
+        else:
+            return torch.reshape(self.central_vf(input_), [-1])
 
     @override(TorchRNN)
     def value_function(self) -> TensorType:
