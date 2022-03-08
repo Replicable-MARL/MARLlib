@@ -26,6 +26,7 @@ at ray.rllib.evaluation.rollout_worker.py line 508
 - MAA2C
 - PPO
 - MAPPO
+- COMA
 
 Note: VDN and QMIX not suitable for turn-based game
   

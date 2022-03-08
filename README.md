@@ -4,7 +4,7 @@
 ### TODO
 
 **basic algorithms**
-- [ ] COMA
+- [x] COMA
 - [x] DDPG,MADDPG
 - [ ] VDAC
 - [ ] VDPPO
