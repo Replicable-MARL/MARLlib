@@ -166,6 +166,35 @@ Here is a chart describing the characteristics of each algorithm:
 | VDAC*  | Cooperative | Yes | Both | Value Decomposition |
 | VDPPO* | Cooperative | Yes | Both | Value Decomposition |
 
+**Current Task & Available algorithm map**: Y for support, N for unavailable, P for partly available, * for under development
+
+| Env w Algorithm | IQL | IPG | IAC | IDDPG | IPPO | COMA | MADDPG | MAAC | MAPPO | VDN | QMIX | VDAC | VDPPO 
+| --------- | -------- | -------- | -------- | -------- | -------- | -------- |--------- | -------- | -------- | -------- | -------- | -------- | -------- |
+| LBF  | Y | Y | Y | Y | Y | Y | Y | Y | Y | P | P | * | * |
+| RWARE  | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | * | * |
+| MPE  | Y | Y | Y | Y | Y | Y | Y | Y | Y | N | N | * | * |
+| SMAC  | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | * | * |
+| Neural-MMO  | N | Y | Y | N | Y | N | N | Y | N | N | N | * | * |
+| Meta-Drive  | N | Y | Y | Y | Y | N | Y | Y | Y | N | N | * | * |
+| Pommerman  | Y | Y | Y | Y | Y | P | P | P | P | P | P | * | * |
+| Google-Football  | Y | Y | Y | Y | Y | N | N | N | N | Y | Y | * | * |
+| Derk's Gym  | N | Y | Y | N | Y | N | N | Y | Y | N | N | * | * |
+| Hanabi  | Y | Y | Y | N | Y | Y | N | Y | Y | N | N | * | * |
+
+**Current Task & Neural Arch map**: Y for support, N for unavailable
+
+| Env w Arch | MLP | GRU | LSTM | CNN | Transformer | 
+| --------- | -------- | -------- | -------- | -------- | -------- |
+| LBF  | N | Y | Y | N | N |
+| RWARE  | N | Y | Y | N | N | 
+| MPE  | Y | Y | Y | N | N | 
+| SMAC  | N | Y | Y | N | Y | 
+| Neural-MMO  | N | Y | Y | Y | Y |
+| Meta-Drive  | N | Y | Y | Y | Y | 
+| Pommerman  | N | Y | Y | Y | N |
+| Google-Football  | N | Y | Y | Y | Y | 
+| Derk's Gym  | N | Y | Y | N | N |
+| Hanabi  | N | Y | Y | N | N |
 
 
 ### Part IV. State of the Art
