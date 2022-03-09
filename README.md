@@ -150,21 +150,21 @@ VDPPO
 
 Here is a chart describing the characteristics of each algorithm:
 
-| Algorithm | Learning Mode | Need Global State | Action | Type |
-| ----------- | ----------- | ----------- | ----------- | ----------- |
-| IQL  | Mixed | No | Discrete | Independent Learning |
-| IPG  | Mixed | No | Both | Independent Learning |
-| IAC  | Mixed | No | Both | Independent Learning |
-| IDDPG*  | Mixed | No | Continuous | Independent Learning |
-| IPPO  | Mixed | No | Both | Independent Learning |
-| COMA*  | Mixed | No | Both | Centralized Critic |
-| MADDPG*  | Mixed | No | Continuous | Centralized Critic |
-| MAAC  | Mixed | No | Both | Centralized Critic |
-| MAPPO  | Mixed | No | Both | Centralized Critic |
-| VDN | Cooperative | No | Discrete | Value Decomposition |
-| QMIX  | Cooperative | Yes | Discrete | Value Decomposition |
-| VDAC*  | Cooperative | Yes | Both | Value Decomposition |
-| VDPPO* | Cooperative | Yes | Both | Value Decomposition |
+| Algorithm | Learning Mode | Need Global State | Action | Learning Mode  | Type |
+| ----------- | ----------- | ----------- | ----------- | ----------- | ----------- |
+| IQL  | Mixed | No | Discrete | Independent Learning | Off Policy
+| IPG  | Mixed | No | Both | Independent Learning | On Policy
+| IAC  | Mixed | No | Both | Independent Learning | On Policy
+| IDDPG*  | Mixed | No | Continuous | Independent Learning | Off Policy
+| IPPO  | Mixed | No | Both | Independent Learning | On Policy
+| COMA*  | Mixed | No | Both | Centralized Critic | On Policy
+| MADDPG*  | Mixed | No | Continuous | Centralized Critic | Off Policy
+| MAAC  | Mixed | No | Both | Centralized Critic | On Policy
+| MAPPO  | Mixed | No | Both | Centralized Critic | On Policy
+| VDN | Cooperative | No | Discrete | Value Decomposition | Off Policy
+| QMIX  | Cooperative | Yes | Discrete | Value Decomposition | Off Policy
+| VDAC*  | Cooperative | Yes | Both | Value Decomposition | On Policy
+| VDPPO* | Cooperative | Yes | Both | Value Decomposition | On Policy
 
 **Current Task & Available algorithm map**: Y for support, N for unavailable, P for partly available, * for under development
 
