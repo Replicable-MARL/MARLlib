@@ -37,8 +37,10 @@ from SMAC.util.maa2c_tools import *
 from SMAC.metric.smac_callback import *
 from SMAC.util.r2d2_tools import *
 from SMAC.model.torch_qmix_mask_gru_updet import *
-from SMAC.model.torch_vda2c_mask_gru_lstm_updet import *
-
+from SMAC.model.torch_vd_ppo_a2c_mask_gru_lstm_updet import *
+from SMAC.util.vda2c_tools import value_mix_centralized_critic_postprocessing, value_mix_actor_critic_loss, \
+    MixingValueMixin
+from SMAC.util.vdppo_tools import value_mix_ppo_surrogate_loss
 # from smac.env.starcraft2.starcraft2 import StarCraft2Env as SMAC
 from SMAC.env.starcraft2_rllib import StarCraft2Env_Rllib as SMAC
 
@@ -189,8 +191,6 @@ def run(args):
 
         VDA2C_CONFIG["rollout_fragment_length"] = rollout_fragment_length
 
-        from SMAC.util.vda2c_tools import value_mix_centralized_critic_postprocessing, value_mix_actor_critic_loss, \
-            MixingValueMixin
         VDA2CTFPolicy = A3CTFPolicy.with_updates(
             name="VDA2CTFPolicy",
             postprocess_fn=value_mix_centralized_critic_postprocessing,
@@ -217,6 +217,82 @@ def run(args):
 
         results = tune.run(VDA2CTrainer, name=args.run + "_" + args.neural_arch + "_" + args.map, stop=stop,
                            config=config, verbose=1)
+
+    elif args.run in ["SUM-VDPPO", "MIX-VDPPO"]:
+
+        """
+        for bug mentioned https://github.com/ray-project/ray/pull/20743
+        make sure sgd_minibatch_size > max_seq_len
+        """
+        sgd_minibatch_size = 128
+        while sgd_minibatch_size < rollout_fragment_length:
+            sgd_minibatch_size *= 2
+
+        config = {
+            "env": SMAC,
+            "sgd_minibatch_size": sgd_minibatch_size,
+            "num_sgd_iter": 10,
+            "model": {
+                "custom_model": "{}_ValueMixer".format(args.neural_arch),
+                "max_seq_len": rollout_fragment_length,
+                "custom_model_config": {
+                    "token_dim": args.token_dim,
+                    "ally_num": n_ally,
+                    "enemy_num": n_enemy,
+                    "self_obs_dim": obs_shape,
+                    "state_dim": state_shape,
+                    "mixer": "qmix" if args.run == "MIX-VDPPO" else "vdn",
+                    "mixer_emb_dim": 64,
+                },
+            },
+        }
+        config.update(common_config)
+
+        VDPPO_CONFIG = merge_dicts(
+            PPO_CONFIG,
+            {
+                "agent_num": n_ally,
+                "state_dim": state_shape,
+                "self_obs_dim": obs_shape,
+            }
+        )
+
+        # not used
+        VDPPOTFPolicy = PPOTFPolicy.with_updates(
+            name="VDPPOTFPolicy",
+            postprocess_fn=value_mix_centralized_critic_postprocessing,
+            loss_fn=value_mix_ppo_surrogate_loss,
+            before_loss_init=setup_tf_mixins,
+            grad_stats_fn=central_vf_stats_ppo,
+            mixins=[
+                LearningRateSchedule, EntropyCoeffSchedule, KLCoeffMixin,
+                ValueNetworkMixin, MixingValueMixin
+            ])
+
+        VDPPOTorchPolicy = PPOTorchPolicy.with_updates(
+            name="VDPPOTorchPolicy",
+            get_default_config=lambda: VDPPO_CONFIG,
+            postprocess_fn=value_mix_centralized_critic_postprocessing,
+            loss_fn=value_mix_ppo_surrogate_loss,
+            before_init=setup_torch_mixins,
+            mixins=[
+                TorchLR, TorchEntropyCoeffSchedule, TorchKLCoeffMixin,
+                ValueNetworkMixin, MixingValueMixin
+            ])
+
+        def get_policy_class(config_):
+            if config_["framework"] == "torch":
+                return VDPPOTorchPolicy
+
+        VDPPOTrainer = PPOTrainer.with_updates(
+            name="VDPPOTrainer",
+            default_policy=VDPPOTFPolicy,
+            get_policy_class=get_policy_class,
+        )
+
+        results = tune.run(VDPPOTrainer, name=args.run + "_" + args.neural_arch + "_" + args.map, stop=stop,
+                           config=config,
+                           verbose=1)
 
 
     elif args.run in ["R2D2"]:  # similar to IQL in recurrent/POMDP mode

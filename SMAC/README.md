@@ -46,6 +46,8 @@ In **ray/rllib/policy/rnn_sequencing.py** about line 130-150
 - PPO
 - MAPPO
 - COMA
+- VDA2C-SUM/MIX
+- VDPPO-SUM/MIX
   
 ### with neural arch
 - GRU

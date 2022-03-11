@@ -4,10 +4,10 @@
 ### TODO
 
 **basic algorithms**
-- [x] COMA
-- [x] DDPG,MADDPG
-- [ ] VDAC
-- [ ] VDPPO
+- [x] COMA (**LBF, RWARE, MPE, SMAC, Pommerman, Hanabi**)
+- [x] DDPG,MADDPG (**MPE, Meta-Drive**)
+- [x] VDAC (**SMAC**,LBF, RWARE, MPE, Hanabi, GRF)
+- [x] VDPPO (**SMAC**,LBF, RWARE, MPE, Hanabi, GRF)
 
 
 **extensions**
@@ -170,16 +170,16 @@ Here is a chart describing the characteristics of each algorithm:
 
 | Env w Algorithm | IQL | IPG | IAC | IDDPG | IPPO | COMA | MADDPG | MAAC | MAPPO | VDN | QMIX | VDAC | VDPPO 
 | --------- | -------- | -------- | -------- | -------- | -------- | -------- |--------- | -------- | -------- | -------- | -------- | -------- | -------- |
-| LBF  | Y | Y | Y | Y | Y | Y | Y | Y | Y | P | P | * | * |
-| RWARE  | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | * | * |
-| MPE  | Y | Y | Y | Y | Y | Y | Y | Y | Y | N | N | * | * |
-| SMAC  | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y | * | * |
-| Neural-MMO  | N | Y | Y | N | Y | N | N | Y | N | N | N | * | * |
-| Meta-Drive  | N | Y | Y | Y | Y | N | Y | Y | Y | N | N | * | * |
-| Pommerman  | Y | Y | Y | Y | Y | P | P | P | P | P | P | * | * |
-| Google-Football  | Y | Y | Y | Y | Y | N | N | N | N | Y | Y | * | * |
-| Derk's Gym  | N | Y | Y | N | Y | N | N | Y | Y | N | N | * | * |
-| Hanabi  | Y | Y | Y | N | Y | Y | N | Y | Y | N | N | * | * |
+| LBF         | Y | Y | Y | Y | Y | Y | N | Y | Y | P | P | * | * |
+| RWARE       | Y | Y | Y | Y | Y | Y | N | Y | Y | Y | Y | * | * |
+| MPE         | P | Y | Y | P | Y | P | P | Y | Y | N | N | * | * |
+| SMAC        | Y | Y | Y | Y | Y | Y | N | Y | Y | Y | Y | Y | Y |
+| Neural-MMO  | N | Y | Y | N | Y | N | N | Y | N | N | N | N | N |
+| Meta-Drive  | N | Y | Y | Y | Y | N | Y | Y | Y | N | N | N | N |
+| Pommerman   | Y | Y | Y | Y | Y | P | N | P | N | P | P | N | N |
+| GRF         | Y | Y | Y | Y | Y | N | N | N | N | Y | Y | * | * |
+| Derk's Gym  | N | Y | Y | N | Y | N | N | Y | Y | N | N | N | N |
+| Hanabi      | Y | Y | Y | N | Y | Y | N | Y | Y | N | N | * | * |
 
 **Current Task & Neural Arch map**: Y for support, N for unavailable
 
@@ -324,6 +324,11 @@ Here is a chart describing the characteristics of each algorithm:
   - RNN
   - Transformer
   - 
+
+### **Part VI. Bug Shooting**
+- ppo related bug: refer to https://github.com/ray-project/ray/pull/20743. 
+  - make sure sgd_minibatch_size > max_seq_len
+  - enlarge the sgd_minibatch_size (128 in default)
 
 ## Acknowledgement
 
