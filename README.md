@@ -158,13 +158,13 @@ Here is a chart describing the characteristics of each algorithm:
 | IDDPG*  | Mixed | No | Continuous | Independent Learning | Off Policy
 | IPPO  | Mixed | No | Both | Independent Learning | On Policy
 | COMA*  | Mixed | No | Both | Centralized Critic | On Policy
-| MADDPG*  | Mixed | No | Continuous | Centralized Critic | Off Policy
-| MAAC  | Mixed | No | Both | Centralized Critic | On Policy
-| MAPPO  | Mixed | No | Both | Centralized Critic | On Policy
+| MADDPG*  | Mixed | Better | Continuous | Centralized Critic | Off Policy
+| MAAC  | Mixed | Better | Both | Centralized Critic | On Policy
+| MAPPO  | Mixed | Better | Both | Centralized Critic | On Policy
 | VDN | Cooperative | No | Discrete | Value Decomposition | Off Policy
 | QMIX  | Cooperative | Yes | Discrete | Value Decomposition | Off Policy
-| VDAC*  | Cooperative | Yes | Both | Value Decomposition | On Policy
-| VDPPO* | Cooperative | Yes | Both | Value Decomposition | On Policy
+| VDAC*  | Cooperative | Better | Both | Value Decomposition | On Policy
+| VDPPO* | Cooperative | Better | Both | Value Decomposition | On Policy
 
 **Current Task & Available algorithm map**: Y for support, N for unavailable, P for partly available, * for under development
 
@@ -236,7 +236,7 @@ Here is a chart describing the characteristics of each algorithm:
 - [Efficient Communication in Multi-Agent Reinforcement Learning via Variance Based Control](https://proceedings.neurips.cc/paper/2019/file/14cfdb59b5bda1fc245aadae15b1984a-Paper.pdf) **[S][2019]**
 - [Exploration with Unreliable Intrinsic Reward in Multi-Agent Reinforcement Learning](https://arxiv.org/pdf/1906.02138) **[P+E][2019]**
 - [Learning nearly decomposable value functions via communication minimization](https://arxiv.org/pdf/1910.05366) **[S][2019]**
-- [Liir: Learning individual intrinsic reward in multi-agent reinforcement learning](https://proceedings.neurips.cc/paper/2019/file/07a9d3fed4c5ea6b17e80258dee231fa-Paper.pdf)**[P][2019]**
+- [Liir: Learning individual intrinsic reward in multi-agent reinforcement learning](https://proceedings.neurips.cc/paper/2019/file/07a9d3fed4c5ea6b17e80258dee231fa-Paper.pdf) **[P][2019]**
 - [MAVEN: Multi-Agent Variational Exploration](https://proceedings.neurips.cc/paper/2019/file/f816dc0acface7498e10496222e9db10-Paper.pdf) **[E][2019]**
 - [Adaptive learning A new decentralized reinforcement learning approach for cooperative multiagent systems](https://ieeexplore.ieee.org/iel7/6287639/8948470/09102277.pdf) **[B][2020]**
 - [Counterfactual Multi-Agent Reinforcement Learning with Graph Convolution Communication](https://arxiv.org/pdf/2004.00470) **[S+G][2020]**

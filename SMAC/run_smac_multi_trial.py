@@ -19,20 +19,20 @@ from ray.rllib.agents.dqn.r2d2 import DEFAULT_CONFIG
 from ray.rllib.agents.trainer_template import build_trainer
 from ray.rllib.agents.dqn.r2d2_tf_policy import R2D2TFPolicy
 
-from model.torch_mask_lstm import *
-from model.torch_mask_lstm_cc import *
-from model.torch_mask_gru import *
-from model.torch_mask_gru_cc import *
-from model.torch_mask_updet import *
-from model.torch_mask_updet_cc import *
-from util.mappo_tools import *
-from util.maa2c_tools import *
-from metric.smac_callback import *
-from model.torch_mask_r2d2 import *
-from model.torch_qmix import *
+from SMAC.model.torch_mask_lstm import *
+from SMAC.model.torch_mask_lstm_cc import *
+from SMAC.model.torch_mask_gru import *
+from SMAC.model.torch_mask_gru_cc import *
+from SMAC.model.torch_mask_updet import *
+from SMAC.model.torch_mask_updet_cc import *
+from SMAC.util.mappo_tools import *
+from SMAC.util.maa2c_tools import *
+from SMAC.metric.smac_callback import *
+from SMAC.util.r2d2_tools import *
+from SMAC.model.torch_qmix_mask_gru_updet import *
 
 # from smac.env.starcraft2.starcraft2 import StarCraft2Env as SMAC
-from env.starcraft2_rllib import StarCraft2Env_Rllib as SMAC
+from SMAC.env.starcraft2_rllib import StarCraft2Env_Rllib as SMAC
 
 
 def run_parallel(args):
