@@ -22,6 +22,8 @@ at ray.rllib.evaluation.rollout_worker.py line 508
 - PPO [D+C]
 - MAPPO [D+C]
 - COMA [D]
+- VDA2C-SUM/MIX [D+C]
+- VDPPO-SUM/MIX [D+C]
 
 Note here D for Discrete, C for Continues
   
