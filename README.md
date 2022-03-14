@@ -6,8 +6,8 @@
 **basic algorithms**
 - [x] COMA (**LBF, RWARE, MPE, SMAC, Pommerman, Hanabi**)
 - [x] DDPG,MADDPG (**MPE, Meta-Drive**)
-- [x] VDAC (**SMAC, LBF, RWARE,** MPE, Hanabi, GRF)
-- [x] VDPPO (**SMAC, LBF, RWARE,** MPE, Hanabi, GRF)
+- [x] VDAC (**SMAC, LBF, RWARE, MPE,** Hanabi, GRF)
+- [x] VDPPO (**SMAC, LBF, RWARE, MPE,** Hanabi, GRF)
 
 
 **extensions**

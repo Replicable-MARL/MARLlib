@@ -30,7 +30,7 @@ Note here D for Discrete, C for Continues
 ### with neural arch
 - GRU
 - LSTM
-- MLP(only for DDPG, MADDPG)
+- MLP(DDPG, MADDPG)
 
 
 
