@@ -26,7 +26,8 @@ at ray.rllib.evaluation.rollout_worker.py line 508
 - PPO
 - MAPPO
 - COMA
-
+- VDA2C-SUM/MIX
+- VDPPO-SUM/MIX
   
 ### with neural arch
 - GRU

@@ -15,8 +15,8 @@ def get_train_parser():
         help="Whether use tune grid research")
     parser.add_argument(
         "--run",
-        choices=["QMIX", "VDN", "R2D2", "PG", "A2C", "A3C", "MAA2C", "PPO", "MAPPO", "COMA"],  # "APPO" "IMPALA"
-        default="COMA",
+        choices=["QMIX", "VDN", "R2D2", "PG", "A2C", "A3C", "MAA2C", "PPO", "MAPPO", "COMA", "SUM-VDA2C", "MIX-VDA2C", "SUM-VDPPO", "MIX-VDPPO"],  # "APPO" "IMPALA"
+        default="MIX-VDPPO",
         help="The RLlib-registered algorithm to use.")
     parser.add_argument(
         "--agent-num",
@@ -47,7 +47,7 @@ def get_train_parser():
         "--neural-arch",
         choices=["LSTM", "GRU"],
         type=str,
-        default="GRU",
+        default="LSTM",
         help="Agent Neural Architecture")
     parser.add_argument(
         "--framework",

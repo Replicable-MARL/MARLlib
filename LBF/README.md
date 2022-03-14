@@ -26,8 +26,10 @@ at ray.rllib.evaluation.rollout_worker.py line 508
 - PPO
 - MAPPO
 - COMA
+- VDA2C-SUM/MIX
+- VDPPO-SUM/MIX
 
-Note: VDN and QMIX only work with setting *coop-force = True* in **config_lbf.py** or script command
+Note: VDN/QMIX/VDA2C/VDPPO only work with setting *coop-force = True* in **config_lbf.py** or script command
   
 ### with neural arch
 - GRU
