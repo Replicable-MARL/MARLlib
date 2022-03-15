@@ -28,7 +28,7 @@ at ray.rllib.evaluation.rollout_worker.py line 508
 - MAPPO
 - COMA
 
-Note: VDN and QMIX not suitable for turn-based game
+Note: Value decomposition methods are not suitable for turn-based game
   
 ### with neural arch
 - GRU

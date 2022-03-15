@@ -197,14 +197,9 @@ def centralized_critic_postprocessing_coma(policy,
         sample_batch["opponent_obs"] = np.zeros(
             (sample_batch["obs"].shape[0], opponent_agents_num, sample_batch["obs"].shape[1]),
             dtype=sample_batch["obs"].dtype)
-        if not continues:
-            sample_batch["opponent_action"] = np.zeros(
-                (sample_batch["actions"].shape[0], opponent_agents_num),
-                dtype=sample_batch["actions"].dtype)
-        else:
-            sample_batch["opponent_action"] = np.zeros(
-                (sample_batch["actions"].shape[0], opponent_agents_num, sample_batch["actions"].shape[1]),
-                dtype=sample_batch["actions"].dtype)
+        sample_batch["opponent_action"] = np.zeros(
+            (sample_batch["actions"].shape[0], opponent_agents_num),
+            dtype=sample_batch["actions"].dtype)
         sample_batch["vf_preds"] = np.zeros_like(
             sample_batch["rewards"], dtype=np.float32)
 
