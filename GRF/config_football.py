@@ -5,7 +5,7 @@ def get_train_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--local-mode",
-        default=False,
+        default=True,
         type=bool,
         help="Init Ray in local mode for easier debugging.")
     parser.add_argument(
@@ -15,8 +15,8 @@ def get_train_parser():
         help="Whether use tune grid research")
     parser.add_argument(
         "--run",
-        choices=["QMIX", "VDN", "R2D2", "PG", "A2C", "A3C", "MAA2C", "PPO", "MAPPO"],  # "APPO" "IMPALA"
-        default="QMIX",
+        choices=["QMIX", "VDN", "R2D2", "PG", "A2C", "A3C", "MAA2C", "PPO", "MAPPO", "COMA", "SUM-VDA2C", "MIX-VDA2C", "SUM-VDPPO", "MIX-VDPPO"],  # "APPO" "IMPALA"
+        default="COMA",
         help="The RLlib-registered algorithm to use.")
     parser.add_argument(
         "--map",

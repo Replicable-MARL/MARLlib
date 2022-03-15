@@ -11,7 +11,7 @@ from ray.rllib.agents.ppo.ppo_tf_policy import PPOTFPolicy
 from ray.rllib.agents.a3c.a3c_tf_policy import A3CTFPolicy
 from ray.rllib.agents.a3c.a3c_torch_policy import A3CTorchPolicy
 from ray.rllib.agents.a3c.a2c import A2CTrainer
-from ray.rllib.agents.a3c.a2c import A2C_DEFAULT_CONFIG as A2C_CONFIG
+from ray.rllib.agents.a3c.a3c import DEFAULT_CONFIG as A3C_CONFIG
 
 from ray.rllib.agents.dqn.r2d2 import DEFAULT_CONFIG, R2D2Trainer
 from ray.rllib.agents.dqn.r2d2_torch_policy import R2D2TorchPolicy
@@ -20,14 +20,26 @@ from ray.rllib.agents.dqn.r2d2_tf_policy import R2D2TFPolicy
 from pettingzoo.mpe import simple_adversary_v2, simple_crypto_v2, simple_v2, simple_push_v2, simple_tag_v2, \
     simple_spread_v2, simple_reference_v2, simple_world_comm_v2, simple_speaker_listener_v3
 import supersuit as ss
+from ray.rllib.agents.ddpg.ddpg import DDPGTrainer
+from ray.rllib.agents.ddpg.ddpg_torch_policy import DDPGTorchPolicy, ComputeTDErrorMixin
+from ray.rllib.agents.ddpg.ddpg_tf_policy import DDPGTFPolicy
+from ray.rllib.agents.ddpg.ddpg import DEFAULT_CONFIG as DDPG_CONFIG
+from MPE.util.maddpg_tools import maddpg_actor_critic_loss, build_maddpg_models_and_action_dist, \
+    maddpg_centralized_critic_postprocessing
+from ray.rllib.agents.sac.sac_torch_policy import TargetNetworkMixin
+from ray.tune.utils import merge_dicts
+from ray.rllib.agents.a3c.a2c import A2C_DEFAULT_CONFIG as A2C_CONFIG
 
-from model.torch_gru import *
-from model.torch_gru_cc import *
-from model.torch_lstm import *
-from model.torch_lstm_cc import *
-from utils.mappo_tools import *
-from utils.maa2c_tools import *
-
+from config_mpe import *
+from MPE.model.torch_gru import *
+from MPE.model.torch_gru_cc import *
+from MPE.model.torch_lstm import *
+from MPE.model.torch_lstm_cc import *
+from MPE.model.torch_vd_ppo_a2c_gru_lstm import *
+from MPE.util.mappo_tools import *
+from MPE.util.maa2c_tools import *
+from MPE.util.vda2c_tools import *
+from MPE.util.vdppo_tools import *
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
 
@@ -47,28 +59,33 @@ def run(args):
     ModelCatalog.register_custom_model(
         "LSTM_CentralizedCritic", Torch_LSTM_CentralizedCritic_Model)
 
+    # Value Decomposition(mixer)
+    ModelCatalog.register_custom_model("GRU_ValueMixer", Torch_GRU_Model_w_Mixer)
+    ModelCatalog.register_custom_model("LSTM_ValueMixer", Torch_LSTM_Model_w_Mixer)
+
     if args.map == "simple_adversary":
-        env = simple_adversary_v2.env()
+        env = simple_adversary_v2.env(continuous_actions=args.continues)
     elif args.map == "simple_crypto":
-        env = simple_crypto_v2.env()
+        env = simple_crypto_v2.env(continuous_actions=args.continues)
     elif args.map == "simple":
-        env = simple_v2.env()
+        env = simple_v2.env(continuous_actions=args.continues)
     elif args.map == "simple_push":
-        env = simple_push_v2.env()
+        env = simple_push_v2.env(continuous_actions=args.continues)
     elif args.map == "simple_tag":
-        env = simple_tag_v2.env()
+        env = simple_tag_v2.env(continuous_actions=args.continues)
     elif args.map == "simple_spread":
-        env = simple_spread_v2.env()
+        env = simple_spread_v2.env(continuous_actions=args.continues)
     elif args.map == "simple_reference":
-        env = simple_reference_v2.env()
+        env = simple_reference_v2.env(continuous_actions=args.continues)
     elif args.map == "simple_world_comm":
-        env = simple_world_comm_v2.env()
+        env = simple_world_comm_v2.env(continuous_actions=args.continues)
     elif args.map == "simple_speaker_listener":
-        env = simple_speaker_listener_v3.env()
+        env = simple_speaker_listener_v3.env(continuous_actions=args.continues)
 
     else:
+        assert NotImplementedError
         print("Scenario {} not exists in pettingzoo".format(args.map))
-        raise ValueError()
+        sys.exit()
 
     # keep obs and action dim same across agents
     # pad_action_space_v0 will auto mask the padding actions
@@ -113,57 +130,23 @@ def run(args):
                 "adversarial agents contained in this MPE scenario. "
                 "Not suitable for cooperative only algo {}".format(args.run)
             )
-            raise ValueError()
+            sys.exit()
         else:
             print(
                 "PettingZooEnv step function only return one agent info, "
-                "not currently good for joint Q learning algo like QMIX/VDN"
-                "and not compatible with rllib built-in algo"
+                "not compatible with rllib built-in QMIX/VDN"
                 "\nwe are working on wrapping the PettingZooEnv"
                 "to support some cooperative scenario based on Ray"
             )
-            raise ValueError()
-
-            # grouping = {
-            #     "group_1": [i for i in range(n_agents)],
-            # }
-            # ## obs state setting here
-            # from gym.spaces import Dict as GymDict, Box, Tuple
-            #
-            # obs_space = Tuple([
-            #                       GymDict({
-            #                           "obs": obs_space,
-            #                       })] * n_agents
-            #                   )
-            # act_space = Tuple([
-            #                       act_space
-            #                   ] * n_agents)
-            #
-            # # QMIX/VDN need grouping
-            # register_env(
-            #     "grouped_mpe",
-            #     lambda config: PettingZooEnv(env).with_agent_groups(
-            #         grouping, obs_space=obs_space, act_space=act_space))
-            #
-            # config = {
-            #     "env": "grouped_mpe",
-            #     "rollout_fragment_length": 30,
-            #     "train_batch_size": 1000,
-            #     "exploration_config": {
-            #         "epsilon_timesteps": 5000,
-            #         "final_epsilon": 0.05,
-            #     },
-            #     "mixer": "qmix" if args.run == "QMIX" else None,  # VDN has no mixer network
-            #
-            #     # Use GPUs iff `RLLIB_NUM_GPUS` env var set to > 0.
-            #     "num_gpus": int(os.environ.get("RLLIB_NUM_GPUS", "1")),
-            #     "num_workers": 0,
-            # }
-            #
-            # results = tune.run(QMixTrainer, name=args.run + "_" + args.neural_arch + "_" + args.map, stop=stop,
-            #                    config=config, verbose=1)
+            sys.exit()
 
     elif args.run in ["R2D2"]:  # similar to IQL in recurrent/POMDP mode
+
+        if args.continues:
+            print(
+                "{} do not support continue action space".format(args.run)
+            )
+            sys.exit()
 
         config = {
             "model": {
@@ -189,6 +172,128 @@ def run(args):
                            config=config,
                            verbose=1)
 
+    elif args.run in ["SUM-VDA2C", "MIX-VDA2C"]:
+
+        if args.map not in ["simple_spread", "simple_speaker_listener", "simple_reference"]:
+            print(
+                "adversarial agents contained in this MPE scenario. "
+                "Not suitable for cooperative only algo {}".format(args.run)
+            )
+            sys.exit()
+
+        config = {
+            "model": {
+                "custom_model": "{}_ValueMixer".format(args.neural_arch),
+                "custom_model_config": {
+                    "n_agents": n_agents,
+                    "mixer": "qmix" if args.run == "MIX-VDA2C" else "vdn",
+                    "mixer_emb_dim": 64,
+                },
+            },
+        }
+        config.update(common_config)
+
+        VDA2C_CONFIG = merge_dicts(
+            A2C_CONFIG,
+            {
+                "agent_num": n_agents,
+            }
+        )
+
+        VDA2CTFPolicy = A3CTFPolicy.with_updates(
+            name="VDA2CTFPolicy",
+            postprocess_fn=value_mix_centralized_critic_postprocessing,
+            loss_fn=value_mix_actor_critic_loss,
+            grad_stats_fn=central_vf_stats_a2c, )
+
+        VDA2CTorchPolicy = A3CTorchPolicy.with_updates(
+            name="VDA2CTorchPolicy",
+            get_default_config=lambda: VDA2C_CONFIG,
+            postprocess_fn=value_mix_centralized_critic_postprocessing,
+            loss_fn=value_mix_actor_critic_loss,
+            mixins=[ValueNetworkMixin, MixingValueMixin],
+        )
+
+
+        def get_policy_class(config_):
+            if config_["framework"] == "torch":
+                return VDA2CTorchPolicy
+
+
+        VDA2CTrainer = A2CTrainer.with_updates(
+            name="VDA2CTrainer",
+            default_policy=VDA2CTFPolicy,
+            get_policy_class=get_policy_class,
+        )
+
+        results = tune.run(VDA2CTrainer, name=args.run + "_" + args.neural_arch + "_" + args.map, stop=stop,
+                           config=config, verbose=1)
+
+    elif args.run in ["SUM-VDPPO", "MIX-VDPPO"]:
+
+        """
+        for bug mentioned https://github.com/ray-project/ray/pull/20743
+        make sure sgd_minibatch_size > max_seq_len
+        """
+
+        config = {
+            "num_sgd_iter": 10,
+            "model": {
+                "custom_model": "{}_ValueMixer".format(args.neural_arch),
+                "custom_model_config": {
+                    "n_agents": n_agents,
+                    "mixer": "qmix" if args.run == "MIX-VDPPO" else "vdn",
+                    "mixer_emb_dim": 64,
+                },
+            },
+        }
+
+        config.update(common_config)
+
+        VDPPO_CONFIG = merge_dicts(
+            PPO_CONFIG,
+            {
+                "agent_num": n_agents,
+            }
+        )
+
+        # not used
+        VDPPOTFPolicy = PPOTFPolicy.with_updates(
+            name="VDPPOTFPolicy",
+            postprocess_fn=value_mix_centralized_critic_postprocessing,
+            loss_fn=value_mix_ppo_surrogate_loss,
+            before_loss_init=setup_tf_mixins,
+            grad_stats_fn=central_vf_stats_ppo,
+            mixins=[
+                LearningRateSchedule, EntropyCoeffSchedule, KLCoeffMixin,
+                ValueNetworkMixin, MixingValueMixin
+            ])
+
+        VDPPOTorchPolicy = PPOTorchPolicy.with_updates(
+            name="VDPPOTorchPolicy",
+            get_default_config=lambda: VDPPO_CONFIG,
+            postprocess_fn=value_mix_centralized_critic_postprocessing,
+            loss_fn=value_mix_ppo_surrogate_loss,
+            before_init=setup_torch_mixins,
+            mixins=[
+                TorchLR, TorchEntropyCoeffSchedule, TorchKLCoeffMixin,
+                ValueNetworkMixin, MixingValueMixin
+            ])
+
+        def get_policy_class(config_):
+            if config_["framework"] == "torch":
+                return VDPPOTorchPolicy
+
+        VDPPOTrainer = PPOTrainer.with_updates(
+            name="VDPPOTrainer",
+            default_policy=VDPPOTFPolicy,
+            get_policy_class=get_policy_class,
+        )
+
+        results = tune.run(VDPPOTrainer, name=args.run + "_" + args.neural_arch + "_" + args.map, stop=stop,
+                           config=config,
+                           verbose=1)
+
 
     elif args.run in ["PG", "A2C", "A3C"]:  # PG need define action mask GRU / only torch now
 
@@ -207,6 +312,83 @@ def run(args):
             config=config,
             verbose=1
         )
+
+    elif args.run == "DDPG":
+
+        if not args.continues:
+            print(
+                "{} only support continues action space".format(args.run)
+            )
+            sys.exit()
+
+        tune.run(
+            args.run,
+            name=args.run + "_" + args.neural_arch + "_" + args.map,
+            stop=stop,
+            config=common_config,
+            verbose=1
+        )
+
+    elif args.run == "MADDPG":
+
+        if not args.continues:
+            print(
+                "{} only support continues action space".format(args.run)
+            )
+            sys.exit()
+
+        from MPE.model.torch_maddpg import MADDPGTorchModel
+        ModelCatalog.register_custom_model(
+            "torch_maddpg", MADDPGTorchModel)
+
+        config = {
+            "model": {
+                "custom_model": "torch_maddpg",
+                "custom_model_config": {
+                    "agent_num": n_agents
+                },
+            },
+        }
+        config.update(common_config)
+
+
+        MADDPGTFPolicy = DDPGTFPolicy.with_updates(
+            name="MADDPGTFPolicy",
+            postprocess_fn=maddpg_centralized_critic_postprocessing,
+            loss_fn=maddpg_actor_critic_loss,
+            mixins=[
+                TargetNetworkMixin,
+                ComputeTDErrorMixin,
+                CentralizedValueMixin
+            ])
+
+        MADDPGTorchPolicy = DDPGTorchPolicy.with_updates(
+            name="MADDPGTorchPolicy",
+            get_default_config=lambda: DDPG_CONFIG,
+            postprocess_fn=maddpg_centralized_critic_postprocessing,
+            make_model_and_action_dist=build_maddpg_models_and_action_dist,
+            loss_fn=maddpg_actor_critic_loss,
+            mixins=[
+                TargetNetworkMixin,
+                ComputeTDErrorMixin,
+                CentralizedValueMixin
+            ])
+
+        def get_policy_class(config_):
+            if config_["framework"] == "torch":
+                return MADDPGTorchPolicy
+
+        MADDPGTrainer = DDPGTrainer.with_updates(
+            name="MADDPGTrainer",
+            default_policy=MADDPGTFPolicy,
+            get_policy_class=get_policy_class,
+        )
+
+        results = tune.run(MADDPGTrainer,
+                           name=args.run + "_" + args.map,
+                           stop=stop,
+                           config=config,
+                           verbose=1)
 
     elif args.run == "MAA2C":  # centralized A2C
 
@@ -231,7 +413,7 @@ def run(args):
 
         MAA2CTorchPolicy = A3CTorchPolicy.with_updates(
             name="MAA2CTorchPolicy",
-            get_default_config=lambda: A2C_CONFIG,
+            get_default_config=lambda: A3C_CONFIG,
             postprocess_fn=centralized_critic_postprocessing,
             loss_fn=loss_with_central_critic_a2c,
             mixins=[
@@ -322,8 +504,56 @@ def run(args):
                            config=config,
                            verbose=1)
 
-    else:
-        print("args.run illegal")
-        raise ValueError()
+    elif args.run == "COMA":
+
+        if args.continues:
+            print("continues action space not supported in COMA")
+            sys.exit()
+
+        config = {
+            "model": {
+                "custom_model": "{}_CentralizedCritic".format(args.neural_arch),
+                "custom_model_config": {
+                    "agent_num": n_agents,
+                    "coma": True
+                },
+            },
+        }
+        config.update(common_config)
+
+        from MPE.util.coma_tools import loss_with_central_critic_coma, central_vf_stats_coma, COMATorchPolicy
+
+        # not used
+        COMATFPolicy = A3CTFPolicy.with_updates(
+            name="MAA2CTFPolicy",
+            postprocess_fn=centralized_critic_postprocessing,
+            loss_fn=loss_with_central_critic_coma,
+            grad_stats_fn=central_vf_stats_coma,
+            mixins=[
+                CentralizedValueMixin
+            ])
+
+        COMATorchPolicy = COMATorchPolicy.with_updates(
+            name="MAA2CTorchPolicy",
+            loss_fn=loss_with_central_critic_coma,
+            mixins=[
+                CentralizedValueMixin
+            ])
+
+        def get_policy_class(config_):
+            if config_["framework"] == "torch":
+                return COMATorchPolicy
+
+        COMATrainer = A2CTrainer.with_updates(
+            name="COMATrainer",
+            default_policy=COMATFPolicy,
+            get_policy_class=get_policy_class,
+        )
+
+        tune.run(COMATrainer,
+                           name=args.run + "_" + args.neural_arch + "_" + args.map,
+                           stop=stop,
+                           config=config,
+                           verbose=1)
 
     ray.shutdown()

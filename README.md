@@ -4,10 +4,10 @@
 ### TODO
 
 **basic algorithms**
-- [ ] COMA
-- [ ] DDPG,MADDPG
-- [ ] VDAC
-- [ ] VDPPO
+- [x] COMA 
+- [x] DDPG
+- [x] VDAC 
+- [x] VDPPO
 
 
 **extensions**
@@ -150,22 +150,52 @@ VDPPO
 
 Here is a chart describing the characteristics of each algorithm:
 
-| Algorithm | Learning Mode | Need Global State | Action | Type |
-| ----------- | ----------- | ----------- | ----------- | ----------- |
-| IQL  | Mixed | No | Discrete | Independent Learning |
-| IPG  | Mixed | No | Both | Independent Learning |
-| IAC  | Mixed | No | Both | Independent Learning |
-| IDDPG*  | Mixed | No | Continuous | Independent Learning |
-| IPPO  | Mixed | No | Both | Independent Learning |
-| COMA*  | Mixed | No | Both | Centralized Critic |
-| MADDPG*  | Mixed | No | Continuous | Centralized Critic |
-| MAAC  | Mixed | No | Both | Centralized Critic |
-| MAPPO  | Mixed | No | Both | Centralized Critic |
-| VDN | Cooperative | No | Discrete | Value Decomposition |
-| QMIX  | Cooperative | Yes | Discrete | Value Decomposition |
-| VDAC*  | Cooperative | Yes | Both | Value Decomposition |
-| VDPPO* | Cooperative | Yes | Both | Value Decomposition |
+| Algorithm | Learning Mode | Need Global State | Action | Learning Mode  | Type |
+| ----------- | ----------- | ----------- | ----------- | ----------- | ----------- |
+| IQL  | Mixed | No | Discrete | Independent Learning | Off Policy
+| IPG  | Mixed | No | Both | Independent Learning | On Policy
+| IAC  | Mixed | No | Both | Independent Learning | On Policy
+| IDDPG*  | Mixed | No | Continuous | Independent Learning | Off Policy
+| IPPO  | Mixed | No | Both | Independent Learning | On Policy
+| COMA*  | Mixed | No | Both | Centralized Critic | On Policy
+| MADDPG*  | Mixed | Better | Continuous | Centralized Critic | Off Policy
+| MAAC  | Mixed | Better | Both | Centralized Critic | On Policy
+| MAPPO  | Mixed | Better | Both | Centralized Critic | On Policy
+| VDN | Cooperative | No | Discrete | Value Decomposition | Off Policy
+| QMIX  | Cooperative | Yes | Discrete | Value Decomposition | Off Policy
+| VDAC*  | Cooperative | Better | Both | Value Decomposition | On Policy
+| VDPPO* | Cooperative | Better | Both | Value Decomposition | On Policy
 
+**Current Task & Available algorithm map**: Y for support, N for unavailable, P for partly available, * for under development
+(Note: in our code, independent algorithms may not have **I** as prefix. For instance, PPO = IPPO)
+
+| Env w Algorithm | IQL(R2D2) | IPG | IAC | IDDPG | IPPO | COMA | MADDPG | MAAC | MAPPO | VDN | QMIX | VDAC | VDPPO 
+| --------- | -------- | -------- | -------- | -------- | -------- | -------- |--------- | -------- | -------- | -------- | -------- | -------- | -------- |
+| LBF         | Y | Y | Y | Y | Y | Y | N | Y | Y | P | P | P | P |
+| RWARE       | Y | Y | Y | Y | Y | Y | N | Y | Y | Y | Y | Y | Y |
+| MPE         | P | Y | Y | P | Y | P | P | Y | Y | N | N | P | P |
+| SMAC        | Y | Y | Y | Y | Y | Y | N | Y | Y | Y | Y | Y | Y |
+| Meta-Drive  | N | Y | Y | Y | Y | N | Y | Y | Y | N | N | N | N |
+| Pommerman   | Y | Y | Y | Y | Y | P | N | P | N | P | P | N | N |
+| GRF         | Y | Y | Y | Y | Y | N | N | N | N | Y | Y | Y | Y |
+| Derk's Gym  | N | Y | Y | N | Y | N | N | Y | Y | N | N | N | N |
+| Hanabi      | Y | Y | Y | N | Y | Y | N | Y | Y | N | N | N | N |
+| Neural-MMO  | N | Y | Y | N | Y | N | N | Y | N | N | N | N | N |
+
+**Current Task & Neural Arch map**: Y for support, N for unavailable
+
+| Env w Arch | MLP | GRU | LSTM | CNN | Transformer | 
+| --------- | -------- | -------- | -------- | -------- | -------- |
+| LBF  | N | Y | Y | N | N |
+| RWARE  | N | Y | Y | N | N | 
+| MPE  | Y | Y | Y | N | N | 
+| SMAC  | N | Y | Y | N | Y | 
+| Neural-MMO  | N | Y | Y | Y | Y |
+| Meta-Drive  | N | Y | Y | Y | Y | 
+| Pommerman  | N | Y | Y | Y | N |
+| Google-Football  | Y | Y | Y | Y | Y | 
+| Derk's Gym  | N | Y | Y | N | N |
+| Hanabi  | N | Y | Y | N | N |
 
 
 ### Part IV. State of the Art
@@ -207,7 +237,7 @@ Here is a chart describing the characteristics of each algorithm:
 - [Efficient Communication in Multi-Agent Reinforcement Learning via Variance Based Control](https://proceedings.neurips.cc/paper/2019/file/14cfdb59b5bda1fc245aadae15b1984a-Paper.pdf) **[S][2019]**
 - [Exploration with Unreliable Intrinsic Reward in Multi-Agent Reinforcement Learning](https://arxiv.org/pdf/1906.02138) **[P+E][2019]**
 - [Learning nearly decomposable value functions via communication minimization](https://arxiv.org/pdf/1910.05366) **[S][2019]**
-- [Liir: Learning individual intrinsic reward in multi-agent reinforcement learning](https://proceedings.neurips.cc/paper/2019/file/07a9d3fed4c5ea6b17e80258dee231fa-Paper.pdf)**[P][2019]**
+- [Liir: Learning individual intrinsic reward in multi-agent reinforcement learning](https://proceedings.neurips.cc/paper/2019/file/07a9d3fed4c5ea6b17e80258dee231fa-Paper.pdf) **[P][2019]**
 - [MAVEN: Multi-Agent Variational Exploration](https://proceedings.neurips.cc/paper/2019/file/f816dc0acface7498e10496222e9db10-Paper.pdf) **[E][2019]**
 - [Adaptive learning A new decentralized reinforcement learning approach for cooperative multiagent systems](https://ieeexplore.ieee.org/iel7/6287639/8948470/09102277.pdf) **[B][2020]**
 - [Counterfactual Multi-Agent Reinforcement Learning with Graph Convolution Communication](https://arxiv.org/pdf/2004.00470) **[S+G][2020]**
@@ -295,6 +325,11 @@ Here is a chart describing the characteristics of each algorithm:
   - RNN
   - Transformer
   - 
+
+### **Part VI. Bug Shooting**
+- ppo related bug: refer to https://github.com/ray-project/ray/pull/20743. 
+  - make sure sgd_minibatch_size > max_seq_len
+  - enlarge the sgd_minibatch_size (128 in default)
 
 ## Acknowledgement
 

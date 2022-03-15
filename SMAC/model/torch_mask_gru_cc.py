@@ -58,6 +58,14 @@ class Torch_ActionMask_GRU_CentralizedCritic_Model(TorchRNN, nn.Module):
             SlimFC(32, 1),
         )
 
+        self.coma_flag = False
+        if "coma" in model_config["custom_model_config"]:
+            self.coma_flag = True
+            self.central_vf = nn.Sequential(
+                SlimFC(input_size, 16, activation_fn=nn.Tanh),
+                SlimFC(16, num_outputs),
+            )
+
     @override(TorchRNN)
     def get_initial_state(self):
         # TODO: (sven): Get rid of `get_initial_state` once Trajectory
@@ -78,7 +86,11 @@ class Torch_ActionMask_GRU_CentralizedCritic_Model(TorchRNN, nn.Module):
         flat_inputs = input_dict["obs"]["obs"].float()
         if isinstance(seq_lens, np.ndarray):
             seq_lens = torch.Tensor(seq_lens).int()
+
+        if seq_lens.shape[0] == 0:
+            print(1)
         max_seq_len = flat_inputs.shape[0] // seq_lens.shape[0]
+
         self.time_major = self.model_config.get("_time_major", False)
         inputs = add_time_dimension(
             flat_inputs,
@@ -110,7 +122,10 @@ class Torch_ActionMask_GRU_CentralizedCritic_Model(TorchRNN, nn.Module):
     # here we use individual observation + global state + other opp input of critic
     def central_value_function(self, obs, state):
         input_ = torch.cat([obs, state], 1)
-        return torch.reshape(self.central_vf(input_), [-1])
+        if self.coma_flag:
+            return torch.reshape(self.central_vf(input_), [-1, self.num_outputs])
+        else:
+            return torch.reshape(self.central_vf(input_), [-1])
 
     @override(TorchRNN)
     def value_function(self) -> TensorType:

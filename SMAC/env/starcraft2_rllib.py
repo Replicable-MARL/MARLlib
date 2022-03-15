@@ -30,7 +30,7 @@ class StarCraft2Env_Rllib(StarCraft2Env, Rllib_MultiAgentEnv):
         self.observation_space = Dict({
                                   "obs": Box(-2.0, 2.0, shape=(obs_shape,)),
                                   "state": Box(-2.0, 2.0, shape=(state_shape,)),
-                                  "action_mask": Box(0.0, 1.0, shape=(n_actions,))
+                                  "action_mask": Box(-2.0, 2.0, shape=(n_actions,))
                               })
         self.action_space = Discrete(n_actions)
 
@@ -78,7 +78,7 @@ class StarCraft2Env_Rllib(StarCraft2Env, Rllib_MultiAgentEnv):
         for agent_index in range(self.n_agents):
             obs_one_agent = obs_smac_api[agent_index]
             state_one_agent = state_smac_api
-            action_mask_one_agent = np.array(self.get_avail_agent_actions(agent_index))
+            action_mask_one_agent = np.array(self.get_avail_agent_actions(agent_index)).astype(np.float32)
             obs_rllib[agent_index] = {
                 "obs": obs_one_agent,
                 "state": state_one_agent,
@@ -193,7 +193,7 @@ class StarCraft2Env_Rllib(StarCraft2Env, Rllib_MultiAgentEnv):
         for agent_index in range(self.n_agents):
             obs_one_agent = obs_smac_api[agent_index]
             state_one_agent = state_smac_api
-            action_mask_one_agent = np.array(self.get_avail_agent_actions(agent_index))
+            action_mask_one_agent = np.array(self.get_avail_agent_actions(agent_index)).astype(np.float32)
             obs_rllib[agent_index] = {
                 "obs": obs_one_agent,
                 "state": state_one_agent,

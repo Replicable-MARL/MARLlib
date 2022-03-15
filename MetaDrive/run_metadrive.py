@@ -6,7 +6,13 @@ from ray.tune.registry import _global_registry, ENV_CREATOR
 from ray.rllib.agents.a3c.a2c import A2C_DEFAULT_CONFIG as A2C_CONFIG
 from ray.rllib.agents.a3c.a3c_torch_policy import A3CTorchPolicy
 from ray.rllib.agents.a3c.a2c import A2CTrainer
-
+from ray.rllib.agents.ddpg.ddpg import DDPGTrainer
+from ray.rllib.agents.ddpg.ddpg_torch_policy import DDPGTorchPolicy, ComputeTDErrorMixin
+from ray.rllib.agents.ddpg.ddpg_tf_policy import DDPGTFPolicy
+from ray.rllib.agents.ddpg.ddpg import DEFAULT_CONFIG as DDPG_CONFIG
+from MetaDrive.util.maddpg_tools import maddpg_actor_critic_loss, build_maddpg_models_and_action_dist, \
+    maddpg_centralized_critic_postprocessing
+from ray.rllib.agents.sac.sac_torch_policy import TargetNetworkMixin
 from MetaDrive.model.torch_gru import Torch_GRU_Model
 from MetaDrive.model.torch_lstm import Torch_LSTM_Model
 from MetaDrive.model.torch_gru_cc import Torch_GRU_CentralizedCritic_Model
@@ -25,7 +31,7 @@ if __name__ == "__main__":
     if args.map == "Bottleneck":
         Env_Class = Bottleneck_RLlib_Centralized_Critic if "MA" in args.run else Bottleneck_RLlib
     elif args.map == "ParkingLot":
-        Env_Class = ParkingLot_RLlib_Centralized_Critic if "MA" in args.run else Bottleneck_RLlib
+        Env_Class = ParkingLot_RLlib_Centralized_Critic if "MA" in args.run else ParkingLot_RLlib
     elif args.map == "Intersection":
         Env_Class = Intersection_RLlib_Centralized_Critic if "MA" in args.run else Intersection_RLlib
     elif args.map == "Roundabout":
@@ -50,8 +56,8 @@ if __name__ == "__main__":
         "LSTM_CentralizedCritic", Torch_LSTM_CentralizedCritic_Model)
 
     env_config = {
-        "start_seed": 123,
-        "num_agents": args.num_agents,
+        "start_seed": 1234,
+        "num_agents": 5,
         "crash_done": True
     }
 
@@ -64,10 +70,8 @@ if __name__ == "__main__":
     common_config = {
         "env": args.map,
         "env_config": env_config,
-        "num_gpus_per_worker": args.num_gpus_per_worker,
         "num_gpus": args.num_gpus,
-        "num_workers": args.num_workers if not args.local_mode else 1,
-        # meta-drive can only have one env one process in local mode
+        "num_workers": 1 if args.local_mode else args.num_workers,
         "train_batch_size": 1000,
         "multiagent": {
             "policies": {
@@ -78,6 +82,21 @@ if __name__ == "__main__":
         "framework": args.framework,
 
     }
+
+    MA_CONFIG = {
+        "real_parameter_sharing": True,
+        "counterfactual": False,
+        "centralized_critic_obs_dim": -1,
+        "num_neighbours": args.num_neighbours,
+        "framework": "torch",
+        "fuse_mode": args.fuse_mode,  # In ["concat", "mf"]
+        "mf_nei_distance": 10,
+    }
+
+    centralized_critic_obs_dim = get_centralized_critic_obs_dim(
+        obs_space, act_space, MA_CONFIG["counterfactual"], MA_CONFIG["num_neighbours"],
+        MA_CONFIG["fuse_mode"]
+    )
 
     stop = {
         "episode_reward_mean": args.stop_reward,
@@ -98,6 +117,7 @@ if __name__ == "__main__":
             "based algo like DQN and R2D2 in Ray/RLlib, only Discrete supported"
         )
         raise ValueError()
+
 
     elif args.run in ["A3C"]:
         print(
@@ -140,28 +160,13 @@ if __name__ == "__main__":
                 raise ValueError()
 
 
-        MAA2C_CONFIG = {
-            "real_parameter_sharing": True,
-            "counterfactual": False,
-            "centralized_critic_obs_dim": -1,
-            "num_neighbours": args.num_neighbours,
-            "framework": args.framework,
-            "fuse_mode": args.fuse_mode,
-            "mf_nei_distance": 10,
-        }
+        MA_CONFIG.update(A2C_CONFIG)
 
-        centralized_critic_obs_dim = get_centralized_critic_obs_dim(
-            obs_space, act_space, MAA2C_CONFIG["counterfactual"], MAA2C_CONFIG["num_neighbours"],
-            MAA2C_CONFIG["fuse_mode"]
-        )
-
-        MAA2C_CONFIG.update(A2C_CONFIG)
-
-        MAA2C_CONFIG["centralized_critic_obs_dim"] = centralized_critic_obs_dim
+        MA_CONFIG["centralized_critic_obs_dim"] = centralized_critic_obs_dim
 
         MAA2CTorchPolicy = A3CTorchPolicy.with_updates(
             name="MAA2CTorchPolicy",
-            get_default_config=lambda: MAA2C_CONFIG,
+            get_default_config=lambda: MA_CONFIG,
             make_model=make_model,
             extra_action_out_fn=vf_preds_fetches,
             postprocess_fn=centralized_critic_postprocessing,
@@ -172,7 +177,7 @@ if __name__ == "__main__":
 
         MAA2CTrainer = A2CTrainer.with_updates(
             name="MAA2CTrainer",
-            default_config=MAA2C_CONFIG,
+            default_config=MA_CONFIG,
             default_policy=MAA2CTorchPolicy,
             get_policy_class=get_policy_class,
         )
@@ -183,8 +188,84 @@ if __name__ == "__main__":
                  config=config,
                  verbose=1)
 
-    elif args.run in ["PPO"]:
+    elif args.run == "DDPG":
 
+        tune.run(
+            args.run,
+            name=args.run + "_" + args.neural_arch + "_" + args.map,
+            stop=stop,
+            config=common_config,
+            verbose=1
+        )
+
+
+    elif args.run == "MADDPG":
+
+        from MetaDrive.model.torch_maddpg import MADDPGTorchModel
+
+        ModelCatalog.register_custom_model(
+            "torch_maddpg", MADDPGTorchModel)
+
+        config = {
+            "model": {
+                "custom_model": "torch_maddpg",
+                "custom_model_config": {
+                    "fuse_mode": MA_CONFIG["fuse_mode"],
+                    "opp_num": MA_CONFIG["num_neighbours"]
+
+                }
+            },
+        }
+
+        config.update(common_config)
+
+        MA_CONFIG.update(DDPG_CONFIG)
+
+        MA_CONFIG["centralized_critic_obs_dim"] = centralized_critic_obs_dim
+
+        MADDPGTFPolicy = DDPGTFPolicy.with_updates(
+            name="MADDPGTFPolicy",
+            postprocess_fn=maddpg_centralized_critic_postprocessing,
+            loss_fn=maddpg_actor_critic_loss,
+            mixins=[
+                TargetNetworkMixin,
+                ComputeTDErrorMixin,
+                CentralizedValueMixin
+            ])
+
+        MADDPGTorchPolicy = DDPGTorchPolicy.with_updates(
+            name="MADDPGTorchPolicy",
+            get_default_config=lambda: MA_CONFIG,
+            postprocess_fn=maddpg_centralized_critic_postprocessing,
+            make_model_and_action_dist=build_maddpg_models_and_action_dist,
+            loss_fn=maddpg_actor_critic_loss,
+            mixins=[
+                TargetNetworkMixin,
+                ComputeTDErrorMixin,
+                CentralizedValueMixin
+            ])
+
+
+        def get_policy_class(config_):
+
+            if config_["framework"] == "torch":
+                return MADDPGTorchPolicy
+
+
+        MADDPGTrainer = DDPGTrainer.with_updates(
+            name="MADDPGTrainer",
+            default_policy=MADDPGTFPolicy,
+            get_policy_class=get_policy_class,
+        )
+
+        tune.run(MADDPGTrainer,
+                           name=args.run + "_" + args.map,
+                           stop=stop,
+                           config=config,
+                           verbose=1)
+
+
+    elif args.run in ["PPO"]:
         config = {
             "model": {
                 "custom_model": "{}_IndependentCritic".format(args.neural_arch),
@@ -218,28 +299,13 @@ if __name__ == "__main__":
                 raise ValueError()
 
 
-        MAPPO_CONFIG = {
-            "real_parameter_sharing": True,
-            "counterfactual": False,
-            "centralized_critic_obs_dim": -1,
-            "num_neighbours": args.num_neighbours,
-            "framework": args.framework,
-            "fuse_mode": args.fuse_mode,
-            "mf_nei_distance": 10,
-        }
+        MA_CONFIG.update(PPO_CONFIG)
 
-        centralized_critic_obs_dim = get_centralized_critic_obs_dim(
-            obs_space, act_space, MAPPO_CONFIG["counterfactual"], MAPPO_CONFIG["num_neighbours"],
-            MAPPO_CONFIG["fuse_mode"]
-        )
-
-        MAPPO_CONFIG.update(PPO_CONFIG)
-
-        MAPPO_CONFIG["centralized_critic_obs_dim"] = centralized_critic_obs_dim
+        MA_CONFIG["centralized_critic_obs_dim"] = centralized_critic_obs_dim
 
         MAPPOTorchPolicy = PPOTorchPolicy.with_updates(
             name="MAPPOTorchPolicy",
-            get_default_config=lambda: MAPPO_CONFIG,
+            get_default_config=lambda: MA_CONFIG,
             make_model=make_model,
             extra_action_out_fn=vf_preds_fetches,
             postprocess_fn=centralized_critic_postprocessing,
@@ -251,7 +317,7 @@ if __name__ == "__main__":
 
         MAPPOTrainer = PPOTrainer.with_updates(
             name="MAPPOTrainer",
-            default_config=MAPPO_CONFIG,
+            default_config=MA_CONFIG,
             default_policy=MAPPOTorchPolicy,
             get_policy_class=get_policy_class,
         )
@@ -261,9 +327,3 @@ if __name__ == "__main__":
                  stop=stop,
                  config=config,
                  verbose=1)
-
-    else:
-        print("args.run illegal")
-        raise ValueError()
-
-    ray.shutdown()

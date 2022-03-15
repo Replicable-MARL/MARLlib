@@ -24,21 +24,25 @@ from ray.rllib.agents.dqn.dqn_torch_model import DQNTorchModel
 from ray.rllib.agents.dqn.r2d2 import DEFAULT_CONFIG
 from ray.rllib.agents.trainer_template import build_trainer
 from ray.rllib.agents.dqn.r2d2_tf_policy import R2D2TFPolicy
+from ray.rllib.agents.ppo.ppo_torch_policy import ValueNetworkMixin
 
-from model.torch_mask_lstm import *
-from model.torch_mask_lstm_cc import *
-from model.torch_mask_gru import *
-from model.torch_mask_gru_cc import *
-from model.torch_mask_updet import *
-from model.torch_mask_updet_cc import *
-from util.mappo_tools import *
-from util.maa2c_tools import *
-from metric.smac_callback import *
-from model.torch_mask_r2d2 import *
-from model.torch_qmix import *
-
+from SMAC.model.torch_mask_lstm import *
+from SMAC.model.torch_mask_lstm_cc import *
+from SMAC.model.torch_mask_gru import *
+from SMAC.model.torch_mask_gru_cc import *
+from SMAC.model.torch_mask_updet import *
+from SMAC.model.torch_mask_updet_cc import *
+from SMAC.util.mappo_tools import *
+from SMAC.util.maa2c_tools import *
+from SMAC.metric.smac_callback import *
+from SMAC.util.r2d2_tools import *
+from SMAC.model.torch_qmix_mask_gru_updet import *
+from SMAC.model.torch_vd_ppo_a2c_mask_gru_lstm_updet import *
+from SMAC.util.vda2c_tools import value_mix_centralized_critic_postprocessing, value_mix_actor_critic_loss, \
+    MixingValueMixin
+from SMAC.util.vdppo_tools import value_mix_ppo_surrogate_loss
 # from smac.env.starcraft2.starcraft2 import StarCraft2Env as SMAC
-from env.starcraft2_rllib import StarCraft2Env_Rllib as SMAC
+from SMAC.env.starcraft2_rllib import StarCraft2Env_Rllib as SMAC
 
 
 def run(args):
@@ -70,6 +74,11 @@ def run(args):
                                        Torch_ActionMask_GRU_CentralizedCritic_Model)
     ModelCatalog.register_custom_model("UPDeT_CentralizedCritic",
                                        Torch_ActionMask_Transformer_CentralizedCritic_Model)
+
+    # Value Decomposition(mixer)
+    ModelCatalog.register_custom_model("GRU_ValueMixer", Torch_ActionMask_GRU_Model_w_Mixer)
+    ModelCatalog.register_custom_model("LSTM_ValueMixer", Torch_ActionMask_LSTM_Model_w_Mixer)
+    ModelCatalog.register_custom_model("UPDeT_ValueMixer", Torch_ActionMask_Transformer_Model_w_Mixer)
 
     stop = {
         "episode_reward_mean": args.stop_reward,
@@ -148,7 +157,143 @@ def run(args):
             "num_workers": 2,
         }
 
-        results = tune.run(QMixTrainer, name=args.run + "_" + args.neural_arch + "_" + args.map, stop=stop, config=config, verbose=1)
+        results = tune.run(QMixTrainer, name=args.run + "_" + args.neural_arch + "_" + args.map, stop=stop,
+                           config=config, verbose=1)
+
+    elif args.run in ["SUM-VDA2C", "MIX-VDA2C"]:
+
+        config = {
+            "env": SMAC,
+            "model": {
+                "custom_model": "{}_ValueMixer".format(args.neural_arch),
+                "max_seq_len": rollout_fragment_length,
+                "custom_model_config": {
+                    "token_dim": args.token_dim,
+                    "ally_num": n_ally,
+                    "enemy_num": n_enemy,
+                    "self_obs_dim": obs_shape,
+                    "state_dim": state_shape,
+                    "mixer": "qmix" if args.run == "MIX-VDA2C" else "vdn",
+                    "mixer_emb_dim": 64,
+                },
+            },
+        }
+        config.update(common_config)
+
+        VDA2C_CONFIG = merge_dicts(
+            A2C_CONFIG,
+            {
+                "agent_num": n_ally,
+                "state_dim": state_shape,
+                "self_obs_dim": obs_shape,
+            }
+        )
+
+        VDA2C_CONFIG["rollout_fragment_length"] = rollout_fragment_length
+
+        VDA2CTFPolicy = A3CTFPolicy.with_updates(
+            name="VDA2CTFPolicy",
+            postprocess_fn=value_mix_centralized_critic_postprocessing,
+            loss_fn=value_mix_actor_critic_loss,
+            grad_stats_fn=central_vf_stats_a2c, )
+
+        VDA2CTorchPolicy = A3CTorchPolicy.with_updates(
+            name="VDA2CTorchPolicy",
+            get_default_config=lambda: VDA2C_CONFIG,
+            postprocess_fn=value_mix_centralized_critic_postprocessing,
+            loss_fn=value_mix_actor_critic_loss,
+            mixins=[ValueNetworkMixin, MixingValueMixin],
+        )
+
+        def get_policy_class(config_):
+            if config_["framework"] == "torch":
+                return VDA2CTorchPolicy
+
+        VDA2CTrainer = A2CTrainer.with_updates(
+            name="VDA2CTrainer",
+            default_policy=VDA2CTFPolicy,
+            get_policy_class=get_policy_class,
+        )
+
+        results = tune.run(VDA2CTrainer, name=args.run + "_" + args.neural_arch + "_" + args.map, stop=stop,
+                           config=config, verbose=1)
+
+    elif args.run in ["SUM-VDPPO", "MIX-VDPPO"]:
+
+        """
+        for bug mentioned https://github.com/ray-project/ray/pull/20743
+        make sure sgd_minibatch_size > max_seq_len
+        """
+        sgd_minibatch_size = 128
+        while sgd_minibatch_size < rollout_fragment_length:
+            sgd_minibatch_size *= 2
+
+        config = {
+            "env": SMAC,
+            "sgd_minibatch_size": sgd_minibatch_size,
+            "num_sgd_iter": 10,
+            "model": {
+                "custom_model": "{}_ValueMixer".format(args.neural_arch),
+                "max_seq_len": rollout_fragment_length,
+                "custom_model_config": {
+                    "token_dim": args.token_dim,
+                    "ally_num": n_ally,
+                    "enemy_num": n_enemy,
+                    "self_obs_dim": obs_shape,
+                    "state_dim": state_shape,
+                    "mixer": "qmix" if args.run == "MIX-VDPPO" else "vdn",
+                    "mixer_emb_dim": 64,
+                },
+            },
+        }
+        config.update(common_config)
+
+        VDPPO_CONFIG = merge_dicts(
+            PPO_CONFIG,
+            {
+                "agent_num": n_ally,
+                "state_dim": state_shape,
+                "self_obs_dim": obs_shape,
+            }
+        )
+
+        # not used
+        VDPPOTFPolicy = PPOTFPolicy.with_updates(
+            name="VDPPOTFPolicy",
+            postprocess_fn=value_mix_centralized_critic_postprocessing,
+            loss_fn=value_mix_ppo_surrogate_loss,
+            before_loss_init=setup_tf_mixins,
+            grad_stats_fn=central_vf_stats_ppo,
+            mixins=[
+                LearningRateSchedule, EntropyCoeffSchedule, KLCoeffMixin,
+                ValueNetworkMixin, MixingValueMixin
+            ])
+
+        VDPPOTorchPolicy = PPOTorchPolicy.with_updates(
+            name="VDPPOTorchPolicy",
+            get_default_config=lambda: VDPPO_CONFIG,
+            postprocess_fn=value_mix_centralized_critic_postprocessing,
+            loss_fn=value_mix_ppo_surrogate_loss,
+            before_init=setup_torch_mixins,
+            mixins=[
+                TorchLR, TorchEntropyCoeffSchedule, TorchKLCoeffMixin,
+                ValueNetworkMixin, MixingValueMixin
+            ])
+
+        def get_policy_class(config_):
+            if config_["framework"] == "torch":
+                return VDPPOTorchPolicy
+
+        VDPPOTrainer = PPOTrainer.with_updates(
+            name="VDPPOTrainer",
+            default_policy=VDPPOTFPolicy,
+            get_policy_class=get_policy_class,
+        )
+
+        results = tune.run(VDPPOTrainer, name=args.run + "_" + args.neural_arch + "_" + args.map, stop=stop,
+                           config=config,
+                           verbose=1)
+
 
     elif args.run in ["R2D2"]:  # similar to IQL in recurrent/POMDP mode
 
@@ -191,7 +336,8 @@ def run(args):
             get_policy_class=get_policy_class,
         )
 
-        results = tune.run(R2D2WithMaskTrainer, name=args.run + "_" + args.neural_arch + "_" + args.map, stop=stop, config=config,
+        results = tune.run(R2D2WithMaskTrainer, name=args.run + "_" + args.neural_arch + "_" + args.map, stop=stop,
+                           config=config,
                            verbose=1)
 
     elif args.run in ["PG", "A2C", "A3C"]:  # PG need define action mask GRU / only torch now
@@ -211,7 +357,8 @@ def run(args):
             },
         }
         config.update(common_config)
-        results = tune.run(args.run, name=args.run + "_" + args.neural_arch + "_" + args.map, stop=stop, config=config, verbose=1)
+        results = tune.run(args.run, name=args.run + "_" + args.neural_arch + "_" + args.map, stop=stop, config=config,
+                           verbose=1)
 
     elif args.run == "MAA2C":  # centralized A2C
 
@@ -269,13 +416,23 @@ def run(args):
             get_policy_class=get_policy_class,
         )
 
-        results = tune.run(MAA2CTrainer, name=args.run + "_" + args.neural_arch + "_" + args.map, stop=stop, config=config, verbose=1)
+        results = tune.run(MAA2CTrainer, name=args.run + "_" + args.neural_arch + "_" + args.map, stop=stop,
+                           config=config, verbose=1)
 
     elif args.run in ["PPO", "APPO"]:
+
+        """
+        for bug mentioned https://github.com/ray-project/ray/pull/20743
+        make sure sgd_minibatch_size > max_seq_len
+        """
+        sgd_minibatch_size = 128
+        while sgd_minibatch_size < rollout_fragment_length:
+            sgd_minibatch_size *= 2
 
         config = {
             "env": SMAC,
             "num_sgd_iter": 10,
+            "sgd_minibatch_size": sgd_minibatch_size,
             "model": {
                 "custom_model": "{}_IndependentCritic".format(args.neural_arch),
                 "max_seq_len": rollout_fragment_length,
@@ -289,13 +446,23 @@ def run(args):
             },
         }
         config.update(common_config)
-        results = tune.run(args.run, name=args.run + "_" + args.neural_arch + "_" + args.map, stop=stop, config=config, verbose=1)
+        results = tune.run(args.run, name=args.run + "_" + args.neural_arch + "_" + args.map, stop=stop, config=config,
+                           verbose=1)
 
     elif args.run == "MAPPO":  # centralized PPO
+
+        """
+        for bug mentioned https://github.com/ray-project/ray/pull/20743
+        make sure sgd_minibatch_size > max_seq_len
+        """
+        sgd_minibatch_size = 128
+        while sgd_minibatch_size < rollout_fragment_length:
+            sgd_minibatch_size *= 2
 
         config = {
             "env": SMAC,
             "num_sgd_iter": 10,
+            "sgd_minibatch_size": sgd_minibatch_size,
             "model": {
                 "custom_model": "{}_CentralizedCritic".format(args.neural_arch),
                 "max_seq_len": rollout_fragment_length,
@@ -352,8 +519,72 @@ def run(args):
             get_policy_class=get_policy_class,
         )
 
-        results = tune.run(MAPPOTrainer, name=args.run + "_" + args.neural_arch + "_" + args.map, stop=stop, config=config,
+        results = tune.run(MAPPOTrainer, name=args.run + "_" + args.neural_arch + "_" + args.map, stop=stop,
+                           config=config,
                            verbose=1)
+    elif args.run == "COMA":
+
+        config = {
+            "env": SMAC,
+            "model": {
+                "custom_model": "{}_CentralizedCritic".format(args.neural_arch),
+                "max_seq_len": rollout_fragment_length,
+                "custom_model_config": {
+                    "token_dim": args.token_dim,
+                    "ally_num": n_ally,
+                    "enemy_num": n_enemy,
+                    "self_obs_dim": obs_shape,
+                    "state_dim": state_shape,
+                    "coma": True
+                },
+            },
+        }
+
+        config.update(common_config)
+
+        from SMAC.util.coma_tools import loss_with_central_critic_coma, central_vf_stats_coma, COMATorchPolicy
+
+        COMA_CONFIG = merge_dicts(
+            A2C_CONFIG,
+            {
+                "agent_num": n_ally,
+                "state_dim": state_shape,
+                "self_obs_dim": obs_shape,
+                "centralized_critic_obs_dim": -1,
+            }
+        )
+
+        # not used
+        COMATFPolicy = A3CTFPolicy.with_updates(
+            name="MAA2CTFPolicy",
+            postprocess_fn=centralized_critic_postprocessing,
+            loss_fn=loss_with_central_critic_coma,
+            grad_stats_fn=central_vf_stats_coma,
+            mixins=[
+                CentralizedValueMixin
+            ])
+
+        COMATorchPolicy = COMATorchPolicy.with_updates(
+            name="MAA2CTorchPolicy",
+            get_default_config=lambda: COMA_CONFIG,
+            loss_fn=loss_with_central_critic_coma,
+            mixins=[
+                CentralizedValueMixin
+            ])
+
+        def get_policy_class(config_):
+            if config_["framework"] == "torch":
+                return COMATorchPolicy
+
+        COMATrainer = A2CTrainer.with_updates(
+            name="COMATrainer",
+            default_policy=COMATFPolicy,
+            get_policy_class=get_policy_class,
+        )
+
+        tune.run(COMATrainer,
+                 name=args.run + "_" + args.neural_arch + "_" + args.map, stop=stop, config=config,
+                 verbose=1)
 
     else:
         print("args.run illegal")

@@ -15,8 +15,8 @@ def get_train_parser():
         help="Whether use tune grid research")
     parser.add_argument(
         "--run",
-        choices=["QMIX", "VDN", "R2D2", "PG", "A2C", "A3C", "MAA2C", "PPO", "MAPPO"],  # "APPO" "IMPALA"
-        default="PPO",
+        choices=["QMIX", "VDN", "R2D2", "PG", "A2C", "A3C", "MAA2C", "PPO", "MAPPO", "COMA"],  # "APPO" "IMPALA"
+        default="COMA",
         help="The RLlib-registered algorithm to use.")
     parser.add_argument(
         "--map",
@@ -34,7 +34,7 @@ def get_train_parser():
             # "PommeTeamFast-v0",
             # "PommeRadio-v2",
         ],
-        default="PommeFFACompetition-v0",
+        default="PommeTeamCompetition-v0",
         help="Envs should be registered")
     parser.add_argument(
         "--agent-position",
@@ -54,7 +54,7 @@ def get_train_parser():
         "--neural-arch",
         choices=["CNN", "CNN_LSTM", "CNN_GRU"],
         type=str,
-        default="CNN",
+        default="CNN_GRU",
         help="Agent Neural Architecture")
     parser.add_argument(
         "--framework",

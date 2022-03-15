@@ -12,17 +12,25 @@ at ray.rllib.evaluation.rollout_worker.py line 508
 > _update_env_seed_if_necessary(self.env, seed, worker_index, 0)
 
 ## current support algo
-- R2D2(IQL)
-- PG
-- A2C
-- A3C
-- MAA2C
-- PPO
-- MAPPO
+- R2D2(IQL) [D]
+- PG [D+C]
+- A2C [D+C]
+- A3C [D+C]
+- MAA2C [D+C]
+- DDPG [C]
+- MADDPG [C]
+- PPO [D+C]
+- MAPPO [D+C]
+- COMA [D]
+- VDA2C-SUM/MIX [D+C]
+- VDPPO-SUM/MIX [D+C]
+
+Note here D for Discrete, C for Continues
   
 ### with neural arch
 - GRU
 - LSTM
+- MLP(DDPG, MADDPG)
 
 
 

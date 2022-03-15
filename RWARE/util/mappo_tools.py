@@ -98,8 +98,6 @@ def centralized_critic_postprocessing(policy,
         sample_batch["opponent_obs"] = np.zeros(
             (sample_batch["obs"].shape[0], opponent_agents_num, sample_batch["obs"].shape[1]),
             dtype=sample_batch["obs"].dtype)
-        sample_batch["opponent_action"] = np.zeros_like(
-            sample_batch["actions"])
         sample_batch["opponent_action"] = np.zeros(
             (sample_batch["actions"].shape[0], opponent_agents_num),
             dtype=sample_batch["actions"].dtype)

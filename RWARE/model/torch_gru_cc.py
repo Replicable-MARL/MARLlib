@@ -1,5 +1,6 @@
 import numpy as np
 from typing import Dict, List, Any, Union
+from gym.spaces.box import Box
 from ray.rllib.models.modelv2 import ModelV2
 from ray.rllib.models.torch.recurrent_net import RecurrentNetwork as TorchRNN
 from ray.rllib.utils.annotations import override
@@ -30,6 +31,8 @@ class Torch_GRU_CentralizedCritic_Model(TorchRNN, nn.Module):
         self.hidden_state_size = hidden_state_size
         self.n_agents = model_config["custom_model_config"]["agent_num"]
         self.num_outputs = num_outputs
+        self.continues = True if action_space.__class__ == Box else False
+
         nn.Module.__init__(self)
         super().__init__(obs_space, action_space, num_outputs, model_config,
                          name)
@@ -44,11 +47,23 @@ class Torch_GRU_CentralizedCritic_Model(TorchRNN, nn.Module):
         self._features = None
 
         # Central VF maps (obs, opp_obs, opp_act) -> vf_pred
-        input_size = self.obs_size * self.n_agents + num_outputs * (self.n_agents - 1)  # obs + opp_obs + opp_act
+        if not self.continues:
+            input_size = self.obs_size * self.n_agents + num_outputs * (self.n_agents - 1)  # obs + opp_obs + opp_act
+        else:
+            input_size = self.obs_size * self.n_agents + num_outputs // 2 * (self.n_agents - 1)
         self.central_vf = nn.Sequential(
             SlimFC(input_size, 16, activation_fn=nn.Tanh),
             SlimFC(16, 1),
         )
+
+        # coma needs a central_vf with action number output
+        self.coma_flag = False
+        if "coma" in model_config["custom_model_config"]:
+            self.coma_flag = True
+            self.central_vf = nn.Sequential(
+                SlimFC(input_size, 16, activation_fn=nn.Tanh),
+                SlimFC(16, num_outputs),
+            )
 
     @override(ModelV2)
     def get_initial_state(self):
@@ -98,9 +113,22 @@ class Torch_GRU_CentralizedCritic_Model(TorchRNN, nn.Module):
         return logits, [torch.squeeze(h, 0)]
 
     def central_value_function(self, obs, opponent_obs, opponent_actions):
-        opponent_actions_onehot = [torch.nn.functional.one_hot(opponent_actions[:, i].long(), self.num_outputs).float() for i in
-                                   range(opponent_actions.shape[1])]
-        input_ = torch.cat([
-                               obs, torch.flatten(opponent_obs, start_dim=1),
-                           ] + opponent_actions_onehot, 1)
-        return torch.reshape(self.central_vf(input_), [-1])
+        if not self.continues:
+            opponent_actions_one_hot = [
+                torch.nn.functional.one_hot(opponent_actions[:, i].long(), self.num_outputs).float()
+                for i in
+                range(opponent_actions.shape[1])]
+            input_ = torch.cat([
+                                   obs, torch.flatten(opponent_obs, start_dim=1),
+                               ] + opponent_actions_one_hot, 1)
+        else:
+            input_ = torch.cat([
+                obs, torch.flatten(opponent_obs, start_dim=1),
+                torch.flatten(opponent_actions, start_dim=1)], 1)
+
+        if self.coma_flag:
+            return torch.reshape(self.central_vf(input_), [-1, self.num_outputs])
+        else:
+            return torch.reshape(self.central_vf(input_), [-1])
+
+

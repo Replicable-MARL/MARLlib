@@ -25,6 +25,9 @@ from ray.rllib.agents.ppo.ppo import PPOTrainer, PPOTFPolicy, validate_config as
 from ray.rllib.agents.ppo.ppo_tf_policy import KLCoeffMixin, \
     ppo_surrogate_loss as tf_loss
 from ray.rllib.agents.ppo.ppo_torch_policy import KLCoeffMixin as TorchKLCoeffMixin, ppo_surrogate_loss as torch_loss
+from ray.rllib.utils.numpy import convert_to_numpy
+from ray.rllib.evaluation.postprocessing import adjust_nstep
+
 
 class CentralizedValueMixin:
     """Add method to evaluate the central value function from the model."""
@@ -125,17 +128,33 @@ def centralized_critic_postprocessing(policy, sample_batch, other_agent_batches=
         )
         sample_batch[SampleBatch.VF_PREDS] = np.zeros_like(sample_batch[SampleBatch.REWARDS], dtype=np.float32)
 
-    # ===== Compute the centralized values' advantage =====
     completed = sample_batch["dones"][-1]
     if completed:
         last_r = 0.0
     else:
-        last_r = sample_batch[SampleBatch.VF_PREDS][-1]
+        last_r = sample_batch["vf_preds"][-1]
 
-    train_batch = compute_advantages(
-        sample_batch, last_r, policy.config["gamma"], policy.config["lambda"], use_gae=policy.config["use_gae"]
-    )
-    return train_batch
+    sample_batch = compute_advantages(
+        sample_batch,
+        last_r,
+        policy.config["gamma"],
+        policy.config["lambda"],
+        use_gae=policy.config["use_gae"])
+
+    return sample_batch
+
+    # # ===== Compute the centralized values' advantage =====
+    # completed = sample_batch["dones"][-1]
+    # if completed:
+    #     last_r = 0.0
+    # else:
+    #     last_r = sample_batch[SampleBatch.VF_PREDS][-1]
+    #
+    # train_batch = compute_advantages(
+    #     sample_batch, last_r, policy.config["gamma"], policy.config["lambda"], use_gae=policy.config["use_gae"]
+    # )
+    # return train_batch
+
 
 # Copied from PPO but optimizing the central value function.
 def loss_with_central_critic_ppo(policy, model, dist_class, train_batch):
@@ -225,6 +244,3 @@ def make_model(policy, obs_space, action_space, config):
 
 def vf_preds_fetches(policy, input_dict, state_batches, model, action_dist):
     return dict()
-
-
-
