@@ -5,7 +5,7 @@ def get_train_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--local-mode",
-        default=False,
+        default=True,
         type=bool,
         help="Init Ray in local mode for easier debugging.")
     parser.add_argument(
@@ -15,8 +15,8 @@ def get_train_parser():
         help="Whether use tune grid research")
     parser.add_argument(
         "--run",
-        choices=["QMIX", "VDN", "R2D2", "PG", "A2C", "A3C", "MAA2C", "PPO", "MAPPO"],  # "APPO" "IMPALA"
-        default="QMIX",
+        choices=["QMIX", "VDN", "R2D2", "PG", "A2C", "A3C", "MAA2C", "PPO", "MAPPO", "SUM-VDA2C", "MIX-VDA2C", "SUM-VDPPO", "MIX-VDPPO"],  # "APPO" "IMPALA"
+        default="MIX-VDPPO",
         help="The RLlib-registered algorithm to use.")
     parser.add_argument(
         "--map",
@@ -39,7 +39,7 @@ def get_train_parser():
         "--neural-arch",
         choices=["CNN", "CNN_LSTM", "CNN_GRU", "CNN_UPDeT"],
         type=str,
-        default="CNN_UPDeT",
+        default="CNN_GRU",
         help="Agent Neural Architecture")
     parser.add_argument(
         "--framework",

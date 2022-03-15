@@ -57,11 +57,15 @@ In **ray/rllib/policy/rnn_sequencing.py** about line 130-150
 - A2C
 - A3C
 - PPO
+- MAA2C
+- MAPPO
+- VDA2C-SUM/MIX
+- VDPPO-SUM/MIX
 
 Note: Google Football is strictly MDP. Information is fully observed. 
 Observation of different agents is almost same(except the current agent's location). 
-Therefore, centralized critic algorithms (e.g. MAPPO) is not supported here.
-As for joint Q learning algorithms like QMIX and VDN, the global reward is calculated
+Therefore, in centralized critic algorithms (e.g. MAPPO) we take individual observation as global state.
+As for value decomposition learning algorithms like QMIX/VDN/VDA2C/VDPPO, the global reward is calculated
 as the sum of the individual reward.
 
 ### with neural arch
