@@ -152,18 +152,18 @@ Here is a chart describing the characteristics of each algorithm:
 | IQL  | Mixed | No | Discrete | Independent Learning | Off Policy
 | IPG  | Mixed | No | Both | Independent Learning | On Policy
 | IAC  | Mixed | No | Both | Independent Learning | On Policy
-| IDDPG*  | Mixed | No | Continuous | Independent Learning | Off Policy
+| IDDPG  | Mixed | No | Continuous | Independent Learning | Off Policy
 | IPPO  | Mixed | No | Both | Independent Learning | On Policy
-| COMA*  | Mixed | No | Both | Centralized Critic | On Policy
-| MADDPG*  | Mixed | Better | Continuous | Centralized Critic | Off Policy
+| COMA  | Mixed | No | Both | Centralized Critic | On Policy
+| MADDPG  | Mixed | Better | Continuous | Centralized Critic | Off Policy
 | MAAC  | Mixed | Better | Both | Centralized Critic | On Policy
 | MAPPO  | Mixed | Better | Both | Centralized Critic | On Policy
 | VDN | Cooperative | No | Discrete | Value Decomposition | Off Policy
 | QMIX  | Cooperative | Yes | Discrete | Value Decomposition | Off Policy
-| VDAC*  | Cooperative | Better | Both | Value Decomposition | On Policy
-| VDPPO* | Cooperative | Better | Both | Value Decomposition | On Policy
+| VDAC  | Cooperative | Better | Both | Value Decomposition | On Policy
+| VDPPO | Cooperative | Better | Both | Value Decomposition | On Policy
 
-**Current Task & Available algorithm map**: Y for support, N for unavailable, P for partly available, * for under development
+**Current Task & Available algorithm map**: Y for support, N for unavailable, P for partly available
 (Note: in our code, independent algorithms may not have **I** as prefix. For instance, PPO = IPPO)
 
 | Env w Algorithm | IQL(R2D2) | IPG | IAC | IDDPG | IPPO | COMA | MADDPG | MAAC | MAPPO | VDN | QMIX | VDAC | VDPPO 
