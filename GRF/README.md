@@ -75,7 +75,7 @@ as the sum of the individual reward.
 - CNN + LSTM
 - CNN + UPDeT
 
-Note: although there is no partial observation setting in Google Football, 
+Note: although there is POMDP setting in Google Football, 
 We still provide the standard [**CNN + popular recurrent architecture**] here.
 
 

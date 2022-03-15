@@ -399,6 +399,7 @@ if __name__ == "__main__":
                                stop=stop,
                                config=config,
                                verbose=1)
+
         elif args.run == "COMA":
 
             config = {
