@@ -37,6 +37,7 @@ from GRF.util.vda2c_tools import *
 from GRF.util.vdppo_tools import *
 from GRF.util.mappo_tools import *
 from GRF.util.maa2c_tools import *
+from GRF.util.coma_tools import loss_with_central_critic_coma, central_vf_stats_coma, COMATorchPolicy
 
 ally_num_dict = {
     "academy_empty_goal": 2,
@@ -457,11 +458,65 @@ if __name__ == "__main__":
                                config=config,
                                verbose=1)
 
+        elif args.run == "COMA":
+
+            config = {
+                "env": "football",
+            }
+
+            if "_" in args.neural_arch:
+                config.update({
+                    "model": {
+                        "custom_model": "{}_CentralizedCritic".format(args.neural_arch),
+                        "custom_model_config": {
+                            "agent_num": ally_num,
+                            "coma": True
+                        },
+                    },
+                })
+            else:
+                raise NotImplementedError
+
+            config.update(common_config)
+
+            # not used
+            COMATFPolicy = A3CTFPolicy.with_updates(
+                name="MAA2CTFPolicy",
+                postprocess_fn=centralized_critic_postprocessing,
+                loss_fn=loss_with_central_critic_coma,
+                grad_stats_fn=central_vf_stats_coma,
+                mixins=[
+                    CentralizedValueMixin
+                ])
+
+            COMATorchPolicy = COMATorchPolicy.with_updates(
+                name="MAA2CTorchPolicy",
+                loss_fn=loss_with_central_critic_coma,
+                mixins=[
+                    CentralizedValueMixin
+                ])
+
+
+            def get_policy_class(config_):
+                if config_["framework"] == "torch":
+                    return COMATorchPolicy
+
+
+            COMATrainer = A2CTrainer.with_updates(
+                name="COMATrainer",
+                default_policy=COMATFPolicy,
+                get_policy_class=get_policy_class,
+            )
+
+            tune.run(COMATrainer,
+                     name=args.run + "_" + args.neural_arch + "_" + args.map,
+                     stop=stop,
+                     config=config,
+                     verbose=1)
+
         else:
             print("{} algo not supported".format(args.run))
             raise ValueError()
-
-
 
     if args.as_test:
         check_learning_achieved(results, args.stop_reward)

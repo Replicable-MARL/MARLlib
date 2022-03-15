@@ -72,6 +72,12 @@ class Torch_CNN_Transformer_CentralizedCritic_Model(TorchRNN, nn.Module):
         # Holds the current "base" output (before logits layer).
         self._features = None
 
+        # coma needs a central_vf with action number output
+        self.coma_flag = False
+        if "coma" in model_config["custom_model_config"]:
+            self.coma_flag = True
+            self.value_branch_cc = nn.Linear(self.trans_emb * 4 + self.agent_num - 1, num_outputs)
+
     @override(ModelV2)
     def get_initial_state(self):
         # TODO: (sven): Get rid of `get_initial_state` once Trajectory
@@ -160,6 +166,9 @@ class Torch_CNN_Transformer_CentralizedCritic_Model(TorchRNN, nn.Module):
         x = self.fc1(x.view(4 * b, -1))
         x = x.view(b, 4 * self.trans_emb)
         x = torch.cat((x, opponent_actions), 1)
-        return torch.reshape(self.value_branch_cc(x), [-1])
+        if self.coma_flag:
+            return torch.reshape(self.value_branch_cc(x), [-1, self.num_outputs])
+        else:
+            return torch.reshape(self.value_branch_cc(x), [-1])
 
 

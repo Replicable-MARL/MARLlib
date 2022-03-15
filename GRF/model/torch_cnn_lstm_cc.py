@@ -66,6 +66,12 @@ class Torch_CNN_LSTM_CentralizedCritic_Model(TorchRNN, nn.Module):
         # Holds the current "base" output (before logits layer).
         self._features = None
 
+        # coma needs a central_vf with action number output
+        self.coma_flag = False
+        if "coma" in model_config["custom_model_config"]:
+            self.coma_flag = True
+            self.value_branch_cc = nn.Linear(self.fc_size + self.agent_num - 1, num_outputs)
+
     @override(ModelV2)
     def get_initial_state(self):
         h = [
@@ -123,4 +129,7 @@ class Torch_CNN_LSTM_CentralizedCritic_Model(TorchRNN, nn.Module):
         x = self.conv2(x)
         x = nn.functional.relu(self.fc1(x.view(obs.shape[0], -1)))
         x = torch.cat((x, opponent_actions), 1)
-        return torch.reshape(self.value_branch_cc(x), [-1])
+        if self.coma_flag:
+            return torch.reshape(self.value_branch_cc(x), [-1, self.num_outputs])
+        else:
+            return torch.reshape(self.value_branch_cc(x), [-1])
