@@ -177,6 +177,7 @@ Here is a chart describing the characteristics of each algorithm:
 | GRF         | Y | Y | Y | N | Y | Y | N | Y | Y | Y | Y | Y | Y |
 | Hanabi      | Y | Y | Y | N | Y | Y | N | Y | Y | N | N | N | N |
 | Neural-MMO  | N | Y | Y | N | Y | N | N | N | N | N | N | N | N |
+
  RLLIB built-in DDPG do not support RNN and discrete action. We might implement one in the future. 
 
 **Current Task & Neural Arch map**: Y for support, N for unavailable
