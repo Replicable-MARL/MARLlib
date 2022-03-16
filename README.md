@@ -163,21 +163,21 @@ Here is a chart describing the characteristics of each algorithm:
 | VDAC  | Cooperative | Better | Both | Value Decomposition | On Policy
 | VDPPO | Cooperative | Better | Both | Value Decomposition | On Policy
 
-**Current Task & Available algorithm map**: Y for support, N for unavailable, P for partly available
+**Current Task & Available algorithm map**: Y for available, N for not suitable, P for partially available
 (Note: in our code, independent algorithms may not have **I** as prefix. For instance, PPO = IPPO)
 
-| Env w Algorithm | IQL(R2D2) | IPG | IAC | IDDPG | IPPO | COMA | MADDPG | MAAC | MAPPO | VDN | QMIX | VDAC | VDPPO 
-| --------- | -------- | -------- | -------- | -------- | -------- | -------- |--------- | -------- | -------- | -------- | -------- | -------- | -------- |
-| LBF         | Y | Y | Y | Y | Y | Y | N | Y | Y | P | P | P | P |
-| RWARE       | Y | Y | Y | Y | Y | Y | N | Y | Y | Y | Y | Y | Y |
-| MPE         | P | Y | Y | P | Y | P | P | Y | Y | N | N | P | P |
-| SMAC        | Y | Y | Y | Y | Y | Y | N | Y | Y | Y | Y | Y | Y |
-| Meta-Drive  | N | Y | Y | Y | Y | N | Y | Y | Y | N | N | N | N |
-| Pommerman   | Y | Y | Y | Y | Y | P | N | P | N | P | P | N | N |
-| GRF         | Y | Y | Y | Y | Y | N | N | N | N | Y | Y | Y | Y |
-| Derk's Gym  | N | Y | Y | N | Y | N | N | Y | Y | N | N | N | N |
+| Env w Algorithm | IQL (R2D2) | IPG | IAC | IDDPG | IPPO | COMA | MADDPG | MAAC | MAPPO | VDN | QMIX | VDAC | VDPPO 
+| ---- | ---- | ---- | ---- | ---- | ---- | ----- | ---- | ---- | ---- | ---- | ---- | ---- | ---- |
+| LBF         | Y | Y | Y | N | Y | Y | N | Y | Y | P | P | P | P |
+| RWARE       | Y | Y | Y | N | Y | Y | N | Y | Y | Y | Y | Y | Y |
+| MPE         | P | Y | Y | P | Y | P | P | Y | Y |   |   | P | P |
+| SMAC        | Y | Y | Y | N | Y | Y | N | Y | Y | Y | Y | Y | Y |
+| Meta-Drive  | N | Y | Y | Y | Y |   | Y | Y | Y | N | N |   |   |
+| Pommerman   | Y | Y | Y | N | Y | P | N | P | P | P | P |   |   |
+| GRF         | Y | Y | Y | N | Y | Y | N | Y | Y | Y | Y | Y | Y |
 | Hanabi      | Y | Y | Y | N | Y | Y | N | Y | Y | N | N | N | N |
-| Neural-MMO  | N | Y | Y | N | Y | N | N | Y | N | N | N | N | N |
+| Neural-MMO  | N | Y | Y | N | Y | N | N | N | N | N | N | N | N |
+ RLLIB built-in DDPG do not support RNN and discrete action. We might implement one in the future. 
 
 **Current Task & Neural Arch map**: Y for support, N for unavailable
 
@@ -191,7 +191,6 @@ Here is a chart describing the characteristics of each algorithm:
 | Meta-Drive  | N | Y | Y | Y | Y | 
 | Pommerman  | N | Y | Y | Y | N |
 | Google-Football  | Y | Y | Y | Y | Y | 
-| Derk's Gym  | N | Y | Y | N | N |
 | Hanabi  | N | Y | Y | N | N |
 
 
