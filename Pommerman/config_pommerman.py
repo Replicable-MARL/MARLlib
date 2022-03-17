@@ -5,7 +5,7 @@ def get_train_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--local-mode",
-        default=False,
+        default=True,
         type=bool,
         help="Init Ray in local mode for easier debugging.")
     parser.add_argument(
@@ -15,8 +15,8 @@ def get_train_parser():
         help="Whether use tune grid research")
     parser.add_argument(
         "--run",
-        choices=["QMIX", "VDN", "R2D2", "PG", "A2C", "A3C", "MAA2C", "PPO", "MAPPO", "COMA"],  # "APPO" "IMPALA"
-        default="COMA",
+        choices=["QMIX", "VDN", "R2D2", "PG", "A2C", "A3C", "MAA2C", "PPO", "MAPPO", "COMA", "MIX-VDA2C", "SUM-VDA2C", "SUM-VDPPO", "MIX-VDPPO"],  # "APPO" "IMPALA"
+        default="MIX-VDPPO",
         help="The RLlib-registered algorithm to use.")
     parser.add_argument(
         "--map",
@@ -39,7 +39,7 @@ def get_train_parser():
     parser.add_argument(
         "--agent-position",
         type=str,
-        default="0123",
+        default="23",
         # choices=["0", "1", "01"] for OneVsOne
         # choices=["0", "1", "2", "3"] random combination for PommeFFACompetition like "023"
         # choices=["01", "23", "0123"] for PommeTeamCompetition
@@ -54,7 +54,7 @@ def get_train_parser():
         "--neural-arch",
         choices=["CNN", "CNN_LSTM", "CNN_GRU"],
         type=str,
-        default="CNN_GRU",
+        default="CNN_LSTM",
         help="Agent Neural Architecture")
     parser.add_argument(
         "--framework",

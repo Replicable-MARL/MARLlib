@@ -28,6 +28,7 @@ from Pommerman.model.torch_cnn_gru import Torch_CNN_GRU_Model
 from Pommerman.model.torch_cnn_gru_cc import Torch_CNN_GRU_CentralizedCritic_Model
 from Pommerman.model.torch_cnn_lstm_cc import Torch_CNN_LSTM_CentralizedCritic_Model
 from Pommerman.model.torch_cnn import Torch_CNN_Model
+from Pommerman.model.torch_vd_ppo_a2c_gru_lstm import Torch_CNN_GRU_Model_w_Mixer, Torch_CNN_LSTM_Model_w_Mixer
 
 from Pommerman.agent.simple_agent import SimpleAgent
 from Pommerman.agent.trainable_place_holder_agent import PlaceHolderAgent
@@ -35,6 +36,8 @@ from Pommerman.agent.random_agent import RandomAgent
 
 from Pommerman.util.mappo_tools import *
 from Pommerman.util.maa2c_tools import *
+from Pommerman.util.vda2c_tools import *
+from Pommerman.util.vdppo_tools import *
 
 if __name__ == "__main__":
     args = get_train_parser().parse_args()
@@ -98,10 +101,36 @@ if __name__ == "__main__":
     ModelCatalog.register_custom_model(
         "CNN_LSTM_CentralizedCritic", Torch_CNN_LSTM_CentralizedCritic_Model)
 
+    # Value Decomposition(mixer)
+    ModelCatalog.register_custom_model("CNN_GRU_ValueMixer", Torch_CNN_GRU_Model_w_Mixer)
+    ModelCatalog.register_custom_model("CNN_LSTM_ValueMixer", Torch_CNN_LSTM_Model_w_Mixer)
+
     stop = {
         "episode_reward_mean": args.stop_reward,
         "timesteps_total": args.stop_timesteps,
         "training_iteration": args.stop_iters,
+    }
+
+    single_env = RllibPommerman(env_config, agent_list)
+    obs_space = single_env.observation_space
+    act_space = single_env.action_space
+
+    policies = {
+        "policy_{}".format(i): (None, obs_space, act_space, {}) for i in range(agent_number)
+    }
+    policy_ids = list(policies.keys())
+
+    common_config = {
+        "num_gpus_per_worker": args.num_gpus_per_worker,
+        "train_batch_size": 1000,
+        "num_workers": args.num_workers,
+        "num_gpus": args.num_gpus,
+        "multiagent": {
+            "policies": policies,
+            "policy_mapping_fn": tune.function(
+                lambda agent_id: policy_ids[int(agent_id[6:])]),
+        },
+        "framework": args.framework,
     }
 
     if args.run in ["QMIX", "VDN"]:  # policy and model are implemented as source code is
@@ -170,29 +199,173 @@ if __name__ == "__main__":
                            config=config,
                            verbose=1)
 
+    elif args.run in ["MIX-VDA2C", "SUM-VDA2C"]:  # policy and model are implemented as source code is
+
+        if args.neural_arch not in ["CNN_GRU", "CNN_LSTM"]:
+            print("{} arch not supported for QMIX/VDN".format(args.neural_arch))
+            raise ValueError()
+
+        if "Team" not in args.map:
+            print("VDA2C is only for cooperative scenarios")
+            raise ValueError()
+
+        if env_config["neural_agent_pos"] == [0, 1, 2, 3]:
+            # 2 vs 2
+            grouping = {
+                "group_1": ["agent_{}".format(i) for i in [0, 1]],
+                "group_2": ["agent_{}".format(i) for i in [2, 3]],
+            }
+
+        elif env_config["neural_agent_pos"] in [[0, 1], [2, 3]]:
+            grouping = {
+                "group_1": ["agent_{}".format(i) for i in [0, 1]],
+            }
+
+        else:
+            print("Wrong agent position setting")
+            raise ValueError
+
+        config = {
+            "env": "pommerman",
+            "model": {
+                "custom_model": "{}_ValueMixer".format(args.neural_arch),
+                "custom_model_config": {
+                    "map_size": 11 if "One" not in args.map else 8,
+                    "agent_num": 2 if env_config["neural_agent_pos"] in [[0, 1], [2, 3]] else 4,
+                    "mixer": "qmix" if args.run == "MIX-VDA2C" else "vdn",
+                    "mixer_emb_dim": 64,
+                },
+            },
+        }
+        config.update(common_config)
+
+        VDA2CTFPolicy = A3CTFPolicy.with_updates(
+            name="VDA2CTFPolicy",
+            postprocess_fn=value_mix_centralized_critic_postprocessing,
+            loss_fn=value_mix_actor_critic_loss,
+            grad_stats_fn=central_vf_stats_a2c,
+            mixins=[
+                CentralizedValueMixin
+            ])
+
+        A3C_CONFIG["grouping"] = grouping
+
+        VDA2CTorchPolicy = A3CTorchPolicy.with_updates(
+            name="VDA2CTorchPolicy",
+            get_default_config=lambda: A3C_CONFIG,
+            postprocess_fn=value_mix_centralized_critic_postprocessing,
+            loss_fn=value_mix_actor_critic_loss,
+            mixins=[ValueNetworkMixin, MixingValueMixin],
+        )
+
+
+        def get_policy_class(config_):
+            if config_["framework"] == "torch":
+                return VDA2CTorchPolicy
+
+
+        VDA2CTrainer = A2CTrainer.with_updates(
+            name="VDA2CTrainer",
+            default_policy=VDA2CTFPolicy,
+            get_policy_class=get_policy_class,
+        )
+
+        results = tune.run(VDA2CTrainer,
+                           name=args.run + "_" + args.neural_arch + "_" + args.map,
+                           stop=stop,
+                           config=config,
+                           verbose=1)
+
+    elif args.run in ["SUM-VDPPO", "MIX-VDPPO"]:
+
+        """
+        for bug mentioned https://github.com/ray-project/ray/pull/20743
+        make sure sgd_minibatch_size > max_seq_len
+        """
+
+        if args.neural_arch not in ["CNN_GRU", "CNN_LSTM"]:
+            print("{} arch not supported for QMIX/VDN".format(args.neural_arch))
+            raise ValueError()
+
+        if "Team" not in args.map:
+            print("VDA2C is only for cooperative scenarios")
+            raise ValueError()
+
+        if env_config["neural_agent_pos"] == [0, 1, 2, 3]:
+            # 2 vs 2
+            grouping = {
+                "group_1": ["agent_{}".format(i) for i in [0, 1]],
+                "group_2": ["agent_{}".format(i) for i in [2, 3]],
+            }
+
+        elif env_config["neural_agent_pos"] in [[0, 1], [2, 3]]:
+            grouping = {
+                "group_1": ["agent_{}".format(i) for i in [0, 1]],
+            }
+
+        else:
+            print("Wrong agent position setting")
+            raise ValueError
+
+        config = {
+            "env": "pommerman",
+            "num_sgd_iter": 5,
+            "model": {
+                "custom_model": "{}_ValueMixer".format(args.neural_arch),
+                "custom_model_config": {
+                    "map_size": 11 if "One" not in args.map else 8,
+                    "agent_num": 2 if env_config["neural_agent_pos"] in [[0, 1], [2, 3]] else 4,
+                    "mixer": "qmix" if args.run == "MIX-VDPPO" else "vdn",
+                    "mixer_emb_dim": 64,
+                },
+            },
+        }
+        config.update(common_config)
+
+        # not used
+        VDPPOTFPolicy = PPOTFPolicy.with_updates(
+            name="VDPPOTFPolicy",
+            postprocess_fn=value_mix_centralized_critic_postprocessing,
+            loss_fn=value_mix_ppo_surrogate_loss,
+            before_loss_init=setup_tf_mixins,
+            grad_stats_fn=central_vf_stats_ppo,
+            mixins=[
+                LearningRateSchedule, EntropyCoeffSchedule, KLCoeffMixin,
+                ValueNetworkMixin, MixingValueMixin
+            ])
+
+        PPO_CONFIG["grouping"] = grouping
+
+
+        VDPPOTorchPolicy = PPOTorchPolicy.with_updates(
+            name="VDPPOTorchPolicy",
+            get_default_config=lambda: PPO_CONFIG,
+            postprocess_fn=value_mix_centralized_critic_postprocessing,
+            loss_fn=value_mix_ppo_surrogate_loss,
+            before_init=setup_torch_mixins,
+            mixins=[
+                TorchLR, TorchEntropyCoeffSchedule, TorchKLCoeffMixin,
+                ValueNetworkMixin, MixingValueMixin
+            ])
+
+
+        def get_policy_class(config_):
+            if config_["framework"] == "torch":
+                return VDPPOTorchPolicy
+
+
+        VDPPOTrainer = PPOTrainer.with_updates(
+            name="VDPPOTrainer",
+            default_policy=VDPPOTFPolicy,
+            get_policy_class=get_policy_class,
+        )
+
+        results = tune.run(VDPPOTrainer, name=args.run + "_" + args.neural_arch + "_" + args.map, stop=stop,
+                           config=config,
+                           verbose=1)
+
     else:  # "PG", "A2C", "A3C", "R2D2", "PPO"
 
-        single_env = RllibPommerman(env_config, agent_list)
-        obs_space = single_env.observation_space
-        act_space = single_env.action_space
-
-        policies = {
-            "policy_{}".format(i): (None, obs_space, act_space, {}) for i in range(agent_number)
-        }
-        policy_ids = list(policies.keys())
-
-        common_config = {
-            "num_gpus_per_worker": args.num_gpus_per_worker,
-            "train_batch_size": 1000,
-            "num_workers": args.num_workers,
-            "num_gpus": args.num_gpus,
-            "multiagent": {
-                "policies": policies,
-                "policy_mapping_fn": tune.function(
-                    lambda agent_id: policy_ids[int(agent_id[6:])]),
-            },
-            "framework": args.framework,
-        }
 
         if args.run in ["PG", "A2C", "A3C", "R2D2"]:
 
