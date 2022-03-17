@@ -31,7 +31,7 @@
 
 We collected most of the existing multi-agent environment and multi-agent reinforcement learning algorithms with different model architecture under one framework based on [**Ray**](https://github.com/ray-project/ray)'s [**RLlib**](https://github.com/ray-project/ray/tree/master/rllib) to boost the MARL research. 
 
-The code is simple and easy to understand. The most common MARL baselines include **independence learning (IQL, IA2C, IPPO, IPG)**, **centralized critic learning (MAPPO, MAA2C)** and **joint Q learning (QMIX, VDN)** are all implemented as simple as possible. The same algorithm under different tasks can be a bit different to satisfy the various settings of multi-agent systems. But once you are familiar with one task, it will be easy to move to another.
+The code is simple and easy to understand. The most common MARL baselines include **independence learning (IQL, IA2C, IPPO, IPG)**, **centralized critic learning (COMA, MADDPG, MAPPO, MAA2C)** and **value decomposition (QMIX, VDN, VDA2C, VDPPO)** are all implemented as simple as possible. The same algorithm under different tasks can be a bit different to satisfy the various settings of multi-agent systems. But once you are familiar with one task, it will be easy to move to another.
 
 We hope everyone in the MARL research community can be benefited from this benchmark.
 
@@ -42,21 +42,18 @@ The basic structure of the repository. Here we take **[SMAC](HTTPS://GITHUB.COM/
 └───SMAC
         └───env     [**wrap the original env to make it compatible with RLLIB**]
                 └───starcraft2_rllib.py
-                └───starcraft2_rllib_qmix.py
-        └───model   [**agent architecture, cc represents for centralized critic**]
+                
+        └───model   [**architecture, cc represents for centralized critic**]
                 └───gru.py
                 └───gru_cc.py
-                └───lstm.py
-                └───lstm_cc.py
-                └───updet.py
-                └───updet_cc.py
-                └───qmix.py
-                └───r2d2.py
-        └───utils   [**centralized critic tools**]
+                
+        └───utils   [**algorithm**]
                 └───mappo_tools.py
-                └───maa2c_tools.py
+                └───vda2c_tools.py
+                
         └───metrics [**customized metrics for logging**]
-                └───SMAC_callback.py
+                └───callback.py
+                
         └───README.md
         └───run_env.py
         └───config_env.py 
@@ -97,7 +94,7 @@ From this perspective, the way of fairly comparing the performance of different 
 
 In this benchmark, we incorporate the characteristics of both Gym and RLLIB.
 
-All the environments we collected are modified (if necessary) to provide Gym style interface for multi-agent interaction. The unified environments are then registered to RAY and should be RLLIB compatible. Algorithms like joint Q learning (QMIX, VDN) need a conforming return value for the step function. We have provided them for cooperative/collaborative multi-agent tasks like [Google-Football](https://github.com/google-research/football) and [Pommerman](https://github.com/MultiAgentLearning/playground).
+All the environments we collected are modified (if necessary) to provide Gym style interface for multi-agent interaction. The unified environments are then registered to RAY and should be RLLIB compatible. Algorithms like Value Decomposition (QMIX, VDN, VDA2C, VDPPO) need a conforming return value for the step function. We have provided them for cooperative/collaborative multi-agent tasks like [Google-Football](https://github.com/google-research/football) and [Pommerman](https://github.com/MultiAgentLearning/playground).
 
 We make full use of RLLIB to provide a standard but extendable MARL training pipeline. All MARL algorithms (like Centralized Critic strategy) and agent's "brain" (Neural Network like CNN + RNN) can be easily customized under RLLIB's API. 
 
@@ -155,32 +152,33 @@ Here is a chart describing the characteristics of each algorithm:
 | IQL  | Mixed | No | Discrete | Independent Learning | Off Policy
 | IPG  | Mixed | No | Both | Independent Learning | On Policy
 | IAC  | Mixed | No | Both | Independent Learning | On Policy
-| IDDPG*  | Mixed | No | Continuous | Independent Learning | Off Policy
+| IDDPG  | Mixed | No | Continuous | Independent Learning | Off Policy
 | IPPO  | Mixed | No | Both | Independent Learning | On Policy
-| COMA*  | Mixed | No | Both | Centralized Critic | On Policy
-| MADDPG*  | Mixed | Better | Continuous | Centralized Critic | Off Policy
+| COMA  | Mixed | No | Both | Centralized Critic | On Policy
+| MADDPG  | Mixed | Better | Continuous | Centralized Critic | Off Policy
 | MAAC  | Mixed | Better | Both | Centralized Critic | On Policy
 | MAPPO  | Mixed | Better | Both | Centralized Critic | On Policy
 | VDN | Cooperative | No | Discrete | Value Decomposition | Off Policy
 | QMIX  | Cooperative | Yes | Discrete | Value Decomposition | Off Policy
-| VDAC*  | Cooperative | Better | Both | Value Decomposition | On Policy
-| VDPPO* | Cooperative | Better | Both | Value Decomposition | On Policy
+| VDAC  | Cooperative | Better | Both | Value Decomposition | On Policy
+| VDPPO | Cooperative | Better | Both | Value Decomposition | On Policy
 
-**Current Task & Available algorithm map**: Y for support, N for unavailable, P for partly available, * for under development
+**Current Task & Available algorithm map**: Y for available, N for not suitable, P for partially available
 (Note: in our code, independent algorithms may not have **I** as prefix. For instance, PPO = IPPO)
 
-| Env w Algorithm | IQL(R2D2) | IPG | IAC | IDDPG | IPPO | COMA | MADDPG | MAAC | MAPPO | VDN | QMIX | VDAC | VDPPO 
-| --------- | -------- | -------- | -------- | -------- | -------- | -------- |--------- | -------- | -------- | -------- | -------- | -------- | -------- |
-| LBF         | Y | Y | Y | Y | Y | Y | N | Y | Y | P | P | P | P |
-| RWARE       | Y | Y | Y | Y | Y | Y | N | Y | Y | Y | Y | Y | Y |
-| MPE         | P | Y | Y | P | Y | P | P | Y | Y | N | N | P | P |
-| SMAC        | Y | Y | Y | Y | Y | Y | N | Y | Y | Y | Y | Y | Y |
-| Meta-Drive  | N | Y | Y | Y | Y | N | Y | Y | Y | N | N | N | N |
-| Pommerman   | Y | Y | Y | Y | Y | P | N | P | N | P | P | N | N |
-| GRF         | Y | Y | Y | Y | Y | N | N | N | N | Y | Y | Y | Y |
-| Derk's Gym  | N | Y | Y | N | Y | N | N | Y | Y | N | N | N | N |
+| Env w Algorithm | IQL (R2D2) | IPG | IAC | IDDPG | IPPO | COMA | MADDPG | MAAC | MAPPO | VDN | QMIX | VDAC | VDPPO 
+| ---- | ---- | ---- | ---- | ---- | ---- | ----- | ---- | ---- | ---- | ---- | ---- | ---- | ---- |
+| LBF         | Y | Y | Y | N | Y | Y | N | Y | Y | P | P | P | P |
+| RWARE       | Y | Y | Y | N | Y | Y | N | Y | Y | Y | Y | Y | Y |
+| MPE         | P | Y | Y | P | Y | P | P | Y | Y |   |   | P | P |
+| SMAC        | Y | Y | Y | N | Y | Y | N | Y | Y | Y | Y | Y | Y |
+| Meta-Drive  | N | Y | Y | Y | Y |   | Y | Y | Y | N | N |   |   |
+| Pommerman   | Y | Y | Y | N | Y | P | N | P | P | P | P |   |   |
+| GRF         | Y | Y | Y | N | Y | Y | N | Y | Y | Y | Y | Y | Y |
 | Hanabi      | Y | Y | Y | N | Y | Y | N | Y | Y | N | N | N | N |
-| Neural-MMO  | N | Y | Y | N | Y | N | N | Y | N | N | N | N | N |
+| Neural-MMO  | N | Y | Y | N | Y | N | N | N | N | N | N | N | N |
+
+ RLLIB built-in DDPG do not support RNN and discrete action. We might implement one in the future. 
 
 **Current Task & Neural Arch map**: Y for support, N for unavailable
 
@@ -194,7 +192,6 @@ Here is a chart describing the characteristics of each algorithm:
 | Meta-Drive  | N | Y | Y | Y | Y | 
 | Pommerman  | N | Y | Y | Y | N |
 | Google-Football  | Y | Y | Y | Y | Y | 
-| Derk's Gym  | N | Y | Y | N | N |
 | Hanabi  | N | Y | Y | N | N |
 
 
