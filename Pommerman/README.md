@@ -43,9 +43,11 @@ Pattern: source package file -> replace file
 - PPO
 - MAPPO
 - COMA
+- VDA2C-SUM/MIX
+- VDPPO-SUM/MIX
 
 Note: 
-- VDN and QMIX only work with map **PommeTeamCompetition-v0**
+- VDN/QMIX/VDA2C/VDPPO only work with map **PommeTeamCompetition-v0**
 - COMA, MAPPO and MAA2C can not work with existing of rule-based agent (require all the agents to be trainable)
 - Additional restrictions on trainable/human-rule/random agents' specification on different maps. You will learn from the error log printed. 
   

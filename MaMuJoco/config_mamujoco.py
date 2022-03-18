@@ -15,52 +15,44 @@ def get_train_parser():
         help="Whether use tune grid research")
     parser.add_argument(
         "--run",
-        choices=["QMIX", "VDN", "R2D2", "PG", "A2C", "A3C", "MAA2C", "PPO", "MAPPO", "COMA", "MIX-VDA2C", "SUM-VDA2C", "SUM-VDPPO", "MIX-VDPPO"],  # "APPO" "IMPALA"
-        default="MIX-VDPPO",
+        choices=["PG", "A2C", "A3C", "MAA2C", "PPO", "MAPPO", "SUM-VDA2C", "MIX-VDA2C", "SUM-VDPPO", "MIX-VDPPO"],  # "APPO" "IMPALA"
+        default="MAPPO",
         help="The RLlib-registered algorithm to use.")
     parser.add_argument(
         "--map",
         choices=[
-            "OneVsOne-v0",
-            "PommeFFACompetition-v0",
-            "PommeTeamCompetition-v0",
-            # following scenarios are not tested
-            # "PommeFFACompetitionFast-v0",
-            # "PommeFFAFast-v0",
-            # "PommeFFA-v1",
-            # "PommeTeamCompetitionFast-v0",
-            # "PommeTeamCompetition-v1",
-            # "PommeTeam-v0",
-            # "PommeTeamFast-v0",
-            # "PommeRadio-v2",
+            "2AgentAnt",
+            "2AgentAntDiag",
+            "4AgentAnt",
+            "2AgentHalfCheetah",
+            "6AgentHalfCheetah",
+            "3AgentHopper",
+            "2AgentHumanoid",
+            "2AgentHumanoidStandup",
+            "2AgentReacher",
+            "2AgentSwimmer",
+            "2AgentWalker",
+            "ManyagentSwimmer",
+            "ManyagentAnt",
         ],
-        default="PommeTeamCompetition-v0",
+        default="ManyagentAnt",
         help="Envs should be registered")
     parser.add_argument(
-        "--agent-position",
-        type=str,
-        default="23",
-        # choices=["0", "1", "01"] for OneVsOne
-        # choices=["0", "1", "2", "3"] random combination for PommeFFACompetition like "023"
-        # choices=["01", "23", "0123"] for PommeTeamCompetition
-        help="Built-in AI for initialization")
-    parser.add_argument(
-        "--builtin-ai-type",
-        choices=["human_rule", "random_rule"],
-        type=str,
-        default="human_rule",
-        help="Built-in AI for initialization")
-    parser.add_argument(
         "--neural-arch",
-        choices=["CNN", "CNN_LSTM", "CNN_GRU"],
+        choices=["LSTM", "GRU"],
         type=str,
-        default="CNN_LSTM",
+        default="LSTM",
         help="Agent Neural Architecture")
     parser.add_argument(
         "--framework",
         choices=["tf", "tf2", "tfe", "torch"],
         default="torch",
         help="The DL framework specifier. Use torch please")
+    parser.add_argument(
+        "--horizon",
+        type=int,
+        default=500,
+        help="episode limit, terminate after this step")
     parser.add_argument(
         "--num-cpus",
         type=int,
@@ -74,7 +66,7 @@ def get_train_parser():
     parser.add_argument(
         "--num-workers",
         type=int,
-        default=0,
+        default=2,
         help="Sampler number per trail")
     parser.add_argument(
         "--num-cpus-per-worker",

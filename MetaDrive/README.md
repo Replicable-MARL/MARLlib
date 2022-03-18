@@ -26,6 +26,8 @@ Install dependencies including(version is not strict)
 - MADDPG
 - PPO
 - MAPPO
+
+The number of neighbour car is not fixed in MetaDrive. Therefore, value decomposition algos (QMIX, VDA2C, etc) not fit here.
   
 ### with neural arch
 - GRU
