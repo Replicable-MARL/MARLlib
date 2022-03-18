@@ -110,13 +110,14 @@ Most of the popular environment in MARL research has been incorporated in this b
 | [RWARE](https://github.com/semitable/robotic-warehouse)  | Collaborative | Partial | Discrete | Discrete |
 | [MPE](https://github.com/openai/multiagent-particle-envs)  | Mixed | Both | Both | Continuous |
 | [SMAC](https://github.com/oxwhirl/smac)  | Cooperative | Partial | Discrete | Continuous |
-| [Neural-MMO](https://github.com/NeuralMMO/environment)  | Competitive | Partial | Multi-Discrete | Continuous |
 | [Meta-Drive](https://github.com/decisionforce/metadrive)  | Collaborative | Partial | Continuous | Continuous |
 | [Pommerman](https://github.com/MultiAgentLearning/playground)  | Mixed | Both | Discrete | Discrete |
+| [MAgentMujoco](https://github.com/schroederdewitt/multiagent_mujoco)  | Cooperative | Partial | Continuous | Continuous |
 | [Google-Football](https://github.com/google-research/football)  | Collaborative | Full | Discrete | Continuous |
-| [Derk's Gym](https://gym.derkgame.com/)  | Mixed | Partial | Mixed | Continuous |
 | [Hanabi](https://github.com/deepmind/hanabi-learning-environment) | Cooperative | Partial | Discrete | Discrete |
+| [Neural-MMO](https://github.com/NeuralMMO/environment)  | Competitive | Partial | Multi-Discrete | Continuous |
 
+[comment]: <> (| [Derk's Gym]&#40;https://gym.derkgame.com/&#41;  | Mixed | Partial | Mixed | Continuous |)
 
 Each environment has a top directory. No inter-dependency exists between two environments. If you are interested in one environment, all the related code is there, in one directory. 
 
@@ -174,6 +175,7 @@ Here is a chart describing the characteristics of each algorithm:
 | SMAC        | Y | Y | Y | N | Y | Y | N | Y | Y | Y | Y | Y | Y |
 | Meta-Drive  | N | Y | Y | Y | Y | N | Y | Y | Y | N | N | N | N |
 | Pommerman   | Y | Y | Y | N | Y | P | N | P | P | P | P | P | P |
+| MAgentMujoco| N | Y | Y | Y | Y | N | Y | Y | Y | N | N | Y | Y |
 | GRF         | Y | Y | Y | N | Y | Y | N | Y | Y | Y | Y | Y | Y |
 | Hanabi      | Y | Y | Y | N | Y | Y | N | Y | Y | N | N | N | N |
 | Neural-MMO  | N | Y | Y | N | Y | N | N | N | N | N | N | N | N |
