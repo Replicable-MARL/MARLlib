@@ -17,7 +17,7 @@
 - [ ] Multi-task Learning
 
 **(optional) MARL environments**
-- [ ] Multi-agent Mujoco
+- [x] Multi-agent Mujoco
 - [ ] Overcooked-AI
 - [ ] MAgent
 - [ ] Go-Bigger
@@ -193,7 +193,8 @@ Here is a chart describing the characteristics of each algorithm:
 | Neural-MMO  | N | Y | Y | Y | Y |
 | Meta-Drive  | N | Y | Y | Y | Y | 
 | Pommerman  | N | Y | Y | Y | N |
-| Google-Football  | Y | Y | Y | Y | Y | 
+| MAgentMujoco  | Y | Y | Y | N | N |
+| GRF  | Y | Y | Y | Y | Y | 
 | Hanabi  | N | Y | Y | N | N |
 
 
@@ -334,68 +335,109 @@ Here is a chart describing the characteristics of each algorithm:
 
 
 ----------------------------
-# MARL in One Repository
-This is fast multi-agent reinforcement learning (MARL) baseline built based on **ray[rllib]**, 
-containing most of the popular multi-agent systems (MAS) and providing available MARL algorithms of each environment.
 
-## Getting started on Linux
-Install Ray
-> pip install ray==1.8.0 # version is important
+[comment]: <> (# MARL in One Repository)
 
-Please annotate one line source code to avoid parallel env seed bug (some env need this)
-at ray.rllib.evaluation.rollout_worker.py line 508
+[comment]: <> (This is fast multi-agent reinforcement learning &#40;MARL&#41; baseline built based on **ray[rllib]**, )
 
-> _update_env_seed_if_necessary(self.env, seed, worker_index, 0)
+[comment]: <> (containing most of the popular multi-agent systems &#40;MAS&#41; and providing available MARL algorithms of each environment.)
 
-Fix Multi-agent + RNN bug according to
+[comment]: <> (## Getting started on Linux)
 
-https://github.com/ray-project/ray/pull/20743/commits/70861dae9398823814b5b28e3593cc98159c9c44
+[comment]: <> (Install Ray)
 
-In **ray/rllib/policy/rnn_sequencing.py** about line 130-150
+[comment]: <> (> pip install ray==1.8.0 # version is important)
 
-        for i, k in enumerate(feature_keys_):
-            batch[k] = tree.unflatten_as(batch[k], feature_sequences[i])
-        for i, k in enumerate(state_keys):
-            batch[k] = initial_states[i]
-        batch[SampleBatch.SEQ_LENS] = np.array(seq_lens)
+[comment]: <> (Please annotate one line source code to avoid parallel env seed bug &#40;some env need this&#41;)
 
-        # add two lines here
-        if dynamic_max:
-            batch.max_seq_len = max(seq_lens)
+[comment]: <> (at ray.rllib.evaluation.rollout_worker.py line 508)
 
-        if log_once("rnn_ma_feed_dict"):
-            logger.info("Padded input for RNN/Attn.Nets/MA:\n\n{}\n".format(
-                summarize({
-                    "features": feature_sequences,
-                    "initial_states": initial_states,
-                    "seq_lens": seq_lens,
-                    "max_seq_len": max_seq_len,
-                })))
+[comment]: <> (> _update_env_seed_if_necessary&#40;self.env, seed, worker_index, 0&#41;)
 
-## current support algo
-- R2D2(IQL)
-- VDN
-- QMIX
-- PG
-- A2C
-- A3C
-- MAA2C
-- PPO
-- MAPPO
+[comment]: <> (Fix Multi-agent + RNN bug according to)
+
+[comment]: <> (https://github.com/ray-project/ray/pull/20743/commits/70861dae9398823814b5b28e3593cc98159c9c44)
+
+[comment]: <> (In **ray/rllib/policy/rnn_sequencing.py** about line 130-150)
+
+[comment]: <> (        for i, k in enumerate&#40;feature_keys_&#41;:)
+
+[comment]: <> (            batch[k] = tree.unflatten_as&#40;batch[k], feature_sequences[i]&#41;)
+
+[comment]: <> (        for i, k in enumerate&#40;state_keys&#41;:)
+
+[comment]: <> (            batch[k] = initial_states[i])
+
+[comment]: <> (        batch[SampleBatch.SEQ_LENS] = np.array&#40;seq_lens&#41;)
+
+[comment]: <> (        # add two lines here)
+
+[comment]: <> (        if dynamic_max:)
+
+[comment]: <> (            batch.max_seq_len = max&#40;seq_lens&#41;)
+
+[comment]: <> (        if log_once&#40;"rnn_ma_feed_dict"&#41;:)
+
+[comment]: <> (            logger.info&#40;"Padded input for RNN/Attn.Nets/MA:\n\n{}\n".format&#40;)
+
+[comment]: <> (                summarize&#40;{)
+
+[comment]: <> (                    "features": feature_sequences,)
+
+[comment]: <> (                    "initial_states": initial_states,)
+
+[comment]: <> (                    "seq_lens": seq_lens,)
+
+[comment]: <> (                    "max_seq_len": max_seq_len,)
+
+[comment]: <> (                }&#41;&#41;&#41;)
+
+[comment]: <> (## current support algo)
+
+[comment]: <> (- R2D2&#40;IQL&#41;)
+
+[comment]: <> (- VDN)
+
+[comment]: <> (- QMIX)
+
+[comment]: <> (- PG)
+
+[comment]: <> (- A2C)
+
+[comment]: <> (- A3C)
+
+[comment]: <> (- MAA2C)
+
+[comment]: <> (- PPO)
+
+[comment]: <> (- MAPPO)
   
-### with neural arch
-- GRU
-- LSTM
-- UPDeT
+[comment]: <> (### with neural arch)
 
-## current support env
-- [LBF](https://github.com/semitable/lb-foraging)
-- [RWARE](https://github.com/semitable/robotic-warehouse)
-- [MPE]( https://github.com/openai/multiagent-particle-envs)
-- [SMAC]( https://github.com/oxwhirl/smac)
-- [Neural-MMO](https://github.com/NeuralMMO/environment) (CompetitionR1)
-- [Meta-Drive](https://github.com/decisionforce/metadrive)
-- [Pommerman](https://github.com/MultiAgentLearning/playground)
-- [Derk's Gym](https://gym.derkgame.com/)
-- [Google-Football](https://github.com/google-research/football)
-- [Hanabi](https://github.com/deepmind/hanabi-learning-environment)
+[comment]: <> (- GRU)
+
+[comment]: <> (- LSTM)
+
+[comment]: <> (- UPDeT)
+
+[comment]: <> (## current support env)
+
+[comment]: <> (- [LBF]&#40;https://github.com/semitable/lb-foraging&#41;)
+
+[comment]: <> (- [RWARE]&#40;https://github.com/semitable/robotic-warehouse&#41;)
+
+[comment]: <> (- [MPE]&#40; https://github.com/openai/multiagent-particle-envs&#41;)
+
+[comment]: <> (- [SMAC]&#40; https://github.com/oxwhirl/smac&#41;)
+
+[comment]: <> (- [Neural-MMO]&#40;https://github.com/NeuralMMO/environment&#41; &#40;CompetitionR1&#41;)
+
+[comment]: <> (- [Meta-Drive]&#40;https://github.com/decisionforce/metadrive&#41;)
+
+[comment]: <> (- [Pommerman]&#40;https://github.com/MultiAgentLearning/playground&#41;)
+
+[comment]: <> (- [Derk's Gym]&#40;https://gym.derkgame.com/&#41;)
+
+[comment]: <> (- [Google-Football]&#40;https://github.com/google-research/football&#41;)
+
+[comment]: <> (- [Hanabi]&#40;https://github.com/deepmind/hanabi-learning-environment&#41;)
