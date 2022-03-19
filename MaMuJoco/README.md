@@ -65,8 +65,8 @@ In **ray/rllib/policy/rnn_sequencing.py** about line 130-150
 - A2C
 - A3C
 - MAA2C
-- DDPG (TODO)
-- MADDPG (TODO)   
+- DDPG 
+- MADDPG   
 - PPO
 - MAPPO
 - VDA2C-SUM/MIX 
@@ -75,4 +75,5 @@ In **ray/rllib/policy/rnn_sequencing.py** about line 130-150
 ### with neural arch
 - GRU
 - LSTM
+- MLP (only for DDPG/MADDPG)
 

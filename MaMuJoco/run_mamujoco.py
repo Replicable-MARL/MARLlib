@@ -18,6 +18,10 @@ from ray.tune.utils import merge_dicts
 from ray.rllib.agents.ppo.ppo_torch_policy import PPOTorchPolicy
 from ray.rllib.agents.ppo.ppo_tf_policy import PPOTFPolicy
 from ray.rllib.agents.ppo.ppo import PPOTrainer, DEFAULT_CONFIG as PPO_CONFIG
+from ray.rllib.agents.ddpg.ddpg import DDPGTrainer
+from ray.rllib.agents.ddpg.ddpg_torch_policy import DDPGTorchPolicy, ComputeTDErrorMixin
+from ray.rllib.agents.ddpg.ddpg_tf_policy import DDPGTFPolicy
+from ray.rllib.agents.ddpg.ddpg import DEFAULT_CONFIG as DDPG_CONFIG
 
 from MaMuJoco.config_mamujoco import get_train_parser
 from MaMuJoco.env.mamujoco_rllib import RllibMAMujoco
@@ -25,11 +29,14 @@ from MaMuJoco.util.mappo_tools import *
 from MaMuJoco.util.maa2c_tools import *
 from MaMuJoco.util.vda2c_tools import *
 from MaMuJoco.util.vdppo_tools import *
+from MaMuJoco.util.maddpg_tools import *
+
 from MaMuJoco.model.torch_gru import Torch_GRU_Model
 from MaMuJoco.model.torch_lstm import Torch_LSTM_Model
 from MaMuJoco.model.torch_gru_cc import Torch_GRU_CentralizedCritic_Model
 from MaMuJoco.model.torch_lstm_cc import Torch_LSTM_CentralizedCritic_Model
 from MaMuJoco.model.torch_vd_ppo_a2c_gru_lstm import Torch_LSTM_Model_w_Mixer, Torch_GRU_Model_w_Mixer
+from MaMuJoco.model.torch_maddpg import MADDPGTorchModel
 
 # from MaMuJoco.util.vdppo_tools import *
 
@@ -89,7 +96,6 @@ env_args_dict = {
                      "episode_limit": 1000},
 }
 
-# TODO VDA2C VDPPO (only action)
 if __name__ == "__main__":
     args = get_train_parser().parse_args()
     ray.init(local_mode=True)
@@ -261,6 +267,78 @@ if __name__ == "__main__":
 
         results = tune.run(MAA2CTrainer,
                            name=args.run + "_" + args.neural_arch + "_" + args.map,
+                           stop=stop,
+                           config=config,
+                           verbose=1)
+
+    elif args.run == "DDPG":
+
+        config = {
+            "env": args.map,
+            "horizon": args.horizon,
+        }
+        config.update(common_config)
+
+        tune.run(
+            args.run,
+            name=args.run + "_" + "MLP" + "_" + args.map,
+            stop=stop,
+            config=config,
+            verbose=1
+        )
+
+    elif args.run == "MADDPG":
+
+        ModelCatalog.register_custom_model(
+            "torch_maddpg", MADDPGTorchModel)
+
+        config = {
+            "env": args.map,
+            "horizon": args.horizon,
+            "model": {
+                "custom_model": "torch_maddpg",
+                "custom_model_config": {
+                    "agent_num": ally_num,
+                },
+            },
+        }
+        config.update(common_config)
+
+
+        MADDPGTFPolicy = DDPGTFPolicy.with_updates(
+            name="MADDPGTFPolicy",
+            postprocess_fn=maddpg_centralized_critic_postprocessing,
+            loss_fn=maddpg_actor_critic_loss,
+            mixins=[
+                TargetNetworkMixin,
+                ComputeTDErrorMixin,
+                CentralizedValueMixin
+            ])
+
+        MADDPGTorchPolicy = DDPGTorchPolicy.with_updates(
+            name="MADDPGTorchPolicy",
+            get_default_config=lambda: DDPG_CONFIG,
+            postprocess_fn=maddpg_centralized_critic_postprocessing,
+            make_model_and_action_dist=build_maddpg_models_and_action_dist,
+            loss_fn=maddpg_actor_critic_loss,
+            mixins=[
+                TargetNetworkMixin,
+                ComputeTDErrorMixin,
+                CentralizedValueMixin
+            ])
+
+        def get_policy_class(config_):
+            if config_["framework"] == "torch":
+                return MADDPGTorchPolicy
+
+        MADDPGTrainer = DDPGTrainer.with_updates(
+            name="MADDPGTrainer",
+            default_policy=MADDPGTFPolicy,
+            get_policy_class=get_policy_class,
+        )
+
+        results = tune.run(MADDPGTrainer,
+                           name=args.run + "_MLP_" + args.map,
                            stop=stop,
                            config=config,
                            verbose=1)
