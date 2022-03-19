@@ -28,6 +28,7 @@ Install Mujoco python api
 
 > pip install mujoco-py==2.0.2.8 # version is important, has to >2.0 and <2.1
 
+Set up multi-agent Mujoco according to https://github.com/schroederdewitt/multiagent_mujoco
 
 Please annotate one line source code to avoid parallel env seed bug (some env need this)
 at ray.rllib.evaluation.rollout_worker.py line 508
@@ -68,8 +69,8 @@ In **ray/rllib/policy/rnn_sequencing.py** about line 130-150
 - MADDPG (TODO)   
 - PPO
 - MAPPO
-- VDA2C-SUM/MIX (TODO)
-- VDPPO-SUM/MIX (TODO)
+- VDA2C-SUM/MIX 
+- VDPPO-SUM/MIX 
   
 ### with neural arch
 - GRU

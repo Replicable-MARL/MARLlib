@@ -23,10 +23,13 @@ from MaMuJoco.config_mamujoco import get_train_parser
 from MaMuJoco.env.mamujoco_rllib import RllibMAMujoco
 from MaMuJoco.util.mappo_tools import *
 from MaMuJoco.util.maa2c_tools import *
+from MaMuJoco.util.vda2c_tools import *
+from MaMuJoco.util.vdppo_tools import *
 from MaMuJoco.model.torch_gru import Torch_GRU_Model
 from MaMuJoco.model.torch_lstm import Torch_LSTM_Model
 from MaMuJoco.model.torch_gru_cc import Torch_GRU_CentralizedCritic_Model
 from MaMuJoco.model.torch_lstm_cc import Torch_LSTM_CentralizedCritic_Model
+from MaMuJoco.model.torch_vd_ppo_a2c_gru_lstm import Torch_LSTM_Model_w_Mixer, Torch_GRU_Model_w_Mixer
 
 # from MaMuJoco.util.vdppo_tools import *
 
@@ -105,9 +108,9 @@ if __name__ == "__main__":
     ModelCatalog.register_custom_model(
         "LSTM_CentralizedCritic", Torch_LSTM_CentralizedCritic_Model)
 
-    # # Value Decomposition(mixer)
-    # ModelCatalog.register_custom_model("CNN_GRU_ValueMixer", Torch_CNN_GRU_Model_w_Mixer)
-    # ModelCatalog.register_custom_model("CNN_LSTM_ValueMixer", Torch_CNN_LSTM_Model_w_Mixer)
+    # Value Decomposition(mixer)
+    ModelCatalog.register_custom_model("GRU_ValueMixer", Torch_GRU_Model_w_Mixer)
+    ModelCatalog.register_custom_model("LSTM_ValueMixer", Torch_LSTM_Model_w_Mixer)
     # ModelCatalog.register_custom_model("CNN_UPDeT_ValueMixer", Torch_CNN_Transformer_Model_w_Mixer)
 
     stop = {
@@ -155,6 +158,60 @@ if __name__ == "__main__":
                            stop=stop,
                            config=config,
                            verbose=1)
+
+    elif args.run in ["SUM-VDA2C", "MIX-VDA2C"]:
+
+
+        config = {
+            "env": args.map,
+            "horizon": args.horizon,
+            "model": {
+                "custom_model": "{}_ValueMixer".format(args.neural_arch),
+                "custom_model_config": {
+                    "n_agents": ally_num,
+                    "mixer": "qmix" if args.run == "MIX-VDA2C" else "vdn",
+                    "mixer_emb_dim": 64,
+                    "state_dim": state_dim
+                },
+            },
+        }
+        config.update(common_config)
+
+        VDA2C_CONFIG = merge_dicts(
+            A2C_CONFIG,
+            {
+                "agent_num": ally_num,
+            }
+        )
+
+        VDA2CTFPolicy = A3CTFPolicy.with_updates(
+            name="VDA2CTFPolicy",
+            postprocess_fn=value_mix_centralized_critic_postprocessing,
+            loss_fn=value_mix_actor_critic_loss,
+            grad_stats_fn=central_vf_stats_a2c, )
+
+        VDA2CTorchPolicy = A3CTorchPolicy.with_updates(
+            name="VDA2CTorchPolicy",
+            get_default_config=lambda: VDA2C_CONFIG,
+            postprocess_fn=value_mix_centralized_critic_postprocessing,
+            loss_fn=value_mix_actor_critic_loss,
+            mixins=[ValueNetworkMixin, MixingValueMixin],
+        )
+
+
+        def get_policy_class(config_):
+            if config_["framework"] == "torch":
+                return VDA2CTorchPolicy
+
+
+        VDA2CTrainer = A2CTrainer.with_updates(
+            name="VDA2CTrainer",
+            default_policy=VDA2CTFPolicy,
+            get_policy_class=get_policy_class,
+        )
+
+        results = tune.run(VDA2CTrainer, name=args.run + "_" + args.neural_arch + "_" + args.map, stop=stop,
+                           config=config, verbose=1)
 
     elif args.run == "MAA2C":  # centralized A2C
 
@@ -230,6 +287,79 @@ if __name__ == "__main__":
         config.update(common_config)
         results = tune.run(args.run, name=args.run + "_" + args.neural_arch + "_" + args.map, stop=stop, config=config,
                            verbose=1)
+
+    elif args.run in ["SUM-VDPPO", "MIX-VDPPO"]:
+
+        """
+        for bug mentioned https://github.com/ray-project/ray/pull/20743
+        make sure sgd_minibatch_size > max_seq_len
+        """
+        sgd_minibatch_size = 128
+        while sgd_minibatch_size < args.horizon:
+            sgd_minibatch_size *= 2
+
+        config = {
+            "env": args.map,
+            "horizon": args.horizon,
+            "num_sgd_iter": 5,
+            "sgd_minibatch_size": sgd_minibatch_size,
+            "model": {
+                "custom_model": "{}_ValueMixer".format(args.neural_arch),
+                "custom_model_config": {
+                    "n_agents": ally_num,
+                    "mixer": "qmix" if args.run == "MIX-VDPPO" else "vdn",
+                    "mixer_emb_dim": 64,
+                    "state_dim": state_dim
+                },
+            },
+        }
+
+        config.update(common_config)
+
+        VDPPO_CONFIG = merge_dicts(
+            PPO_CONFIG,
+            {
+                "agent_num": ally_num,
+            }
+        )
+
+        # not used
+        VDPPOTFPolicy = PPOTFPolicy.with_updates(
+            name="VDPPOTFPolicy",
+            postprocess_fn=value_mix_centralized_critic_postprocessing,
+            loss_fn=value_mix_ppo_surrogate_loss,
+            before_loss_init=setup_tf_mixins,
+            grad_stats_fn=central_vf_stats_ppo,
+            mixins=[
+                LearningRateSchedule, EntropyCoeffSchedule, KLCoeffMixin,
+                ValueNetworkMixin, MixingValueMixin
+            ])
+
+        VDPPOTorchPolicy = PPOTorchPolicy.with_updates(
+            name="VDPPOTorchPolicy",
+            get_default_config=lambda: VDPPO_CONFIG,
+            postprocess_fn=value_mix_centralized_critic_postprocessing,
+            loss_fn=value_mix_ppo_surrogate_loss,
+            before_init=setup_torch_mixins,
+            mixins=[
+                TorchLR, TorchEntropyCoeffSchedule, TorchKLCoeffMixin,
+                ValueNetworkMixin, MixingValueMixin
+            ])
+
+        def get_policy_class(config_):
+            if config_["framework"] == "torch":
+                return VDPPOTorchPolicy
+
+        VDPPOTrainer = PPOTrainer.with_updates(
+            name="VDPPOTrainer",
+            default_policy=VDPPOTFPolicy,
+            get_policy_class=get_policy_class,
+        )
+
+        results = tune.run(VDPPOTrainer, name=args.run + "_" + args.neural_arch + "_" + args.map, stop=stop,
+                           config=config,
+                           verbose=1)
+
 
     elif args.run == "MAPPO":  # centralized PPO
 
