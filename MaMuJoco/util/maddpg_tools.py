@@ -28,7 +28,6 @@ from ray.rllib.utils.torch_ops import apply_grad_clipping, \
     concat_multi_gpu_td_errors, huber_loss, l2_loss
 from ray.rllib.utils.typing import TrainerConfigDict, TensorType, \
     LocalOptimizer, GradInfoDict
-from MPE.model.torch_maddpg import MADDPGTorchModel
 from ray.rllib.agents.ppo.ppo_tf_policy import KLCoeffMixin, \
     ppo_surrogate_loss as tf_loss
 from ray.rllib.agents.ppo.ppo_torch_policy import KLCoeffMixin as TorchKLCoeffMixin, ppo_surrogate_loss as torch_loss
@@ -46,6 +45,8 @@ from ray.rllib.evaluation.postprocessing import adjust_nstep
 from ray.rllib.utils.numpy import convert_to_numpy
 import numpy as np
 from ray.rllib.utils.framework import try_import_tf, try_import_torch
+
+from MaMuJoco.model.torch_maddpg import MADDPGTorchModel
 
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
