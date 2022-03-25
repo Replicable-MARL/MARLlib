@@ -1,4 +1,4 @@
-from ray.rllib.env import PettingZooEnv
+from ray.rllib.env import PettingZooEnv, ParallelPettingZooEnv
 from ray.rllib.models import ModelCatalog
 import os
 import sys
@@ -16,10 +16,10 @@ from ray.rllib.agents.a3c.a3c import DEFAULT_CONFIG as A3C_CONFIG
 from ray.rllib.agents.dqn.r2d2 import DEFAULT_CONFIG, R2D2Trainer
 from ray.rllib.agents.dqn.r2d2_torch_policy import R2D2TorchPolicy
 from ray.rllib.agents.dqn.r2d2_tf_policy import R2D2TFPolicy
+from gym.spaces import Tuple
 
 from pettingzoo.mpe import simple_adversary_v2, simple_crypto_v2, simple_v2, simple_push_v2, simple_tag_v2, \
     simple_spread_v2, simple_reference_v2, simple_world_comm_v2, simple_speaker_listener_v3
-import supersuit as ss
 from ray.rllib.agents.ddpg.ddpg import DDPGTrainer
 from ray.rllib.agents.ddpg.ddpg_torch_policy import DDPGTorchPolicy, ComputeTDErrorMixin
 from ray.rllib.agents.ddpg.ddpg_tf_policy import DDPGTFPolicy
@@ -40,6 +40,9 @@ from MPE.util.mappo_tools import *
 from MPE.util.maa2c_tools import *
 from MPE.util.vda2c_tools import *
 from MPE.util.vdppo_tools import *
+from MPE.env.mpe_rllib import RllibMPE
+from MPE.env.mpe_rllib_qmix import RllibMPE_QMIX
+
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
 
@@ -87,18 +90,13 @@ def run(args):
         print("Scenario {} not exists in pettingzoo".format(args.map))
         sys.exit()
 
-    # keep obs and action dim same across agents
-    # pad_action_space_v0 will auto mask the padding actions
-    env = ss.pad_observations_v0(env)
-    env = ss.pad_action_space_v0(env)
+    register_env(args.map, lambda _: RllibMPE(env))
 
-    register_env(args.map,
-                 lambda _: PettingZooEnv(env))
-
-    test_env = PettingZooEnv(env)
+    test_env = RllibMPE(env)
     obs_space = test_env.observation_space
     act_space = test_env.action_space
-    n_agents = len(test_env.agents)
+    n_agents = test_env.num_agents
+    test_env.close()
 
     stop = {
         "episode_reward_mean": args.stop_reward,
@@ -125,20 +123,72 @@ def run(args):
     }
 
     if args.run in ["QMIX", "VDN"]:
+
+        if args.continues:
+            print(
+                "{} do not support continue action space".format(args.run)
+            )
+            sys.exit()
+
         if args.map not in ["simple_spread", "simple_speaker_listener", "simple_reference"]:
             print(
                 "adversarial agents contained in this MPE scenario. "
                 "Not suitable for cooperative only algo {}".format(args.run)
             )
             sys.exit()
-        else:
-            print(
-                "PettingZooEnv step function only return one agent info, "
-                "not compatible with rllib built-in QMIX/VDN"
-                "\nwe are working on wrapping the PettingZooEnv"
-                "to support some cooperative scenario based on Ray"
-            )
+
+        if args.neural_arch not in ["GRU"]:
+            print("{} arch not supported for QMIX/VDN".format(args.neural_arch))
             sys.exit()
+
+        if args.map == "simple_spread":
+            env = simple_spread_v2.parallel_env(continuous_actions=False)
+        elif args.map == "simple_reference":
+            env = simple_reference_v2.parallel_env(continuous_actions=False)
+        elif args.map == "simple_speaker_listener":
+            env = simple_speaker_listener_v3.parallel_env(continuous_actions=False)
+
+
+        test_env = RllibMPE_QMIX(env)
+        agent_num = test_env.num_agents
+        agent_list = test_env.agents
+        obs_space = test_env.observation_space
+        act_space = test_env.action_space
+        test_env.close()
+
+        obs_space = Tuple([obs_space] * agent_num)
+        act_space = Tuple([act_space] * agent_num)
+
+        # align with RWARE/env/rware_rllib_qmix.py reset() function in line 41-50
+        grouping = {
+            "group_1": [i for i in agent_list],
+        }
+
+        # QMIX/VDN algo needs grouping env
+        register_env(
+            args.map,
+            lambda _: RllibMPE_QMIX(env).with_agent_groups(
+                grouping, obs_space=obs_space, act_space=act_space))
+
+        config = {
+            "env": args.map,
+            "train_batch_size": 32,
+            "exploration_config": {
+                "epsilon_timesteps": 5000,
+                "final_epsilon": 0.05,
+            },
+            "mixer": "qmix" if args.run == "QMIX" else None,  # None for VDN, which has no mixer
+            "num_gpus": args.num_gpus,
+            "num_workers": args.num_workers,
+            "num_gpus_per_worker": args.num_gpus_per_worker,
+
+        }
+
+        results = tune.run("QMIX",
+                           name=args.run + "_" + args.neural_arch + "_" + args.map,
+                           stop=stop,
+                           config=config,
+                           verbose=1)
 
     elif args.run in ["R2D2"]:  # similar to IQL in recurrent/POMDP mode
 
@@ -214,11 +264,9 @@ def run(args):
             mixins=[ValueNetworkMixin, MixingValueMixin],
         )
 
-
         def get_policy_class(config_):
             if config_["framework"] == "torch":
                 return VDA2CTorchPolicy
-
 
         VDA2CTrainer = A2CTrainer.with_updates(
             name="VDA2CTrainer",
@@ -350,7 +398,6 @@ def run(args):
             },
         }
         config.update(common_config)
-
 
         MADDPGTFPolicy = DDPGTFPolicy.with_updates(
             name="MADDPGTFPolicy",
@@ -551,9 +598,9 @@ def run(args):
         )
 
         tune.run(COMATrainer,
-                           name=args.run + "_" + args.neural_arch + "_" + args.map,
-                           stop=stop,
-                           config=config,
-                           verbose=1)
+                 name=args.run + "_" + args.neural_arch + "_" + args.map,
+                 stop=stop,
+                 config=config,
+                 verbose=1)
 
     ray.shutdown()

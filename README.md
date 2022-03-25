@@ -171,7 +171,7 @@ Here is a chart describing the characteristics of each algorithm:
 | ---- | ---- | ---- | ---- | ---- | ---- | ----- | ---- | ---- | ---- | ---- | ---- | ---- | ---- |
 | LBF         | Y | Y | Y | N | Y | Y | N | Y | Y | P | P | P | P |
 | RWARE       | Y | Y | Y | N | Y | Y | N | Y | Y | Y | Y | Y | Y |
-| MPE         | P | Y | Y | P | Y | P | P | Y | Y |   |   | Y | Y |
+| MPE         | P | Y | Y | P | Y | P | P | Y | Y | Y | Y | Y | Y |
 | SMAC        | Y | Y | Y | N | Y | Y | N | Y | Y | Y | Y | Y | Y |
 | Meta-Drive  | N | Y | Y | Y | Y | N | Y | Y | Y | N | N | N | N |
 | Pommerman   | Y | Y | Y | N | Y | P | N | P | P | P | P | P | P |

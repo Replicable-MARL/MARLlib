@@ -16,17 +16,17 @@ def get_train_parser():
     parser.add_argument(
         "--run",
         choices=["QMIX", "VDN", "R2D2", "PG", "A2C", "A3C", "DDPG", "MADDPG", "MAA2C", "PPO", "MAPPO", "COMA", "SUM-VDA2C", "MIX-VDA2C", "SUM-VDPPO", "MIX-VDPPO"],  # "APPO" "IMPALA"
-        default="MIX-VDPPO",
+        default="QMIX",
         help="The RLlib-registered algorithm to use.")
     parser.add_argument(
         "--map",
         choices=["simple", "simple_adversary", "simple_crypto", "simple_push", "simple_tag", "simple_spread",
                  "simple_reference", "simple_world_comm", "simple_speaker_listener"],
-        default="simple_spread",
+        default="simple_speaker_listener",
         help="Maps should be registered")
     parser.add_argument(
         "--continues",
-        default=True,
+        default=False,
         type=bool,
         help="MPE continue/discrete action space")
     parser.add_argument(
