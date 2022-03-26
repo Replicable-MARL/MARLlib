@@ -22,7 +22,7 @@ from ray.rllib.utils.torch_ops import apply_grad_clipping, \
 from ray.rllib.utils.typing import TensorType, TrainerConfigDict
 from ray.rllib.utils.torch_ops import convert_to_torch_tensor
 from ray.rllib.utils.numpy import convert_to_numpy
-from MaMuJoco.util.vda2c_tools import MixingValueMixin
+from MaMujoco.util.vda2c_tools import MixingValueMixin
 
 torch, nn = try_import_torch()
 

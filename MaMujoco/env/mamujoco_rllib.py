@@ -8,7 +8,7 @@ import ray
 from ray import tune
 from ray.rllib.env.multi_agent_env import MultiAgentEnv
 from ray.tune.registry import register_env
-from MaMuJoco.src.multiagent_mujoco.mujoco_multi import MujocoMulti
+from MaMujoco.src.multiagent_mujoco.mujoco_multi import MujocoMulti
 from gym.spaces import Dict, Discrete, Box
 import numpy as np
 

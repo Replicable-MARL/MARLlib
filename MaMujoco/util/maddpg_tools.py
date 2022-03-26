@@ -46,7 +46,7 @@ from ray.rllib.utils.numpy import convert_to_numpy
 import numpy as np
 from ray.rllib.utils.framework import try_import_tf, try_import_torch
 
-from MaMuJoco.model.torch_maddpg import MADDPGTorchModel
+from MaMujoco.model.torch_maddpg import MADDPGTorchModel
 
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()

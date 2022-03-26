@@ -23,22 +23,22 @@ from ray.rllib.agents.ddpg.ddpg_torch_policy import DDPGTorchPolicy, ComputeTDEr
 from ray.rllib.agents.ddpg.ddpg_tf_policy import DDPGTFPolicy
 from ray.rllib.agents.ddpg.ddpg import DEFAULT_CONFIG as DDPG_CONFIG
 
-from MaMuJoco.config_mamujoco import get_train_parser
-from MaMuJoco.env.mamujoco_rllib import RllibMAMujoco
-from MaMuJoco.util.mappo_tools import *
-from MaMuJoco.util.maa2c_tools import *
-from MaMuJoco.util.vda2c_tools import *
-from MaMuJoco.util.vdppo_tools import *
-from MaMuJoco.util.maddpg_tools import *
+from MaMujoco.config_mamujoco import get_train_parser
+from MaMujoco.env.mamujoco_rllib import RllibMAMujoco
+from MaMujoco.util.mappo_tools import *
+from MaMujoco.util.maa2c_tools import *
+from MaMujoco.util.vda2c_tools import *
+from MaMujoco.util.vdppo_tools import *
+from MaMujoco.util.maddpg_tools import *
 
-from MaMuJoco.model.torch_gru import Torch_GRU_Model
-from MaMuJoco.model.torch_lstm import Torch_LSTM_Model
-from MaMuJoco.model.torch_gru_cc import Torch_GRU_CentralizedCritic_Model
-from MaMuJoco.model.torch_lstm_cc import Torch_LSTM_CentralizedCritic_Model
-from MaMuJoco.model.torch_vd_ppo_a2c_gru_lstm import Torch_LSTM_Model_w_Mixer, Torch_GRU_Model_w_Mixer
-from MaMuJoco.model.torch_maddpg import MADDPGTorchModel
+from MaMujoco.model.torch_gru import Torch_GRU_Model
+from MaMujoco.model.torch_lstm import Torch_LSTM_Model
+from MaMujoco.model.torch_gru_cc import Torch_GRU_CentralizedCritic_Model
+from MaMujoco.model.torch_lstm_cc import Torch_LSTM_CentralizedCritic_Model
+from MaMujoco.model.torch_vd_ppo_a2c_gru_lstm import Torch_LSTM_Model_w_Mixer, Torch_GRU_Model_w_Mixer
+from MaMujoco.model.torch_maddpg import MADDPGTorchModel
 
-# from MaMuJoco.util.vdppo_tools import *
+# from MaMujoco.util.vdppo_tools import *
 
 # from https://github.com/schroederdewitt/multiagent_mujoco
 env_args_dict = {
