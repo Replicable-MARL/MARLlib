@@ -112,7 +112,7 @@ Most of the popular environment in MARL research has been incorporated in this b
 | [SMAC](https://github.com/oxwhirl/smac)  | Cooperative | Partial | Discrete | Continuous |
 | [Meta-Drive](https://github.com/decisionforce/metadrive)  | Collaborative | Partial | Continuous | Continuous |
 | [Pommerman](https://github.com/MultiAgentLearning/playground)  | Mixed | Both | Discrete | Discrete |
-| [MAgentMujoco](https://github.com/schroederdewitt/multiagent_mujoco)  | Cooperative | Partial | Continuous | Continuous |
+| [MaMujoco](https://github.com/schroederdewitt/multiagent_mujoco)  | Cooperative | Partial | Continuous | Continuous |
 | [Google-Football](https://github.com/google-research/football)  | Collaborative | Full | Discrete | Continuous |
 | [Hanabi](https://github.com/deepmind/hanabi-learning-environment) | Cooperative | Partial | Discrete | Discrete |
 | [Neural-MMO](https://github.com/NeuralMMO/environment)  | Competitive | Partial | Multi-Discrete | Continuous |
@@ -175,7 +175,7 @@ Here is a chart describing the characteristics of each algorithm:
 | SMAC        | Y | Y | Y | N | Y | Y | N | Y | Y | Y | Y | Y | Y |
 | Meta-Drive  | N | Y | Y | Y | Y | N | Y | Y | Y | N | N | N | N |
 | Pommerman   | Y | Y | Y | N | Y | P | N | P | P | P | P | P | P |
-| MAgentMujoco| N | Y | Y | Y | Y | N | Y | Y | Y | N | N | Y | Y |
+| MaMujoco| N | Y | Y | Y | Y | N | Y | Y | Y | N | N | Y | Y |
 | GRF         | Y | Y | Y | N | Y | Y | N | Y | Y | Y | Y | Y | Y |
 | Hanabi      | Y | Y | Y | N | Y | Y | N | Y | Y | N | N | N | N |
 | Neural-MMO  | N | Y | Y | N | Y | N | N | N | N | N | N | N | N |
@@ -193,7 +193,7 @@ Here is a chart describing the characteristics of each algorithm:
 | Neural-MMO  | N | Y | Y | Y | Y |
 | Meta-Drive  | N | Y | Y | Y | Y | 
 | Pommerman  | N | Y | Y | Y | N |
-| MAgentMujoco  | Y | Y | Y | N | N |
+| MaMujoco  | Y | Y | Y | N | N |
 | GRF  | Y | Y | Y | Y | Y | 
 | Hanabi  | N | Y | Y | N | N |
 
