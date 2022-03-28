@@ -10,7 +10,7 @@ def get_train_parser():
         help="Init Ray in local mode for easier debugging.")
     parser.add_argument(
         "--parallel",
-        default=True,
+        default=False,
         type=bool,
         help="Whether use tune grid research")
     parser.add_argument(

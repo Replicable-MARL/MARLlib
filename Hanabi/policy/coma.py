@@ -2,23 +2,24 @@ from ray import tune
 from ray.rllib.agents.a3c.a3c_tf_policy import A3CTFPolicy
 from ray.rllib.agents.a3c.a2c import A2CTrainer
 
-from RWARE.util.mappo_tools import *
-from RWARE.util.maa2c_tools import *
-from RWARE.util.coma_tools import loss_with_central_critic_coma, central_vf_stats_coma, COMATorchPolicy
+from Hanabi.util.mappo_tools import *
+from Hanabi.util.maa2c_tools import *
 
 
-def run_coma(args, common_config, env_config, map_name, stop):
+def run_coma(args, common_config, n_agents, stop):
     config = {
         "model": {
             "custom_model": "{}_CentralizedCritic".format(args.neural_arch),
             "custom_model_config": {
-                "agent_num": env_config["agents_num"],
+                "agent_num": n_agents,
                 "coma": True
             },
         },
     }
+
     config.update(common_config)
 
+    from Hanabi.util.coma_tools import loss_with_central_critic_coma, central_vf_stats_coma, COMATorchPolicy
 
     # not used
     COMATFPolicy = A3CTFPolicy.with_updates(
@@ -30,6 +31,12 @@ def run_coma(args, common_config, env_config, map_name, stop):
             CentralizedValueMixin
         ])
 
+    COMATorchPolicy = COMATorchPolicy.with_updates(
+        name="MAA2CTorchPolicy",
+        loss_fn=loss_with_central_critic_coma,
+        mixins=[
+            CentralizedValueMixin
+        ])
 
     def get_policy_class(config_):
         if config_["framework"] == "torch":
@@ -42,9 +49,9 @@ def run_coma(args, common_config, env_config, map_name, stop):
     )
 
     results = tune.run(COMATrainer,
-             name=args.run + "_" + args.neural_arch + "_" + map_name,
-             stop=stop,
-             config=config,
-             verbose=1)
+                       name=args.run + "_" + args.neural_arch + "_" + "Hanabi",
+                       stop=stop,
+                       config=config,
+                       verbose=1)
 
     return results

@@ -41,7 +41,6 @@ ally_num_dict = {
     "academy_counterattack_hard": 11,
 }
 
-# TODO VDA2C VDPPO (only action)
 if __name__ == "__main__":
     args = get_train_parser().parse_args()
     ray.init(local_mode=args.local_mode)
@@ -137,7 +136,7 @@ if __name__ == "__main__":
 
     ##################
     ### run script ###
-    ###################
+    ##################
 
     results = policy_function_dict[args.run](args, common_config, env_config, stop)
 
