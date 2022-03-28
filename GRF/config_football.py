@@ -16,7 +16,7 @@ def get_train_parser():
     parser.add_argument(
         "--run",
         choices=["QMIX", "VDN", "R2D2", "PG", "A2C", "A3C", "MAA2C", "PPO", "MAPPO", "COMA", "SUM-VDA2C", "MIX-VDA2C", "SUM-VDPPO", "MIX-VDPPO"],  # "APPO" "IMPALA"
-        default="COMA",
+        default="SUM-VDA2C",
         help="The RLlib-registered algorithm to use.")
     parser.add_argument(
         "--map",
@@ -39,7 +39,7 @@ def get_train_parser():
         "--neural-arch",
         choices=["CNN", "CNN_LSTM", "CNN_GRU", "CNN_UPDeT"],
         type=str,
-        default="CNN_UPDeT",
+        default="CNN_GRU",
         help="Agent Neural Architecture")
     parser.add_argument(
         "--framework",
