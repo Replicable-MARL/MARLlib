@@ -5,18 +5,20 @@ from ray.rllib.agents.a3c.a3c_torch_policy import A3CTorchPolicy
 from ray.rllib.agents.a3c.a2c import A2CTrainer
 from ray.rllib.agents.a3c.a3c import DEFAULT_CONFIG as A3C_CONFIG
 
-from LBF.util.mappo_tools import *
-from LBF.util.maa2c_tools import *
+from MaMujoco.util.mappo_tools import *
+from MaMujoco.util.maa2c_tools import *
 
 
-def run_maa2c(args, common_config, env_config, map_name, stop):
-
+def run_maa2c(args, common_config, env_config, stop):
     config = {
+        "env": args.map,
+        "horizon": args.horizon,
         "model": {
             "custom_model": "{}_CentralizedCritic".format(args.neural_arch),
             "custom_model_config": {
-                "agent_num": env_config["num_agents"]
-            },
+                "agent_num": env_config["ally_num"],
+                "state_dim": env_config["state_dim"]
+            }
         },
     }
 
@@ -51,7 +53,7 @@ def run_maa2c(args, common_config, env_config, map_name, stop):
     )
 
     results = tune.run(MAA2CTrainer,
-                       name=args.run + "_" + args.neural_arch + "_" + map_name,
+                       name=args.run + "_" + args.neural_arch + "_" + args.map,
                        stop=stop,
                        config=config,
                        verbose=1)
