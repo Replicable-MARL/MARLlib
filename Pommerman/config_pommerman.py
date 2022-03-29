@@ -16,7 +16,7 @@ def get_train_parser():
     parser.add_argument(
         "--run",
         choices=["QMIX", "VDN", "R2D2", "PG", "A2C", "A3C", "MAA2C", "PPO", "MAPPO", "COMA", "MIX-VDA2C", "SUM-VDA2C", "SUM-VDPPO", "MIX-VDPPO"],  # "APPO" "IMPALA"
-        default="MIX-VDPPO",
+        default="MIX-VDA2C",
         help="The RLlib-registered algorithm to use.")
     parser.add_argument(
         "--map",
@@ -24,7 +24,7 @@ def get_train_parser():
             "OneVsOne-v0",
             "PommeFFACompetition-v0",
             "PommeTeamCompetition-v0",
-            # following scenarios are not tested
+            # following scenarios are under development
             # "PommeFFACompetitionFast-v0",
             # "PommeFFAFast-v0",
             # "PommeFFA-v1",
@@ -39,7 +39,7 @@ def get_train_parser():
     parser.add_argument(
         "--agent-position",
         type=str,
-        default="23",
+        default="0123",
         # choices=["0", "1", "01"] for OneVsOne
         # choices=["0", "1", "2", "3"] random combination for PommeFFACompetition like "023"
         # choices=["01", "23", "0123"] for PommeTeamCompetition
@@ -54,7 +54,7 @@ def get_train_parser():
         "--neural-arch",
         choices=["CNN", "CNN_LSTM", "CNN_GRU"],
         type=str,
-        default="CNN_LSTM",
+        default="CNN_GRU",
         help="Agent Neural Architecture")
     parser.add_argument(
         "--framework",
