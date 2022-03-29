@@ -5,6 +5,7 @@ from ray.rllib.agents.ppo.ppo_tf_policy import PPOTFPolicy
 from Pommerman.util.mappo_tools import *
 from Pommerman.util.vda2c_tools import *
 from Pommerman.util.vdppo_tools import *
+import sys
 
 
 def run_vdppo_sum_mix(args, common_config, env_config, agent_list, stop):
@@ -16,11 +17,11 @@ def run_vdppo_sum_mix(args, common_config, env_config, agent_list, stop):
 
     if args.neural_arch not in ["CNN_GRU", "CNN_LSTM"]:
         print("{} arch not supported for QMIX/VDN".format(args.neural_arch))
-        raise ValueError()
+        sys.exit()
 
     if "Team" not in args.map:
         print("VDA2C is only for cooperative scenarios")
-        raise ValueError()
+        sys.exit()
 
     if env_config["neural_agent_pos"] == [0, 1, 2, 3]:
         # 2 vs 2

@@ -3,16 +3,17 @@ from ray import tune
 from ray.tune.registry import register_env
 from Pommerman.env.pommerman_rllib_qmix import RllibPommerman_QMIX
 from Pommerman.model.torch_qmix_model import QMixTrainer
+import sys
 
 
 def run_vdn_qmix(args, common_config, env_config, agent_list, stop):
     if args.neural_arch not in ["CNN_GRU", ]:
         print("{} arch not supported for QMIX/VDN".format(args.neural_arch))
-        raise ValueError()
+        sys.exit()
 
     if "Team" not in args.map:
         print("QMIX/VDN is only for cooperative scenarios")
-        raise ValueError()
+        sys.exit()
 
     if env_config["neural_agent_pos"] == [0, 1, 2, 3]:
         # 2 vs 2

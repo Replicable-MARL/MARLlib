@@ -7,6 +7,7 @@ from ray.rllib.agents.a3c.a3c import DEFAULT_CONFIG as A3C_CONFIG
 
 from Pommerman.util.mappo_tools import *
 from Pommerman.util.maa2c_tools import *
+import sys
 
 
 def run_maa2c(args, common_config, env_config, agent_list, stop):
@@ -14,12 +15,12 @@ def run_maa2c(args, common_config, env_config, agent_list, stop):
         print("Centralized critic can not be used in scenario where rule"
               "based agent exists"
               "\n Set rule_agent_pos to empty list []")
-        raise ValueError()
+        sys.exit()
 
     if "Team" not in args.map:
         print("Scenario \"{}\" is under fully observed setting. "
               "MAA2C is not suitable".format(args.map))
-        raise ValueError()
+        sys.exit()
 
     config = {
         "env": "pommerman",

@@ -2,16 +2,17 @@ from ray import tune
 from gym.spaces import Dict as GymDict, Tuple, Box, Discrete
 from ray.tune.registry import register_env
 from LBF.env.lbf_rllib_qmix import RllibLBF_QMIX
+import sys
 
 
 def run_vdn_qmix(args, common_config, env_config, map_name, stop):
     if args.neural_arch not in ["GRU"]:
         print("{} arch not supported for QMIX/VDN".format(args.neural_arch))
-        raise ValueError()
+        sys.exit()
 
     if not args.force_coop:
         print("competitive settings are not suitable for QMIX/VDN")
-        raise ValueError()
+        sys.exit()
 
     single_env = RllibLBF_QMIX(env_config)
     obs_space = single_env.observation_space

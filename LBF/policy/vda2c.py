@@ -7,11 +7,12 @@ from ray.tune.utils import merge_dicts
 from ray.rllib.agents.a3c.a2c import A2C_DEFAULT_CONFIG as A2C_CONFIG
 from LBF.util.vda2c_tools import *
 from LBF.util.maa2c_tools import *
+import sys
 
 def run_vda2c_sum_mix(args, common_config, env_config, map_name, stop):
     if not args.force_coop:
         print("competitive settings are not suitable for VDA2C")
-        raise ValueError()
+        sys.exit()
 
     config = {
         "model": {

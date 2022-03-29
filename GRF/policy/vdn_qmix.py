@@ -1,10 +1,8 @@
 from gym.spaces import Dict as GymDict, Tuple, Box, Discrete
-
+import sys
 from ray import tune
 from ray.tune.registry import register_env
-
 from GRF.env.football_rllib_qmix import RllibGFootball_QMIX
-
 from GRF.model.torch_qmix_model import QMixTrainer
 
 
@@ -12,7 +10,7 @@ def run_vdn_qmix(args, common_config, env_config, stop):
 
     if args.neural_arch not in ["CNN_GRU", "CNN_UPDeT"]:
         print("{} arch not supported for QMIX/VDN".format(args.neural_arch))
-        raise ValueError()
+        sys.exit()
 
     single_env = RllibGFootball_QMIX(env_config)
     obs_space = single_env.observation_space

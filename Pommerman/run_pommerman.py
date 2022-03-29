@@ -25,8 +25,8 @@ from Pommerman.policy.vdppo import run_vdppo_sum_mix
 from Pommerman.policy.maa2c import run_maa2c
 from Pommerman.policy.mappo import run_mappo
 from Pommerman.policy.coma import run_coma
-
 from Pommerman.util.vdppo_tools import *
+import sys
 
 if __name__ == "__main__":
     args = get_train_parser().parse_args()
@@ -64,13 +64,13 @@ if __name__ == "__main__":
         agent_list = [None, None, ]
         if set(env_config["neural_agent_pos"] + env_config["rule_agent_pos"]) != {0, 1}:
             print("Wrong bomber agent position")
-            raise ValueError()
+            sys.exit()
 
     else:
         agent_list = [None, None, None, None]
         if set(env_config["neural_agent_pos"] + env_config["rule_agent_pos"]) != {0, 1, 2, 3}:
             print("Wrong bomber agent position")
-            raise ValueError()
+            sys.exit()
 
     for agent_pos in env_config["neural_agent_pos"]:
         agent_list[agent_pos] = PlaceHolderAgent()  # fake, just for initialization

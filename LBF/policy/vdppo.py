@@ -8,6 +8,7 @@ from ray.tune.utils import merge_dicts
 from LBF.util.mappo_tools import *
 from LBF.util.vda2c_tools import *
 from LBF.util.vdppo_tools import *
+import sys
 
 
 def run_vdppo_sum_mix(args, common_config, env_config, map_name, stop):
@@ -19,7 +20,7 @@ def run_vdppo_sum_mix(args, common_config, env_config, map_name, stop):
 
     if not args.force_coop:
         print("competitive settings are not suitable for VDPPO")
-        raise ValueError()
+        sys.exit()
 
     config = {
         "num_sgd_iter": 10,

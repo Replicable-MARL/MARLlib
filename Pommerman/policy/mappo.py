@@ -6,6 +6,7 @@ from ray.rllib.agents.ppo.ppo_tf_policy import PPOTFPolicy
 from Pommerman.util.mappo_tools import *
 from Pommerman.util.maa2c_tools import *
 from Pommerman.util.vdppo_tools import *
+import sys
 
 
 
@@ -16,12 +17,12 @@ def run_mappo(args, common_config, env_config, agent_list, stop):
         print("Centralized critic can not be used in scenario where rule"
               "based agent exists"
               "\n Set rule_agent_pos to empty list []")
-        raise ValueError()
+        sys.exit()
 
     if "Team" not in args.map:
         print("Scenario \"{}\" is under fully observed setting. "
               "MAPPO is not suitable".format(args.map))
-        raise ValueError()
+        sys.exit()
 
     config = {
         "env": "pommerman",

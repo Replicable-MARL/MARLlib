@@ -7,15 +7,16 @@ from ray.tune.utils import merge_dicts
 from ray.rllib.agents.a3c.a2c import A2C_DEFAULT_CONFIG as A2C_CONFIG
 from Pommerman.util.vda2c_tools import *
 from Pommerman.util.maa2c_tools import *
+import sys
 
 def run_vda2c_sum_mix(args, common_config, env_config, agent_list, stop):
     if args.neural_arch not in ["CNN_GRU", "CNN_LSTM"]:
         print("{} arch not supported for QMIX/VDN".format(args.neural_arch))
-        raise ValueError()
+        sys.exit()
 
     if "Team" not in args.map:
         print("VDA2C is only for cooperative scenarios")
-        raise ValueError()
+        sys.exit()
 
     if env_config["neural_agent_pos"] == [0, 1, 2, 3]:
         # 2 vs 2

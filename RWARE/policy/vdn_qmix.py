@@ -2,13 +2,14 @@ from ray import tune
 from RWARE.env.rware_rllib_qmix import RllibRWARE_QMIX
 from gym.spaces import Dict as GymDict, Tuple, Box, Discrete
 from ray.tune.registry import register_env
+import sys
 
 
 def run_vdn_qmix(args, common_config, env_config, map_name, stop):
 
     if args.neural_arch not in ["GRU"]:
         print("{} arch not supported for QMIX/VDN".format(args.neural_arch))
-        raise ValueError()
+        sys.exit()
 
     single_env = RllibRWARE_QMIX(env_config)
     obs_space = single_env.observation_space

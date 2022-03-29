@@ -3,6 +3,7 @@ from ray.rllib.agents.a3c.a3c_torch_policy import A3CTorchPolicy
 from ray.rllib.agents.a3c.a2c import A2CTrainer
 
 from MetaDrive.util.maa2c_tools import *
+import sys
 
 
 def run_maa2c(args, common_config, ma_config, cc_obs_dim, stop):
@@ -18,7 +19,7 @@ def run_maa2c(args, common_config, ma_config, cc_obs_dim, stop):
         if config["framework"] == "torch":
             return MAA2CTorchPolicy
         else:
-            raise ValueError()
+            sys.exit()
 
     ma_config.update(A2C_CONFIG)
 

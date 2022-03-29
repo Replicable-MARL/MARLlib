@@ -5,6 +5,7 @@ from ray.rllib.agents.ppo.ppo_tf_policy import PPOTFPolicy
 
 from MetaDrive.util.mappo_tools import *
 from MetaDrive.util.maa2c_tools import *
+import sys
 
 
 def run_mappo(args, common_config, ma_config, cc_obs_dim, stop):
@@ -24,7 +25,7 @@ def run_mappo(args, common_config, ma_config, cc_obs_dim, stop):
         if config["framework"] == "torch":
             return MAPPOTorchPolicy
         else:
-            raise ValueError()
+            sys.exit()
 
     ma_config.update(PPO_CONFIG)
 
