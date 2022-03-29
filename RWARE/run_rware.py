@@ -60,10 +60,17 @@ if __name__ == "__main__":
     ### policy ###
     ##############
 
-    policies = {
-        "policy_{}".format(i): (None, obs_space, act_space, {}) for i in range(agent_num)
-    }
-    policy_ids = list(policies.keys())
+    if args.share_policy:
+        policies = {"shared_policy"}
+        policy_mapping_fn = (
+            lambda agent_id, episode, **kwargs: "shared_policy")
+    else:
+        policies = {
+            "policy_{}".format(i): (None, obs_space, act_space, {}) for i in range(agent_num)
+        }
+        policy_ids = list(policies.keys())
+        policy_mapping_fn = tune.function(
+            lambda agent_id: policy_ids[int(agent_id[6:])])
 
     policy_function_dict = {
         "PG": run_pg_a2c_a3c_r2d2,
@@ -114,8 +121,7 @@ if __name__ == "__main__":
         "num_gpus": args.num_gpus,
         "multiagent": {
             "policies": policies,
-            "policy_mapping_fn": tune.function(
-                lambda agent_id: policy_ids[int(agent_id[6:])]),
+            "policy_mapping_fn": policy_mapping_fn,
         },
         "framework": args.framework,
     }

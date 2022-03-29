@@ -36,6 +36,11 @@ def get_train_parser():
         default="academy_3_vs_1_with_keeper",
         help="Envs should be registered")
     parser.add_argument(
+        "--share-policy",
+        type=bool,
+        default=False,
+        help="Maps should be registered")
+    parser.add_argument(
         "--neural-arch",
         choices=["CNN", "CNN_LSTM", "CNN_GRU", "CNN_UPDeT"],
         type=str,

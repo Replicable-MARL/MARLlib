@@ -44,10 +44,16 @@ if __name__ == '__main__':
     ### policy ###
     ##############
 
-    policies = {
-        "player_{}".format(i): (None, obs_space, act_space, {}) for i in range(agent_num)
-    }
-    policy_ids = list(policies.keys())
+    if args.share_policy:
+        policies = {"shared_policy"}
+        policy_mapping_fn = (
+            lambda agent_id, episode, **kwargs: "shared_policy")
+    else:
+        policies = {
+            "player_{}".format(i): (None, obs_space, act_space, {}) for i in range(agent_num)
+        }
+        policy_ids = list(policies.keys())
+        policy_mapping_fn = lambda agent_id: agent_id
 
     policy_function_dict = {
         "PG": run_pg_a2c_a3c,
@@ -59,7 +65,6 @@ if __name__ == '__main__':
         "MAPPO": run_mappo,
         "COMA": run_coma,
     }
-
 
     #############
     ### model ###
@@ -92,7 +97,7 @@ if __name__ == '__main__':
         "horizon": 200,
         "multiagent": {
             "policies": policies,
-            "policy_mapping_fn": lambda agent_id: agent_id
+            "policy_mapping_fn": policy_mapping_fn
         },
         "framework": args.framework,
     }

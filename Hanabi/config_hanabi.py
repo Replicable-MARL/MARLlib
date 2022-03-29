@@ -19,6 +19,11 @@ def get_train_parser():
         default="COMA",
         help="The RLlib-registered algorithm to use.")
     parser.add_argument(
+        "--share-policy",
+        type=bool,
+        default=True,
+        help="Maps should be registered")
+    parser.add_argument(
         "--num-players",
         type=int,
         default=3,

@@ -1,6 +1,7 @@
 from ray.rllib.models import ModelCatalog
 import sys
 from ray.tune import register_env
+from ray import tune
 
 from ray.rllib.utils.test_utils import check_learning_achieved
 from pettingzoo.mpe import simple_adversary_v2, simple_crypto_v2, simple_v2, simple_push_v2, simple_tag_v2, \
@@ -100,9 +101,16 @@ if __name__ == "__main__":
     ### policy ###
     ##############
 
-    policies = {
-        agent_name: (None, obs_space, act_space, {}) for agent_name in test_env.agents
-    }
+    if args.share_policy:
+        policies = {"shared_policy"}
+        policy_mapping_fn = (
+            lambda agent_id, episode, **kwargs: "shared_policy")
+    else:
+        policies = {
+            agent_name: (None, obs_space, act_space, {}) for agent_name in test_env.agents
+        }
+        policy_ids = list(policies.keys())
+        policy_mapping_fn = lambda agent_id: agent_id
 
     policy_function_dict = {
         "PG": run_pg_a2c_a3c,
@@ -137,7 +145,7 @@ if __name__ == "__main__":
         "horizon": 200,
         "multiagent": {
             "policies": policies,
-            "policy_mapping_fn": lambda agent_id: agent_id
+            "policy_mapping_fn": policy_mapping_fn
         },
         # "callbacks": SmacCallbacks,
         "framework": args.framework,

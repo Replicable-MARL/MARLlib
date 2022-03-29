@@ -54,16 +54,20 @@ if __name__ == "__main__":
     obs_space = single_env.observation_space["agent0"]
     act_space = single_env.action_space["agent0"]
 
-
     ##############
     ### policy ###
     ##############
 
-    policies = {
-        "policy_{}".format(i): (None, obs_space, act_space, {}) for i in range(args.num_agents)
-    }
-    policy_ids = list(policies.keys())
-
+    if args.share_policy:
+        policies = {
+            "shared_policy": (None, obs_space, act_space, {})
+        }
+        policy_mapping_fn = lambda x: "shared_policy"
+    else:
+        print(
+            "Should set share-policy to True \n This is because in meta-drive, old car out, new car in, "
+            "car number is always keep same as max agent number")
+        sys.exit()
 
     policy_function_dict = {
         "PG": run_pg_a2c,
@@ -74,7 +78,6 @@ if __name__ == "__main__":
         "DDPG": run_ddpg,
         "MADDPG": run_maddpg,
     }
-
 
     #############
     ### model ###
@@ -91,7 +94,6 @@ if __name__ == "__main__":
         "GRU_CentralizedCritic", Torch_GRU_CentralizedCritic_Model)
     ModelCatalog.register_custom_model(
         "LSTM_CentralizedCritic", Torch_LSTM_CentralizedCritic_Model)
-
 
     #####################
     ### common config ###
@@ -114,10 +116,8 @@ if __name__ == "__main__":
         "num_workers": 1 if args.local_mode else args.num_workers,
         "train_batch_size": 1000,
         "multiagent": {
-            "policies": {
-                "shared_policy": (None, obs_space, act_space, {})
-            },
-            "policy_mapping_fn": lambda x: "shared_policy"
+            "policies": policies,
+            "policy_mapping_fn": policy_mapping_fn
         },
         "framework": args.framework,
 
@@ -144,5 +144,3 @@ if __name__ == "__main__":
         check_learning_achieved(results, args.stop_reward)
 
     ray.shutdown()
-
-

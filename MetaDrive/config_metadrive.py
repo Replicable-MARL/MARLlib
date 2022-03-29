@@ -16,8 +16,13 @@ def get_train_parser():
     parser.add_argument(
         "--run",
         choices=["PG", "A2C", "DDPG", "MADDPG", "MAA2C", "PPO", "MAPPO"],  # "APPO" "IMPALA"
-        default="MAA2C",
+        default="A2C",
         help="The RLlib-registered algorithm to use.")
+    parser.add_argument(
+        "--share-policy",
+        type=bool,
+        default=True,
+        help="Maps should be registered")
     parser.add_argument(
         "--map",
         choices=["Bottleneck", "ParkingLot", "Intersection", "Roundabout", "Tollgate"],
