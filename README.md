@@ -11,7 +11,7 @@
 
 
 **extensions**
-- [ ] Grouping
+- [x] Parameter Sharing
 - [ ] Message sending
 - [ ] Modelling others
 - [ ] Multi-task Learning
@@ -47,16 +47,20 @@ The basic structure of the repository. Here we take **[SMAC](HTTPS://GITHUB.COM/
                 └───gru.py
                 └───gru_cc.py
                 
-        └───utils   [**algorithm**]
+        └───util    [**algorithm module**]
                 └───mappo_tools.py
                 └───vda2c_tools.py
+        
+        └───policy  [**algorithm config**]
+                └───mappo.py
+                └───vda2c.py
                 
         └───metrics [**customized metrics for logging**]
                 └───callback.py
                 
         └───README.md
-        └───run_env.py
-        └───config_env.py 
+        └───run.py
+        └───config.py 
 
 ```
 
