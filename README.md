@@ -28,7 +28,7 @@
 
 We collected most of the existing multi-agent environment and multi-agent reinforcement learning algorithms with different model architecture under one framework based on [**Ray**](https://github.com/ray-project/ray)'s [**RLlib**](https://github.com/ray-project/ray/tree/master/rllib) to boost the MARL research. 
 
-The code is simple and easy to understand. The most common MARL baselines include **independence learning (IQL, IA2C, IPPO, IPG)**, **centralized critic learning (COMA, MADDPG, MAPPO, MAA2C)** and **value decomposition (QMIX, VDN, VDA2C, VDPPO)** are all implemented as simple as possible. The same algorithm under different tasks can be a bit different to satisfy the various settings of multi-agent systems. But once you are familiar with one task, it will be easy to move to another.
+The code is simple and easy to understand. The most common MARL baselines include **independence learning (R2D2, A2C, PPO, PG)**, **centralized critic learning (COMA, MADDPG, MAPPO, MAA2C)** and **value decomposition (QMIX, VDN, VDA2C, VDPPO)** are all implemented as simple as possible. The same algorithm under different tasks can be a bit different to satisfy the various settings of multi-agent systems. But once you are familiar with one task, it will be easy to move to another.
 
 We hope everyone in the MARL research community can be benefited from this benchmark.
 
@@ -152,11 +152,11 @@ Here is a chart describing the characteristics of each algorithm:
 
 | Algorithm | Learning Mode | Need Global State | Action | Learning Mode  | Type |
 | ----------- | ----------- | ----------- | ----------- | ----------- | ----------- |
-| IQL  | Mixed | No | Discrete | Independent Learning | Off Policy
-| IPG  | Mixed | No | Both | Independent Learning | On Policy
-| IAC  | Mixed | No | Both | Independent Learning | On Policy
-| IDDPG  | Mixed | No | Continuous | Independent Learning | Off Policy
-| IPPO  | Mixed | No | Both | Independent Learning | On Policy
+| R2D2  | Mixed | No | Discrete | Independent Learning | Off Policy
+| PG  | Mixed | No | Both | Independent Learning | On Policy
+| AC  | Mixed | No | Both | Independent Learning | On Policy
+| DDPG  | Mixed | No | Continuous | Independent Learning | Off Policy
+| PPO  | Mixed | No | Both | Independent Learning | On Policy
 | COMA  | Mixed | No | Both | Centralized Critic | On Policy
 | MADDPG  | Mixed | Better | Continuous | Centralized Critic | Off Policy
 | MAAC  | Mixed | Better | Both | Centralized Critic | On Policy
