@@ -5,7 +5,7 @@ def get_train_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--local-mode",
-        default=True,
+        default=False,
         type=bool,
         help="Init Ray in local mode for easier debugging.")
     parser.add_argument(
@@ -17,23 +17,33 @@ def get_train_parser():
         "--run",
         choices=["QMIX", "VDN", "R2D2", "PG", "A2C", "A3C", "MAA2C", "PPO", "MAPPO", "COMA", "MIX-VDA2C", "SUM-VDA2C", "MIX-VDPPO", "SUM-VDPPO"],
         # "APPO" "IMPALA"
-        default="QMIX",
+        default="MAPPO",
         help="The RLlib-registered algorithm to use.")
     parser.add_argument(
         "--map",
         type=str,
-        default="3s_vs_5z",
+        default="3s5z",
         help="Maps should be registered")
     parser.add_argument(
         "--share-policy",
         type=bool,
-        default=False,
+        default=True,
         help="Maps should be registered")
     parser.add_argument(
         "--token-dim",
         type=int,
         default=6,
         help="Maps should be registered")
+    parser.add_argument(
+        "--train-batch-size",
+        type=int,
+        default=1000,
+        help="train-batch-size")
+    parser.add_argument(
+        "--evaluation-interval",
+        type=int,
+        default=1000,
+        help="evaluation_interval")
     parser.add_argument(
         "--neural-arch",
         choices=["LSTM", "GRU", "UPDeT", ],
@@ -53,7 +63,7 @@ def get_train_parser():
     parser.add_argument(
         "--num-gpus",
         type=float,
-        default=0.2,
+        default=0.5,
         help="GPU number per trail")
     parser.add_argument(
         "--num-workers",
@@ -67,7 +77,7 @@ def get_train_parser():
     parser.add_argument(
         "--num-gpus-per-worker",
         type=float,
-        default=0.1)
+        default=0.2)
     parser.add_argument(
         "--num-seeds",
         type=int,

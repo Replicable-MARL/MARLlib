@@ -115,10 +115,10 @@ if __name__ == '__main__':
     #####################
 
     common_config = {
-        "num_gpus_per_worker": 0.2,
-        "num_gpus": 0.6,
-        "num_workers": 0,
-        "train_batch_size": 1000,
+        "num_gpus": args.num_gpus,
+        "num_workers": args.num_workers,
+        "num_gpus_per_worker": args.num_gpus_per_worker,
+        "train_batch_size": args.train_batch_size,
         "env_config": {
             "map_name": args.map,
         },
@@ -128,6 +128,7 @@ if __name__ == '__main__':
         },
         "callbacks": SmacCallbacks,
         "framework": args.framework,
+        "evaluation_interval": args.evaluation_interval,
     }
 
     stop = {
