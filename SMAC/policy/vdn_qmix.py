@@ -49,7 +49,7 @@ def run_vdn_qmix(args, common_config, env_config, stop):
         "rollout_fragment_length": rollout_fragment_length,
         "train_batch_size": 400,
         "exploration_config": {
-            "epsilon_timesteps": 5000,
+            "epsilon_timesteps": 50000,
             "final_epsilon": 0.05,
         },
         "model": {
@@ -66,7 +66,7 @@ def run_vdn_qmix(args, common_config, env_config, stop):
 
         # Use GPUs iff `RLLIB_NUM_GPUS` env var set to > 0.
         "num_gpus": int(os.environ.get("RLLIB_NUM_GPUS", "1")),
-        "num_workers": 2,
+        "num_workers": args.num_workers,
     }
 
     results = tune.run(QMixTrainer, name=args.run + "_" + args.neural_arch + "_" + args.map, stop=stop,

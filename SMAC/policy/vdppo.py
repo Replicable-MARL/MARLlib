@@ -29,7 +29,7 @@ def run_vdppo_sum_mix(args, common_config, env_config, stop):
     config = {
         "env": "smac",
         "sgd_minibatch_size": sgd_minibatch_size,
-        "num_sgd_iter": 10,
+        "num_sgd_iter": args.num_sgd_iter,
         "model": {
             "custom_model": "{}_ValueMixer".format(args.neural_arch),
             "max_seq_len": rollout_fragment_length,

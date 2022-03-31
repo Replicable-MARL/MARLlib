@@ -19,7 +19,7 @@ def run_ppo(args, common_config, env_config, stop):
 
     config = {
         "env": "smac",
-        "num_sgd_iter": 10,
+        "num_sgd_iter": args.num_sgd_iter,
         "sgd_minibatch_size": sgd_minibatch_size,
         "model": {
             "custom_model": "{}_IndependentCritic".format(args.neural_arch),

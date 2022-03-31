@@ -40,6 +40,11 @@ def get_train_parser():
         default=1000,
         help="train-batch-size")
     parser.add_argument(
+        "--num-sgd-iter",
+        type=int,
+        default=15,
+        help="ppo specific parameter")
+    parser.add_argument(
         "--evaluation-interval",
         type=int,
         default=1000,
