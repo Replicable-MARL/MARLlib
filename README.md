@@ -11,7 +11,7 @@
 
 
 **extensions**
-- [ ] Grouping
+- [x] Parameter Sharing
 - [ ] Message sending
 - [ ] Modelling others
 - [ ] Multi-task Learning
@@ -19,11 +19,8 @@
 **(optional) MARL environments**
 - [x] Multi-agent Mujoco
 - [ ] Overcooked-AI
-- [ ] MAgent
+- [x] MAgent
 - [ ] Go-Bigger
-
-
-
 
 
 
@@ -31,7 +28,7 @@
 
 We collected most of the existing multi-agent environment and multi-agent reinforcement learning algorithms with different model architecture under one framework based on [**Ray**](https://github.com/ray-project/ray)'s [**RLlib**](https://github.com/ray-project/ray/tree/master/rllib) to boost the MARL research. 
 
-The code is simple and easy to understand. The most common MARL baselines include **independence learning (IQL, IA2C, IPPO, IPG)**, **centralized critic learning (COMA, MADDPG, MAPPO, MAA2C)** and **value decomposition (QMIX, VDN, VDA2C, VDPPO)** are all implemented as simple as possible. The same algorithm under different tasks can be a bit different to satisfy the various settings of multi-agent systems. But once you are familiar with one task, it will be easy to move to another.
+The code is simple and easy to understand. The most common MARL baselines include **independence learning (R2D2, A2C, PPO, PG)**, **centralized critic learning (COMA, MADDPG, MAPPO, MAA2C)** and **value decomposition (QMIX, VDN, VDA2C, VDPPO)** are all implemented as simple as possible. The same algorithm under different tasks can be a bit different to satisfy the various settings of multi-agent systems. But once you are familiar with one task, it will be easy to move to another.
 
 We hope everyone in the MARL research community can be benefited from this benchmark.
 
@@ -47,16 +44,20 @@ The basic structure of the repository. Here we take **[SMAC](HTTPS://GITHUB.COM/
                 └───gru.py
                 └───gru_cc.py
                 
-        └───utils   [**algorithm**]
+        └───util    [**algorithm module**]
                 └───mappo_tools.py
                 └───vda2c_tools.py
+        
+        └───policy  [**algorithm config**]
+                └───mappo.py
+                └───vda2c.py
                 
         └───metrics [**customized metrics for logging**]
                 └───callback.py
                 
         └───README.md
-        └───run_env.py
-        └───config_env.py 
+        └───run.py
+        └───config.py 
 
 ```
 
@@ -106,13 +107,14 @@ Most of the popular environment in MARL research has been incorporated in this b
 
 | Env Name | Learning Mode | Observability | Action Space | Observations |
 | ----------- | ----------- | ----------- | ----------- | ----------- |
-| [LBF](https://github.com/semitable/lb-foraging)  | Mixed | Both | Discrete | Discrete |
-| [RWARE](https://github.com/semitable/robotic-warehouse)  | Collaborative | Partial | Discrete | Discrete |
-| [MPE](https://github.com/openai/multiagent-particle-envs)  | Mixed | Both | Both | Continuous |
+| [LBF](https://github.com/semitable/lb-foraging)  | Mixed | Both | Discrete | Discrete  |
+| [RWARE](https://github.com/semitable/robotic-warehouse)  | Collaborative | Partial | Discrete | Discrete  |
+| [MPE](https://github.com/openai/multiagent-particle-envs)  | Mixed | Both | Both | Continuous  |
 | [SMAC](https://github.com/oxwhirl/smac)  | Cooperative | Partial | Discrete | Continuous |
 | [Meta-Drive](https://github.com/decisionforce/metadrive)  | Collaborative | Partial | Continuous | Continuous |
+|[MAgent](https://www.pettingzoo.ml/magent) | Mixed | Partial | Discrete | Discrete |
 | [Pommerman](https://github.com/MultiAgentLearning/playground)  | Mixed | Both | Discrete | Discrete |
-| [MAgentMujoco](https://github.com/schroederdewitt/multiagent_mujoco)  | Cooperative | Partial | Continuous | Continuous |
+| [MaMujoco](https://github.com/schroederdewitt/multiagent_mujoco)  | Cooperative | Partial | Continuous | Continuous |
 | [Google-Football](https://github.com/google-research/football)  | Collaborative | Full | Discrete | Continuous |
 | [Hanabi](https://github.com/deepmind/hanabi-learning-environment) | Cooperative | Partial | Discrete | Discrete |
 | [Neural-MMO](https://github.com/NeuralMMO/environment)  | Competitive | Partial | Multi-Discrete | Continuous |
@@ -128,11 +130,11 @@ Each environment has a readme file, standing as the instruction for this task, t
 We provide three types of MARL algorithms as our baselines including:
 
 **Independent Learning:** 
-IQL
-IPG
-IAC
-IDDPG
-IPPO
+R2D2
+PG
+A2C
+DDPG
+PPO
 
 **Centralized Critic:**
 COMA 
@@ -150,11 +152,11 @@ Here is a chart describing the characteristics of each algorithm:
 
 | Algorithm | Learning Mode | Need Global State | Action | Learning Mode  | Type |
 | ----------- | ----------- | ----------- | ----------- | ----------- | ----------- |
-| IQL  | Mixed | No | Discrete | Independent Learning | Off Policy
-| IPG  | Mixed | No | Both | Independent Learning | On Policy
-| IAC  | Mixed | No | Both | Independent Learning | On Policy
-| IDDPG  | Mixed | No | Continuous | Independent Learning | Off Policy
-| IPPO  | Mixed | No | Both | Independent Learning | On Policy
+| R2D2  | Mixed | No | Discrete | Independent Learning | Off Policy
+| PG  | Mixed | No | Both | Independent Learning | On Policy
+| AC  | Mixed | No | Both | Independent Learning | On Policy
+| DDPG  | Mixed | No | Continuous | Independent Learning | Off Policy
+| PPO  | Mixed | No | Both | Independent Learning | On Policy
 | COMA  | Mixed | No | Both | Centralized Critic | On Policy
 | MADDPG  | Mixed | Better | Continuous | Centralized Critic | Off Policy
 | MAAC  | Mixed | Better | Both | Centralized Critic | On Policy
@@ -167,15 +169,16 @@ Here is a chart describing the characteristics of each algorithm:
 **Current Task & Available algorithm map**: Y for available, N for not suitable, P for partially available
 (Note: in our code, independent algorithms may not have **I** as prefix. For instance, PPO = IPPO)
 
-| Env w Algorithm | IQL (R2D2) | IPG | IAC | IDDPG | IPPO | COMA | MADDPG | MAAC | MAPPO | VDN | QMIX | VDAC | VDPPO 
+| Env w Algorithm | R2D2 | PG | A2C | DDPG | PPO | COMA | MADDPG | MAAC | MAPPO | VDN | QMIX | VDAC | VDPPO 
 | ---- | ---- | ---- | ---- | ---- | ---- | ----- | ---- | ---- | ---- | ---- | ---- | ---- | ---- |
 | LBF         | Y | Y | Y | N | Y | Y | N | Y | Y | P | P | P | P |
 | RWARE       | Y | Y | Y | N | Y | Y | N | Y | Y | Y | Y | Y | Y |
 | MPE         | P | Y | Y | P | Y | P | P | Y | Y | Y | Y | Y | Y |
 | SMAC        | Y | Y | Y | N | Y | Y | N | Y | Y | Y | Y | Y | Y |
 | Meta-Drive  | N | Y | Y | Y | Y | N | Y | Y | Y | N | N | N | N |
+| MAgent      | Y | Y | Y | N | Y | Y | N | Y | Y | N | N | N | N |
 | Pommerman   | Y | Y | Y | N | Y | P | N | P | P | P | P | P | P |
-| MAgentMujoco| N | Y | Y | Y | Y | N | Y | Y | Y | N | N | Y | Y |
+| MaMujoco    | N | Y | Y | Y | Y | N | Y | Y | Y | N | N | Y | Y |
 | GRF         | Y | Y | Y | N | Y | Y | N | Y | Y | Y | Y | Y | Y |
 | Hanabi      | Y | Y | Y | N | Y | Y | N | Y | Y | N | N | N | N |
 | Neural-MMO  | N | Y | Y | N | Y | N | N | N | N | N | N | N | N |
@@ -192,8 +195,9 @@ Here is a chart describing the characteristics of each algorithm:
 | SMAC  | N | Y | Y | N | Y | 
 | Neural-MMO  | N | Y | Y | Y | Y |
 | Meta-Drive  | N | Y | Y | Y | Y | 
+| MAgent  | N | Y | Y | Y | N |
 | Pommerman  | N | Y | Y | Y | N |
-| MAgentMujoco  | Y | Y | Y | N | N |
+| MaMujoco  | Y | Y | Y | N | N |
 | GRF  | Y | Y | Y | Y | Y | 
 | Hanabi  | N | Y | Y | N | N |
 

@@ -27,13 +27,14 @@ from DerksGym.model.torch_lstm import *
 from DerksGym.model.torch_lstm_cc import *
 from DerksGym.util.mappo_tools import *
 from DerksGym.util.maa2c_tools import *
+import sys
 
 if __name__ == "__main__":
     args = get_train_parser().parse_args()
 
     if args.num_workers > 1:
         print("Derk is based on chromium, multiple env instance is illegal")
-        raise ValueError()
+        sys.exit()
     
     ray.init(local_mode=args.local_mode)
 
@@ -64,7 +65,7 @@ if __name__ == "__main__":
     if args.run in ["QMIX", "VDN", "R2D2"]:  # policy and model are implemented as source code is
 
         print("Continues action space exists Derk's, which is illegal in {}".format(args.run))
-        raise ValueError()
+        sys.exit()
 
     else:  # "PG", "A2C", "PPO"
 
@@ -218,7 +219,7 @@ if __name__ == "__main__":
                                verbose=1)
         else:
             print("{} algo not supported".format(args.run))
-            raise ValueError()
+            sys.exit()
 
     if args.as_test:
         check_learning_achieved(results, args.stop_reward)

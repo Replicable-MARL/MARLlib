@@ -10,14 +10,19 @@ def get_train_parser():
         help="Init Ray in local mode for easier debugging.")
     parser.add_argument(
         "--parallel",
-        default=True,
+        default=False,
         type=bool,
         help="Whether use tune grid research")
     parser.add_argument(
         "--run",
         choices=["R2D2", "PG", "A2C", "A3C", "MAA2C", "PPO", "MAPPO", "COMA"],  # "APPO" "IMPALA"
-        default="COMA",
+        default="MAPPO",
         help="The RLlib-registered algorithm to use.")
+    parser.add_argument(
+        "--share-policy",
+        type=bool,
+        default=True,
+        help="Maps should be registered")
     parser.add_argument(
         "--num-players",
         type=int,

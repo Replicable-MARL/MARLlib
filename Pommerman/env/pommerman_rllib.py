@@ -10,6 +10,7 @@ from ray.tune.registry import register_env
 from gym.spaces import Dict, Discrete, Box
 import pommerman
 from Pommerman.agent.trainable_place_holder_agent import PlaceHolderAgent
+import sys
 
 
 class RllibPommerman(MultiAgentEnv):
@@ -52,7 +53,7 @@ class RllibPommerman(MultiAgentEnv):
                 state["agent_%d" % x] = obs_status
             else:
                 print("agent number must > 1")
-                raise ValueError()
+                sys.exit()
         return state
 
     def step(self, action_dict):

@@ -7,7 +7,7 @@ from ray.rllib.env import BaseEnv
 from ray.rllib.evaluation import MultiAgentEpisode, RolloutWorker
 from ray.rllib.policy import Policy
 
-
+# from original repo: https://github.com/decisionforce/metadrive
 class MultiAgentDrivingCallbacks(DefaultCallbacks):
     def on_episode_start(
             self, *, worker: RolloutWorker, base_env: BaseEnv, policies: Dict[str, Policy], episode: MultiAgentEpisode,

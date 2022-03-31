@@ -5,42 +5,29 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from ray.rllib.models.catalog import ModelCatalog
-import ray
 from ray import tune
 from ray.tune.registry import register_env
-from ray.rllib.agents.a3c.a2c import A2CTrainer
-from ray.rllib.agents.a3c.a3c import DEFAULT_CONFIG as A3C_CONFIG
-from ray.rllib.agents.a3c.a3c_tf_policy import A3CTFPolicy
-from ray.rllib.agents.a3c.a3c_torch_policy import A3CTorchPolicy
-from ray.rllib.agents.a3c.a2c import A2C_DEFAULT_CONFIG as A2C_CONFIG
-from ray.tune.utils import merge_dicts
-from ray.rllib.agents.ppo.ppo_torch_policy import PPOTorchPolicy
-from ray.rllib.agents.ppo.ppo_tf_policy import PPOTFPolicy
-from ray.rllib.agents.ppo.ppo import PPOTrainer, DEFAULT_CONFIG as PPO_CONFIG
-from ray.rllib.agents.ddpg.ddpg import DDPGTrainer
-from ray.rllib.agents.ddpg.ddpg_torch_policy import DDPGTorchPolicy, ComputeTDErrorMixin
-from ray.rllib.agents.ddpg.ddpg_tf_policy import DDPGTFPolicy
-from ray.rllib.agents.ddpg.ddpg import DEFAULT_CONFIG as DDPG_CONFIG
+from ray.rllib.utils.test_utils import check_learning_achieved
 
 from MaMujoco.config_mamujoco import get_train_parser
 from MaMujoco.env.mamujoco_rllib import RllibMAMujoco
-from MaMujoco.util.mappo_tools import *
-from MaMujoco.util.maa2c_tools import *
-from MaMujoco.util.vda2c_tools import *
-from MaMujoco.util.vdppo_tools import *
 from MaMujoco.util.maddpg_tools import *
-
 from MaMujoco.model.torch_gru import Torch_GRU_Model
 from MaMujoco.model.torch_lstm import Torch_LSTM_Model
 from MaMujoco.model.torch_gru_cc import Torch_GRU_CentralizedCritic_Model
 from MaMujoco.model.torch_lstm_cc import Torch_LSTM_CentralizedCritic_Model
 from MaMujoco.model.torch_vd_ppo_a2c_gru_lstm import Torch_LSTM_Model_w_Mixer, Torch_GRU_Model_w_Mixer
-from MaMujoco.model.torch_maddpg import MADDPGTorchModel
-
-# from MaMujoco.util.vdppo_tools import *
+from MaMujoco.policy.pg_a2c_a3c import run_pg_a2c_a3c
+from MaMujoco.policy.ppo import run_ppo
+from MaMujoco.policy.vda2c import run_vda2c_sum_mix
+from MaMujoco.policy.vdppo import run_vdppo_sum_mix
+from MaMujoco.policy.maa2c import run_maa2c
+from MaMujoco.policy.mappo import run_mappo
+from MaMujoco.policy.ddpg import run_ddpg
+from MaMujoco.policy.maddpg import run_maddpg
 
 # from https://github.com/schroederdewitt/multiagent_mujoco
+
 env_args_dict = {
     "2AgentAnt": {"scenario": "Ant-v2",
                   "agent_conf": "2x4",
@@ -100,9 +87,57 @@ if __name__ == "__main__":
     args = get_train_parser().parse_args()
     ray.init(local_mode=True)
 
+    ###################
+    ### environment ###
+    ###################
+
     env_config = env_args_dict[args.map]
 
     register_env(args.map, lambda _: RllibMAMujoco(env_config))
+
+    single_env = RllibMAMujoco(env_config)
+    obs_space = single_env.observation_space
+    act_space = single_env.action_space
+    state_dim = single_env.state_dim
+    ally_num = single_env.num_agents
+
+    env_config["state_dim"] = state_dim
+    env_config["ally_num"] = ally_num
+
+    ##############
+    ### policy ###
+    ##############
+
+    if args.share_policy:
+        policies = {"shared_policy"}
+        policy_mapping_fn = (
+            lambda agent_id, episode, **kwargs: "shared_policy")
+    else:
+        policies = {
+            "policy_{}".format(i): (None, obs_space, act_space, {}) for i in range(ally_num)
+        }
+        policy_ids = list(policies.keys())
+        policy_mapping_fn = tune.function(
+            lambda agent_id: policy_ids[int(agent_id[6:])])
+
+    policy_function_dict = {
+        "PG": run_pg_a2c_a3c,
+        "A2C": run_pg_a2c_a3c,
+        "A3C": run_pg_a2c_a3c,
+        "PPO": run_ppo,
+        "MIX-VDA2C": run_vda2c_sum_mix,
+        "SUM-VDA2C": run_vda2c_sum_mix,
+        "MIX-VDPPO": run_vdppo_sum_mix,
+        "SUM-VDPPO": run_vdppo_sum_mix,
+        "MAA2C": run_maa2c,
+        "MAPPO": run_mappo,
+        "DDPG": run_ddpg,
+        "MADDPG": run_maddpg,
+    }
+
+    #############
+    ### model ###
+    #############
 
     # Independent
     ModelCatalog.register_custom_model("LSTM", Torch_LSTM_Model)
@@ -119,22 +154,9 @@ if __name__ == "__main__":
     ModelCatalog.register_custom_model("LSTM_ValueMixer", Torch_LSTM_Model_w_Mixer)
     # ModelCatalog.register_custom_model("CNN_UPDeT_ValueMixer", Torch_CNN_Transformer_Model_w_Mixer)
 
-    stop = {
-        "episode_reward_mean": args.stop_reward,
-        "timesteps_total": args.stop_timesteps,
-        "training_iteration": args.stop_iters,
-    }
-
-    single_env = RllibMAMujoco(env_config)
-    obs_space = single_env.observation_space
-    act_space = single_env.action_space
-    state_dim = single_env.state_dim
-    ally_num = single_env.num_agents
-
-    policies = {
-        "policy_{}".format(i): (None, obs_space, act_space, {}) for i in range(ally_num)
-    }
-    policy_ids = list(policies.keys())
+    #####################
+    ### common config ###
+    #####################
 
     common_config = {
         "num_gpus_per_worker": args.num_gpus_per_worker,
@@ -143,362 +165,24 @@ if __name__ == "__main__":
         "num_gpus": args.num_gpus,
         "multiagent": {
             "policies": policies,
-            "policy_mapping_fn": tune.function(
-                lambda agent_id: policy_ids[int(agent_id[6:])]),
+            "policy_mapping_fn": policy_mapping_fn,
         },
         "framework": args.framework,
     }
 
-    if args.run in ["PG", "A2C", "A3C", "R2D2"]:
-        config = {
-            "env": args.map,
-            "horizon": args.horizon,
-            "model": {
-                "custom_model": args.neural_arch,
-            },
-        }
+    stop = {
+        "episode_reward_mean": args.stop_reward,
+        "timesteps_total": args.stop_timesteps,
+        "training_iteration": args.stop_iters,
+    }
 
-        config.update(common_config)
-        results = tune.run(args.run,
-                           name=args.run + "_" + args.neural_arch + "_" + args.map,
-                           stop=stop,
-                           config=config,
-                           verbose=1)
+    ##################
+    ### run script ###
+    ###################
 
-    elif args.run in ["SUM-VDA2C", "MIX-VDA2C"]:
+    results = policy_function_dict[args.run](args, common_config, env_config, stop)
 
-
-        config = {
-            "env": args.map,
-            "horizon": args.horizon,
-            "model": {
-                "custom_model": "{}_ValueMixer".format(args.neural_arch),
-                "custom_model_config": {
-                    "n_agents": ally_num,
-                    "mixer": "qmix" if args.run == "MIX-VDA2C" else "vdn",
-                    "mixer_emb_dim": 64,
-                    "state_dim": state_dim
-                },
-            },
-        }
-        config.update(common_config)
-
-        VDA2C_CONFIG = merge_dicts(
-            A2C_CONFIG,
-            {
-                "agent_num": ally_num,
-            }
-        )
-
-        VDA2CTFPolicy = A3CTFPolicy.with_updates(
-            name="VDA2CTFPolicy",
-            postprocess_fn=value_mix_centralized_critic_postprocessing,
-            loss_fn=value_mix_actor_critic_loss,
-            grad_stats_fn=central_vf_stats_a2c, )
-
-        VDA2CTorchPolicy = A3CTorchPolicy.with_updates(
-            name="VDA2CTorchPolicy",
-            get_default_config=lambda: VDA2C_CONFIG,
-            postprocess_fn=value_mix_centralized_critic_postprocessing,
-            loss_fn=value_mix_actor_critic_loss,
-            mixins=[ValueNetworkMixin, MixingValueMixin],
-        )
-
-
-        def get_policy_class(config_):
-            if config_["framework"] == "torch":
-                return VDA2CTorchPolicy
-
-
-        VDA2CTrainer = A2CTrainer.with_updates(
-            name="VDA2CTrainer",
-            default_policy=VDA2CTFPolicy,
-            get_policy_class=get_policy_class,
-        )
-
-        results = tune.run(VDA2CTrainer, name=args.run + "_" + args.neural_arch + "_" + args.map, stop=stop,
-                           config=config, verbose=1)
-
-    elif args.run == "MAA2C":  # centralized A2C
-
-        config = {
-            "env": args.map,
-            "horizon": args.horizon,
-            "model": {
-                "custom_model": "{}_CentralizedCritic".format(args.neural_arch),
-                "custom_model_config": {
-                    "agent_num": ally_num,
-                    "state_dim": state_dim
-                }
-            },
-        }
-
-        config.update(common_config)
-
-        MAA2CTFPolicy = A3CTFPolicy.with_updates(
-            name="MAA2CTFPolicy",
-            postprocess_fn=centralized_critic_postprocessing,
-            loss_fn=loss_with_central_critic_a2c,
-            grad_stats_fn=central_vf_stats_a2c,
-            mixins=[
-                CentralizedValueMixin
-            ])
-
-        MAA2CTorchPolicy = A3CTorchPolicy.with_updates(
-            name="MAA2CTorchPolicy",
-            get_default_config=lambda: A3C_CONFIG,
-            postprocess_fn=centralized_critic_postprocessing,
-            loss_fn=loss_with_central_critic_a2c,
-            mixins=[
-                CentralizedValueMixin
-            ])
-
-
-        def get_policy_class(config_):
-            if config_["framework"] == "torch":
-                return MAA2CTorchPolicy
-
-
-        MAA2CTrainer = A2CTrainer.with_updates(
-            name="MAA2CTrainer",
-            default_policy=MAA2CTFPolicy,
-            get_policy_class=get_policy_class,
-        )
-
-        results = tune.run(MAA2CTrainer,
-                           name=args.run + "_" + args.neural_arch + "_" + args.map,
-                           stop=stop,
-                           config=config,
-                           verbose=1)
-
-    elif args.run == "DDPG":
-
-        config = {
-            "env": args.map,
-            "horizon": args.horizon,
-        }
-        config.update(common_config)
-
-        tune.run(
-            args.run,
-            name=args.run + "_" + "MLP" + "_" + args.map,
-            stop=stop,
-            config=config,
-            verbose=1
-        )
-
-    elif args.run == "MADDPG":
-
-        ModelCatalog.register_custom_model(
-            "torch_maddpg", MADDPGTorchModel)
-
-        config = {
-            "env": args.map,
-            "horizon": args.horizon,
-            "model": {
-                "custom_model": "torch_maddpg",
-                "custom_model_config": {
-                    "agent_num": ally_num,
-                },
-            },
-        }
-        config.update(common_config)
-
-
-        MADDPGTFPolicy = DDPGTFPolicy.with_updates(
-            name="MADDPGTFPolicy",
-            postprocess_fn=maddpg_centralized_critic_postprocessing,
-            loss_fn=maddpg_actor_critic_loss,
-            mixins=[
-                TargetNetworkMixin,
-                ComputeTDErrorMixin,
-                CentralizedValueMixin
-            ])
-
-        MADDPGTorchPolicy = DDPGTorchPolicy.with_updates(
-            name="MADDPGTorchPolicy",
-            get_default_config=lambda: DDPG_CONFIG,
-            postprocess_fn=maddpg_centralized_critic_postprocessing,
-            make_model_and_action_dist=build_maddpg_models_and_action_dist,
-            loss_fn=maddpg_actor_critic_loss,
-            mixins=[
-                TargetNetworkMixin,
-                ComputeTDErrorMixin,
-                CentralizedValueMixin
-            ])
-
-        def get_policy_class(config_):
-            if config_["framework"] == "torch":
-                return MADDPGTorchPolicy
-
-        MADDPGTrainer = DDPGTrainer.with_updates(
-            name="MADDPGTrainer",
-            default_policy=MADDPGTFPolicy,
-            get_policy_class=get_policy_class,
-        )
-
-        results = tune.run(MADDPGTrainer,
-                           name=args.run + "_MLP_" + args.map,
-                           stop=stop,
-                           config=config,
-                           verbose=1)
-
-    elif args.run in ["PPO", "APPO"]:
-
-        """
-        for bug mentioned https://github.com/ray-project/ray/pull/20743
-        make sure sgd_minibatch_size > max_seq_len
-        """
-        sgd_minibatch_size = 128
-        while sgd_minibatch_size < args.horizon:
-            sgd_minibatch_size *= 2
-
-        config = {
-            "env": args.map,
-            "horizon": args.horizon,
-            "num_sgd_iter": 5,
-            "sgd_minibatch_size": sgd_minibatch_size,
-            "model": {
-                "custom_model": args.neural_arch,
-            },
-        }
-        config.update(common_config)
-        results = tune.run(args.run, name=args.run + "_" + args.neural_arch + "_" + args.map, stop=stop, config=config,
-                           verbose=1)
-
-    elif args.run in ["SUM-VDPPO", "MIX-VDPPO"]:
-
-        """
-        for bug mentioned https://github.com/ray-project/ray/pull/20743
-        make sure sgd_minibatch_size > max_seq_len
-        """
-        sgd_minibatch_size = 128
-        while sgd_minibatch_size < args.horizon:
-            sgd_minibatch_size *= 2
-
-        config = {
-            "env": args.map,
-            "horizon": args.horizon,
-            "num_sgd_iter": 5,
-            "sgd_minibatch_size": sgd_minibatch_size,
-            "model": {
-                "custom_model": "{}_ValueMixer".format(args.neural_arch),
-                "custom_model_config": {
-                    "n_agents": ally_num,
-                    "mixer": "qmix" if args.run == "MIX-VDPPO" else "vdn",
-                    "mixer_emb_dim": 64,
-                    "state_dim": state_dim
-                },
-            },
-        }
-
-        config.update(common_config)
-
-        VDPPO_CONFIG = merge_dicts(
-            PPO_CONFIG,
-            {
-                "agent_num": ally_num,
-            }
-        )
-
-        # not used
-        VDPPOTFPolicy = PPOTFPolicy.with_updates(
-            name="VDPPOTFPolicy",
-            postprocess_fn=value_mix_centralized_critic_postprocessing,
-            loss_fn=value_mix_ppo_surrogate_loss,
-            before_loss_init=setup_tf_mixins,
-            grad_stats_fn=central_vf_stats_ppo,
-            mixins=[
-                LearningRateSchedule, EntropyCoeffSchedule, KLCoeffMixin,
-                ValueNetworkMixin, MixingValueMixin
-            ])
-
-        VDPPOTorchPolicy = PPOTorchPolicy.with_updates(
-            name="VDPPOTorchPolicy",
-            get_default_config=lambda: VDPPO_CONFIG,
-            postprocess_fn=value_mix_centralized_critic_postprocessing,
-            loss_fn=value_mix_ppo_surrogate_loss,
-            before_init=setup_torch_mixins,
-            mixins=[
-                TorchLR, TorchEntropyCoeffSchedule, TorchKLCoeffMixin,
-                ValueNetworkMixin, MixingValueMixin
-            ])
-
-        def get_policy_class(config_):
-            if config_["framework"] == "torch":
-                return VDPPOTorchPolicy
-
-        VDPPOTrainer = PPOTrainer.with_updates(
-            name="VDPPOTrainer",
-            default_policy=VDPPOTFPolicy,
-            get_policy_class=get_policy_class,
-        )
-
-        results = tune.run(VDPPOTrainer, name=args.run + "_" + args.neural_arch + "_" + args.map, stop=stop,
-                           config=config,
-                           verbose=1)
-
-
-    elif args.run == "MAPPO":  # centralized PPO
-
-        """
-        for bug mentioned https://github.com/ray-project/ray/pull/20743
-        make sure sgd_minibatch_size > max_seq_len
-        """
-        sgd_minibatch_size = 128
-        while sgd_minibatch_size < args.horizon:
-            sgd_minibatch_size *= 2
-
-        config = {
-            "env": args.map,
-            "horizon": args.horizon,
-            "num_sgd_iter": 5,
-            "sgd_minibatch_size": sgd_minibatch_size,
-            "model": {
-                "custom_model": "{}_CentralizedCritic".format(args.neural_arch),
-                "custom_model_config": {
-                    "agent_num": ally_num,
-                    "state_dim": state_dim
-                }
-            },
-        }
-        config.update(common_config)
-
-
-        MAPPOTFPolicy = PPOTFPolicy.with_updates(
-            name="MAPPOTFPolicy",
-            postprocess_fn=centralized_critic_postprocessing,
-            loss_fn=loss_with_central_critic,
-            before_loss_init=setup_tf_mixins,
-            grad_stats_fn=central_vf_stats_ppo,
-            mixins=[
-                LearningRateSchedule, EntropyCoeffSchedule, KLCoeffMixin,
-                CentralizedValueMixin
-            ])
-
-        MAPPOTorchPolicy = PPOTorchPolicy.with_updates(
-            name="MAPPOTorchPolicy",
-            get_default_config=lambda: PPO_CONFIG,
-            postprocess_fn=centralized_critic_postprocessing,
-            loss_fn=loss_with_central_critic,
-            before_init=setup_torch_mixins,
-            mixins=[
-                TorchLR, TorchEntropyCoeffSchedule, TorchKLCoeffMixin,
-                CentralizedValueMixin
-            ])
-
-        def get_policy_class(config_):
-            if config_["framework"] == "torch":
-                return MAPPOTorchPolicy
-
-        MAPPOTrainer = PPOTrainer.with_updates(
-            name="MAPPOTrainer",
-            default_policy=MAPPOTFPolicy,
-            get_policy_class=get_policy_class,
-        )
-
-        results = tune.run(MAPPOTrainer, name=args.run + "_" + args.neural_arch + "_" + args.map, stop=stop,
-                           config=config,
-                           verbose=1)
+    if args.as_test:
+        check_learning_achieved(results, args.stop_reward)
 
     ray.shutdown()

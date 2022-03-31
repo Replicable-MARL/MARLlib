@@ -15,6 +15,10 @@ This is Neural-MMO baseline with **ray[rllib]**
 Please add one line source code in **copy.py** according to
 https://bugs.python.org/issue38293 to avoid copy bug of @property
 
+if Flexdict related error reported, change your gym version to
+
+> pip install gym==0.17.2
+
 Please annotate one line source code to avoid parallel env seed bug (some env need this)
 at ray.rllib.evaluation.rollout_worker.py line 508
 
