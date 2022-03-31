@@ -42,12 +42,13 @@ def run_vdn_qmix(args, common_config, env_config, stop):
             grouping, obs_space=obs_space, act_space=act_space))
 
     config = {
+        "seed": tune.grid_search([0, 1, 2]),
         "env": "grouped_smac",
         "env_config": {
             "map_name": args.map,
         },
         "rollout_fragment_length": rollout_fragment_length,
-        "train_batch_size": 400,
+        "train_batch_size": tune.grid_search([args.train_batch_size, 2 * args.train_batch_size]),
         "exploration_config": {
             "epsilon_timesteps": 50000,
             "final_epsilon": 0.05,

@@ -1,0 +1,150 @@
+from ray import tune
+from ray.tune import register_env
+from ray.rllib.utils.test_utils import check_learning_achieved
+from SMAC.model.torch_mask_lstm import *
+from SMAC.model.torch_mask_lstm_cc import *
+from SMAC.model.torch_mask_gru import *
+from SMAC.model.torch_mask_gru_cc import *
+from SMAC.model.torch_mask_updet_cc import *
+from SMAC.metric.smac_callback import *
+from SMAC.util.r2d2_tools import *
+from SMAC.model.torch_qmix_mask_gru_updet import *
+from SMAC.model.torch_vd_ppo_a2c_mask_gru_lstm_updet import *
+from SMAC.env.starcraft2_rllib import StarCraft2Env_Rllib as SMAC
+from config_smac import *
+from SMAC.policy.vdn_qmix import run_vdn_qmix
+from SMAC.policy.pg_a2c_a3c import run_pg_a2c_a3c
+from SMAC.policy.r2d2 import run_r2d2
+from SMAC.policy.ppo import run_ppo
+from SMAC.policy.vda2c import run_vda2c_sum_mix
+from SMAC.policy.vdppo import run_vdppo_sum_mix
+from SMAC.policy.maa2c import run_maa2c
+from SMAC.policy.mappo import run_mappo
+from SMAC.policy.coma import run_coma
+
+if __name__ == '__main__':
+
+    args = get_train_parser().parse_args()
+    ray.init(num_cpus=args.num_cpus or None, local_mode=args.local_mode)
+
+    ###################
+    ### environment ###
+    ###################
+
+    env = SMAC(map_name=args.map)
+    env_info = env.get_env_info()
+    obs_space = env.observation_space
+    act_space = env.action_space
+    state_shape = env_info["state_shape"]
+    obs_shape = env_info["obs_shape"]
+    n_actions = env_info["n_actions"]
+    n_ally = env_info["n_agents"]
+    n_enemy = env.death_tracker_enemy.shape[0]
+    rollout_fragment_length = env_info["episode_limit"]
+    env.close()
+    # close env instance
+
+    env_config = {
+        "obs_shape": obs_shape,
+        "n_ally": n_ally,
+        "n_enemy": n_enemy,
+        "state_shape": state_shape,
+        "n_actions": n_actions,
+        "rollout_fragment_length": rollout_fragment_length,
+    }
+
+    register_env("smac", lambda config: SMAC(args.map))
+
+    #############
+    ### model ###
+    #############
+
+    # Independent
+    ModelCatalog.register_custom_model("LSTM_IndependentCritic", Torch_ActionMask_LSTM_Model)
+    ModelCatalog.register_custom_model("GRU_IndependentCritic", Torch_ActionMask_GRU_Model)
+    ModelCatalog.register_custom_model("UPDeT_IndependentCritic", Torch_ActionMask_Transformer_Model)
+
+    # CTDE(centralized critic)
+    ModelCatalog.register_custom_model("LSTM_CentralizedCritic",
+                                       Torch_ActionMask_LSTM_CentralizedCritic_Model)
+    ModelCatalog.register_custom_model("GRU_CentralizedCritic",
+                                       Torch_ActionMask_GRU_CentralizedCritic_Model)
+    ModelCatalog.register_custom_model("UPDeT_CentralizedCritic",
+                                       Torch_ActionMask_Transformer_CentralizedCritic_Model)
+
+    # Value Decomposition(mixer)
+    ModelCatalog.register_custom_model("GRU_ValueMixer", Torch_ActionMask_GRU_Model_w_Mixer)
+    ModelCatalog.register_custom_model("LSTM_ValueMixer", Torch_ActionMask_LSTM_Model_w_Mixer)
+    ModelCatalog.register_custom_model("UPDeT_ValueMixer", Torch_ActionMask_Transformer_Model_w_Mixer)
+
+    ##############
+    ### policy ###
+    ##############
+
+    if args.share_policy:
+        policies = {"shared_policy"}
+        policy_mapping_fn = (
+            lambda agent_id, episode, **kwargs: "shared_policy")
+    else:
+        policies = {
+            "policy_{}".format(i): (None, obs_space, act_space, {}) for i in range(n_ally)
+        }
+        policy_ids = list(policies.keys())
+        policy_mapping_fn = tune.function(
+            lambda agent_id: policy_ids[agent_id])
+
+    policy_function_dict = {
+        "PG": run_pg_a2c_a3c,
+        "A2C": run_pg_a2c_a3c,
+        "A3C": run_pg_a2c_a3c,
+        "R2D2": run_r2d2,
+        "VDN": run_vdn_qmix,
+        "QMIX": run_vdn_qmix,
+        "PPO": run_ppo,
+        "MIX-VDA2C": run_vda2c_sum_mix,
+        "SUM-VDA2C": run_vda2c_sum_mix,
+        "MIX-VDPPO": run_vdppo_sum_mix,
+        "SUM-VDPPO": run_vdppo_sum_mix,
+        "MAA2C": run_maa2c,
+        "MAPPO": run_mappo,
+        "COMA": run_coma,
+    }
+
+    #####################
+    ### common config ###
+    #####################
+
+    common_config = {
+        "seed": tune.grid_search([0, 1, 2]),
+        "num_gpus": args.num_gpus,
+        "num_workers": args.num_workers,
+        "num_gpus_per_worker": args.num_gpus_per_worker,
+        "train_batch_size": tune.grid_search([args.train_batch_size, 2*args.train_batch_size]),
+        "env_config": {
+            "map_name": args.map,
+        },
+        "multiagent": {
+            "policies": policies,
+            "policy_mapping_fn": policy_mapping_fn,
+        },
+        "callbacks": SmacCallbacks,
+        "framework": args.framework,
+        "evaluation_interval": args.evaluation_interval,
+    }
+
+    stop = {
+        "episode_reward_mean": args.stop_reward,
+        "timesteps_total": args.stop_timesteps,
+        "training_iteration": args.stop_iters,
+    }
+
+    ##################
+    ### run script ###
+    ###################
+
+    results = policy_function_dict[args.run](args, common_config, env_config, stop)
+
+    if args.as_test:
+        check_learning_achieved(results, args.stop_reward)
+
+    ray.shutdown()

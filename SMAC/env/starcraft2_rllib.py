@@ -214,6 +214,6 @@ class StarCraft2Env_Rllib(StarCraft2Env, Rllib_MultiAgentEnv):
                     "n_actions": self.get_total_actions(),
                     "n_agents": self.n_agents,
                     "episode_limit": self.episode_limit}
-        env_info["agent_features"] = self.ally_state_attr_names
-        env_info["enemy_features"] = self.enemy_state_attr_names
+        # env_info["agent_features"] = self.ally_state_attr_names
+        # env_info["enemy_features"] = self.enemy_state_attr_names
         return env_info

@@ -5,7 +5,7 @@ def get_train_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--local-mode",
-        default=False,
+        default=True,
         type=bool,
         help="Init Ray in local mode for easier debugging.")
     parser.add_argument(
@@ -73,7 +73,7 @@ def get_train_parser():
     parser.add_argument(
         "--num-workers",
         type=int,
-        default=2,
+        default=4,
         help="Sampler number per trail")
     parser.add_argument(
         "--num-cpus-per-worker",
