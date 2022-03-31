@@ -204,7 +204,7 @@ def ppo_surrogate_loss(
     if contain_global_obs(train_batch):
         sub_losses = []
 
-        m_advantage = train_batch[Postprocessing.ADVANTAGES].clone()
+        m_advantage = train_batch[Postprocessing.ADVANTAGES]
 
         agents_num = train_batch[GLOBAL_MODEL_LOGITS].shape[1] + 1
         # all_agents = [SELF] + train_batch[get_global_name(SampleBatch.OBS)]
@@ -226,11 +226,11 @@ def ppo_surrogate_loss(
                 old_action_log_dist = train_batch[SampleBatch.ACTION_LOGP]
                 actions = train_batch[SampleBatch.ACTIONS]
             else:
-                current_action_logits = train_batch[GLOBAL_MODEL_LOGITS][:, agent_id, :].clone()
+                current_action_logits = train_batch[GLOBAL_MODEL_LOGITS][:, agent_id, :]
                 current_action_dist = dist_class(current_action_logits, None)
                 # current_action_dist = train_batch[GLOBAL_MODEL_LOGITS][:, agent_id, :]
-                old_action_log_dist = train_batch[get_global_name(SampleBatch.ACTION_LOGP)][:, agent_id].clone()
-                actions = train_batch[get_global_name(SampleBatch.ACTIONS)][:, agent_id, :].clone()
+                old_action_log_dist = train_batch[get_global_name(SampleBatch.ACTION_LOGP)][:, agent_id]
+                actions = train_batch[get_global_name(SampleBatch.ACTIONS)][:, agent_id, :]
 
             importance_sampling = torch.exp(current_action_dist.logp(actions) - old_action_log_dist)
 
