@@ -43,7 +43,7 @@ def run_happo(args, common_config, env_config, stop):
     config.update(common_config)
 
     HAPPOTorchPolicy = PPOTorchPolicy.with_updates(
-        name="MAPPOTorchPolicy",
+        name="HAPPOTorchPolicy",
         get_default_config=lambda: PPO_CONFIG,
         postprocess_fn=add_another_agent_and_gae,
         loss_fn=ppo_surrogate_loss,

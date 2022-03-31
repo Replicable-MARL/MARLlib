@@ -60,6 +60,7 @@ from ray.rllib.utils.test_utils import check_learning_achieved
 from ray.rllib.utils.numpy import convert_to_numpy
 from MaMujoco.util.vda2c_tools import MixingValueMixin
 from ray.rllib.evaluation.postprocessing import compute_gae_for_sample_batch
+from ray.rllib.utils.torch_ops import convert_to_torch_tensor as _d2t
 
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
@@ -90,6 +91,7 @@ from ray.rllib.examples.centralized_critic import centralized_critic_postprocess
 
 GLOBAL_NEED_COLLECT = [SampleBatch.OBS, SampleBatch.ACTIONS, SampleBatch.ACTION_LOGP]
 GLOBAL_PREFIX = 'GLOBAL_'
+GLOBAL_MODEL_LOGITS = f'{GLOBAL_PREFIX}_model_logits'
 
 
 def add_other_agent_info(agents_batch: dict, key: str):
@@ -109,19 +111,57 @@ def get_global_name(key):
     return f'{GLOBAL_PREFIX}{key}'
 
 
+def collect_other_agents_model_output(agents_batch):
+
+    other_agents_logits = []
+
+    for agent_id, (policy, obs) in agents_batch.items():
+        agent_model = policy.model
+        agent_logits, state = agent_model(_d2t(obs))
+        # dis_class = TorchDistributionWrapper
+        # curr_action_dist = dis_class(agent_logits, agent_model)
+        # action_log_dist = curr_action_dist.logp(obs[SampleBatch.ACTIONS])
+
+        other_agents_logits.append(agent_logits)
+
+    other_agents_logits = np.stack(other_agents_logits, axis=1)
+
+    return other_agents_logits
+
+
 def add_another_agent_and_gae(policy, sample_batch, other_agent_batches=None, episode=None):
     train_batch = compute_gae_for_sample_batch(policy, sample_batch, other_agent_batches, episode)
 
     if other_agent_batches:
-
         for key in GLOBAL_NEED_COLLECT:
             train_batch[get_global_name(key)] = add_other_agent_info(agents_batch=other_agent_batches, key=key)
+
+        train_batch[GLOBAL_MODEL_LOGITS] = collect_other_agents_model_output(other_agent_batches)
 
     return train_batch
 
 
 def contain_global_obs(train_batch):
     return any(key.startswith(GLOBAL_PREFIX) for key in train_batch)
+
+
+def surrogate_for_one_agent(importance_sampling, advantage, epsilon):
+    surrogate_loss = torch.min(
+        advantage * importance_sampling,
+        advantage * torch.clamp(
+            importance_sampling, 1 - epsilon,
+            1 + epsilon
+        )
+    )
+
+    return surrogate_loss
+
+
+def get_action_from_batch(train_batch, model, dist_class):
+    logits, state = model(train_batch)
+    curr_action_dist = dist_class(logits, model)
+
+    return curr_action_dist
 
 
 def ppo_surrogate_loss(
@@ -138,6 +178,7 @@ def ppo_surrogate_loss(
         Union[TensorType, List[TensorType]]: A single loss tensor or a list
             of loss tensors.
     """
+
     logits, state = model(train_batch)
     curr_action_dist = dist_class(logits, model)
 
@@ -161,26 +202,66 @@ def ppo_surrogate_loss(
         reduce_mean_valid = torch.mean
 
     if contain_global_obs(train_batch):
-        print('contain global observation!')
+        sub_losses = []
 
+        m_advantage = train_batch[Postprocessing.ADVANTAGES].clone()
+
+        agents_num = train_batch[GLOBAL_MODEL_LOGITS].shape[1] + 1
+        # all_agents = [SELF] + train_batch[get_global_name(SampleBatch.OBS)]
+
+        random_indices = np.random.permutation(range(agents_num))
+        print(f'there are {agents_num} agents, training as {random_indices}')
+        # in order to get each agent's information, if random_indices is len(agents_num) - 1, we set
+        # this as our current_agent, and get the information from generally train batch.
+        # otherwise, we get the agent information from "GLOBAL_LOGITS", "GLOBAL_ACTIONS", etc
+
+        def is_current_agent(i): return i == agents_num - 1
+
+        torch.autograd.set_detect_anomaly(True)
+
+        for agent_id in random_indices:
+            if is_current_agent(agent_id):
+                logits, state = model(train_batch)
+                current_action_dist = dist_class(logits, model)
+                old_action_log_dist = train_batch[SampleBatch.ACTION_LOGP]
+                actions = train_batch[SampleBatch.ACTIONS]
+            else:
+                current_action_logits = train_batch[GLOBAL_MODEL_LOGITS][:, agent_id, :].clone()
+                current_action_dist = dist_class(current_action_logits, None)
+                # current_action_dist = train_batch[GLOBAL_MODEL_LOGITS][:, agent_id, :]
+                old_action_log_dist = train_batch[get_global_name(SampleBatch.ACTION_LOGP)][:, agent_id].clone()
+                actions = train_batch[get_global_name(SampleBatch.ACTIONS)][:, agent_id, :].clone()
+
+            importance_sampling = torch.exp(current_action_dist.logp(actions) - old_action_log_dist)
+
+            sub_loss = surrogate_for_one_agent(importance_sampling=importance_sampling,
+                                               advantage=m_advantage,
+                                               epsilon=policy.config["clip_param"])
+
+            m_advantage = importance_sampling * m_advantage
+
+            sub_losses.append(sub_loss)
+
+        surrogate_loss = torch.mean(torch.stack(sub_losses, axis=1), axis=1)
+    else:
+        logp_ratio = torch.exp(
+            curr_action_dist.logp(train_batch[SampleBatch.ACTIONS]) -
+            train_batch[SampleBatch.ACTION_LOGP])
+
+        surrogate_loss = torch.min(
+            train_batch[Postprocessing.ADVANTAGES] * logp_ratio,
+            train_batch[Postprocessing.ADVANTAGES] * torch.clamp(
+                logp_ratio, 1 - policy.config["clip_param"],
+                1 + policy.config["clip_param"]))
+
+    mean_policy_loss = reduce_mean_valid(-surrogate_loss)
 
     prev_action_dist = dist_class(train_batch[SampleBatch.ACTION_DIST_INPUTS], model)
-
-    logp_ratio = torch.exp(
-        curr_action_dist.logp(train_batch[SampleBatch.ACTIONS]) -
-        train_batch[SampleBatch.ACTION_LOGP])
     action_kl = prev_action_dist.kl(curr_action_dist)
     mean_kl_loss = reduce_mean_valid(action_kl)
 
     curr_entropy = curr_action_dist.entropy()
     mean_entropy = reduce_mean_valid(curr_entropy)
-
-    surrogate_loss = torch.min(
-        train_batch[Postprocessing.ADVANTAGES] * logp_ratio,
-        train_batch[Postprocessing.ADVANTAGES] * torch.clamp(
-            logp_ratio, 1 - policy.config["clip_param"],
-            1 + policy.config["clip_param"]))
-    mean_policy_loss = reduce_mean_valid(-surrogate_loss)
 
     # Compute a value function loss.
     if policy.config["use_critic"]:
