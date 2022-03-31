@@ -5,7 +5,7 @@ def get_train_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--local-mode",
-        default=True,
+        default=False,
         type=bool,
         help="Init Ray in local mode for easier debugging.")
     parser.add_argument(
@@ -82,7 +82,7 @@ def get_train_parser():
     parser.add_argument(
         "--num-gpus-per-worker",
         type=float,
-        default=0.2)
+        default=0.1)
     parser.add_argument(
         "--num-seeds",
         type=int,

@@ -42,13 +42,13 @@ def run_vdn_qmix(args, common_config, env_config, stop):
             grouping, obs_space=obs_space, act_space=act_space))
 
     config = {
-        "seed": tune.grid_search([0, 1, 2]),
+        "seed": common_config["seed"],
         "env": "grouped_smac",
         "env_config": {
             "map_name": args.map,
         },
         "rollout_fragment_length": rollout_fragment_length,
-        "train_batch_size": tune.grid_search([args.train_batch_size, 2 * args.train_batch_size]),
+        "train_batch_size": common_config["train_batch_size"],
         "exploration_config": {
             "epsilon_timesteps": 50000,
             "final_epsilon": 0.05,
@@ -66,7 +66,7 @@ def run_vdn_qmix(args, common_config, env_config, stop):
         "mixer": "qmix" if args.run == "QMIX" else None,  # VDN has no mixer network
 
         # Use GPUs iff `RLLIB_NUM_GPUS` env var set to > 0.
-        "num_gpus": int(os.environ.get("RLLIB_NUM_GPUS", "1")),
+        "num_gpus": args.num_gpus,
         "num_workers": args.num_workers,
     }
 
