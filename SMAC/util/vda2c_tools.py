@@ -72,8 +72,8 @@ def value_mix_centralized_critic_postprocessing(policy,
             (np.expand_dims(sample_batch["vf_preds"], axis=1), sample_batch["opponent_vf_preds"]), axis=1)
 
         sample_batch["vf_tot"] = convert_to_numpy(policy.model.mixing_value(
-            convert_to_torch_tensor(sample_batch["all_vf_preds"]),
-            convert_to_torch_tensor(sample_batch["state"])))
+            convert_to_torch_tensor(sample_batch["all_vf_preds"]).cuda(),
+            convert_to_torch_tensor(sample_batch["state"]).cuda()))
 
     else:
         # Policy hasn't been initialized yet, use zeros.
@@ -93,8 +93,8 @@ def value_mix_centralized_critic_postprocessing(policy,
             (np.expand_dims(sample_batch["vf_preds"], axis=1), sample_batch["opponent_vf_preds"]), axis=1)
 
         sample_batch["vf_tot"] = convert_to_numpy(policy.model.mixing_value(
-            convert_to_torch_tensor(sample_batch["all_vf_preds"]),
-            convert_to_torch_tensor(sample_batch["state"])))
+            convert_to_torch_tensor(sample_batch["all_vf_preds"]).cuda(),
+            convert_to_torch_tensor(sample_batch["state"]).cuda()))
 
     completed = sample_batch["dones"][-1]
     if completed:
