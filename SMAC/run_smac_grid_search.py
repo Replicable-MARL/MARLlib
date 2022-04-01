@@ -55,6 +55,39 @@ if __name__ == '__main__':
 
     register_env("smac", lambda config: SMAC(args.map))
 
+    ##############
+    ### policy ###
+    ##############
+
+    if args.share_policy:
+        policies = {"shared_policy"}
+        policy_mapping_fn = (
+            lambda agent_id, episode, **kwargs: "shared_policy")
+    else:
+        policies = {
+            "policy_{}".format(i): (None, obs_space, act_space, {}) for i in range(n_ally)
+        }
+        policy_ids = list(policies.keys())
+        policy_mapping_fn = tune.function(
+            lambda agent_id: policy_ids[int(agent_id[6:])])
+
+    policy_function_dict = {
+        "PG": run_pg_a2c_a3c,
+        "A2C": run_pg_a2c_a3c,
+        "A3C": run_pg_a2c_a3c,
+        "R2D2": run_r2d2,
+        "VDN": run_vdn_qmix,
+        "QMIX": run_vdn_qmix,
+        "PPO": run_ppo,
+        "MIX-VDA2C": run_vda2c_sum_mix,
+        "SUM-VDA2C": run_vda2c_sum_mix,
+        "MIX-VDPPO": run_vdppo_sum_mix,
+        "SUM-VDPPO": run_vdppo_sum_mix,
+        "MAA2C": run_maa2c,
+        "MAPPO": run_mappo,
+        "COMA": run_coma,
+    }
+
     #############
     ### model ###
     #############
@@ -77,39 +110,6 @@ if __name__ == '__main__':
     ModelCatalog.register_custom_model("LSTM_ValueMixer", Torch_ActionMask_LSTM_Model_w_Mixer)
     ModelCatalog.register_custom_model("UPDeT_ValueMixer", Torch_ActionMask_Transformer_Model_w_Mixer)
 
-    ##############
-    ### policy ###
-    ##############
-
-    if args.share_policy:
-        policies = {"shared_policy"}
-        policy_mapping_fn = (
-            lambda agent_id, episode, **kwargs: "shared_policy")
-    else:
-        policies = {
-            "policy_{}".format(i): (None, obs_space, act_space, {}) for i in range(n_ally)
-        }
-        policy_ids = list(policies.keys())
-        policy_mapping_fn = tune.function(
-            lambda agent_id: policy_ids[agent_id])
-
-    policy_function_dict = {
-        "PG": run_pg_a2c_a3c,
-        "A2C": run_pg_a2c_a3c,
-        "A3C": run_pg_a2c_a3c,
-        "R2D2": run_r2d2,
-        "VDN": run_vdn_qmix,
-        "QMIX": run_vdn_qmix,
-        "PPO": run_ppo,
-        "MIX-VDA2C": run_vda2c_sum_mix,
-        "SUM-VDA2C": run_vda2c_sum_mix,
-        "MIX-VDPPO": run_vdppo_sum_mix,
-        "SUM-VDPPO": run_vdppo_sum_mix,
-        "MAA2C": run_maa2c,
-        "MAPPO": run_mappo,
-        "COMA": run_coma,
-    }
-
     #####################
     ### common config ###
     #####################
@@ -119,7 +119,6 @@ if __name__ == '__main__':
         "num_gpus": args.num_gpus,
         "num_workers": args.num_workers,
         "num_gpus_per_worker": args.num_gpus_per_worker,
-        "train_batch_size": tune.grid_search([args.train_batch_size, 2*args.train_batch_size]),
         "env_config": {
             "map_name": args.map,
         },
@@ -129,6 +128,7 @@ if __name__ == '__main__':
         },
         "callbacks": SmacCallbacks,
         "framework": args.framework,
+        # "evaluation_parallel_to_training": True,
         "evaluation_interval": args.evaluation_interval,
     }
 
@@ -140,7 +140,7 @@ if __name__ == '__main__':
 
     ##################
     ### run script ###
-    ###################
+    ##################
 
     results = policy_function_dict[args.run](args, common_config, env_config, stop)
 

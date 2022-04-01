@@ -79,6 +79,7 @@ class StarCraft2Env_Rllib(StarCraft2Env, Rllib_MultiAgentEnv):
             obs_one_agent = obs_smac_api[agent_index]
             state_one_agent = state_smac_api
             action_mask_one_agent = np.array(self.get_avail_agent_actions(agent_index)).astype(np.float32)
+            agent_index = "agent_{}".format(agent_index)
             obs_rllib[agent_index] = {
                 "obs": obs_one_agent,
                 "state": state_one_agent,
@@ -194,6 +195,7 @@ class StarCraft2Env_Rllib(StarCraft2Env, Rllib_MultiAgentEnv):
             obs_one_agent = obs_smac_api[agent_index]
             state_one_agent = state_smac_api
             action_mask_one_agent = np.array(self.get_avail_agent_actions(agent_index)).astype(np.float32)
+            agent_index = "agent_{}".format(agent_index)
             obs_rllib[agent_index] = {
                 "obs": obs_one_agent,
                 "state": state_one_agent,

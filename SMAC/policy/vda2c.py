@@ -14,13 +14,18 @@ def run_vda2c_sum_mix(args, common_config, env_config, stop):
     n_enemy = env_config["n_enemy"]
     state_shape = env_config["state_shape"]
     n_actions = env_config["n_actions"]
-    rollout_fragment_length = env_config["rollout_fragment_length"]
+    episode_limit = env_config["episode_limit"]
+
+    episode_num = 10
+    train_batch_size = episode_num * episode_limit
 
     config = {
         "env": "smac",
+        "batch_mode": "complete_episodes",
+        "train_batch_size": train_batch_size,
         "model": {
             "custom_model": "{}_ValueMixer".format(args.neural_arch),
-            "max_seq_len": rollout_fragment_length,
+            "max_seq_len": episode_limit,
             "custom_model_config": {
                 "token_dim": args.token_dim,
                 "ally_num": n_ally,
@@ -40,10 +45,9 @@ def run_vda2c_sum_mix(args, common_config, env_config, stop):
             "agent_num": n_ally,
             "state_dim": state_shape,
             "self_obs_dim": obs_shape,
+            "rollout_fragment_length":episode_limit
         }
     )
-
-    VDA2C_CONFIG["rollout_fragment_length"] = rollout_fragment_length
 
     VDA2CTFPolicy = A3CTFPolicy.with_updates(
         name="VDA2CTFPolicy",

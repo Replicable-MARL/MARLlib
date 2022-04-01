@@ -205,10 +205,3 @@ class Customized_QMixTorchPolicy(QMixTorchPolicy):
             alpha=config["optim_alpha"],
             eps=config["optim_eps"])
 
-
-QMixTrainer = GenericOffPolicyTrainer.with_updates(
-    name="QMIX",
-    default_config=DEFAULT_CONFIG,
-    default_policy=Customized_QMixTorchPolicy,
-    get_policy_class=None,
-    execution_plan=execution_plan)

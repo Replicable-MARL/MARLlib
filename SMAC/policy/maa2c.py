@@ -8,21 +8,23 @@ from SMAC.util.mappo_tools import *
 from SMAC.util.maa2c_tools import *
 
 
-
 def run_maa2c(args, common_config, env_config, stop):
-
     obs_shape = env_config["obs_shape"]
     n_ally = env_config["n_ally"]
     n_enemy = env_config["n_enemy"]
     state_shape = env_config["state_shape"]
     n_actions = env_config["n_actions"]
-    rollout_fragment_length = env_config["rollout_fragment_length"]
+    episode_limit = env_config["episode_limit"]
 
+    episode_num = 10
+    train_batch_size = episode_num * episode_limit
     config = {
         "env": "smac",
+        "batch_mode": "complete_episodes",
+        "train_batch_size": train_batch_size,
         "model": {
             "custom_model": "{}_CentralizedCritic".format(args.neural_arch),
-            "max_seq_len": rollout_fragment_length,
+            "max_seq_len": episode_limit,
             "custom_model_config": {
                 "token_dim": args.token_dim,
                 "ally_num": n_ally,

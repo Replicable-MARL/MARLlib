@@ -20,19 +20,27 @@ def run_vdppo_sum_mix(args, common_config, env_config, stop):
     n_enemy = env_config["n_enemy"]
     state_shape = env_config["state_shape"]
     n_actions = env_config["n_actions"]
-    rollout_fragment_length = env_config["rollout_fragment_length"]
+    episode_limit = env_config["episode_limit"]
 
-    sgd_minibatch_size = 128
-    while sgd_minibatch_size < rollout_fragment_length:
+    episode_num = 10
+    iteration = 5
+    train_batch_size = episode_num * episode_limit
+    sgd_minibatch_size = train_batch_size // iteration + 1
+    while sgd_minibatch_size < episode_limit:
         sgd_minibatch_size *= 2
 
     config = {
         "env": "smac",
+        "train_batch_size": train_batch_size,
+        "num_sgd_iter": iteration,
         "sgd_minibatch_size": sgd_minibatch_size,
-        "num_sgd_iter": args.num_sgd_iter,
+        "batch_mode": "complete_episodes",
+        "entropy_coeff": 0.01,
+        "clip_param": 0.2,
+        "vf_clip_param": 20.0,  # very sensitive, depends on the scale of the rewards
         "model": {
             "custom_model": "{}_ValueMixer".format(args.neural_arch),
-            "max_seq_len": rollout_fragment_length,
+            "max_seq_len": episode_limit,
             "custom_model_config": {
                 "token_dim": args.token_dim,
                 "ally_num": n_ally,

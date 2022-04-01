@@ -35,6 +35,8 @@ class Torch_ActionMask_LSTM_CentralizedCritic_Model(TorchRNN, nn.Module):
         self.obs_size = full_obs_space['obs'].shape[0]
         self.fc_size = fc_size
         self.lstm_state_size = lstm_state_size
+        self.n_agents = model_config["custom_model_config"]["ally_num"]
+
         nn.Module.__init__(self)
         super().__init__(obs_space, action_space, num_outputs, model_config,
                          name)
@@ -52,7 +54,7 @@ class Torch_ActionMask_LSTM_CentralizedCritic_Model(TorchRNN, nn.Module):
         # Central VF maps (obs, opp_obs, opp_act) -> vf_pred
         obs_dim = kwargs['self_obs_dim']
         state_dim = kwargs['state_dim']
-        input_size = obs_dim + state_dim  # obs + opp_obs + opp_act
+        input_size = obs_dim + state_dim + num_outputs * (self.n_agents - 1)  # obs + opp_obs + opp_act
         self.central_vf = nn.Sequential(
             SlimFC(input_size, 32, activation_fn=nn.Tanh),
             SlimFC(32, 1),
@@ -119,8 +121,12 @@ class Torch_ActionMask_LSTM_CentralizedCritic_Model(TorchRNN, nn.Module):
         return logits, [torch.squeeze(h, 0), torch.squeeze(c, 0)]
 
     # here we use individual observation + global state + other opp input of critic
-    def central_value_function(self, obs, state):
-        input_ = torch.cat([obs, state], 1)
+    def central_value_function(self, obs, state, opponent_actions):
+        opponent_actions_one_hot = [
+            torch.nn.functional.one_hot(opponent_actions[:, i].long(), self.num_outputs).float()
+            for i in
+            range(opponent_actions.shape[1])]
+        input_ = torch.cat([obs, state] + opponent_actions_one_hot, 1)
         if self.coma_flag:
             return torch.reshape(self.central_vf(input_), [-1, self.num_outputs])
         else:

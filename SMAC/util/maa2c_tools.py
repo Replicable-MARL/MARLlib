@@ -18,7 +18,7 @@ def loss_with_central_critic_a2c(policy, model, dist_class, train_batch):
 
     vf_saved = model.value_function
     model.value_function = lambda: policy.model.central_value_function(
-        train_batch["self_obs"], train_batch["state"])
+        train_batch["self_obs"], train_batch["state"], train_batch["opponent_action"])
 
     # recording data
     policy._central_value_out = model.value_function()

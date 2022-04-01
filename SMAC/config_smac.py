@@ -5,7 +5,7 @@ def get_train_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--local-mode",
-        default=False,
+        default=True,
         type=bool,
         help="Init Ray in local mode for easier debugging.")
     parser.add_argument(
@@ -22,7 +22,7 @@ def get_train_parser():
     parser.add_argument(
         "--map",
         type=str,
-        default="3s5z",
+        default="3m",
         help="Maps should be registered")
     parser.add_argument(
         "--share-policy",
@@ -32,22 +32,12 @@ def get_train_parser():
     parser.add_argument(
         "--token-dim",
         type=int,
-        default=6,
+        default=5,
         help="Maps should be registered")
-    parser.add_argument(
-        "--train-batch-size",
-        type=int,
-        default=1000,
-        help="train-batch-size")
-    parser.add_argument(
-        "--num-sgd-iter",
-        type=int,
-        default=15,
-        help="ppo specific parameter")
     parser.add_argument(
         "--evaluation-interval",
         type=int,
-        default=1000,
+        default=10,
         help="evaluation_interval")
     parser.add_argument(
         "--neural-arch",
@@ -73,7 +63,7 @@ def get_train_parser():
     parser.add_argument(
         "--num-workers",
         type=int,
-        default=4,
+        default=0,
         help="Sampler number per trail")
     parser.add_argument(
         "--num-cpus-per-worker",
