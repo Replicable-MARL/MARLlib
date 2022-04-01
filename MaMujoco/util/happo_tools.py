@@ -182,6 +182,8 @@ def ppo_surrogate_loss(
     logits, state = model(train_batch)
     curr_action_dist = dist_class(logits, model)
 
+    # print(f'agent-{train_batch[SampleBatch.AGENT_INDEX][0]} with advantage: {torch.mean(train_batch[Postprocessing.ADVANTAGES])}')
+
     # RNN case: Mask away 0-padded chunks at end of time axis.
     if state:
         B = len(train_batch[SampleBatch.SEQ_LENS])
@@ -210,7 +212,7 @@ def ppo_surrogate_loss(
         # all_agents = [SELF] + train_batch[get_global_name(SampleBatch.OBS)]
 
         random_indices = np.random.permutation(range(agents_num))
-        print(f'there are {agents_num} agents, training as {random_indices}')
+        # print(f'there are {agents_num} agents, training as {random_indices}')
         # in order to get each agent's information, if random_indices is len(agents_num) - 1, we set
         # this as our current_agent, and get the information from generally train batch.
         # otherwise, we get the agent information from "GLOBAL_LOGITS", "GLOBAL_ACTIONS", etc
