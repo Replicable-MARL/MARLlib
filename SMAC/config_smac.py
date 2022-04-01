@@ -5,8 +5,7 @@ def get_train_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--local-mode",
-        default=True,
-        type=bool,
+        action="store_true",
         help="Init Ray in local mode for easier debugging.")
     parser.add_argument(
         "--parallel",
