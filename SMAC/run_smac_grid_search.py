@@ -40,7 +40,7 @@ if __name__ == '__main__':
     n_actions = env_info["n_actions"]
     n_ally = env_info["n_agents"]
     n_enemy = env.death_tracker_enemy.shape[0]
-    rollout_fragment_length = env_info["episode_limit"]
+    episode_limit = env_info["episode_limit"]
     env.close()
     # close env instance
 
@@ -50,7 +50,7 @@ if __name__ == '__main__':
         "n_enemy": n_enemy,
         "state_shape": state_shape,
         "n_actions": n_actions,
-        "rollout_fragment_length": rollout_fragment_length,
+        "episode_limit": episode_limit,
     }
 
     register_env("smac", lambda config: SMAC(args.map))
