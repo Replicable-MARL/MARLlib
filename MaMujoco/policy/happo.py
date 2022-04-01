@@ -32,12 +32,15 @@ def run_happo(args, common_config, env_config, stop):
         "horizon": args.horizon,
         "num_sgd_iter": 5,
         "sgd_minibatch_size": sgd_minibatch_size,
+        "lr": 5e-6,
+        # "epoch": 5,
         "model": {
             "custom_model": "{}_CentralizedCritic".format(args.neural_arch),
             "custom_model_config": {
                 "agent_num": env_config["ally_num"],
                 "state_dim": env_config["state_dim"]
-            }
+            },
+            "vf_share_layers": True
         },
     }
     config.update(common_config)
