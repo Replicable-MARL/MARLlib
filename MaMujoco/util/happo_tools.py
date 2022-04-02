@@ -4,62 +4,23 @@ __author__: minquan
 __data__: March-29-2022
 """
 
-
-import gym
 import logging
 from typing import Dict, List, Type, Union
 
-import ray
-from ray.rllib.agents.ppo.ppo_tf_policy import setup_config
-from ray.rllib.evaluation.postprocessing import compute_gae_for_sample_batch, \
-    Postprocessing
 from ray.rllib.models.modelv2 import ModelV2
 from ray.rllib.models.torch.torch_action_dist import TorchDistributionWrapper
+from ray.rllib.agents.ppo.ppo_torch_policy import ppo_surrogate_loss as torch_loss
 from ray.rllib.policy.policy import Policy
-from ray.rllib.policy.policy_template import build_policy_class
-from ray.rllib.policy.sample_batch import SampleBatch
-from ray.rllib.policy.torch_policy import EntropyCoeffSchedule, \
-    LearningRateSchedule
-from ray.rllib.utils.framework import try_import_torch
 from ray.rllib.utils.torch_ops import apply_grad_clipping, \
     explained_variance, sequence_mask
 from ray.rllib.utils.typing import TensorType, TrainerConfigDict
-from ray.rllib.utils.torch_ops import convert_to_torch_tensor
-
-import argparse
 import numpy as np
-from gym.spaces import Discrete
-import os
-
-import ray
-from ray import tune
-from ray.rllib.agents.maml.maml_torch_policy import KLCoeffMixin as TorchKLCoeffMixin
-from ray.rllib.agents.ppo.ppo import PPOTrainer
 from ray.rllib.agents.ppo.ppo_tf_policy import (
-    PPOTFPolicy,
-    KLCoeffMixin,
     ppo_surrogate_loss as tf_loss,
 )
-from ray.rllib.agents.ppo.ppo_torch_policy import PPOTorchPolicy
-from ray.rllib.evaluation.postprocessing import compute_advantages, Postprocessing
-from ray.rllib.examples.env.two_step_game import TwoStepGame
-from ray.rllib.examples.models.centralized_critic_models import (
-    CentralizedCriticModel,
-    TorchCentralizedCriticModel,
-)
-from ray.rllib.models import ModelCatalog
+from ray.rllib.evaluation.postprocessing import compute_advantages, Postprocessing, compute_gae_for_sample_batch
 from ray.rllib.policy.sample_batch import SampleBatch
-from ray.rllib.policy.tf_policy import LearningRateSchedule, EntropyCoeffSchedule
-from ray.rllib.policy.torch_policy import (
-    LearningRateSchedule as TorchLR,
-    EntropyCoeffSchedule as TorchEntropyCoeffSchedule,
-)
-from ray.rllib.utils.annotations import override
 from ray.rllib.utils.framework import try_import_tf, try_import_torch
-from ray.rllib.utils.test_utils import check_learning_achieved
-from ray.rllib.utils.numpy import convert_to_numpy
-from MaMujoco.util.vda2c_tools import MixingValueMixin
-from ray.rllib.evaluation.postprocessing import compute_gae_for_sample_batch
 from ray.rllib.utils.torch_ops import convert_to_torch_tensor as _d2t
 
 tf1, tf, tfv = try_import_tf()
@@ -83,15 +44,17 @@ def postprocess_fn(policy, sample_batch, other_agent_batches, episode):
     return sample_batch
 
 """
-from ray.rllib.examples.centralized_critic import centralized_critic_postprocessing
+from ray.rllib.examples.centralized_critic import CentralizedValueMixin
 
 
 # Grabs the opponent obs/act and includes it in the experience train_batch,
 # and computes GAE using the central vf predictions.
 
-GLOBAL_NEED_COLLECT = [SampleBatch.OBS, SampleBatch.ACTIONS, SampleBatch.ACTION_LOGP]
+GLOBAL_NEED_COLLECT = [SampleBatch.ACTION_LOGP, SampleBatch.ACTIONS]
 GLOBAL_PREFIX = 'GLOBAL_'
 GLOBAL_MODEL_LOGITS = f'{GLOBAL_PREFIX}_model_logits'
+STATE = 'state'
+convert_to_torch_tensor = _d2t
 
 
 def add_other_agent_info(agents_batch: dict, key: str):
@@ -131,6 +94,11 @@ def collect_other_agents_model_output(agents_batch):
 
 def add_another_agent_and_gae(policy, sample_batch, other_agent_batches=None, episode=None):
     train_batch = compute_gae_for_sample_batch(policy, sample_batch, other_agent_batches, episode)
+    # train_batch = centralized_critic_postprocessing(policy, sample_batch, other_agent_batches, episode)
+
+    state_dim = policy.config["model"]["custom_model_config"]["state_dim"]
+
+    sample_batch[STATE] = sample_batch[SampleBatch.OBS][:, -state_dim:]
 
     if other_agent_batches:
         for key in GLOBAL_NEED_COLLECT:
@@ -179,6 +147,8 @@ def ppo_surrogate_loss(
             of loss tensors.
     """
 
+    CentralizedValueMixin.__init__(policy)
+
     logits, state = model(train_batch)
     curr_action_dist = dist_class(logits, model)
 
@@ -203,7 +173,15 @@ def ppo_surrogate_loss(
         mask = None
         reduce_mean_valid = torch.mean
 
+    func = tf_loss if not policy.config["framework"] == "torch" else torch_loss
+    vf_saved = model.value_function
+
     if contain_global_obs(train_batch):
+        model.value_function = lambda: policy.model.central_value_function(
+            train_batch[STATE], train_batch[get_global_name(SampleBatch.ACTIONS)])
+
+        policy._central_value_out = model.value_function()  # change value function to calculate all agents information
+
         sub_losses = []
 
         m_advantage = train_batch[Postprocessing.ADVANTAGES]
@@ -281,6 +259,9 @@ def ppo_surrogate_loss(
     # Ignore the value function.
     else:
         vf_loss = mean_vf_loss = 0.0
+
+    model.value_function = vf_saved
+    # recovery the value function.
 
     total_loss = reduce_mean_valid(-surrogate_loss +
                                    policy.kl_coeff * action_kl +
