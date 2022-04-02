@@ -29,7 +29,7 @@ def run_happo(args, common_config, env_config, stop):
 
     config = {
         "env": args.map,
-        "horizon": args.horizon,
+        "horizon": 1000,
         "num_sgd_iter": 5,
         "sgd_minibatch_size": sgd_minibatch_size,
         "lr": 5e-6,
