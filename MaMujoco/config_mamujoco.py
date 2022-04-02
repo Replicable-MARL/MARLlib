@@ -5,7 +5,8 @@ def get_train_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--local-mode",
-        default=True,
+        # default=True,
+        default=False,
         type=bool,
         help="Init Ray in local mode for easier debugging.")
     parser.add_argument(
@@ -15,13 +16,16 @@ def get_train_parser():
         help="Whether use tune grid research")
     parser.add_argument(
         "--run",
-        choices=["PG", "A2C", "A3C", "MAA2C", "DDPG", "MADDPG", "PPO", "MAPPO", "SUM-VDA2C", "MIX-VDA2C", "SUM-VDPPO", "MIX-VDPPO"],  # "APPO" "IMPALA"
-        default="A2C",
+        # choices=["PG", "A2C", "A3C", "MAA2C", "DDPG", "MADDPG", "PPO", "MAPPO", "SUM-VDA2C", "MIX-VDA2C", "SUM-VDPPO", "MIX-VDPPO"],  # "APPO" "IMPALA"
+        choices=["HAPPO"],  # "APPO" "IMPALA"
+        # default="A2C",
+        default="HAPPO",
         help="The RLlib-registered algorithm to use.")
     parser.add_argument(
         "--share-policy",
         type=bool,
-        default=True,
+        default=False,
+        # default=True,
         help="Maps should be registered")
     parser.add_argument(
         "--map",
@@ -40,7 +44,8 @@ def get_train_parser():
             "ManyagentSwimmer",
             "ManyagentAnt",
         ],
-        default="ManyagentAnt",
+        # default="ManyagentAnt",
+        default="2AgentHalfCheetah",
         help="Envs should be registered")
     parser.add_argument(
         "--neural-arch",
@@ -93,7 +98,7 @@ def get_train_parser():
     parser.add_argument(
         "--stop-timesteps",
         type=int,
-        default=1000000,
+        default=int(1e7),
         help="Number of timesteps to train.")
     parser.add_argument(
         "--stop-reward",

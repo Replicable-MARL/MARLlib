@@ -25,6 +25,7 @@ from MaMujoco.policy.maa2c import run_maa2c
 from MaMujoco.policy.mappo import run_mappo
 from MaMujoco.policy.ddpg import run_ddpg
 from MaMujoco.policy.maddpg import run_maddpg
+from MaMujoco.policy.happo import run_happo
 
 # from https://github.com/schroederdewitt/multiagent_mujoco
 
@@ -133,6 +134,7 @@ if __name__ == "__main__":
         "MAPPO": run_mappo,
         "DDPG": run_ddpg,
         "MADDPG": run_maddpg,
+        "HAPPO": run_happo,
     }
 
     #############
@@ -180,9 +182,11 @@ if __name__ == "__main__":
     ### run script ###
     ###################
 
-    results = policy_function_dict[args.run](args, common_config, env_config, stop)
+    policy = policy_function_dict[args.run]
 
-    if args.as_test:
+    results = policy(args, common_config, env_config, stop)
+
+    if args.test:
         check_learning_achieved(results, args.stop_reward)
 
     ray.shutdown()

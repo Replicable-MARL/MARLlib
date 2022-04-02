@@ -16,6 +16,7 @@ from MaMujoco.util.mappo_tools import TorchLR
 from MaMujoco.util.mappo_tools import TorchKLCoeffMixin
 from MaMujoco.util.mappo_tools import TorchEntropyCoeffSchedule
 from MaMujoco.util.mappo_tools import CentralizedValueMixin
+from ray.rllib.agents.ppo import ppo
 
 
 def run_happo(args, common_config, env_config, stop):
@@ -27,13 +28,16 @@ def run_happo(args, common_config, env_config, stop):
     while sgd_minibatch_size < args.horizon:
         sgd_minibatch_size *= 2
 
-    config = {
+    config = {}
+    config.update(common_config)
+
+    config.update({
         "env": args.map,
         "horizon": 1000,
-        "num_sgd_iter": 5,
+        "num_sgd_iter": 5,  # ppo-epoch
+        "train_batch_size": 4000,
         "sgd_minibatch_size": sgd_minibatch_size,
         "lr": 5e-6,
-        # "epoch": 5,
         "model": {
             "custom_model": "{}_CentralizedCritic".format(args.neural_arch),
             "custom_model_config": {
@@ -42,8 +46,7 @@ def run_happo(args, common_config, env_config, stop):
             },
             "vf_share_layers": True
         },
-    }
-    config.update(common_config)
+    })
 
     HAPPOTorchPolicy = PPOTorchPolicy.with_updates(
         name="HAPPOTorchPolicy",
@@ -61,7 +64,7 @@ def run_happo(args, common_config, env_config, stop):
             return HAPPOTorchPolicy
 
     HAPPOTrainer = PPOTrainer.with_updates(
-        name="HAPPOTrainer",
+        name="HAPPOTrainer-with-local-mode-False",
         default_policy=HAPPOTorchPolicy,
         get_policy_class=get_policy_class,
     )
