@@ -39,7 +39,7 @@ if __name__ == '__main__':
     obs_shape = env_info["obs_shape"]
     n_actions = env_info["n_actions"]
     n_ally = env_info["n_agents"]
-    n_enemy = env.death_tracker_enemy.shape[0]
+    n_enemy = env.env.death_tracker_enemy.shape[0]
     episode_limit = env_info["episode_limit"]
     env.close()
     # close env instance

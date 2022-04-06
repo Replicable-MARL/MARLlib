@@ -36,6 +36,7 @@ def run_mappo(args, common_config, env_config, stop):
         "entropy_coeff": 0.01,
         "clip_param": 0.2,
         "vf_clip_param": 20.0,  # very sensitive, depends on the scale of the rewards
+        "lr": 0.0005,
         "model": {
             "custom_model": "{}_CentralizedCritic".format(args.neural_arch),
             "max_seq_len": episode_limit,

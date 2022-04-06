@@ -35,6 +35,24 @@ In **ray/rllib/policy/rnn_sequencing.py** about line 130-150
                     "max_seq_len": max_seq_len,
                 })))
 
+In ray/rllib/execution/replay_buffer.py about line 227-237
+
+        def _sample_proportional(self, num_items: int) -> List[int]:
+            res = []
+            for _ in range(num_items):
+                # TODO(szymon): should we ensure no repeats?
+                mass = random.random() * self._it_sum.sum(0, len(self._storage))
+                idx = self._it_sum.find_prefixsum_idx(mass)
+
+                # add three lines here
+                while idx in res: # ensure no repeats
+                    mass = random.random() * self._it_sum.sum(0, len(self._storage))
+                    idx = self._it_sum.find_prefixsum_idx(mass)
+
+                res.append(idx)
+            return res
+
+
 ## current support algo
 - R2D2(IQL)
 - VDN

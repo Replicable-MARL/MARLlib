@@ -10,7 +10,7 @@ from ray.rllib.utils.annotations import override
 from ray.rllib.utils.framework import try_import_torch
 from ray.rllib.agents.qmix.qmix import *
 from SMAC.model.torch_mask_updet import Transformer
-
+from torch.optim import Adam
 torch, nn = try_import_torch()
 
 
@@ -199,9 +199,13 @@ class Customized_QMixTorchPolicy(QMixTorchPolicy):
                              self.target_mixer, self.n_agents, self.n_actions,
                              self.config["double_q"], self.config["gamma"])
         from torch.optim import RMSprop
-        self.optimiser = RMSprop(
+        # self.optimiser = RMSprop(
+        #     params=self.params,
+        #     lr=config["lr"],
+        #     alpha=config["optim_alpha"],
+        #     eps=config["optim_eps"])
+        self.optimiser = Adam(
             params=self.params,
             lr=config["lr"],
-            alpha=config["optim_alpha"],
             eps=config["optim_eps"])
 

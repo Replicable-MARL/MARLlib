@@ -59,11 +59,11 @@ class SmacCallbacks(DefaultCallbacks):
             })
 
         if "GroupAgentsWrapper" in worker.env.__class__.__name__: # QMIX VDN
+            ally_state = worker.env.env.env.death_tracker_ally
+            enemy_state = worker.env.env.env.death_tracker_enemy
+        else:
             ally_state = worker.env.env.death_tracker_ally
             enemy_state = worker.env.env.death_tracker_enemy
-        else:
-            ally_state = worker.env.death_tracker_ally
-            enemy_state = worker.env.death_tracker_enemy
 
         # count battle win rate in recent 100 games
         if self.battle_win_queue.full():
