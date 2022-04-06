@@ -4,6 +4,7 @@ Current now is same as MAPPO, need runnable firstly.
 
 """
 from ray import tune
+from ray.rllib.agents import trainer
 from ray.rllib.agents.ppo.ppo import PPOTrainer, DEFAULT_CONFIG as PPO_CONFIG
 from ray.rllib.agents.ppo.ppo_torch_policy import PPOTorchPolicy
 from ray.rllib.agents.ppo.ppo_tf_policy import PPOTFPolicy
@@ -37,7 +38,7 @@ def run_happo(args, common_config, env_config, stop):
         "num_sgd_iter": 5,  # ppo-epoch
         "train_batch_size": 4000,
         "sgd_minibatch_size": sgd_minibatch_size,
-        "lr": 5e-6,
+        "lr": 5e-5,
         "model": {
             "custom_model": "{}_CentralizedCritic".format(args.neural_arch),
             "custom_model_config": {

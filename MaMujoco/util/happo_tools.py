@@ -6,11 +6,10 @@ __data__: March-29-2022
 
 import logging
 from typing import Dict, List, Type, Union
-
-from ray.rllib.models.modelv2 import ModelV2
 from ray.rllib.models.torch.torch_action_dist import TorchDistributionWrapper
-from ray.rllib.agents.ppo.ppo_torch_policy import ppo_surrogate_loss as torch_loss
 from ray.rllib.policy.policy import Policy
+from ray.rllib.models.modelv2 import ModelV2
+from ray.rllib.agents.ppo.ppo_torch_policy import ppo_surrogate_loss as torch_loss
 from ray.rllib.utils.torch_ops import apply_grad_clipping, \
     explained_variance, sequence_mask
 from ray.rllib.utils.typing import TensorType, TrainerConfigDict
@@ -80,6 +79,7 @@ def collect_other_agents_model_output(agents_batch):
 
     for agent_id, (policy, obs) in agents_batch.items():
         agent_model = policy.model
+        assert isinstance(obs, SampleBatch)
         agent_logits, state = agent_model(_d2t(obs))
         # dis_class = TorchDistributionWrapper
         # curr_action_dist = dis_class(agent_logits, agent_model)
@@ -173,7 +173,6 @@ def ppo_surrogate_loss(
         mask = None
         reduce_mean_valid = torch.mean
 
-    func = tf_loss if not policy.config["framework"] == "torch" else torch_loss
     vf_saved = model.value_function
 
     if contain_global_obs(train_batch):
@@ -206,11 +205,11 @@ def ppo_surrogate_loss(
                 old_action_log_dist = train_batch[SampleBatch.ACTION_LOGP]
                 actions = train_batch[SampleBatch.ACTIONS]
             else:
-                current_action_logits = train_batch[GLOBAL_MODEL_LOGITS][:, agent_id, :]
+                current_action_logits = train_batch[GLOBAL_MODEL_LOGITS][:, agent_id, :].detach()
                 current_action_dist = dist_class(current_action_logits, None)
                 # current_action_dist = train_batch[GLOBAL_MODEL_LOGITS][:, agent_id, :]
-                old_action_log_dist = train_batch[get_global_name(SampleBatch.ACTION_LOGP)][:, agent_id]
-                actions = train_batch[get_global_name(SampleBatch.ACTIONS)][:, agent_id, :]
+                old_action_log_dist = train_batch[get_global_name(SampleBatch.ACTION_LOGP)][:, agent_id].detach()
+                actions = train_batch[get_global_name(SampleBatch.ACTIONS)][:, agent_id, :].detach()
 
             importance_sampling = torch.exp(current_action_dist.logp(actions) - old_action_log_dist)
 
