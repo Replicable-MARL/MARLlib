@@ -11,6 +11,7 @@ def get_train_parser():
         help="Init Ray in local mode for easier debugging.")
     parser.add_argument(
         "--parallel",
+        # default=False,
         default=False,
         type=bool,
         help="Whether use tune grid research")
@@ -20,6 +21,7 @@ def get_train_parser():
         choices=["HAPPO"],  # "APPO" "IMPALA"
         # default="A2C",
         default="HAPPO",
+        # default="MAPPO",
         help="The RLlib-registered algorithm to use.")
     parser.add_argument(
         "--share-policy",
@@ -46,6 +48,7 @@ def get_train_parser():
         ],
         # default="ManyagentAnt",
         default="2AgentHalfCheetah",
+        # default="2AgentWalker",
         help="Envs should be registered")
     parser.add_argument(
         "--neural-arch",
@@ -76,7 +79,7 @@ def get_train_parser():
     parser.add_argument(
         "--num-workers",
         type=int,
-        default=2,
+        default=4,
         help="Sampler number per trail")
     parser.add_argument(
         "--num-cpus-per-worker",
