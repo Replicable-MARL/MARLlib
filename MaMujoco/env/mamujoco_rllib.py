@@ -34,6 +34,8 @@ class RllibMAMujoco(MultiAgentEnv):
         else:
             self.num_agents = int(env_config["agent_conf"].split("x")[0])
 
+        self.previous_r = None
+
     def reset(self):
         self.env.reset()
         o = self.env.get_obs()  # obs
@@ -48,10 +50,15 @@ class RllibMAMujoco(MultiAgentEnv):
         return obs
 
     def step(self, action_dict):
+        # print(f"Running Env ID: {id(self)}")
         actions = []
         for key, value in sorted(action_dict.items()):
             actions.append(value)
+
+        actions = normalize_action(np.array(actions), self.action_space)
+
         r, d, _ = self.env.step(actions)
+
         o = self.env.get_obs()  # obs
         s = self.env.get_state()  # g state
         rewards = {}
@@ -67,3 +74,10 @@ class RllibMAMujoco(MultiAgentEnv):
             }
         dones = {"__all__": d}
         return obs, rewards, dones, infos
+
+
+def normalize_action(action, action_space):
+    action = (action + 1) / 2
+    action *= (action_space.high - action_space.low)
+    action += action_space.low
+    return action
