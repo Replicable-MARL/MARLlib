@@ -335,6 +335,46 @@ Here is a chart describing the characteristics of each algorithm:
   - make sure sgd_minibatch_size > max_seq_len
   - enlarge the sgd_minibatch_size (128 in default)
 
+- rnn related bug:  
+In **ray/rllib/policy/rnn_sequencing.py** about line 130-150
+
+        for i, k in enumerate(feature_keys_):
+            batch[k] = tree.unflatten_as(batch[k], feature_sequences[i])
+        for i, k in enumerate(state_keys):
+            batch[k] = initial_states[i]
+        batch[SampleBatch.SEQ_LENS] = np.array(seq_lens)
+
+        # add two lines here
+        if dynamic_max:
+            batch.max_seq_len = max(seq_lens)
+
+        if log_once("rnn_ma_feed_dict"):
+            logger.info("Padded input for RNN/Attn.Nets/MA:\n\n{}\n".format(
+                summarize({
+                    "features": feature_sequences,
+                    "initial_states": initial_states,
+                    "seq_lens": seq_lens,
+                    "max_seq_len": max_seq_len,
+                })))
+
+- replay buffer related bug:  
+In ray/rllib/execution/replay_buffer.py about line 227-237
+
+        def _sample_proportional(self, num_items: int) -> List[int]:
+            res = []
+            for _ in range(num_items):
+                # TODO(szymon): should we ensure no repeats?
+                mass = random.random() * self._it_sum.sum(0, len(self._storage))
+                idx = self._it_sum.find_prefixsum_idx(mass)
+
+                # add three lines here
+                while idx in res: # ensure no repeats
+                    mass = random.random() * self._it_sum.sum(0, len(self._storage))
+                    idx = self._it_sum.find_prefixsum_idx(mass)
+
+                res.append(idx)
+            return res
+
 ## Acknowledgement
 
 

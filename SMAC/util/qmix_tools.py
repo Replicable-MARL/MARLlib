@@ -73,7 +73,7 @@ class QMixFromTorchPolicy(QMixTorchPolicy):
         self.exploration = self._create_exploration()
 
         # Setup the mixer network.
-        if config["mixer"] is None:
+        if config["mixer"] is None: # "iql"
             self.mixer = None
             self.target_mixer = None
         elif config["mixer"] == "qmix":

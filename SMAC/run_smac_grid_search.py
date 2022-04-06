@@ -12,7 +12,7 @@ from SMAC.model.torch_qmix_mask_gru_updet import *
 from SMAC.model.torch_vd_ppo_a2c_mask_gru_lstm_updet import *
 from SMAC.env.starcraft2_rllib import StarCraft2Env_Rllib as SMAC
 from config_smac import *
-from SMAC.policy.vdn_qmix import run_vdn_qmix
+from SMAC.policy.vdn_qmix_iql import run_vdn_qmix_iql
 from SMAC.policy.pg_a2c_a3c import run_pg_a2c_a3c
 from SMAC.policy.r2d2 import run_r2d2
 from SMAC.policy.ppo import run_ppo
@@ -76,8 +76,9 @@ if __name__ == '__main__':
         "A2C": run_pg_a2c_a3c,
         "A3C": run_pg_a2c_a3c,
         "R2D2": run_r2d2,
-        "VDN": run_vdn_qmix,
-        "QMIX": run_vdn_qmix,
+        "VDN": run_vdn_qmix_iql,
+        "QMIX": run_vdn_qmix_iql,
+        "IQL": run_vdn_qmix_iql,
         "PPO": run_ppo,
         "MIX-VDA2C": run_vda2c_sum_mix,
         "SUM-VDA2C": run_vda2c_sum_mix,

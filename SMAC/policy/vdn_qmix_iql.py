@@ -21,7 +21,7 @@ from SMAC.env.starcraft2_rllib import StarCraft2Env_Rllib as SMAC
 from SMAC.util.qmix_tools import QMixFromTorchPolicy, QMixReplayBuffer
 
 
-def run_vdn_qmix(args, common_config, env_config, stop):
+def run_vdn_qmix_iql(args, common_config, env_config, stop):
     if args.neural_arch not in ["GRU", "UPDeT"]:
         assert NotImplementedError
 
@@ -53,6 +53,11 @@ def run_vdn_qmix(args, common_config, env_config, stop):
         lambda config: SMAC(config).with_agent_groups(
             grouping, obs_space=obs_space, act_space=act_space))
 
+    mixer_dict = {
+        "QMIX": "qmix",
+        "VDN": "vdn",
+        "IQL": None
+    }
     config = {
         "seed": common_config["seed"],
         "env": "grouped_smac",
@@ -70,7 +75,7 @@ def run_vdn_qmix(args, common_config, env_config, stop):
                 "state_dim": state_shape
             },
         },
-        "mixer": "qmix" if args.run == "QMIX" else None,  # VDN has no mixer network
+        "mixer": mixer_dict[args.run],  # VDN has no mixer network
         "callbacks": common_config["callbacks"],
         # Use GPUs iff `RLLIB_NUM_GPUS` env var set to > 0.
         "num_gpus": args.num_gpus,
