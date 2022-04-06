@@ -26,8 +26,8 @@ def get_train_parser():
     parser.add_argument(
         "--share-policy",
         type=bool,
-        # default=False,
-        default=True,
+        default=False,
+        # default=True,
         help="Maps should be registered")
     parser.add_argument(
         "--map",

@@ -38,7 +38,6 @@ def run_happo(args, common_config, env_config, stop):
         "num_sgd_iter": 5,  # ppo-epoch
         "train_batch_size": 4000,
         "sgd_minibatch_size": sgd_minibatch_size,
-        "share_policy": False,
         "lr": 5e-5,
         "model": {
             "custom_model": "{}_CentralizedCritic".format(args.neural_arch),
@@ -46,7 +45,7 @@ def run_happo(args, common_config, env_config, stop):
                 "agent_num": env_config["ally_num"],
                 "state_dim": env_config["state_dim"]
             },
-            "vf_share_layers": True
+            "vf_share_layers": True,
         },
     })
 
