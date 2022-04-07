@@ -2,7 +2,7 @@ from gym.spaces import Dict as GymDict, Tuple, Box, Discrete
 import sys
 from ray import tune
 from ray.tune.registry import register_env
-from ray.rllib.agents.qmix.qmix import DEFAULT_CONFIG as QMIX_CONFIG
+from ray.rllib.agents.qmix.qmix import DEFAULT_CONFIG as QMIX_CONFIG, QMixTrainer
 from ray.rllib.agents.trainer import Trainer
 from ray.rllib.evaluation.worker_set import WorkerSet
 from ray.rllib.execution.concurrency_ops import Concurrently
@@ -12,31 +12,36 @@ from ray.rllib.execution.rollout_ops import ParallelRollouts
 from ray.rllib.execution.train_ops import TrainOneStep, UpdateTargetNetwork
 from ray.rllib.utils.typing import TrainerConfigDict
 from ray.util.iter import LocalIterator
-from GRF.env.football_rllib_qmix import RllibGFootball_QMIX
-from GRF.model.torch_qmix_model import QMixTrainer
-from GRF.util.qmix_tools import QMixReplayBuffer, QMixFromTorchPolicy
+from LBF.env.lbf_rllib_qmix import RllibLBF_QMIX
+from LBF.util.qmix_tools import QMixReplayBuffer, QMixFromTorchPolicy
+import sys
 
-def run_vdn_qmix_iql(args, common_config, env_config, stop):
-    if args.neural_arch not in ["CNN_GRU", "CNN_UPDeT"]:
+
+def run_vdn_qmix_iql(args, common_config, env_config, map_name, stop):
+    if args.neural_arch not in ["GRU"]:
         print("{} arch not supported for QMIX/VDN".format(args.neural_arch))
         sys.exit()
 
-    single_env = RllibGFootball_QMIX(env_config)
+    if not args.force_coop:
+        print("competitive settings are not suitable for QMIX/VDN")
+        sys.exit()
+
+    single_env = RllibLBF_QMIX(env_config)
     obs_space = single_env.observation_space
     act_space = single_env.action_space
 
     obs_space = Tuple([obs_space] * env_config["num_agents"])
     act_space = Tuple([act_space] * env_config["num_agents"])
 
-    # align with GoogleFootball/env/football_rllib_qmix.py reset() function in line 41-50
+    # align with LBF/env/lbf_rllib_qmix.py reset() function in line 41-50
     grouping = {
         "group_1": ["agent_{}".format(i) for i in range(env_config["num_agents"])],
     }
 
     # QMIX/VDN algo needs grouping env
     register_env(
-        "grouped_football",
-        lambda _: RllibGFootball_QMIX(env_config).with_agent_groups(
+        "grouped_lbf",
+        lambda _: RllibLBF_QMIX(env_config).with_agent_groups(
             grouping, obs_space=obs_space, act_space=act_space))
 
     mixer_dict = {
@@ -48,14 +53,14 @@ def run_vdn_qmix_iql(args, common_config, env_config, stop):
     # take care, when total sampled step > learning_starts, the training begins.
     # at this time, if the number of episode in buffer is less than train_batch_size,
     # then will cause dead loop where training never start.
-    episode_limit = args.episode_limit
+    episode_limit = env_config["max_episode_steps"]
     train_batch_size = 4 if args.local_mode else 32
     buffer_slot = 100 if args.local_mode else 1000
     learning_starts = episode_limit * train_batch_size
 
     config = {
         "seed": common_config["seed"],
-        "env": "grouped_football",
+        "env": "grouped_lbf",
         "model": {
             "max_seq_len": episode_limit + 1,  # dynamic
             "custom_model_config": {
@@ -149,7 +154,7 @@ def run_vdn_qmix_iql(args, common_config, env_config, stop):
         execution_plan=execution_plan_qmix)
 
     results = tune.run(QMixTrainer_,
-                       name=args.run + "_" + args.neural_arch + "_" + args.map,
+                       name=args.run + "_" + args.neural_arch + "_" + map_name,
                        stop=stop,
                        config=config,
                        verbose=1)

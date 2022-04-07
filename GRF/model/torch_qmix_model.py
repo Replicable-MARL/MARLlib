@@ -64,9 +64,9 @@ class Torch_CNN_GRU_Model(TorchModelV2, nn.Module):
     @override(ModelV2)
     def forward(self, input_dict, hidden_state, seq_lens):
         b = input_dict["obs_flat"].shape[0]
-        x = self.conv1(input_dict["obs_flat"].view(b, 42, 42, 4).permute(0, 3, 1, 2))
+        x = self.conv1(input_dict["obs_flat"].reshape(b, 42, 42, 4).permute(0, 3, 1, 2))
         x = self.conv2(x)
-        x = nn.functional.relu(self.fc1(x.view(b, -1)))
+        x = nn.functional.relu(self.fc1(x.reshape(b, -1)))
         h_in = hidden_state[0].reshape(-1, self.hidden_state_size)
         h = self.rnn(x, h_in)
         q = self.fc2(h)
@@ -139,12 +139,12 @@ class Torch_CNN_UPDeT_Model(TorchModelV2, nn.Module):
     @override(ModelV2)
     def forward(self, input_dict, hidden_state, seq_lens):
         b = input_dict["obs_flat"].shape[0]
-        x = input_dict["obs_flat"].view(b, 42, 42, 4)
+        x = input_dict["obs_flat"].reshape(b, 42, 42, 4)
         x = x.permute(0, 3, 1, 2).reshape(-1, 1, 42, 42)
         x = self.conv1(x)
         x = self.conv2(x)
-        x = self.fc1(x.view(4 * b, -1))
-        x = x.view(b, 4, self.trans_emb)
+        x = self.fc1(x.reshape(4 * b, -1))
+        x = x.reshape(b, 4, self.trans_emb)
 
         # inputs = self._build_inputs_transformer(inputs)
         outputs, _ = self.transformer(x, hidden_state[0], None)
@@ -162,7 +162,7 @@ class Torch_CNN_UPDeT_Model(TorchModelV2, nn.Module):
     def _build_inputs_transformer(self, inputs):
         pos = 4 - self.token_dim  # 5 for -1 6 for -2
         arranged_obs = torch.cat((inputs[:, pos:], inputs[:, :pos]), 1)
-        reshaped_obs = arranged_obs.view(-1, 1 + (self.enemy_num - 1) + self.ally_num, self.token_dim)
+        reshaped_obs = arranged_obs.reshape(-1, 1 + (self.enemy_num - 1) + self.ally_num, self.token_dim)
 
         return reshaped_obs
 
