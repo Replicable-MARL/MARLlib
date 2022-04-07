@@ -15,7 +15,7 @@ from LBF.model.torch_gru import *
 from LBF.model.torch_gru_cc import *
 from LBF.model.torch_lstm import *
 from LBF.model.torch_lstm_cc import *
-from LBF.model.torch_vd_ppo_a2c_gru_lstm import *
+from LBF.model.torch_vda2c_vdppo_model import *
 from LBF.util.vdppo_tools import *
 
 from LBF.policy.pg_a2c_a3c_r2d2 import run_pg_a2c_a3c_r2d2

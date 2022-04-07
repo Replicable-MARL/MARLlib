@@ -12,13 +12,13 @@ from MPE.model.torch_gru import *
 from MPE.model.torch_gru_cc import *
 from MPE.model.torch_lstm import *
 from MPE.model.torch_lstm_cc import *
-from MPE.model.torch_vd_ppo_a2c_gru_lstm import *
+from MPE.model.torch_vda2c_vdppo_model import *
 from MPE.util.vda2c_tools import *
 from MPE.util.vdppo_tools import *
 from MPE.env.mpe_rllib import RllibMPE
 
 from MPE.policy.pg_a2c_a3c import run_pg_a2c_a3c
-from MPE.policy.vdn_qmix import run_vdn_qmix
+from MPE.policy.vdn_qmix_iql import run_vdn_qmix_iql
 from MPE.policy.ppo import run_ppo
 from MPE.policy.vda2c import run_vda2c_sum_mix
 from MPE.policy.vdppo import run_vdppo_sum_mix
@@ -117,8 +117,9 @@ if __name__ == "__main__":
         "A2C": run_pg_a2c_a3c,
         "A3C": run_pg_a2c_a3c,
         "R2D2": run_r2d2,
-        "VDN": run_vdn_qmix,
-        "QMIX": run_vdn_qmix,
+        "IQL": run_vdn_qmix_iql,
+        "VDN": run_vdn_qmix_iql,
+        "QMIX": run_vdn_qmix_iql,
         "PPO": run_ppo,
         "MIX-VDA2C": run_vda2c_sum_mix,
         "SUM-VDA2C": run_vda2c_sum_mix,
@@ -136,6 +137,7 @@ if __name__ == "__main__":
     #####################
 
     common_config = {
+        "seed": 1,
         "env": args.map,
         "num_gpus_per_worker": 0.2,
         "num_gpus": 0.6,
