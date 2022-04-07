@@ -17,8 +17,8 @@ def get_train_parser():
         help="Whether use tune grid research")
     parser.add_argument(
         "--run",
-        # choices=["PG", "A2C", "A3C", "MAA2C", "DDPG", "MADDPG", "PPO", "MAPPO", "SUM-VDA2C", "MIX-VDA2C", "SUM-VDPPO", "MIX-VDPPO"],  # "APPO" "IMPALA"
-        choices=["HAPPO"],  # "APPO" "IMPALA"
+        choices=["PG", "A2C", "A3C", "MAA2C", "DDPG", "MADDPG", "PPO", "MAPPO", "SUM-VDA2C", "MIX-VDA2C", "SUM-VDPPO", "MIX-VDPPO", "HAPPO"],  # "APPO" "IMPALA"
+        # choices=["HAPPO"],  # "APPO" "IMPALA"
         # default="A2C",
         default="HAPPO",
         # default="MAPPO",
