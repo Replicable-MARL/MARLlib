@@ -11,7 +11,7 @@ from ray.rllib.execution.replay_buffer import *
 from ray.rllib.models.catalog import ModelCatalog
 from ray.rllib.policy.sample_batch import SampleBatch
 
-from SMAC.model.torch_vdn_qmix_iql_model import GRUModel, UPDeTModel
+from GRF.model.torch_qmix_model import Torch_CNN_GRU_Model, Torch_CNN_UPDeT_Model
 
 
 class QMixFromTorchPolicy(QMixTorchPolicy):
@@ -55,7 +55,7 @@ class QMixFromTorchPolicy(QMixTorchPolicy):
             config["model"],
             framework="torch",
             name="model",
-            default_model=GRUModel if neural_arch == "GRU" else UPDeTModel).to(self.device)
+            default_model=Torch_CNN_GRU_Model if neural_arch == "CNN_GRU" else Torch_CNN_UPDeT_Model).to(self.device)
 
         self.target_model = ModelCatalog.get_model_v2(
             agent_obs_space,
@@ -64,7 +64,7 @@ class QMixFromTorchPolicy(QMixTorchPolicy):
             config["model"],
             framework="torch",
             name="target_model",
-            default_model=GRUModel if neural_arch == "GRU" else UPDeTModel).to(self.device)
+            default_model=Torch_CNN_GRU_Model if neural_arch == "CNN_GRU" else Torch_CNN_UPDeT_Model).to(self.device)
 
         self.exploration = self._create_exploration()
 
@@ -95,7 +95,7 @@ class QMixFromTorchPolicy(QMixTorchPolicy):
                              self.target_mixer, self.n_agents, self.n_actions,
                              self.config["double_q"], self.config["gamma"])
 
-        if config["optimizer"] == "pymarl":
+        if config["optimizer"] == "RMSprop":
             from torch.optim import RMSprop
             self.optimiser = RMSprop(
                 params=self.params,
@@ -103,7 +103,7 @@ class QMixFromTorchPolicy(QMixTorchPolicy):
                 alpha=config["optim_alpha"],
                 eps=config["optim_eps"])
 
-        elif config["optimizer"] == "epymarl":
+        elif config["optimizer"] == "Adam":
             from torch.optim import Adam
             self.optimiser = Adam(
                 params=self.params,
@@ -111,7 +111,7 @@ class QMixFromTorchPolicy(QMixTorchPolicy):
                 eps=config["optim_eps"])
 
         else:
-            raise ValueError("choose one optimizer type from pymarl(RMSprop) or epymarl(Adam)")
+            raise ValueError("choose one optimizer type from RMSprop or Adam")
 
 
 # customized the LocalReplayBuffer to ensure the return batchsize = 32

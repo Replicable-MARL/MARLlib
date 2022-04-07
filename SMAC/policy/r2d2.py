@@ -4,7 +4,6 @@ from ray.rllib.agents.trainer_template import build_trainer
 from ray.rllib.agents.dqn.r2d2_tf_policy import R2D2TFPolicy
 from SMAC.metric.smac_callback import *
 from SMAC.util.r2d2_tools import *
-from SMAC.model.torch_qmix_mask_gru_updet import *
 
 
 def r2d2_avoid_bug_validate_config(config: TrainerConfigDict) -> None:

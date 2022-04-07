@@ -16,10 +16,10 @@ from GRF.model.torch_cnn_gru import Torch_CNN_GRU_Model
 from GRF.model.torch_cnn_gru_cc import Torch_CNN_GRU_CentralizedCritic_Model
 from GRF.model.torch_cnn_updet import Torch_CNN_Transformer_Model
 from GRF.model.torch_cnn_updet_cc import Torch_CNN_Transformer_CentralizedCritic_Model
-from GRF.model.torch_vd_ppo_a2c_cnn_gru_lstm_updet import *
+from GRF.model.torch_vda2c_vdppo_model import *
 from GRF.util.vdppo_tools import *
 from GRF.policy.pg_a2c_a3c_r2d2 import run_pg_a2c_a3c_r2d2
-from GRF.policy.vdn_qmix import run_vdn_qmix
+from GRF.policy.vdn_qmix_iql import run_vdn_qmix_iql
 from GRF.policy.ppo import run_ppo
 from GRF.policy.vda2c import run_vda2c_sum_mix
 from GRF.policy.vdppo import run_vdppo_sum_mix
@@ -83,8 +83,9 @@ if __name__ == "__main__":
         "A2C": run_pg_a2c_a3c_r2d2,
         "A3C": run_pg_a2c_a3c_r2d2,
         "R2D2": run_pg_a2c_a3c_r2d2,
-        "VDN": run_vdn_qmix,
-        "QMIX": run_vdn_qmix,
+        "IQL": run_vdn_qmix_iql,
+        "VDN": run_vdn_qmix_iql,
+        "QMIX": run_vdn_qmix_iql,
         "PPO": run_ppo,
         "MIX-VDA2C": run_vda2c_sum_mix,
         "SUM-VDA2C": run_vda2c_sum_mix,
@@ -122,6 +123,7 @@ if __name__ == "__main__":
     #####################
 
     common_config = {
+        "seed": 1,
         "num_gpus_per_worker": args.num_gpus_per_worker,
         "train_batch_size": 1000,
         "num_workers": args.num_workers,

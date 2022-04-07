@@ -3,10 +3,14 @@ import argparse
 
 def get_train_parser():
     parser = argparse.ArgumentParser()
+    # parser.add_argument(
+    #     "--local-mode",
+    #     default=True,
+    #     type=bool,
+    #     help="Init Ray in local mode for easier debugging.")
     parser.add_argument(
         "--local-mode",
-        default=True,
-        type=bool,
+        action="store_true",
         help="Init Ray in local mode for easier debugging.")
     parser.add_argument(
         "--parallel",
@@ -15,8 +19,8 @@ def get_train_parser():
         help="Whether use tune grid research")
     parser.add_argument(
         "--run",
-        choices=["QMIX", "VDN", "R2D2", "PG", "A2C", "A3C", "MAA2C", "PPO", "MAPPO", "COMA", "SUM-VDA2C", "MIX-VDA2C", "SUM-VDPPO", "MIX-VDPPO"],  # "APPO" "IMPALA"
-        default="SUM-VDA2C",
+        choices=["IQL", "QMIX", "VDN", "R2D2", "PG", "A2C", "A3C", "MAA2C", "PPO", "MAPPO", "COMA", "SUM-VDA2C", "MIX-VDA2C", "SUM-VDPPO", "MIX-VDPPO"],  # "APPO" "IMPALA"
+        default="IQL",
         help="The RLlib-registered algorithm to use.")
     parser.add_argument(
         "--map",
@@ -36,10 +40,24 @@ def get_train_parser():
         default="academy_3_vs_1_with_keeper",
         help="Envs should be registered")
     parser.add_argument(
+        "--episode-limit",
+        type=int,
+        default=200,
+        help="episode-limit for each game")
+    # parser.add_argument(
+    #     "--share-policy",
+    #     type=bool,
+    #     default=True,
+    #     help="Maps should be registered")
+    parser.add_argument(
         "--share-policy",
-        type=bool,
-        default=False,
+        action="store_true",
         help="Maps should be registered")
+    parser.add_argument(
+        "--evaluation-interval",
+        type=int,
+        default=10,
+        help="evaluation_interval")
     parser.add_argument(
         "--neural-arch",
         choices=["CNN", "CNN_LSTM", "CNN_GRU", "CNN_UPDeT"],

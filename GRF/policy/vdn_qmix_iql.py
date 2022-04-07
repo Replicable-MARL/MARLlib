@@ -1,56 +1,42 @@
-from gym.spaces import Dict as GymDict
+from gym.spaces import Dict as GymDict, Tuple, Box, Discrete
+import sys
 from ray import tune
-from ray.tune import register_env
-from SMAC.model.torch_mask_updet_cc import *
-from SMAC.util.r2d2_tools import *
-from SMAC.model.torch_vdn_qmix_iql_model import *
+from ray.tune.registry import register_env
 from ray.rllib.agents.qmix.qmix import DEFAULT_CONFIG as QMIX_CONFIG
 from ray.rllib.agents.trainer import Trainer
 from ray.rllib.evaluation.worker_set import WorkerSet
 from ray.rllib.execution.concurrency_ops import Concurrently
 from ray.rllib.execution.metric_ops import StandardMetricsReporting
-from ray.rllib.execution.replay_buffer import LocalReplayBuffer
 from ray.rllib.execution.replay_ops import Replay, StoreToReplayBuffer
 from ray.rllib.execution.rollout_ops import ParallelRollouts
-from ray.rllib.execution.train_ops import TrainOneStep, UpdateTargetNetwork, \
-    MultiGPUTrainOneStep
-from ray.rllib.utils.metrics.learner_info import LEARNER_STATS_KEY
+from ray.rllib.execution.train_ops import TrainOneStep, UpdateTargetNetwork
 from ray.rllib.utils.typing import TrainerConfigDict
 from ray.util.iter import LocalIterator
-from SMAC.env.starcraft2_rllib import StarCraft2Env_Rllib as SMAC
-from SMAC.util.qmix_tools import QMixFromTorchPolicy, QMixReplayBuffer
-
+from GRF.env.football_rllib_qmix import RllibGFootball_QMIX
+from GRF.model.torch_qmix_model import QMixTrainer
+from GRF.util.qmix_tools import QMixReplayBuffer, QMixFromTorchPolicy
 
 def run_vdn_qmix_iql(args, common_config, env_config, stop):
-    if args.neural_arch not in ["GRU", "UPDeT"]:
-        assert NotImplementedError
+    if args.neural_arch not in ["CNN_GRU", "CNN_UPDeT"]:
+        print("{} arch not supported for QMIX/VDN".format(args.neural_arch))
+        sys.exit()
 
-    obs_shape = env_config["obs_shape"]
-    n_ally = env_config["n_ally"]
-    n_enemy = env_config["n_enemy"]
-    state_shape = env_config["state_shape"]
-    n_actions = env_config["n_actions"]
-    episode_limit = env_config["episode_limit"]
+    single_env = RllibGFootball_QMIX(env_config)
+    obs_space = single_env.observation_space
+    act_space = single_env.action_space
 
+    obs_space = Tuple([obs_space] * env_config["num_agents"])
+    act_space = Tuple([act_space] * env_config["num_agents"])
+
+    # align with GoogleFootball/env/football_rllib_qmix.py reset() function in line 41-50
     grouping = {
-        "group_1": ["agent_{}".format(i) for i in range(n_ally)],
+        "group_1": ["agent_{}".format(i) for i in range(env_config["num_agents"])],
     }
-    ## obs state setting here
-    obs_space = Tuple([
-                          GymDict({
-                              "obs": Box(-2.0, 2.0, shape=(obs_shape,)),
-                              "state": Box(-2.0, 2.0, shape=(state_shape,)),
-                              "action_mask": Box(0.0, 1.0, shape=(n_actions,))
-                          })] * n_ally
-                      )
-    act_space = Tuple([
-                          Discrete(n_actions)
-                      ] * n_ally)
 
-    # QMIX/VDN need grouping
+    # QMIX/VDN algo needs grouping env
     register_env(
-        "grouped_smac",
-        lambda config: SMAC(config).with_agent_groups(
+        "grouped_football",
+        lambda _: RllibGFootball_QMIX(env_config).with_agent_groups(
             grouping, obs_space=obs_space, act_space=act_space))
 
     mixer_dict = {
@@ -58,36 +44,36 @@ def run_vdn_qmix_iql(args, common_config, env_config, stop):
         "VDN": "vdn",
         "IQL": None
     }
+
+    # take care, when total sampled step > learning_starts, the training begins.
+    # at this time, if the number of episode in buffer is less than train_batch_size,
+    # then will cause dead loop where training never start.
+    episode_limit = args.episode_limit
+    train_batch_size = 4 if args.local_mode else 32
+    buffer_slot = 100 if args.local_mode else 1000
+    learning_starts = episode_limit * train_batch_size
+
     config = {
         "seed": common_config["seed"],
-        "env": "grouped_smac",
-        "env_config": {
-            "map_name": args.map,
+        "env": "grouped_football",
+        "exploration_config": {
+            "epsilon_timesteps": 5000,
+            "final_epsilon": 0.05,
         },
         "model": {
             "max_seq_len": episode_limit + 1,  # dynamic
             "custom_model_config": {
                 "neural_arch": args.neural_arch,
-                "token_dim": args.token_dim,
-                "ally_num": n_ally,
-                "enemy_num": n_enemy,
-                "self_obs_dim": obs_shape,
-                "state_dim": state_shape
             },
         },
         "mixer": mixer_dict[args.run],
-        "callbacks": common_config["callbacks"],
-        # Use GPUs iff `RLLIB_NUM_GPUS` env var set to > 0.
         "num_gpus": args.num_gpus,
-        # "_disable_preprocessor_api": True
     }
 
-    learning_starts = episode_limit * 32
-    train_batch_size = 32
     QMIX_CONFIG.update(
         {
             "rollout_fragment_length": 1,
-            "buffer_size": 5000 * episode_limit // 2,  # in timesteps
+            "buffer_size": buffer_slot * episode_limit,  # in timesteps
             "train_batch_size": train_batch_size,  # in sequence
             "target_network_update_freq": episode_limit * 100,  # in timesteps
             "learning_starts": learning_starts,
@@ -102,7 +88,7 @@ def run_vdn_qmix_iql(args, common_config, env_config, stop):
         })
 
     QMIX_CONFIG["training_intensity"] = None
-    QMIX_CONFIG["optimizer"] = "pymarl"  # for RMSProp or "epymarl" for Adam
+    QMIX_CONFIG["optimizer"] = "RMSprop"  # or Adam
 
     def execution_plan_qmix(trainer: Trainer, workers: WorkerSet,
                             config: TrainerConfigDict, **kwargs) -> LocalIterator[dict]:
@@ -166,7 +152,10 @@ def run_vdn_qmix_iql(args, common_config, env_config, stop):
         get_policy_class=None,
         execution_plan=execution_plan_qmix)
 
-    results = tune.run(QMixTrainer_, name=args.run + "_" + args.neural_arch + "_" + args.map, stop=stop,
-                       config=config, verbose=1)
+    results = tune.run(QMixTrainer_,
+                       name=args.run + "_" + args.neural_arch + "_" + args.map,
+                       stop=stop,
+                       config=config,
+                       verbose=1)
 
     return results

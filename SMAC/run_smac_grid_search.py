@@ -8,8 +8,8 @@ from SMAC.model.torch_mask_gru_cc import *
 from SMAC.model.torch_mask_updet_cc import *
 from SMAC.metric.smac_callback import *
 from SMAC.util.r2d2_tools import *
-from SMAC.model.torch_qmix_mask_gru_updet import *
-from SMAC.model.torch_vd_ppo_a2c_mask_gru_lstm_updet import *
+from SMAC.model.torch_vdn_qmix_iql_model import *
+from SMAC.model.torch_vda2c_vdppo_model import *
 from SMAC.env.starcraft2_rllib import StarCraft2Env_Rllib as SMAC
 from config_smac import *
 from SMAC.policy.vdn_qmix_iql import run_vdn_qmix_iql
