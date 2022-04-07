@@ -2,18 +2,14 @@ from ray.rllib.agents.qmix.qmix_policy import *
 from ray.rllib.policy.torch_policy import TorchPolicy
 from ray.rllib.models.modelv2 import _unpack_obs
 from ray.rllib.agents.qmix.model import RNNModel, _get_size
-from ray.rllib.models.torch.torch_action_dist import TorchCategorical
 from gym.spaces import Tuple as Gym_Tuple, Discrete, Dict as Gym_Dict
-
 import numpy as np
 import tree  # pip install dm_tree
 from typing import Dict, List, Optional, TYPE_CHECKING
+from ray.rllib.execution.replay_buffer import *
 
 from ray.rllib.models.catalog import ModelCatalog
 from ray.rllib.policy.sample_batch import SampleBatch
-
-from ray.rllib.utils.typing import AgentID, ModelGradients, ModelWeights, \
-    TensorType, TensorStructType, TrainerConfigDict, Tuple, Union
 
 from SMAC.model.torch_qmix_mask_gru_updet import GRUModel
 
@@ -73,7 +69,7 @@ class QMixFromTorchPolicy(QMixTorchPolicy):
         self.exploration = self._create_exploration()
 
         # Setup the mixer network.
-        if config["mixer"] is None: # "iql"
+        if config["mixer"] is None:  # "iql"
             self.mixer = None
             self.target_mixer = None
         elif config["mixer"] == "qmix":
@@ -98,23 +94,29 @@ class QMixFromTorchPolicy(QMixTorchPolicy):
         self.loss = QMixLoss(self.model, self.target_model, self.mixer,
                              self.target_mixer, self.n_agents, self.n_actions,
                              self.config["double_q"], self.config["gamma"])
-        from torch.optim import RMSprop
-        # self.optimiser = RMSprop(
-        #     params=self.params,
-        #     lr=config["lr"],
-        #     alpha=config["optim_alpha"],
-        #     eps=config["optim_eps"])
-        from torch.optim import Adam
-        self.optimiser = Adam(
-            params=self.params,
-            lr=config["lr"],
-            eps=config["optim_eps"])
 
+        if config["optimizer"] == "pymarl":
+            from torch.optim import RMSprop
+            self.optimiser = RMSprop(
+                params=self.params,
+                lr=config["lr"],
+                alpha=config["optim_alpha"],
+                eps=config["optim_eps"])
 
-from ray.rllib.execution.replay_buffer import *
+        elif config["optimizer"] == "epymarl":
+            from torch.optim import Adam
+            self.optimiser = Adam(
+                params=self.params,
+                lr=config["lr"],
+                eps=config["optim_eps"])
+
+        else:
+            raise ValueError("choose one optimizer type from pymarl(RMSprop) or epymarl(Adam)")
 
 
 # customized the LocalReplayBuffer to ensure the return batchsize = 32
+# be aware, although the rllib doc says, capacity is sequence number not one step data when replay_sequence_length > 1,
+# in fact, it is not when sampling batch. This might be a bug for
 class QMixReplayBuffer(LocalReplayBuffer):
 
     def __init__(
@@ -139,6 +141,7 @@ class QMixReplayBuffer(LocalReplayBuffer):
                                    buffer_size)
 
         self.replay_batch_size = replay_batch_size
+        # self.len_debug = 0
 
     @override(LocalReplayBuffer)
     def add_batch(self, batch: SampleBatchType) -> None:
@@ -165,4 +168,7 @@ class QMixReplayBuffer(LocalReplayBuffer):
                     self.replay_buffers[policy_id].add(
                         time_slice, weight=weight)
         self.num_added += batch.count
-
+        # if self.len_debug != len(self.replay_buffers["default_policy"]):
+        #     self.len_debug = len(self.replay_buffers["default_policy"])
+        # else:
+        #     print(1)

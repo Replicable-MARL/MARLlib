@@ -54,7 +54,8 @@ In ray/rllib/execution/replay_buffer.py about line 227-237
 
 
 ## current support algo
-- R2D2(IQL)
+- R2D2
+- IQL  
 - VDN
 - QMIX
 - PG

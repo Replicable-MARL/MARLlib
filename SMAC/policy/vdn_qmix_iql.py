@@ -87,8 +87,8 @@ def run_vdn_qmix_iql(args, common_config, env_config, stop):
     QMIX_CONFIG.update(
         {
             "rollout_fragment_length": 1,
-            "buffer_size": 5000,
-            "train_batch_size": train_batch_size,  # in batch
+            "buffer_size": 5000 * episode_limit // 2,  # in timesteps
+            "train_batch_size": train_batch_size,  # in sequence
             "target_network_update_freq": episode_limit * 100,  # in timesteps
             "learning_starts": learning_starts,
             "lr": 0.0005,  # default
@@ -102,6 +102,7 @@ def run_vdn_qmix_iql(args, common_config, env_config, stop):
         })
 
     QMIX_CONFIG["training_intensity"] = None
+    QMIX_CONFIG["optimizer"] = "pymarl"  # or "epymarl"
 
     def execution_plan_qmix(trainer: Trainer, workers: WorkerSet,
                             config: TrainerConfigDict, **kwargs) -> LocalIterator[dict]:
@@ -112,7 +113,7 @@ def run_vdn_qmix_iql(args, common_config, env_config, stop):
 
         local_replay_buffer = QMixReplayBuffer(
             learning_starts=config["learning_starts"],
-            buffer_size=config["buffer_size"],
+            capacity=config["buffer_size"],
             replay_batch_size=config["train_batch_size"],
             replay_sequence_length=config.get("replay_sequence_length", 1),
             replay_burn_in=config.get("burn_in", 0),
