@@ -7,6 +7,7 @@ from ray.rllib.utils.annotations import override
 from ray.rllib.utils.framework import try_import_tf, try_import_torch, \
     TensorType
 from ray.rllib.policy.rnn_sequencing import add_time_dimension
+from MaMujoco.model.utils import init_orthogonal
 
 
 tf1, tf, tfv = try_import_tf()
@@ -40,7 +41,7 @@ class Torch_GRU_Model(TorchRNN, nn.Module):
         self.fc1 = nn.Linear(self.obs_size, self.fc_size)
         self.gru = nn.GRU(
             self.fc_size, self.hidden_state_size, batch_first=True)
-        self.action_branch = nn.Linear(self.hidden_state_size, num_outputs)
+        self.action_branch = init_orthogonal(nn.Linear(self.hidden_state_size, num_outputs))
         self.value_branch = nn.Linear(self.hidden_state_size, 1)
         # Holds the current "base" output (before logits layer).
         self._features = None
