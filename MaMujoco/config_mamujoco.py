@@ -79,7 +79,7 @@ def get_train_parser():
     parser.add_argument(
         "--num-workers",
         type=int,
-        default=4,
+        default=1,
         help="Sampler number per trail")
     parser.add_argument(
         "--num-cpus-per-worker",
