@@ -18,7 +18,7 @@ from ray.rllib.utils.metrics.learner_info import LEARNER_STATS_KEY
 from ray.rllib.utils.typing import TrainerConfigDict
 from ray.util.iter import LocalIterator
 from SMAC.env.starcraft2_rllib import StarCraft2Env_Rllib as SMAC
-from SMAC.util.qmix_tools import QMixFromTorchPolicy, QMixReplayBuffer
+from SMAC.util.qmix_tools import QMixTorchPolicy_Customized, QMixReplayBuffer
 
 
 def run_vdn_qmix_iql(args, common_config, env_config, stop):
@@ -101,8 +101,9 @@ def run_vdn_qmix_iql(args, common_config, env_config, stop):
             "evaluation_interval": args.evaluation_interval,
         })
 
+    QMIX_CONFIG["reward_standardize"] = True  # this may affect the final performance so much if you turn off
     QMIX_CONFIG["training_intensity"] = None
-    QMIX_CONFIG["optimizer"] = "pymarl"  # for RMSProp or "epymarl" for Adam
+    QMIX_CONFIG["optimizer"] = "epymarl"  # pyamrl for RMSProp or epymarl for Adam
 
     def execution_plan_qmix(trainer: Trainer, workers: WorkerSet,
                             config: TrainerConfigDict, **kwargs) -> LocalIterator[dict]:
@@ -162,7 +163,7 @@ def run_vdn_qmix_iql(args, common_config, env_config, stop):
     QMixTrainer_ = QMixTrainer.with_updates(
         name="QMIX",
         default_config=QMIX_CONFIG,
-        default_policy=QMixFromTorchPolicy,
+        default_policy=QMixTorchPolicy_Customized,
         get_policy_class=None,
         execution_plan=execution_plan_qmix)
 
