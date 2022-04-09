@@ -16,7 +16,7 @@ from RWARE.model.torch_gru import *
 from RWARE.model.torch_gru_cc import *
 from RWARE.model.torch_lstm import *
 from RWARE.model.torch_lstm_cc import *
-from RWARE.model.torch_vd_ppo_a2c_gru_lstm import *
+from RWARE.model.torch_vda2c_vdppo_model import *
 from RWARE.util.vdppo_tools import *
 
 from RWARE.policy.pg_a2c_a3c_r2d2 import run_pg_a2c_a3c_r2d2

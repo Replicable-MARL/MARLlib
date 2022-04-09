@@ -12,7 +12,7 @@ from ray.rllib.models.catalog import ModelCatalog
 from ray.rllib.policy.sample_batch import SampleBatch
 from ray.rllib.agents.qmix.qmix_policy import _mac, _validate, _unroll_mac
 
-from GRF.model.torch_qmix_model import Torch_CNN_GRU_Model, Torch_CNN_UPDeT_Model
+from GRF.model.torch_qmix_vdn_iql_model import Torch_CNN_GRU_Model, Torch_CNN_UPDeT_Model
 
 
 # the _unroll_mac for next observation is different from Pymarl.

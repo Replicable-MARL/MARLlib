@@ -13,7 +13,7 @@ from ray.rllib.execution.train_ops import TrainOneStep, UpdateTargetNetwork
 from ray.rllib.utils.typing import TrainerConfigDict
 from ray.util.iter import LocalIterator
 from GRF.env.football_rllib_qmix import RllibGFootball_QMIX
-from GRF.model.torch_qmix_model import QMixTrainer
+from GRF.model.torch_qmix_vdn_iql_model import QMixTrainer
 from GRF.util.qmix_tools import QMixReplayBuffer, QMixTorchPolicy_Customized
 
 """

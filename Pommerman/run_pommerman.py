@@ -13,7 +13,7 @@ from Pommerman.model.torch_cnn_gru import Torch_CNN_GRU_Model
 from Pommerman.model.torch_cnn_gru_cc import Torch_CNN_GRU_CentralizedCritic_Model
 from Pommerman.model.torch_cnn_lstm_cc import Torch_CNN_LSTM_CentralizedCritic_Model
 from Pommerman.model.torch_cnn import Torch_CNN_Model
-from Pommerman.model.torch_vd_ppo_a2c_gru_lstm import Torch_CNN_GRU_Model_w_Mixer, Torch_CNN_LSTM_Model_w_Mixer
+from Pommerman.model.torch_vda2c_vdppo_model import Torch_CNN_GRU_Model_w_Mixer, Torch_CNN_LSTM_Model_w_Mixer
 from Pommerman.agent.simple_agent import SimpleAgent
 from Pommerman.agent.trainable_place_holder_agent import PlaceHolderAgent
 from Pommerman.agent.random_agent import RandomAgent
