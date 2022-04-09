@@ -1,25 +1,23 @@
-from gym.spaces import Dict as GymDict, Tuple, Box, Discrete
-import sys
 from ray import tune
+from RWARE.env.rware_rllib_qmix import RllibRWARE_QMIX
+from gym.spaces import Dict as GymDict, Tuple, Box, Discrete
 from ray.tune.registry import register_env
+import sys
 from ray.rllib.agents.qmix.qmix import DEFAULT_CONFIG as QMIX_CONFIG, QMixTrainer
+
 from ray.rllib.agents.trainer import Trainer
 from ray.rllib.evaluation.worker_set import WorkerSet
 from ray.rllib.execution.concurrency_ops import Concurrently
 from ray.rllib.execution.metric_ops import StandardMetricsReporting
+from ray.rllib.execution.replay_buffer import LocalReplayBuffer
 from ray.rllib.execution.replay_ops import Replay, StoreToReplayBuffer
 from ray.rllib.execution.rollout_ops import ParallelRollouts
-from ray.rllib.execution.train_ops import TrainOneStep, UpdateTargetNetwork
+from ray.rllib.execution.train_ops import TrainOneStep, UpdateTargetNetwork, \
+    MultiGPUTrainOneStep
+from ray.rllib.utils.metrics.learner_info import LEARNER_STATS_KEY
 from ray.rllib.utils.typing import TrainerConfigDict
 from ray.util.iter import LocalIterator
-
-from gym.spaces import Tuple
-
-from pettingzoo.mpe import simple_adversary_v2, simple_crypto_v2, simple_v2, simple_push_v2, simple_tag_v2, \
-    simple_spread_v2, simple_reference_v2, simple_world_comm_v2, simple_speaker_listener_v3
-from MPE.env.mpe_rllib_qmix import RllibMPE_QMIX
-from MPE.util.qmix_tools import QMixReplayBuffer, QMixFromTorchPolicy
-
+from RWARE.util.qmix_tools import QMixTorchPolicy_Customized, QMixReplayBuffer
 
 """
 This QMiX/VDN version is based on but different from that rllib built-in qmix_policy
@@ -30,54 +28,29 @@ This QMiX/VDN version is based on but different from that rllib built-in qmix_po
 5. follow DQN execution plan
 """
 
-def run_vdn_qmix_iql(args, common_config, env_config, stop):
 
-    if args.continues:
-        print(
-            "{} do not support continue action space".format(args.run)
-        )
-        sys.exit()
-
-    if args.map not in ["simple_spread", "simple_speaker_listener", "simple_reference"]:
-        print(
-            "adversarial agents contained in this MPE scenario. "
-            "Not suitable for cooperative only algo {}".format(args.run)
-        )
-        sys.exit()
+def run_vdn_qmix_iql(args, common_config, env_config, map_name, stop):
 
     if args.neural_arch not in ["GRU"]:
         print("{} arch not supported for QMIX/VDN".format(args.neural_arch))
         sys.exit()
 
-    if args.map == "simple_spread":
-        env = simple_spread_v2.parallel_env(continuous_actions=False)
-    elif args.map == "simple_reference":
-        env = simple_reference_v2.parallel_env(continuous_actions=False)
-    elif args.map == "simple_speaker_listener":
-        env = simple_speaker_listener_v3.parallel_env(continuous_actions=False)
-    else:
-        print("not support QMIX/VDN in {}".format(args.map))
-        sys.exit()
+    single_env = RllibRWARE_QMIX(env_config)
+    obs_space = single_env.observation_space
+    act_space = single_env.action_space
 
-    test_env = RllibMPE_QMIX(env)
-    agent_num = test_env.num_agents
-    agent_list = test_env.agents
-    obs_space = test_env.observation_space
-    act_space = test_env.action_space
-    test_env.close()
-
-    obs_space = Tuple([obs_space] * agent_num)
-    act_space = Tuple([act_space] * agent_num)
+    obs_space = Tuple([obs_space] * env_config["agents_num"])
+    act_space = Tuple([act_space] * env_config["agents_num"])
 
     # align with RWARE/env/rware_rllib_qmix.py reset() function in line 41-50
     grouping = {
-        "group_1": [i for i in agent_list],
+        "group_1": ["agent_{}".format(i) for i in range(env_config["agents_num"])],
     }
 
     # QMIX/VDN algo needs grouping env
     register_env(
-        args.map,
-        lambda _: RllibMPE_QMIX(env).with_agent_groups(
+        "grouped_rware",
+        lambda _: RllibRWARE_QMIX(env_config).with_agent_groups(
             grouping, obs_space=obs_space, act_space=act_space))
 
     mixer_dict = {
@@ -86,17 +59,18 @@ def run_vdn_qmix_iql(args, common_config, env_config, stop):
         "IQL": None
     }
 
-    # take care, when total sampled step > learning_starts, the training begins.
-    # at this time, if the number of episode in buffer is less than train_batch_size,
-    # then will cause dead loop where training never start.
-    episode_limit = 100
+    episode_limit = 500
     train_batch_size = 4 if args.local_mode else 32
     buffer_slot = 100 if args.local_mode else 1000
     learning_starts = episode_limit * train_batch_size
 
     config = {
         "seed": common_config["seed"],
-        "env": args.map,
+        "env": "grouped_rware",
+        "exploration_config": {
+            "epsilon_timesteps": 5000,
+            "final_epsilon": 0.05,
+        },
         "model": {
             "max_seq_len": episode_limit + 1,  # dynamic
         },
@@ -183,12 +157,12 @@ def run_vdn_qmix_iql(args, common_config, env_config, stop):
     QMixTrainer_ = QMixTrainer.with_updates(
         name="QMIX",
         default_config=QMIX_CONFIG,
-        default_policy=QMixFromTorchPolicy,
+        default_policy=QMixTorchPolicy_Customized,
         get_policy_class=None,
         execution_plan=execution_plan_qmix)
 
     results = tune.run(QMixTrainer_,
-                       name=args.run + "_" + args.neural_arch + "_" + args.map,
+                       name=args.run + "_" + args.neural_arch + "_" + map_name,
                        stop=stop,
                        config=config,
                        verbose=1)

@@ -10,8 +10,132 @@ from ray.rllib.execution.replay_buffer import *
 
 from ray.rllib.models.catalog import ModelCatalog
 from ray.rllib.policy.sample_batch import SampleBatch
-from ray.rllib.agents.qmix.qmix_policy import _mac, _validate
+from ray.rllib.agents.qmix.qmix_policy import _mac, _validate, _unroll_mac
 from SMAC.model.torch_vdn_qmix_iql_model import GRUModel, UPDeTModel
+
+
+# the _unroll_mac for next observation is different from Pymarl.
+# we provide a new QMixloss here
+class Pymarl_QMixLoss(nn.Module):
+    def __init__(self,
+                 model,
+                 target_model,
+                 mixer,
+                 target_mixer,
+                 n_agents,
+                 n_actions,
+                 double_q=True,
+                 gamma=0.99):
+        nn.Module.__init__(self)
+        self.model = model
+        self.target_model = target_model
+        self.mixer = mixer
+        self.target_mixer = target_mixer
+        self.n_agents = n_agents
+        self.n_actions = n_actions
+        self.double_q = double_q
+        self.gamma = gamma
+
+    def forward(self,
+                rewards,
+                actions,
+                terminated,
+                mask,
+                obs,
+                next_obs,
+                action_mask,
+                next_action_mask,
+                state=None,
+                next_state=None):
+        """Forward pass of the loss.
+
+        Args:
+            rewards: Tensor of shape [B, T, n_agents]
+            actions: Tensor of shape [B, T, n_agents]
+            terminated: Tensor of shape [B, T, n_agents]
+            mask: Tensor of shape [B, T, n_agents]
+            obs: Tensor of shape [B, T, n_agents, obs_size]
+            next_obs: Tensor of shape [B, T, n_agents, obs_size]
+            action_mask: Tensor of shape [B, T, n_agents, n_actions]
+            next_action_mask: Tensor of shape [B, T, n_agents, n_actions]
+            state: Tensor of shape [B, T, state_dim] (optional)
+            next_state: Tensor of shape [B, T, state_dim] (optional)
+        """
+
+        # Assert either none or both of state and next_state are given
+        if state is None and next_state is None:
+            state = obs  # default to state being all agents' observations
+            next_state = next_obs
+        elif (state is None) != (next_state is None):
+            raise ValueError("Expected either neither or both of `state` and "
+                             "`next_state` to be given. Got: "
+                             "\n`state` = {}\n`next_state` = {}".format(
+                state, next_state))
+
+        # append the first element of obs + next_obs to get new one
+        whole_obs = torch.cat((obs[:, 0:1], next_obs), axis=1)
+
+        # Calculate estimated Q-Values
+        mac_out = _unroll_mac(self.model, whole_obs)
+
+        # Pick the Q-Values for the actions taken -> [B * n_agents, T]
+        chosen_action_qvals = torch.gather(
+            mac_out[:, :-1], dim=3, index=actions.unsqueeze(3)).squeeze(3)
+
+        # Calculate the Q-Values necessary for the target
+
+        target_mac_out = _unroll_mac(self.target_model, whole_obs)
+
+        # we only need target_mac_out for raw next_obs part
+        target_mac_out = target_mac_out[:, 1:]
+
+        # Mask out unavailable actions for the t+1 step
+        ignore_action_tp1 = (next_action_mask == 0) & (mask == 1).unsqueeze(-1)
+        target_mac_out[ignore_action_tp1] = -np.inf
+
+        # Max over target Q-Values
+        if self.double_q:
+            # large bugs here in original QMixloss, the gradient is calculated
+            # we fix this follow pymarl
+            mac_out_tp1 = mac_out.clone().detach()
+            mac_out_tp1 = mac_out_tp1[:, 1:]
+
+            # mask out unallowed actions
+            mac_out_tp1[ignore_action_tp1] = -np.inf
+
+            # obtain best actions at t+1 according to policy NN
+            cur_max_actions = mac_out_tp1.argmax(dim=3, keepdim=True)
+
+            # use the target network to estimate the Q-values of policy
+            # network's selected actions
+            target_max_qvals = torch.gather(target_mac_out, 3,
+                                            cur_max_actions).squeeze(3)
+        else:
+            target_max_qvals = target_mac_out.max(dim=3)[0]
+
+        assert target_max_qvals.min().item() != -np.inf, \
+            "target_max_qvals contains a masked action; \
+            there may be a state with no valid actions."
+
+        # Mix
+        if self.mixer is not None:
+            chosen_action_qvals = self.mixer(chosen_action_qvals, state)
+            target_max_qvals = self.target_mixer(target_max_qvals, next_state)
+
+        # Calculate 1-step Q-Learning targets
+        targets = rewards + self.gamma * (1 - terminated) * target_max_qvals
+
+        # Td-error
+        td_error = (chosen_action_qvals - targets.detach())
+
+        mask = mask.expand_as(td_error)
+
+        # 0-out the targets that came from padded data
+        masked_td_error = td_error * mask
+
+        # Normal L2 loss, take mean over actual data
+        loss = (masked_td_error ** 2).sum() / mask.sum()
+        return loss, mask, masked_td_error, chosen_action_qvals, targets
 
 
 class QMixTorchPolicy_Customized(Policy):
@@ -40,10 +164,10 @@ class QMixTorchPolicy_Customized(Policy):
             self.obs_size = _get_size(agent_obs_space.spaces["obs"])
             if "action_mask" in space_keys:
                 mask_shape = tuple(agent_obs_space.spaces["action_mask"].shape)
-                if mask_shape != (self.n_actions, ):
+                if mask_shape != (self.n_actions,):
                     raise ValueError(
                         "Action mask shape must be {}, got {}".format(
-                            (self.n_actions, ), mask_shape))
+                            (self.n_actions,), mask_shape))
                 self.has_action_mask = True
             if ENV_STATE in space_keys:
                 self.env_global_state_shape = _get_size(
@@ -102,9 +226,9 @@ class QMixTorchPolicy_Customized(Policy):
         self.params = list(self.model.parameters())
         if self.mixer:
             self.params += list(self.mixer.parameters())
-        self.loss = QMixLoss(self.model, self.target_model, self.mixer,
-                             self.target_mixer, self.n_agents, self.n_actions,
-                             self.config["double_q"], self.config["gamma"])
+        self.loss = Pymarl_QMixLoss(self.model, self.target_model, self.mixer,
+                                    self.target_mixer, self.n_agents, self.n_actions,
+                                    self.config["double_q"], self.config["gamma"])
 
         if config["optimizer"] == "pymarl":
             from torch.optim import RMSprop
@@ -116,7 +240,7 @@ class QMixTorchPolicy_Customized(Policy):
             from torch.optim import Adam
             self.optimiser = Adam(
                 params=self.params,
-                lr=config["lr"],)
+                lr=config["lr"], )
 
         else:
             raise ValueError("choose one optimizer type from pymarl(RMSprop) or epymarl(Adam)")
@@ -219,7 +343,6 @@ class QMixTorchPolicy_Customized(Policy):
         rewards = to_batches(rew, torch.float) / self.n_agents
         if self.reward_standardize:
             rewards = (rewards - rewards.mean()) / (rewards.std() + 1e-5)
-
 
         actions = to_batches(act, torch.long)
         obs = to_batches(obs, torch.float).reshape(
@@ -382,7 +505,7 @@ class QMixTorchPolicy_Customized(Policy):
 
 # customized the LocalReplayBuffer to ensure the return batchsize = 32
 # be aware, although the rllib doc says, capacity is sequence number not one step data when replay_sequence_length > 1,
-# in fact, it is not when sampling batch. This might be a bug for
+# in fact, it is not when sampling batch.
 class QMixReplayBuffer(LocalReplayBuffer):
 
     def __init__(

@@ -14,7 +14,17 @@ from ray.rllib.utils.typing import TrainerConfigDict
 from ray.util.iter import LocalIterator
 from GRF.env.football_rllib_qmix import RllibGFootball_QMIX
 from GRF.model.torch_qmix_model import QMixTrainer
-from GRF.util.qmix_tools import QMixReplayBuffer, QMixFromTorchPolicy
+from GRF.util.qmix_tools import QMixReplayBuffer, QMixTorchPolicy_Customized
+
+"""
+This QMiX/VDN version is based on but different from that rllib built-in qmix_policy
+1. the replay buffer is now standard localreplaybuffer instead of simplereplaybuffer
+2. the QMIX loss is modified to be align with pymarl
+3. provide reward standardize option
+4. provide model optimizer option
+5. follow DQN execution plan
+"""
+
 
 def run_vdn_qmix_iql(args, common_config, env_config, stop):
     if args.neural_arch not in ["CNN_GRU", "CNN_UPDeT"]:
@@ -83,6 +93,7 @@ def run_vdn_qmix_iql(args, common_config, env_config, stop):
             "evaluation_interval": args.evaluation_interval,
         })
 
+    QMIX_CONFIG["reward_standardize"] = True  # this may affect the final performance so much if you turn off
     QMIX_CONFIG["training_intensity"] = None
     QMIX_CONFIG["optimizer"] = "RMSprop"  # or Adam
 
@@ -144,7 +155,7 @@ def run_vdn_qmix_iql(args, common_config, env_config, stop):
     QMixTrainer_ = QMixTrainer.with_updates(
         name="QMIX",
         default_config=QMIX_CONFIG,
-        default_policy=QMixFromTorchPolicy,
+        default_policy=QMixTorchPolicy_Customized,
         get_policy_class=None,
         execution_plan=execution_plan_qmix)
 

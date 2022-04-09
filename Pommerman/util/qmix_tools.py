@@ -1,7 +1,18 @@
 from ray.rllib.agents.qmix.qmix_policy import *
+from ray.rllib.policy.torch_policy import TorchPolicy
+from ray.rllib.models.modelv2 import _unpack_obs
+from ray.rllib.agents.qmix.model import RNNModel, _get_size
+from gym.spaces import Tuple as Gym_Tuple, Discrete, Dict as Gym_Dict
+import numpy as np
+import tree  # pip install dm_tree
+from typing import Dict, List, Optional, TYPE_CHECKING
 from ray.rllib.execution.replay_buffer import *
+
+from ray.rllib.models.catalog import ModelCatalog
 from ray.rllib.policy.sample_batch import SampleBatch
 from ray.rllib.agents.qmix.qmix_policy import _mac, _validate, _unroll_mac
+
+from Pommerman.model.torch_qmix_model import Torch_CNN_GRU_Model
 
 
 # the _unroll_mac for next observation is different from Pymarl.
@@ -127,11 +138,71 @@ class Pymarl_QMixLoss(nn.Module):
         loss = (masked_td_error ** 2).sum() / mask.sum()
         return loss, mask, masked_td_error, chosen_action_qvals, targets
 
-class QMixFromTorchPolicy(QMixTorchPolicy):
+
+class QMixTorchPolicy_Customized(Policy):
 
     def __init__(self, obs_space, action_space, config):
+        _validate(obs_space, action_space)
+        config = dict(ray.rllib.agents.qmix.qmix.DEFAULT_CONFIG, **config)
+        self.framework = "torch"
         super().__init__(obs_space, action_space, config)
+        self.n_agents = len(obs_space.original_space.spaces)
+        config["model"]["n_agents"] = self.n_agents
+        self.n_actions = action_space.spaces[0].n
+        self.h_size = config["model"]["lstm_cell_size"]
+        self.has_env_global_state = False
+        self.has_action_mask = False
+        self.device = (torch.device("cuda")
+                       if torch.cuda.is_available() else torch.device("cpu"))
         self.reward_standardize = config["reward_standardize"]
+
+        agent_obs_space = obs_space.original_space.spaces[0]
+        if isinstance(agent_obs_space, Gym_Dict):
+            space_keys = set(agent_obs_space.spaces.keys())
+            if "obs" not in space_keys:
+                raise ValueError(
+                    "Dict obs space must have subspace labeled `obs`")
+            self.obs_size = _get_size(agent_obs_space.spaces["obs"])
+            if "action_mask" in space_keys:
+                mask_shape = tuple(agent_obs_space.spaces["action_mask"].shape)
+                if mask_shape != (self.n_actions, ):
+                    raise ValueError(
+                        "Action mask shape must be {}, got {}".format(
+                            (self.n_actions, ), mask_shape))
+                self.has_action_mask = True
+            if ENV_STATE in space_keys:
+                self.env_global_state_shape = _get_size(
+                    agent_obs_space.spaces[ENV_STATE])
+                self.has_env_global_state = True
+            else:
+                self.env_global_state_shape = (self.obs_size, self.n_agents)
+            # The real agent obs space is nested inside the dict
+            config["model"]["full_obs_space"] = agent_obs_space
+            agent_obs_space = agent_obs_space.spaces["obs"]
+        else:
+            self.obs_size = _get_size(agent_obs_space)
+            self.env_global_state_shape = (self.obs_size, self.n_agents)
+
+        neural_arch = config["model"]["custom_model_config"]["neural_arch"]
+        self.model = ModelCatalog.get_model_v2(
+            agent_obs_space,
+            action_space.spaces[0],
+            self.n_actions,
+            config["model"],
+            framework="torch",
+            name="model",
+            default_model=Torch_CNN_GRU_Model).to(self.device)
+
+        self.target_model = ModelCatalog.get_model_v2(
+            agent_obs_space,
+            action_space.spaces[0],
+            self.n_actions,
+            config["model"],
+            framework="torch",
+            name="target_model",
+            default_model=Torch_CNN_GRU_Model).to(self.device)
+
+        self.exploration = self._create_exploration()
 
         # Setup the mixer network.
         if config["mixer"] is None:  # "iql"
@@ -178,7 +249,60 @@ class QMixFromTorchPolicy(QMixTorchPolicy):
         else:
             raise ValueError("choose one optimizer type from RMSprop or Adam")
 
-    @override(QMixTorchPolicy)
+    @override(Policy)
+    def compute_actions(self,
+                        obs_batch,
+                        state_batches=None,
+                        prev_action_batch=None,
+                        prev_reward_batch=None,
+                        info_batch=None,
+                        episodes=None,
+                        explore=None,
+                        timestep=None,
+                        **kwargs):
+        explore = explore if explore is not None else self.config["explore"]
+        obs_batch, action_mask, _ = self._unpack_observation(obs_batch)
+        # We need to ensure we do not use the env global state
+        # to compute actions
+
+        # Compute actions
+        with torch.no_grad():
+            q_values, hiddens = _mac(
+                self.model,
+                torch.as_tensor(
+                    obs_batch, dtype=torch.float, device=self.device), [
+                    torch.as_tensor(
+                        np.array(s), dtype=torch.float, device=self.device)
+                    for s in state_batches
+                ])
+            avail = torch.as_tensor(
+                action_mask, dtype=torch.float, device=self.device)
+            masked_q_values = q_values.clone()
+            masked_q_values[avail == 0.0] = -float("inf")
+            masked_q_values_folded = torch.reshape(
+                masked_q_values, [-1] + list(masked_q_values.shape)[2:])
+            actions, _ = self.exploration.get_exploration_action(
+                action_distribution=TorchCategorical(masked_q_values_folded),
+                timestep=timestep,
+                explore=explore)
+            actions = torch.reshape(
+                actions,
+                list(masked_q_values.shape)[:-1]).cpu().numpy()
+            hiddens = [s.cpu().numpy() for s in hiddens]
+
+        return tuple(actions.transpose([1, 0])), hiddens, {}
+
+    @override(Policy)
+    def compute_log_likelihoods(self,
+                                actions,
+                                obs_batch,
+                                state_batches=None,
+                                prev_action_batch=None,
+                                prev_reward_batch=None):
+        obs_batch, action_mask, _ = self._unpack_observation(obs_batch)
+        return np.zeros(obs_batch.size()[0])
+
+    @override(Policy)
     def learn_on_batch(self, samples):
         obs_batch, action_mask, env_global_state = self._unpack_observation(
             samples[SampleBatch.CUR_OBS])
@@ -270,6 +394,115 @@ class QMixFromTorchPolicy(QMixTorchPolicy):
             "target_mean": (targets * mask).sum().item() / mask_elems,
         }
         return {LEARNER_STATS_KEY: stats}
+
+    @override(Policy)
+    def get_initial_state(self):  # initial RNN state
+        return [
+            s.expand([self.n_agents, -1]).cpu().numpy()
+            for s in self.model.get_initial_state()
+        ]
+
+    @override(Policy)
+    def get_weights(self):
+        return {
+            "model": self._cpu_dict(self.model.state_dict()),
+            "target_model": self._cpu_dict(self.target_model.state_dict()),
+            "mixer": self._cpu_dict(self.mixer.state_dict())
+            if self.mixer else None,
+            "target_mixer": self._cpu_dict(self.target_mixer.state_dict())
+            if self.mixer else None,
+        }
+
+    @override(Policy)
+    def set_weights(self, weights):
+        self.model.load_state_dict(self._device_dict(weights["model"]))
+        self.target_model.load_state_dict(
+            self._device_dict(weights["target_model"]))
+        if weights["mixer"] is not None:
+            self.mixer.load_state_dict(self._device_dict(weights["mixer"]))
+            self.target_mixer.load_state_dict(
+                self._device_dict(weights["target_mixer"]))
+
+    @override(Policy)
+    def get_state(self):
+        state = self.get_weights()
+        state["cur_epsilon"] = self.cur_epsilon
+        return state
+
+    @override(Policy)
+    def set_state(self, state):
+        self.set_weights(state)
+        self.set_epsilon(state["cur_epsilon"])
+
+    def update_target(self):
+        self.target_model.load_state_dict(self.model.state_dict())
+        if self.mixer is not None:
+            self.target_mixer.load_state_dict(self.mixer.state_dict())
+        logger.debug("Updated target networks")
+        print("Updated target networks")
+
+    def set_epsilon(self, epsilon):
+        self.cur_epsilon = epsilon
+
+    def _get_group_rewards(self, info_batch):
+        group_rewards = np.array([
+            info.get(GROUP_REWARDS, [0.0] * self.n_agents)
+            for info in info_batch
+        ])
+        return group_rewards
+
+    def _device_dict(self, state_dict):
+        return {
+            k: torch.as_tensor(v, device=self.device)
+            for k, v in state_dict.items()
+        }
+
+    @staticmethod
+    def _cpu_dict(state_dict):
+        return {k: v.cpu().detach().numpy() for k, v in state_dict.items()}
+
+    def _unpack_observation(self, obs_batch):
+        """Unpacks the observation, action mask, and state (if present)
+        from agent grouping.
+
+        Returns:
+            obs (np.ndarray): obs tensor of shape [B, n_agents, obs_size]
+            mask (np.ndarray): action mask, if any
+            state (np.ndarray or None): state tensor of shape [B, state_size]
+                or None if it is not in the batch
+        """
+
+        unpacked = _unpack_obs(
+            np.array(obs_batch, dtype=np.float32),
+            self.observation_space.original_space,
+            tensorlib=np)
+
+        if isinstance(unpacked[0], dict):
+            assert "obs" in unpacked[0]
+            unpacked_obs = [
+                np.concatenate(tree.flatten(u["obs"]), 1) for u in unpacked
+            ]
+        else:
+            unpacked_obs = unpacked
+
+        obs = np.concatenate(
+            unpacked_obs,
+            axis=1).reshape([len(obs_batch), self.n_agents, self.obs_size])
+
+        if self.has_action_mask:
+            action_mask = np.concatenate(
+                [o["action_mask"] for o in unpacked], axis=1).reshape(
+                [len(obs_batch), self.n_agents, self.n_actions])
+        else:
+            action_mask = np.ones(
+                [len(obs_batch), self.n_agents, self.n_actions],
+                dtype=np.float32)
+
+        if self.has_env_global_state:
+            state = np.concatenate(tree.flatten(unpacked[0][ENV_STATE]), 1)
+        else:
+            state = None
+        return obs, action_mask, state
 
 
 # customized the LocalReplayBuffer to ensure the return batchsize = 32

@@ -21,9 +21,19 @@ from SMAC.env.starcraft2_rllib import StarCraft2Env_Rllib as SMAC
 from SMAC.util.qmix_tools import QMixTorchPolicy_Customized, QMixReplayBuffer
 
 
+"""
+This QMiX/VDN version is based on but different from that rllib built-in qmix_policy
+1. the replay buffer is now standard localreplaybuffer instead of simplereplaybuffer
+2. the QMIX loss is modified to be align with pymarl
+3. provide reward standardize option
+4. provide model optimizer option
+5. follow DQN execution plan
+"""
+
+
 def run_vdn_qmix_iql(args, common_config, env_config, stop):
     if args.neural_arch not in ["GRU", "UPDeT"]:
-        assert NotImplementedError
+        raise NotImplementedError()
 
     obs_shape = env_config["obs_shape"]
     n_ally = env_config["n_ally"]
@@ -58,6 +68,7 @@ def run_vdn_qmix_iql(args, common_config, env_config, stop):
         "VDN": "vdn",
         "IQL": None
     }
+
     config = {
         "seed": common_config["seed"],
         "env": "grouped_smac",
@@ -101,7 +112,7 @@ def run_vdn_qmix_iql(args, common_config, env_config, stop):
             "evaluation_interval": args.evaluation_interval,
         })
 
-    QMIX_CONFIG["reward_standardize"] = True  # this may affect the final performance so much if you turn off
+    QMIX_CONFIG["reward_standardize"] = True  # this may affect the final performance if you turn off
     QMIX_CONFIG["training_intensity"] = None
     QMIX_CONFIG["optimizer"] = "epymarl"  # pyamrl for RMSProp or epymarl for Adam
 

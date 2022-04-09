@@ -20,7 +20,7 @@ from RWARE.model.torch_vd_ppo_a2c_gru_lstm import *
 from RWARE.util.vdppo_tools import *
 
 from RWARE.policy.pg_a2c_a3c_r2d2 import run_pg_a2c_a3c_r2d2
-from RWARE.policy.vdn_qmix import run_vdn_qmix
+from RWARE.policy.vdn_qmix_iql import run_vdn_qmix_iql
 from RWARE.policy.ppo import run_ppo
 from RWARE.policy.vda2c import run_vda2c_sum_mix
 from RWARE.policy.vdppo import run_vdppo_sum_mix
@@ -77,8 +77,9 @@ if __name__ == "__main__":
         "A2C": run_pg_a2c_a3c_r2d2,
         "A3C": run_pg_a2c_a3c_r2d2,
         "R2D2": run_pg_a2c_a3c_r2d2,
-        "VDN": run_vdn_qmix,
-        "QMIX": run_vdn_qmix,
+        "IQL": run_vdn_qmix_iql,
+        "VDN": run_vdn_qmix_iql,
+        "QMIX": run_vdn_qmix_iql,
         "PPO": run_ppo,
         "MIX-VDA2C": run_vda2c_sum_mix,
         "SUM-VDA2C": run_vda2c_sum_mix,
@@ -114,6 +115,7 @@ if __name__ == "__main__":
     #####################
 
     common_config = {
+        "seed": 1,
         "env": "rware",
         "num_gpus_per_worker": args.num_gpus_per_worker,
         "train_batch_size": 1000,

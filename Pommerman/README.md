@@ -33,7 +33,8 @@ Pattern: source package file -> replace file
 - **pommerman/env/v0.py**  ->  **v0.py** 
 
 ## current support algo
-- R2D2(IQL)
+- R2D2
+- IQL  
 - VDN
 - QMIX
 - PG

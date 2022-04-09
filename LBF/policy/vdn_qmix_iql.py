@@ -13,8 +13,18 @@ from ray.rllib.execution.train_ops import TrainOneStep, UpdateTargetNetwork
 from ray.rllib.utils.typing import TrainerConfigDict
 from ray.util.iter import LocalIterator
 from LBF.env.lbf_rllib_qmix import RllibLBF_QMIX
-from LBF.util.qmix_tools import QMixReplayBuffer, QMixFromTorchPolicy
+from LBF.util.qmix_tools import QMixReplayBuffer, QMixTorchPolicy_Customized
 import sys
+
+
+"""
+This QMiX/VDN version is based on but different from that rllib built-in qmix_policy
+1. the replay buffer is now standard localreplaybuffer instead of simplereplaybuffer
+2. the QMIX loss is modified to be align with pymarl
+3. provide reward standardize option
+4. provide model optimizer option
+5. follow DQN execution plan
+"""
 
 
 def run_vdn_qmix_iql(args, common_config, env_config, map_name, stop):
@@ -85,6 +95,7 @@ def run_vdn_qmix_iql(args, common_config, env_config, map_name, stop):
             "evaluation_interval": args.evaluation_interval,
         })
 
+    QMIX_CONFIG["reward_standardize"] = True  # this may affect the final performance so much if you turn off
     QMIX_CONFIG["training_intensity"] = None
     QMIX_CONFIG["optimizer"] = "RMSprop"  # or Adam
 
@@ -146,7 +157,7 @@ def run_vdn_qmix_iql(args, common_config, env_config, map_name, stop):
     QMixTrainer_ = QMixTrainer.with_updates(
         name="QMIX",
         default_config=QMIX_CONFIG,
-        default_policy=QMixFromTorchPolicy,
+        default_policy=QMixTorchPolicy_Customized,
         get_policy_class=None,
         execution_plan=execution_plan_qmix)
 

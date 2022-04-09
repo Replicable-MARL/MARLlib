@@ -331,6 +331,8 @@ Here is a chart describing the characteristics of each algorithm:
   - 
 
 ### **Part VI. Bug Shooting**
+This part is really important and I highly recommend you to read it first and keep in mind before running the code.
+
 - ppo related bug: refer to https://github.com/ray-project/ray/pull/20743. 
   - make sure sgd_minibatch_size > max_seq_len
   - enlarge the sgd_minibatch_size (128 in default)
@@ -374,6 +376,24 @@ In ray/rllib/execution/replay_buffer.py about line 227-237
 
                 res.append(idx)
             return res
+
+
+- preprocessors wrongly triggered: 
+  
+      Be aware, rllib-built in preprocessors may automatically triggered when observation shape follow a pattern.
+      
+      E.g. in SMAC 3s5z map, the obs_dim is 128, which is unluckily equal to ATARI_RAM_OBS_SHAPE which is defined in 
+      ray/rllib/models/preprocessors.py line 13 in ray 1.8.0. 
+  
+      Then the observation will be transformed to a Atari obs style unintendedly.
+      
+      This will not cause a bug, but will harm the final performance of the training.
+      
+      the easiest way to fix this problem is changing ATARI_RAM_OBS_SHAPE to other value in source code ray/rllib/models/preprocessors.py line 13 in ray 1.8.0. 
+      when you do find such performance degradation
+      
+      I haven't checked whether future ray version have fixed this issue.
+
 
 ## Acknowledgement
 

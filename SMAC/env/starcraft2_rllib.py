@@ -39,21 +39,21 @@ class StarCraft2Env_Rllib(MultiAgentEnv):
         Returns initial observations and states.
         """
         self.env.reset()
-        obs_smac_api = self.env.get_obs()
-        state_smac_api = self.env.get_state()
-        obs_rllib = {}
+        obs_smac = self.env.get_obs()
+        state_smac = self.env.get_state()
+        obs_dict = {}
         for agent_index in range(self.n_agents):
-            obs_one_agent = obs_smac_api[agent_index]
-            state_one_agent = state_smac_api
+            obs_one_agent = obs_smac[agent_index]
+            state_one_agent = state_smac
             action_mask_one_agent = np.array(self.env.get_avail_agent_actions(agent_index)).astype(np.float32)
             agent_index = "agent_{}".format(agent_index)
-            obs_rllib[agent_index] = {
+            obs_dict[agent_index] = {
                 "obs": obs_one_agent,
                 "state": state_one_agent,
                 "action_mask": action_mask_one_agent
             }
 
-        return obs_rllib
+        return obs_dict
 
     def step(self, actions):
 
@@ -61,25 +61,26 @@ class StarCraft2Env_Rllib(MultiAgentEnv):
 
         reward, terminated, info = self.env.step(actions_ls)
 
-        obs_smac_api = self.env.get_obs()
-        state_smac_api = self.env.get_state()
-        obs_rllib = {}
-        reward_rllib = {}
+        obs_smac = self.env.get_obs()
+        state_smac = self.env.get_state()
+
+        obs_dict = {}
+        reward_dict = {}
         for agent_index in range(self.n_agents):
-            obs_one_agent = obs_smac_api[agent_index]
-            state_one_agent = state_smac_api
+            obs_one_agent = obs_smac[agent_index]
+            state_one_agent = state_smac
             action_mask_one_agent = np.array(self.env.get_avail_agent_actions(agent_index)).astype(np.float32)
             agent_index = "agent_{}".format(agent_index)
-            obs_rllib[agent_index] = {
+            obs_dict[agent_index] = {
                 "obs": obs_one_agent,
                 "state": state_one_agent,
                 "action_mask": action_mask_one_agent
             }
-            reward_rllib[agent_index] = reward
+            reward_dict[agent_index] = reward
 
         dones = {"__all__": terminated}
 
-        return obs_rllib, reward_rllib, dones, {}
+        return obs_dict, reward_dict, dones, {}
 
     def get_env_info(self):
         return self.env.get_env_info()

@@ -12,7 +12,7 @@ at ray.rllib.evaluation.rollout_worker.py line 508
 > _update_env_seed_if_necessary(self.env, seed, worker_index, 0)
 
 ## current support algo
-- R2D2(IQL) [D]
+- R2D2[D]
 - PG [D+C]
 - A2C [D+C]
 - A3C [D+C]
@@ -22,6 +22,7 @@ at ray.rllib.evaluation.rollout_worker.py line 508
 - PPO [D+C]
 - MAPPO [D+C]
 - COMA [D]
+- IQL [D]  
 - VDN [D]
 - QMIX [D]  
 - VDA2C-SUM/MIX [D+C]
