@@ -1,6 +1,7 @@
 from ray import tune
 from ray.tune import register_env
 from ray.rllib.utils.test_utils import check_learning_achieved
+import random
 from SMAC.model.torch_mask_lstm import *
 from SMAC.model.torch_mask_lstm_cc import *
 from SMAC.model.torch_mask_gru import *
@@ -116,7 +117,7 @@ if __name__ == '__main__':
     #####################
 
     common_config = {
-        "seed": 1,
+        "seed": random.randint(0, 9999),
         "num_gpus": args.num_gpus,
         "num_workers": args.num_workers,
         "num_gpus_per_worker": args.num_gpus_per_worker,
