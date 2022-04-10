@@ -68,7 +68,7 @@ def run_happo(args, common_config, env_config, stop):
             return HAPPOTorchPolicy
 
     HAPPOTrainer = PPOTrainer.with_updates(
-        name="HAPPOTrainer-with-local-mode-False",
+        name="#04-08-Version#-HAPPOTrainer-with-local-mode-False",
         default_policy=HAPPOTorchPolicy,
         get_policy_class=get_policy_class,
     )
