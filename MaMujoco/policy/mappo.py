@@ -43,7 +43,7 @@ def run_mappo(args, common_config, env_config, stop):
         "train_batch_size": 4000,
         "sgd_minibatch_size": sgd_minibatch_size,
         "lr": 5e-5,
-        "grad_clip": 10,
+        "grad_clip": 20,
         "clip_param": 0.3,
         "model": {
             "custom_model": "{}_CentralizedCritic".format(args.neural_arch),
@@ -83,7 +83,7 @@ def run_mappo(args, common_config, env_config, stop):
             return MAPPOTorchPolicy
 
     MAPPOTrainer = PPOTrainer.with_updates(
-        name="#lr-5e-5-config-as-with-Grad-Norm-Clip-With-Fn-MAPPOTrainer#",
+        name="#lr-5e-5-config-as-with-Grad-Norm-Clip-20-With-Fn-MAPPOTrainer#",
         default_policy=MAPPOTFPolicy,
         get_policy_class=get_policy_class,
     )
