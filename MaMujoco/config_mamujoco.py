@@ -5,23 +5,29 @@ def get_train_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--local-mode",
-        default=True,
+        # default=True,
+        default=False,
         type=bool,
         help="Init Ray in local mode for easier debugging.")
     parser.add_argument(
         "--parallel",
+        # default=False,
         default=False,
         type=bool,
         help="Whether use tune grid research")
     parser.add_argument(
         "--run",
-        choices=["PG", "A2C", "A3C", "MAA2C", "DDPG", "MADDPG", "PPO", "MAPPO", "SUM-VDA2C", "MIX-VDA2C", "SUM-VDPPO", "MIX-VDPPO"],  # "APPO" "IMPALA"
-        default="A2C",
+        choices=["PG", "A2C", "A3C", "MAA2C", "DDPG", "MADDPG", "PPO", "MAPPO", "SUM-VDA2C", "MIX-VDA2C", "SUM-VDPPO", "MIX-VDPPO", "HAPPO"],  # "APPO" "IMPALA"
+        # choices=["HAPPO"],  # "APPO" "IMPALA"
+        # default="A2C",
+        default="MAPPO",
+        # default="MAPPO",
         help="The RLlib-registered algorithm to use.")
     parser.add_argument(
         "--share-policy",
         type=bool,
-        default=True,
+        default=False,
+        # default=True,
         help="Maps should be registered")
     parser.add_argument(
         "--map",
@@ -40,7 +46,9 @@ def get_train_parser():
             "ManyagentSwimmer",
             "ManyagentAnt",
         ],
-        default="ManyagentAnt",
+        # default="ManyagentAnt",
+        default="2AgentHalfCheetah",
+        # default="2AgentWalker",
         help="Envs should be registered")
     parser.add_argument(
         "--neural-arch",
@@ -71,7 +79,7 @@ def get_train_parser():
     parser.add_argument(
         "--num-workers",
         type=int,
-        default=2,
+        default=4,
         help="Sampler number per trail")
     parser.add_argument(
         "--num-cpus-per-worker",
@@ -93,7 +101,7 @@ def get_train_parser():
     parser.add_argument(
         "--stop-timesteps",
         type=int,
-        default=1000000,
+        default=int(1e7),
         help="Number of timesteps to train.")
     parser.add_argument(
         "--stop-reward",

@@ -8,6 +8,7 @@ from ray.rllib.utils.framework import try_import_tf, try_import_torch, \
     TensorType
 from ray.rllib.policy.rnn_sequencing import add_time_dimension
 from ray.rllib.models.torch.misc import SlimFC
+from MaMujoco.model.utils import init_orthogonal
 
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
@@ -43,7 +44,7 @@ class Torch_GRU_CentralizedCritic_Model(TorchRNN, nn.Module):
         self.fc1 = nn.Linear(self.obs_size, self.fc_size)
         self.gru = nn.GRU(
             self.fc_size, self.hidden_state_size, batch_first=True)
-        self.action_branch = nn.Linear(self.hidden_state_size, num_outputs)
+        self.action_branch = init_orthogonal(nn.Linear(self.hidden_state_size, num_outputs))
         self.value_branch = nn.Linear(self.hidden_state_size, 1)
         # Holds the current "base" output (before logits layer).
         self._features = None
@@ -80,6 +81,10 @@ class Torch_GRU_CentralizedCritic_Model(TorchRNN, nn.Module):
             seq_lens = torch.Tensor(seq_lens).int()
         max_seq_len = flat_inputs.shape[0] // seq_lens.shape[0]
         self.time_major = self.model_config.get("_time_major", False)
+        # print(f'inputs==> {flat_inputs.shape}')
+        # print(f'seq_lens==> {seq_lens}')
+        # print(f'max_seq_len==> {max_seq_len}')
+        # print(f'time_major==> {self.time_major}')
         inputs = add_time_dimension(
             flat_inputs,
             max_seq_len=max_seq_len,
