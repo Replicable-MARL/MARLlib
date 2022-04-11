@@ -41,7 +41,7 @@ def run_happo(args, common_config, env_config, stop):
         "num_sgd_iter": 5,  # ppo-epoch
         "train_batch_size": 4000,
         "sgd_minibatch_size": sgd_minibatch_size,
-        "lr": 1e-5,
+        "lr": 1e-6,
         "grad_clip": 10,
         "clip_param": 0.3,  # ppo-clip
         "model": {
