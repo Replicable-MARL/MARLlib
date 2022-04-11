@@ -21,6 +21,7 @@ from ray.rllib.evaluation.postprocessing import compute_advantages, Postprocessi
 from ray.rllib.policy.sample_batch import SampleBatch
 from ray.rllib.utils.framework import try_import_tf, try_import_torch
 from ray.rllib.utils.torch_ops import convert_to_torch_tensor as _d2t
+from torch import nn
 
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()

@@ -17,6 +17,8 @@ from MaMujoco.util.mappo_tools import TorchLR
 from MaMujoco.util.mappo_tools import TorchKLCoeffMixin
 from MaMujoco.util.mappo_tools import TorchEntropyCoeffSchedule
 from MaMujoco.util.mappo_tools import CentralizedValueMixin
+from ray.rllib.utils.torch_ops import apply_grad_clipping
+
 from ray.rllib.agents.ppo import ppo
 
 
@@ -41,7 +43,10 @@ def run_happo(args, common_config, env_config, stop):
         "sgd_minibatch_size": sgd_minibatch_size,
         "lr": 5e-5,
         "grad_clip": 10,
-        "clip_param": 0.3,
+        "clip_param": 0.3,  # ppo-clip
+        "optimizer": {
+            "eps": 1e-5,
+        },
         "model": {
             "custom_model": "{}_CentralizedCritic".format(args.neural_arch),
             "custom_model_config": {
@@ -58,6 +63,7 @@ def run_happo(args, common_config, env_config, stop):
         postprocess_fn=add_another_agent_and_gae,
         loss_fn=ppo_surrogate_loss,
         before_init=setup_torch_mixins,
+        extra_grad_process_fn=apply_grad_clipping,
         mixins=[
             TorchLR, TorchEntropyCoeffSchedule, TorchKLCoeffMixin,
             CentralizedValueMixin
@@ -68,7 +74,7 @@ def run_happo(args, common_config, env_config, stop):
             return HAPPOTorchPolicy
 
     HAPPOTrainer = PPOTrainer.with_updates(
-        name="#04-08-Version#-HAPPOTrainer-with-local-mode-False",
+        name="#04-08-8-Worker-lr-5e-6-Test-Version-with-grad-norm-fn#-HAPPOTrainer-with-local-mode-False",
         default_policy=HAPPOTorchPolicy,
         get_policy_class=get_policy_class,
     )

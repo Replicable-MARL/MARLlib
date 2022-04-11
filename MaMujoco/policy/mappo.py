@@ -2,6 +2,7 @@ from ray import tune
 from ray.rllib.agents.ppo.ppo import PPOTrainer, DEFAULT_CONFIG as PPO_CONFIG
 from ray.rllib.agents.ppo.ppo_torch_policy import PPOTorchPolicy
 from ray.rllib.agents.ppo.ppo_tf_policy import PPOTFPolicy
+from ray.rllib.utils.torch_ops import apply_grad_clipping
 
 from MaMujoco.util.mappo_tools import *
 from MaMujoco.util.maa2c_tools import *
@@ -17,20 +18,42 @@ def run_mappo(args, common_config, env_config, stop):
     while sgd_minibatch_size < args.horizon:
         sgd_minibatch_size *= 2
 
-    config = {
+    # config = {
+    #     "env": args.map,
+    #     "horizon": args.horizon,
+    #     "num_sgd_iter": 5,
+    #     "sgd_minibatch_size": sgd_minibatch_size,
+    #     "model": {
+    #         "custom_model": "{}_CentralizedCritic".format(args.neural_arch),
+    #         "custom_model_config": {
+    #             "agent_num": env_config["ally_num"],
+    #             "state_dim": env_config["state_dim"]
+    #         }
+    #     },
+    # }
+
+    config = dict()
+    config.update(common_config)
+
+    config.update({
+        "seed": 1,
         "env": args.map,
-        "horizon": args.horizon,
-        "num_sgd_iter": 5,
+        "horizon": 1000,
+        "num_sgd_iter": 5,  # ppo-epoch
+        "train_batch_size": 4000,
         "sgd_minibatch_size": sgd_minibatch_size,
+        "lr": 5e-5,
+        "grad_clip": 10,
+        "clip_param": 0.3,
         "model": {
             "custom_model": "{}_CentralizedCritic".format(args.neural_arch),
             "custom_model_config": {
                 "agent_num": env_config["ally_num"],
                 "state_dim": env_config["state_dim"]
-            }
+            },
+            "vf_share_layers": True,
         },
-    }
-    config.update(common_config)
+    })
 
     MAPPOTFPolicy = PPOTFPolicy.with_updates(
         name="MAPPOTFPolicy",
@@ -49,6 +72,7 @@ def run_mappo(args, common_config, env_config, stop):
         postprocess_fn=centralized_critic_postprocessing,
         loss_fn=loss_with_central_critic,
         before_init=setup_torch_mixins,
+        extra_grad_process_fn=apply_grad_clipping,
         mixins=[
             TorchLR, TorchEntropyCoeffSchedule, TorchKLCoeffMixin,
             CentralizedValueMixin
@@ -59,7 +83,7 @@ def run_mappo(args, common_config, env_config, stop):
             return MAPPOTorchPolicy
 
     MAPPOTrainer = PPOTrainer.with_updates(
-        name="MAPPOTrainer",
+        name="#lr-5e-5-config-as-with-Grad-Norm-Clip-With-Fn-MAPPOTrainer#",
         default_policy=MAPPOTFPolicy,
         get_policy_class=get_policy_class,
     )
