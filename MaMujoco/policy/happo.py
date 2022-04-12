@@ -41,8 +41,10 @@ def run_happo(args, common_config, env_config, stop):
         "num_sgd_iter": 5,  # ppo-epoch
         "train_batch_size": 4000,
         "sgd_minibatch_size": sgd_minibatch_size,
-        "lr": 1e-5,
-        "grad_clip": 20,
+        # "lr": 1e-5,
+        # "lr": args.lr,
+        "lr": tune.grid_search([1e-5, 5e-5, 5e-6]),
+        "grad_clip": tune.grid_search([10, 20, 40]),
         "clip_param": 0.3,  # ppo-clip
         "model": {
             "custom_model": "{}_CentralizedCritic".format(args.neural_arch),
@@ -71,7 +73,7 @@ def run_happo(args, common_config, env_config, stop):
             return HAPPOTorchPolicy
 
     HAPPOTrainer = PPOTrainer.with_updates(
-        name="#04-08-8-Worker-lr-1e-5-Version-with-grad-norm-fn-20#-HAPPOTrainer-with-local-mode-False",
+        name="#HAPPO-with-grid-search",
         default_policy=HAPPOTorchPolicy,
         get_policy_class=get_policy_class,
     )
