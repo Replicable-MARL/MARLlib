@@ -152,9 +152,9 @@ if __name__ == '__main__':
 
     default_metric_columns = SMACReporter.DEFAULT_COLUMNS.copy()
     customized_metric_columns = {
-        "custom_metrics/battle_win_rate_mean": "battle_win_rate",
-        "custom_metrics/ally_survive_rate_mean": "ally_survive_rate",
-        "custom_metrics/enemy_kill_rate_mean": "enemy_kill_rate",
+        "battle_win": "battle_win_rate",
+        "ally_survive": "ally_survive_rate",
+        "enemy_kill": "enemy_kill_rate",
     }
     reporter = SMACReporter(
         metric_columns=merge_dicts(default_metric_columns, customized_metric_columns),

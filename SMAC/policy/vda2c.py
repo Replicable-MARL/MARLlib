@@ -19,6 +19,12 @@ def run_vda2c_sum_mix(args, common_config, env_config, stop, reporter):
 
     episode_num = 10
     train_batch_size = episode_num * episode_limit
+    # This is for compensate the RLLIB optimization style, even if
+    # we use share policy, rllib will split it into agent number iteration
+    # which means, compared to optimization like pymarl (homogeneous),
+    # the batchsize is reduced as b * 1/agent_num.
+    if args.share_policy:
+        train_batch_size *= n_ally
 
     config = {
         "env": "smac",
@@ -28,7 +34,7 @@ def run_vda2c_sum_mix(args, common_config, env_config, stop, reporter):
         "entropy_coeff": 0.01,
         "model": {
             "custom_model": "{}_ValueMixer".format(args.neural_arch),
-            "max_seq_len": episode_limit + 1,
+            "max_seq_len": episode_limit,
             "custom_model_config": {
                 "token_dim": args.token_dim,
                 "ally_num": n_ally,

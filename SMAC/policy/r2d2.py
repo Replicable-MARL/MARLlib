@@ -21,7 +21,7 @@ def run_r2d2(args, common_config, env_config, stop, reporter):
         "env": "smac",
         "model": {
             "custom_model": "{}_IndependentCritic".format(args.neural_arch),
-            "max_seq_len": episode_limit + 1,
+            "max_seq_len": episode_limit,
             "custom_model_config": {
                 "ally_num": n_ally,
                 "enemy_num": n_enemy,
@@ -37,8 +37,14 @@ def run_r2d2(args, common_config, env_config, stop, reporter):
         if config_["framework"] == "torch":
             return R2D2WithMaskPolicy
 
-    learning_starts = episode_limit * 32
-    train_batch_size = 32
+    train_batch_size = 32 * episode_limit
+    learning_starts = train_batch_size
+    # This is for compensate the RLLIB optimization style, even if
+    # we use share policy, rllib will split it into agent number iteration
+    # which means, compared to optimization like pymarl (homogeneous),
+    # the batchsize is reduced as b * 1/agent_num.
+    if args.share_policy:
+        train_batch_size *= n_ally
 
     R2D2_CONFIG.update(
         {

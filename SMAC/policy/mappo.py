@@ -23,6 +23,13 @@ def run_mappo(args, common_config, env_config, stop, reporter):
     episode_num = 10
     iteration = 4
     train_batch_size = episode_num * episode_limit
+    # This is for compensate the RLLIB optimization style, even if
+    # we use share policy, rllib will split it into agent number iteration
+    # which means, compared to optimization like pymarl (homogeneous),
+    # the batchsize is reduced as b * 1/agent_num.
+    if args.share_policy:
+        train_batch_size *= n_ally
+
     sgd_minibatch_size = train_batch_size - 1
     while sgd_minibatch_size < episode_limit:
         sgd_minibatch_size *= 2
@@ -39,7 +46,7 @@ def run_mappo(args, common_config, env_config, stop, reporter):
         "lr": 0.0005,
         "model": {
             "custom_model": "{}_CentralizedCritic".format(args.neural_arch),
-            "max_seq_len": episode_limit + 1,
+            "max_seq_len": episode_limit,
             "custom_model_config": {
                 "token_dim": args.token_dim,
                 "ally_num": n_ally,

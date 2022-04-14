@@ -64,7 +64,7 @@ def run_vdn_qmix_iql(args, common_config, env_config, stop, reporter):
             "map_name": args.map,
         },
         "model": {
-            "max_seq_len": episode_limit + 1,  # dynamic
+            "max_seq_len": episode_limit,  # dynamic
             "custom_model_config": {
                 "neural_arch": args.neural_arch,
                 "token_dim": args.token_dim,
