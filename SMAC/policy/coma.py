@@ -1,10 +1,10 @@
 from ray import tune
 from ray.tune.utils import merge_dicts
 from ray.rllib.agents.a3c.a3c_tf_policy import A3CTFPolicy
+from ray.rllib.agents.a3c.a3c_torch_policy import A3CTorchPolicy
 from ray.rllib.agents.a3c.a2c import A2CTrainer
 from ray.rllib.agents.a3c.a2c import A2C_DEFAULT_CONFIG as A2C_CONFIG
-from SMAC.util.mappo_tools import *
-from SMAC.util.maa2c_tools import *
+from SMAC.util.coma_tools import *
 
 
 def run_coma(args, common_config, env_config, stop, reporter):
@@ -21,6 +21,8 @@ def run_coma(args, common_config, env_config, stop, reporter):
         "env": "smac",
         "batch_mode": "complete_episodes",
         "train_batch_size": train_batch_size,
+        "lr": 0.0005,
+        "entropy_coeff": 0.01,
         "model": {
             "custom_model": "{}_CentralizedCritic".format(args.neural_arch),
             "max_seq_len": episode_limit + 1,
@@ -37,8 +39,6 @@ def run_coma(args, common_config, env_config, stop, reporter):
 
     config.update(common_config)
 
-    from SMAC.util.coma_tools import loss_with_central_critic_coma, central_vf_stats_coma, COMATorchPolicy
-
     COMA_CONFIG = merge_dicts(
         A2C_CONFIG,
         {
@@ -51,7 +51,7 @@ def run_coma(args, common_config, env_config, stop, reporter):
 
     # not used
     COMATFPolicy = A3CTFPolicy.with_updates(
-        name="MAA2CTFPolicy",
+        name="COMATFPolicy",
         postprocess_fn=centralized_critic_postprocessing,
         loss_fn=loss_with_central_critic_coma,
         grad_stats_fn=central_vf_stats_coma,
@@ -59,13 +59,14 @@ def run_coma(args, common_config, env_config, stop, reporter):
             CentralizedValueMixin
         ])
 
-    COMATorchPolicy = COMATorchPolicy.with_updates(
-        name="MAA2CTorchPolicy",
+    # based on a3c torch policy
+    COMATorchPolicy = A3CTorchPolicy.with_updates(
+        name="COMATorchPolicy",
         get_default_config=lambda: COMA_CONFIG,
-        loss_fn=loss_with_central_critic_coma,
-        mixins=[
-            CentralizedValueMixin
-        ])
+        loss_fn=coma_loss,
+        postprocess_fn=centralized_critic_postprocessing_coma,
+        extra_action_out_fn=coma_model_value_predictions,
+    )
 
     def get_policy_class(config_):
         if config_["framework"] == "torch":
