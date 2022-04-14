@@ -3,12 +3,13 @@ from ray.rllib.agents.ppo.ppo import PPOTrainer, DEFAULT_CONFIG as PPO_CONFIG
 from ray.rllib.agents.ppo.ppo_torch_policy import PPOTorchPolicy
 from ray.rllib.agents.ppo.ppo_tf_policy import PPOTFPolicy
 from ray.tune.utils import merge_dicts
+from ray.rllib.agents.ppo.ppo_torch_policy import ValueNetworkMixin
 from SMAC.util.mappo_tools import *
 from SMAC.util.vda2c_tools import *
 from SMAC.util.vdppo_tools import *
 
 
-def run_vdppo_sum_mix(args, common_config, env_config, stop):
+def run_vdppo_sum_mix(args, common_config, env_config, stop, reporter):
 
     """
     for bug mentioned https://github.com/ray-project/ray/pull/20743
@@ -23,9 +24,9 @@ def run_vdppo_sum_mix(args, common_config, env_config, stop):
     episode_limit = env_config["episode_limit"]
 
     episode_num = 10
-    iteration = 5
+    iteration = 4
     train_batch_size = episode_num * episode_limit
-    sgd_minibatch_size = train_batch_size // iteration + 1
+    sgd_minibatch_size = train_batch_size - 1
     while sgd_minibatch_size < episode_limit:
         sgd_minibatch_size *= 2
 
@@ -38,9 +39,10 @@ def run_vdppo_sum_mix(args, common_config, env_config, stop):
         "entropy_coeff": 0.01,
         "clip_param": 0.2,
         "vf_clip_param": 20.0,  # very sensitive, depends on the scale of the rewards
+        "lr": 0.0005,
         "model": {
             "custom_model": "{}_ValueMixer".format(args.neural_arch),
-            "max_seq_len": episode_limit,
+            "max_seq_len": episode_limit + 1,
             "custom_model_config": {
                 "token_dim": args.token_dim,
                 "ally_num": n_ally,
@@ -100,6 +102,8 @@ def run_vdppo_sum_mix(args, common_config, env_config, stop):
 
     results = tune.run(VDPPOTrainer, name=args.run + "_" + args.neural_arch + "_" + args.map, stop=stop,
                        config=config,
-                       verbose=1)
+                       verbose=1,
+                       progress_reporter=reporter
+                       )
 
     return results

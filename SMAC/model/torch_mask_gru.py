@@ -76,7 +76,10 @@ class Torch_ActionMask_GRU_Model(TorchRNN, nn.Module):
         flat_inputs = input_dict["obs"]["obs"].float()
         if isinstance(seq_lens, np.ndarray):
             seq_lens = torch.Tensor(seq_lens).int()
+        if seq_lens.shape[0] == 0:
+            print(1)
         max_seq_len = flat_inputs.shape[0] // seq_lens.shape[0]
+
         self.time_major = self.model_config.get("_time_major", False)
         inputs = add_time_dimension(
             flat_inputs,
