@@ -23,6 +23,10 @@ def run_ppo(args, common_config, env_config, stop, reporter):
     # the batchsize is reduced as b * 1/agent_num.
     if args.share_policy:
         train_batch_size *= n_ally
+
+    if train_batch_size >= 20000:
+        train_batch_size //= 2
+
     sgd_minibatch_size = train_batch_size - 1
     while sgd_minibatch_size < episode_limit:
         sgd_minibatch_size *= 2
