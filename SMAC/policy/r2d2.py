@@ -39,12 +39,6 @@ def run_r2d2(args, common_config, env_config, stop, reporter):
 
     train_batch_size = 32 * episode_limit
     learning_starts = train_batch_size
-    # This is for compensate the RLLIB optimization style, even if
-    # we use share policy, rllib will split it into agent number iteration
-    # which means, compared to optimization like pymarl (homogeneous),
-    # the batchsize is reduced as b * 1/agent_num.
-    if args.share_policy:
-        train_batch_size *= n_ally
 
     R2D2_CONFIG.update(
         {

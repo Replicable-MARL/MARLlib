@@ -13,21 +13,10 @@ def run_ppo(args, common_config, env_config, stop, reporter):
     state_shape = env_config["state_shape"]
     n_actions = env_config["n_actions"]
     episode_limit = env_config["episode_limit"]
-
     episode_num = 10
     iteration = 4
     train_batch_size = episode_num * episode_limit
-    # This is for compensate the RLLIB optimization style, even if
-    # we use share policy, rllib will split it into agent number iteration
-    # which means, compared to optimization like pymarl (homogeneous),
-    # the batchsize is reduced as b * 1/agent_num.
-    if args.share_policy:
-        train_batch_size *= n_ally
-
-    if train_batch_size >= 20000:
-        train_batch_size //= 2
-
-    sgd_minibatch_size = train_batch_size - 1
+    sgd_minibatch_size = train_batch_size
     while sgd_minibatch_size < episode_limit:
         sgd_minibatch_size *= 2
 

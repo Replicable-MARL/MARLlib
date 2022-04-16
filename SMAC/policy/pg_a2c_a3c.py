@@ -9,15 +9,8 @@ def run_pg_a2c_a3c(args, common_config, env_config, stop, reporter):
     state_shape = env_config["state_shape"]
     n_actions = env_config["n_actions"]
     episode_limit = env_config["episode_limit"]
-
     episode_num = 10
     train_batch_size = episode_num * episode_limit
-    # This is for compensate the RLLIB optimization style, even if
-    # we use share policy, rllib will split it into agent number iteration
-    # which means, compared to optimization like pymarl (homogeneous),
-    # the batchsize is reduced as b * 1/agent_num.
-    if args.share_policy:
-        train_batch_size *= n_ally
 
     config = {
         "env": "smac",
