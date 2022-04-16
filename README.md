@@ -1,28 +1,6 @@
 #  White Paper for [MARL in One](https://github.com/Theohhhu/[SMAC](HTTPS://GITHUB.COM/OXWHIRL/SMAC)_Ray) Benchmark
 -- multi-agent tasks and baselines under a unified framework
 
-### TODO
-
-**basic algorithms**
-- [x] COMA 
-- [x] DDPG
-- [x] VDAC 
-- [x] VDPPO
-
-
-**extensions**
-- [x] Parameter Sharing
-- [ ] Message sending
-- [ ] Modelling others
-- [ ] Multi-task Learning
-
-**(optional) MARL environments**
-- [x] Multi-agent Mujoco
-- [ ] Overcooked-AI
-- [x] MAgent
-- [ ] Go-Bigger
-
-
 
 ### Part I. Overview
 
@@ -32,44 +10,15 @@ The code is simple and easy to understand. The most common MARL baselines includ
 
 We hope everyone in the MARL research community can be benefited from this benchmark.
 
-The basic structure of the repository. Here we take **[SMAC](HTTPS://GITHUB.COM/OXWHIRL/SMAC)** task as an example (name may be slightly different)
-
-```
-/
-└───SMAC
-        └───env     [**wrap the original env to make it compatible with RLLIB**]
-                └───starcraft2_rllib.py
-                
-        └───model   [**architecture, cc represents for centralized critic**]
-                └───gru.py
-                └───gru_cc.py
-                
-        └───util    [**algorithm module**]
-                └───mappo_tools.py
-                └───vda2c_tools.py
-        
-        └───policy  [**algorithm config**]
-                └───mappo.py
-                └───vda2c.py
-                
-        └───metrics [**customized metrics for logging**]
-                └───callback.py
-                
-        └───README.md
-        └───run.py
-        └───config.py 
-
-```
-
 All codes are built based on RLLIB with some necessary extensions. The tutorial of RLLIB can be found in https://docs.ray.io/en/latest/rllib/index.html.
 Fast examples can be found in https://docs.ray.io/en/latest/rllib-examples.html. 
 These will help you easily dive into RLLIB.
 
 The following parts are organized as:
 - **Part II.Environment**: available environments with the description
-- **Part III. Baseline Algorithms**: implemented baseline MARL algorithms cover **independent learning / centralized critic / value decomposition**
-- **Part IV. State of the Art**: existing works on the environments we provide, with topic annotation.
-- **Part V. Extensions**: general module that can be applied to most of the environments/baseline algorithms
+- **Part III. Baseline Algorithms**: implemented baseline MARL algorithms
+- **Part VI. Getting started**: how to use this repository
+- **Part V. State of the Art**: existing works on the environments we provide, with topic annotation.
 
 ### Part II. Environment
 
@@ -115,7 +64,7 @@ Most of the popular environment in MARL research has been incorporated in this b
 |[MAgent](https://www.pettingzoo.ml/magent) | Mixed | Partial | Discrete | Discrete |
 | [Pommerman](https://github.com/MultiAgentLearning/playground)  | Mixed | Both | Discrete | Discrete |
 | [MaMujoco](https://github.com/schroederdewitt/multiagent_mujoco)  | Cooperative | Partial | Continuous | Continuous |
-| [Google-Football](https://github.com/google-research/football)  | Collaborative | Full | Discrete | Continuous |
+| [GRF](https://github.com/google-research/football)  | Collaborative | Full | Discrete | Continuous |
 | [Hanabi](https://github.com/deepmind/hanabi-learning-environment) | Cooperative | Partial | Discrete | Discrete |
 | [Neural-MMO](https://github.com/NeuralMMO/environment)  | Competitive | Partial | Multi-Discrete | Continuous |
 
@@ -130,6 +79,7 @@ Each environment has a readme file, standing as the instruction for this task, t
 We provide three types of MARL algorithms as our baselines including:
 
 **Independent Learning:** 
+DQN
 R2D2
 PG
 A2C
@@ -141,6 +91,7 @@ COMA
 MADDPG 
 MAAC 
 MAPPO
+HAPPO
 
 **Value Decomposition:**
 VDN
@@ -152,6 +103,7 @@ Here is a chart describing the characteristics of each algorithm:
 
 | Algorithm | Learning Mode | Need Global State | Action | Learning Mode  | Type |
 | ----------- | ----------- | ----------- | ----------- | ----------- | ----------- |
+| DQN  | Mixed | No | Discrete | Independent Learning | Off Policy
 | R2D2  | Mixed | No | Discrete | Independent Learning | Off Policy
 | PG  | Mixed | No | Both | Independent Learning | On Policy
 | AC  | Mixed | No | Both | Independent Learning | On Policy
@@ -161,6 +113,7 @@ Here is a chart describing the characteristics of each algorithm:
 | MADDPG  | Mixed | Better | Continuous | Centralized Critic | Off Policy
 | MAAC  | Mixed | Better | Both | Centralized Critic | On Policy
 | MAPPO  | Mixed | Better | Both | Centralized Critic | On Policy
+| HAPPO  | Cooperative | Better | Both | Centralized Critic | On Policy
 | VDN | Cooperative | No | Discrete | Value Decomposition | Off Policy
 | QMIX  | Cooperative | Yes | Discrete | Value Decomposition | Off Policy
 | VDAC  | Cooperative | Better | Both | Value Decomposition | On Policy
@@ -201,8 +154,65 @@ Here is a chart describing the characteristics of each algorithm:
 | GRF  | Y | Y | Y | Y | Y | 
 | Hanabi  | N | Y | Y | N | N |
 
+### Part IV. Getting started
 
-### Part IV. State of the Art
+Install Ray 
+```
+pip install -U ray==1.8.0 # version important
+```
+
+
+clone our fork of Ray
+```
+git clone https://github.com/Theohhhu/ray_marl.git@marl_in_one
+```
+
+follow https://docs.ray.io/en/latest/ray-contribute/development.html#python-develop
+```
+cd ray_marl
+python python/ray/setup-dev.py
+```
+**Y** to replace source-packages code with local one (replacing **rllib** is enough)
+
+**Attention**: Above is the common installation. Follow the README file under each task's directory to meet the requirement before you run the code.
+
+After everything you need is settled down, you can run the code. A typical run script can be like
+```
+CUDA_VISIBLE_DEVICES=1 python SMAC/run_smac.py --run MAPPO --map 3s5z --share-policy --num-workers 5 --stop-iters 10000000 --stop-timesteps 20000000
+```
+
+The basic structure of the repository. Here we take **[SMAC](HTTPS://GITHUB.COM/OXWHIRL/SMAC)** task as an example (name may be slightly different)
+
+```
+/
+└───SMAC
+        └───env     [**env compatible with RLLIB**]
+                └───starcraft2_rllib.py
+                
+        └───model   [**agent architecture**]
+                └───gru.py
+                └───gru_cc.py
+                
+        └───util    [**algorithm module**]
+                └───mappo_tools.py
+                └───vda2c_tools.py
+        
+        └───policy  [**algorithm config**]
+                └───mappo.py
+                └───vda2c.py
+                
+        └───metrics [**logging**]
+                └───callback.py
+                └───reporter.py
+                
+        └───README.md
+        └───run.py
+        └───config.py 
+
+```
+
+
+### Part V. State of the Art
 
 **[B]** Basic
 **[S]** Information Sharing
@@ -314,88 +324,150 @@ Here is a chart describing the characteristics of each algorithm:
 
 **(Note: this is not a comprehensive list. Only representative papers are selected.)**
 
-### **Part V. Extensions**
+### TODO
 
-- **Grouping / Parameter Sharing**:
-  - Fully sharing (All in one group)
-  - Selectively sharing (Several groups)
-  - No sharing (No group)
-
-- **Communication / Information Exchange**:
-  - Sending Message (Explicit communication)
-  - Modeling Others (Predict teammates/opponents action)
-
-- **Multi-task Learning / Transfer Learning / Continue learning**
-  - RNN
-  - Transformer
-  - 
-
-### **Part VI. Bug Shooting**
-This part is really important and I highly recommend you to read it first and keep in mind before running the code.
-
-- ppo related bug: refer to https://github.com/ray-project/ray/pull/20743. 
-  - make sure sgd_minibatch_size > max_seq_len
-  - enlarge the sgd_minibatch_size (128 in default)
-
-- rnn related bug:  
-In **ray/rllib/policy/rnn_sequencing.py** about line 130-150
-
-        for i, k in enumerate(feature_keys_):
-            batch[k] = tree.unflatten_as(batch[k], feature_sequences[i])
-        for i, k in enumerate(state_keys):
-            batch[k] = initial_states[i]
-        batch[SampleBatch.SEQ_LENS] = np.array(seq_lens)
-
-        # add two lines here
-        if dynamic_max:
-            batch.max_seq_len = max(seq_lens)
-
-        if log_once("rnn_ma_feed_dict"):
-            logger.info("Padded input for RNN/Attn.Nets/MA:\n\n{}\n".format(
-                summarize({
-                    "features": feature_sequences,
-                    "initial_states": initial_states,
-                    "seq_lens": seq_lens,
-                    "max_seq_len": max_seq_len,
-                })))
-
-- replay buffer related bug:  
-In ray/rllib/execution/replay_buffer.py about line 227-237
-
-        def _sample_proportional(self, num_items: int) -> List[int]:
-            res = []
-            for _ in range(num_items):
-                # TODO(szymon): should we ensure no repeats?
-                mass = random.random() * self._it_sum.sum(0, len(self._storage))
-                idx = self._it_sum.find_prefixsum_idx(mass)
-
-                # add three lines here
-                while idx in res: # ensure no repeats
-                    mass = random.random() * self._it_sum.sum(0, len(self._storage))
-                    idx = self._it_sum.find_prefixsum_idx(mass)
-
-                res.append(idx)
-            return res
+**basic algorithms**
+- [x] COMA 
+- [x] DDPG
+- [x] VDAC 
+- [x] VDPPO
 
 
-- preprocessors wrongly triggered: 
+**extensions**
+- [x] Parameter Sharing
+- [ ] Message sending
+- [ ] Modelling others
+- [ ] Multi-task Learning
+
+**(optional) MARL environments**
+- [x] Multi-agent Mujoco
+- [ ] Overcooked-AI
+- [x] MAgent
+- [ ] Go-Bigger
+
+[comment]: <> (### **Part V. Extensions**)
+
+[comment]: <> (- **Grouping / Parameter Sharing**:)
+
+[comment]: <> (  - Fully sharing &#40;All in one group&#41;)
+
+[comment]: <> (  - Selectively sharing &#40;Several groups&#41;)
+
+[comment]: <> (  - No sharing &#40;No group&#41;)
+
+[comment]: <> (- **Communication / Information Exchange**:)
+
+[comment]: <> (  - Sending Message &#40;Explicit communication&#41;)
+
+[comment]: <> (  - Modeling Others &#40;Predict teammates/opponents action&#41;)
+
+[comment]: <> (- **Multi-task Learning / Transfer Learning / Continue learning**)
+
+[comment]: <> (  - RNN)
+
+[comment]: <> (  - Transformer)
+
+[comment]: <> (  - )
+
+
+
+[comment]: <> (### **Part VI. Bug Shooting**)
+
+[comment]: <> (This part is really important and I highly recommend you to read it first and keep in mind before running the code.)
+
+[comment]: <> (- ppo related bug: refer to https://github.com/ray-project/ray/pull/20743. )
+
+[comment]: <> (  - make sure sgd_minibatch_size > max_seq_len)
+
+[comment]: <> (  - enlarge the sgd_minibatch_size &#40;128 in default&#41;)
+
+[comment]: <> (- rnn related bug:  )
+
+[comment]: <> (In **ray/rllib/policy/rnn_sequencing.py** about line 130-150)
+
+[comment]: <> (        for i, k in enumerate&#40;feature_keys_&#41;:)
+
+[comment]: <> (            batch[k] = tree.unflatten_as&#40;batch[k], feature_sequences[i]&#41;)
+
+[comment]: <> (        for i, k in enumerate&#40;state_keys&#41;:)
+
+[comment]: <> (            batch[k] = initial_states[i])
+
+[comment]: <> (        batch[SampleBatch.SEQ_LENS] = np.array&#40;seq_lens&#41;)
+
+[comment]: <> (        # add two lines here &#40;may have been added depending on your ray version&#41;)
+
+[comment]: <> (        if dynamic_max:)
+
+[comment]: <> (            batch.max_seq_len = max&#40;seq_lens&#41;)
+
+[comment]: <> (        if log_once&#40;"rnn_ma_feed_dict"&#41;:)
+
+[comment]: <> (            logger.info&#40;"Padded input for RNN/Attn.Nets/MA:\n\n{}\n".format&#40;)
+
+[comment]: <> (                summarize&#40;{)
+
+[comment]: <> (                    "features": feature_sequences,)
+
+[comment]: <> (                    "initial_states": initial_states,)
+
+[comment]: <> (                    "seq_lens": seq_lens,)
+
+[comment]: <> (                    "max_seq_len": max_seq_len,)
+
+[comment]: <> (                }&#41;&#41;&#41;)
+
+[comment]: <> (- replay buffer related bug:  )
+
+[comment]: <> (In ray/rllib/execution/replay_buffer.py about line 227-237)
+
+[comment]: <> (        def _sample_proportional&#40;self, num_items: int&#41; -> List[int]:)
+
+[comment]: <> (            res = [])
+
+[comment]: <> (            for _ in range&#40;num_items&#41;:)
+
+[comment]: <> (                # TODO&#40;szymon&#41;: should we ensure no repeats?)
+
+[comment]: <> (                mass = random.random&#40;&#41; * self._it_sum.sum&#40;0, len&#40;self._storage&#41;&#41;)
+
+[comment]: <> (                idx = self._it_sum.find_prefixsum_idx&#40;mass&#41;)
+
+[comment]: <> (                # add three lines here)
+
+[comment]: <> (                while idx in res: # ensure no repeats)
+
+[comment]: <> (                    mass = random.random&#40;&#41; * self._it_sum.sum&#40;0, len&#40;self._storage&#41;&#41;)
+
+[comment]: <> (                    idx = self._it_sum.find_prefixsum_idx&#40;mass&#41;)
+
+[comment]: <> (                res.append&#40;idx&#41;)
+
+[comment]: <> (            return res)
+
+
+[comment]: <> (- preprocessors wrongly triggered: )
   
-      Be aware, rllib-built in preprocessors may automatically triggered when observation shape follow a pattern.
+[comment]: <> (      Be aware, rllib-built in preprocessors may automatically triggered when observation shape follow a pattern.)
       
-      E.g. in SMAC 3s5z map, the obs_dim is 128, which is unluckily equal to ATARI_RAM_OBS_SHAPE which is defined in 
-      ray/rllib/models/preprocessors.py line 13 in ray 1.8.0. 
+[comment]: <> (      E.g. in SMAC 3s5z map, the obs_dim is 128, which is unluckily equal to ATARI_RAM_OBS_SHAPE which is defined in )
+
+[comment]: <> (      ray/rllib/models/preprocessors.py line 13 in ray 1.8.0. )
   
-      Then the observation will be transformed to a Atari obs style unintendedly.
+[comment]: <> (      Then the observation will be transformed to a Atari obs style unintendedly.)
       
-      This will not cause a bug, but will harm the final performance of the training.
+[comment]: <> (      This will not cause a bug, but will harm the final performance of the training.)
       
-      the easiest way to fix this problem is changing ATARI_RAM_OBS_SHAPE to other value in source code ray/rllib/models/preprocessors.py line 13 in ray 1.8.0. 
-      when you do find such performance degradation
+[comment]: <> (      the easiest way to fix this problem is changing ATARI_RAM_OBS_SHAPE to other value in source code ray/rllib/models/preprocessors.py line 13 in ray 1.8.0. )
+
+[comment]: <> (      when you do find such performance degradation)
       
-      I haven't checked whether future ray version have fixed this issue.
+[comment]: <> (      I haven't checked whether future ray version have fixed this issue.)
 
 
 ## Acknowledgement
+
+Task like MAgent and MPE is modified and documented by PettingZoo. 
 
 
 ----------------------------
