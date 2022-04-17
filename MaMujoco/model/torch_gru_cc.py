@@ -9,6 +9,7 @@ from ray.rllib.utils.framework import try_import_tf, try_import_torch, \
 from ray.rllib.policy.rnn_sequencing import add_time_dimension
 from ray.rllib.models.torch.misc import SlimFC
 from MaMujoco.model.utils import init_orthogonal
+from functools import reduce
 
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
@@ -112,4 +113,11 @@ class Torch_GRU_CentralizedCritic_Model(TorchRNN, nn.Module):
         input_ = torch.cat([state, opponent_action.reshape(-1, (self.n_agents-1) * self.num_outputs//2)], 1)
         return torch.reshape(self.central_vf(input_), [-1])
 
+    def policy_variables(self):
+        return reduce(lambda x, y: x + y, map(lambda p: list(p.parameters()), [self.fc1, self.gru, self.action_branch]))
+        # return self.fc1.variables() + self.gru.variables() + self.action_branch.variables()
+        # return self.fc1.parameters() +
 
+    def critic_variables(self):
+        # return self.central_vf.variables() + self.value_branch.variables()
+        return reduce(lambda x, y: x + y, map(lambda p: list(p.parameters()), [self.central_vf, self.value_branch]))

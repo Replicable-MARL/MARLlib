@@ -25,6 +25,7 @@ from ray.rllib.policy.torch_policy import LearningRateSchedule as TorchLR, \
     EntropyCoeffSchedule as TorchEntropyCoeffSchedule
 from ray.rllib.utils.tf_ops import explained_variance, make_tf_callable
 from ray.rllib.utils.torch_ops import convert_to_torch_tensor
+from MaMujoco.util.valuenorm import ValueNorm
 
 import numpy as np
 from ray.rllib.utils.framework import try_import_tf, try_import_torch
@@ -32,6 +33,7 @@ from ray.rllib.utils.framework import try_import_tf, try_import_torch
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
 
+value_normalizer = ValueNorm(1)
 
 class CentralizedValueMixin:
     """Add method to evaluate the central value function from the model."""
@@ -53,6 +55,7 @@ def centralized_critic_postprocessing(policy,
     pytorch = policy.config["framework"] == "torch"
     state_dim = policy.config["model"]["custom_model_config"]["state_dim"]
     opponent_agents_num = policy.config["model"]["custom_model_config"]["agent_num"] - 1
+
 
     if (pytorch and hasattr(policy, "compute_central_vf")) or \
             (not pytorch and policy.loss_initialized()):
@@ -102,6 +105,11 @@ def centralized_critic_postprocessing(policy,
         sample_batch[SampleBatch.VF_PREDS] = np.zeros_like(
             sample_batch[SampleBatch.REWARDS], dtype=np.float32)
 
+    global value_normalizer
+
+    if value_normalizer.updated:
+        sample_batch[SampleBatch.VF_PREDS] = value_normalizer.denormalize(sample_batch[SampleBatch.VF_PREDS])
+
     completed = sample_batch["dones"][-1]
     if completed:
         last_r = 0.0
@@ -125,6 +133,10 @@ def loss_with_central_critic(policy, model, dist_class, train_batch):
     vf_saved = model.value_function
     model.value_function = lambda: policy.model.central_value_function(
         train_batch["state"], train_batch["opponent_action"])
+
+    if policy.model.model_config['custom_model_config']['normal_value']:
+        value_normalizer.update(train_batch[Postprocessing.VALUE_TARGETS])
+        train_batch[Postprocessing.VALUE_TARGETS] = value_normalizer.normalize(train_batch[Postprocessing.VALUE_TARGETS])
 
     policy._central_value_out = model.value_function()
     loss = func(policy, model, dist_class, train_batch)
