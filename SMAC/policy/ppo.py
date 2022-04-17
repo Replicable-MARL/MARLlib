@@ -2,7 +2,7 @@ from ray import tune
 from ray.rllib.agents.ppo.ppo import PPOTrainer, DEFAULT_CONFIG as PPO_CONFIG
 
 
-def run_ppo(args, common_config, env_config, stop):
+def run_ppo(args, common_config, env_config, stop, reporter):
     """
     for bug mentioned https://github.com/ray-project/ray/pull/20743
     make sure sgd_minibatch_size > max_seq_len
@@ -13,11 +13,10 @@ def run_ppo(args, common_config, env_config, stop):
     state_shape = env_config["state_shape"]
     n_actions = env_config["n_actions"]
     episode_limit = env_config["episode_limit"]
-
     episode_num = 10
-    iteration = 5
-    train_batch_size = episode_num * episode_limit
-    sgd_minibatch_size = train_batch_size // iteration + 1
+    iteration = 4
+    train_batch_size = episode_num * episode_limit // args.batchsize_reduce
+    sgd_minibatch_size = train_batch_size
     while sgd_minibatch_size < episode_limit:
         sgd_minibatch_size *= 2
 
@@ -30,6 +29,7 @@ def run_ppo(args, common_config, env_config, stop):
         "entropy_coeff": 0.01,
         "clip_param": 0.2,
         "vf_clip_param": 20.0,  # very sensitive, depends on the scale of the rewards
+        "lr": 0.0005,
         "model": {
             "custom_model": "{}_IndependentCritic".format(args.neural_arch),
             "max_seq_len": episode_limit,
@@ -50,6 +50,6 @@ def run_ppo(args, common_config, env_config, stop):
     )
 
     results = tune.run(PPOTrainer_, name=args.run + "_" + args.neural_arch + "_" + args.map, stop=stop, config=config,
-                       verbose=1)
+                       verbose=1, progress_reporter=reporter)
 
     return results

@@ -36,6 +36,8 @@ class Torch_ActionMask_GRU_CentralizedCritic_Model(TorchRNN, nn.Module):
         self.fc_size = fc_size
         self.hidden_state_size = hidden_state_size
         self.n_agents = model_config["custom_model_config"]["ally_num"]
+        self.obs_dim = model_config["custom_model_config"]['self_obs_dim']
+        self.state_dim = model_config["custom_model_config"]['state_dim']
 
         nn.Module.__init__(self)
         super().__init__(obs_space, action_space, num_outputs, model_config,
@@ -52,9 +54,7 @@ class Torch_ActionMask_GRU_CentralizedCritic_Model(TorchRNN, nn.Module):
         self._features = None
 
         # Central VF maps (obs, opp_obs, opp_act) -> vf_pred
-        obs_dim = kwargs['self_obs_dim']
-        state_dim = kwargs['state_dim']
-        input_size = obs_dim + state_dim + num_outputs * (self.n_agents - 1)  # obs + opp_obs + opp_act
+        input_size = self.obs_dim + self.state_dim + num_outputs * (self.n_agents - 1)  # obs + opp_obs + opp_act
         self.central_vf = nn.Sequential(
             SlimFC(input_size, 32, activation_fn=nn.Tanh),
             SlimFC(32, 1),
@@ -63,6 +63,7 @@ class Torch_ActionMask_GRU_CentralizedCritic_Model(TorchRNN, nn.Module):
         self.coma_flag = False
         if "coma" in model_config["custom_model_config"]:
             self.coma_flag = True
+            self.value_branch = nn.Linear(self.hidden_state_size, num_outputs)
             self.central_vf = nn.Sequential(
                 SlimFC(input_size, 16, activation_fn=nn.Tanh),
                 SlimFC(16, num_outputs),
@@ -136,4 +137,7 @@ class Torch_ActionMask_GRU_CentralizedCritic_Model(TorchRNN, nn.Module):
     @override(TorchRNN)
     def value_function(self) -> TensorType:
         assert self._features is not None, "must call forward() first"
-        return torch.reshape(self.value_branch(self._features), [-1])
+        if self.coma_flag:
+            return torch.reshape(self.value_branch(self._features), [-1, self.num_outputs])
+        else:
+            return torch.reshape(self.value_branch(self._features), [-1])

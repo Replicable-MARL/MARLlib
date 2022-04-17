@@ -9,10 +9,7 @@ from ray.rllib.models.action_dist import ActionDistribution
 from ray.rllib.models.modelv2 import ModelV2
 from ray.rllib.policy.policy import Policy
 from ray.rllib.policy.policy_template import build_policy_class
-from ray.rllib.policy.sample_batch import SampleBatch
-
-from ray.rllib.utils.torch_ops import apply_grad_clipping, \
-    concat_multi_gpu_td_errors, huber_loss, l2_loss
+from ray.rllib.utils.torch_ops import apply_grad_clipping
 from ray.rllib.utils.typing import TrainerConfigDict, TensorType, \
     LocalOptimizer, GradInfoDict
 from SMAC.util.mappo_tools import centralized_critic_postprocessing, CentralizedValueMixin
@@ -22,14 +19,18 @@ from ray.rllib.evaluation.postprocessing import compute_advantages, \
 from ray.rllib.policy.sample_batch import SampleBatch
 from ray.rllib.utils.tf_ops import explained_variance, make_tf_callable
 from ray.rllib.utils.torch_ops import convert_to_torch_tensor
-from gym.spaces.box import Box
-from ray.rllib.evaluation.postprocessing import adjust_nstep
-from ray.rllib.utils.numpy import convert_to_numpy
+from ray.rllib.evaluation.postprocessing import discount_cumsum
 import numpy as np
 from ray.rllib.utils.framework import try_import_tf, try_import_torch
 
 torch, nn = try_import_torch()
 
+"""
+key point in coma (based on A2C/A3C)
+1. select value according to chosen action in postprocessing stage
+2. use softmax to get pi distribution and compute baseline for actor loss
+3. cc model value branch output (-1, action_dim)
+"""
 
 def loss_with_central_critic_coma(policy, model, dist_class, train_batch):
     CentralizedValueMixin.__init__(policy)
@@ -62,6 +63,7 @@ def coma_loss(policy: Policy, model: ModelV2,
               train_batch: SampleBatch) -> TensorType:
     logits, _ = model.from_batch(train_batch)
     values = model.value_function()
+    pi = torch.nn.functional.softmax(logits, dim=-1)
 
     if policy.is_recurrent():
         B = len(train_batch[SampleBatch.SEQ_LENS])
@@ -77,7 +79,7 @@ def coma_loss(policy: Policy, model: ModelV2,
 
     # here the coma loss & calculate the mean values as baseline:
     select_action_Q_value = values.gather(1, train_batch[SampleBatch.ACTIONS].unsqueeze(1)).squeeze()
-    advantages = (select_action_Q_value - torch.mean(values, dim=1)).detach()
+    advantages = (select_action_Q_value - torch.sum(values * pi, dim=1)).detach()
     coma_pi_err = -torch.sum(torch.masked_select(log_probs * advantages, valid_mask))
 
     # Compute coma critic loss.
@@ -117,7 +119,6 @@ def loss_and_entropy_stats(policy: Policy,
             torch.stack(policy.get_tower_stats("value_err"))),
     }
 
-
 def coma_model_value_predictions(
         policy: Policy, input_dict: Dict[str, TensorType], state_batches,
         model: ModelV2,
@@ -151,13 +152,36 @@ def centralized_critic_postprocessing_coma(policy,
     pytorch = policy.config["framework"] == "torch"
     self_obs_dim = policy.config["self_obs_dim"]
     state_dim = policy.config["state_dim"]
+    n_agents = policy.config["model"]["custom_model_config"]["ally_num"]
+    opponent_agents_num = n_agents - 1
 
     # action_dim = policy.action_space.n
     if (pytorch and hasattr(policy, "compute_central_vf")) or \
             (not pytorch and policy.loss_initialized()):
         assert other_agent_batches is not None
+
+        opponent_batch_list = list(other_agent_batches.values())
+
+        # TODO sample batch size not equal across different batches.
+        # here we only provide a solution to force the same length with sample batch
+        raw_opponent_batch = [opponent_batch_list[i][1] for i in range(opponent_agents_num)]
+        opponent_batch = []
+        for one_opponent_batch in raw_opponent_batch:
+            if len(one_opponent_batch) == len(sample_batch):
+                pass
+            else:
+                if len(one_opponent_batch) > len(sample_batch):
+                    one_opponent_batch = one_opponent_batch.slice(0, len(sample_batch))
+                else:  # len(one_opponent_batch) < len(sample_batch):
+                    length_dif = len(sample_batch) - len(one_opponent_batch)
+                    one_opponent_batch = one_opponent_batch.concat(
+                        one_opponent_batch.slice(len(one_opponent_batch) - length_dif, len(one_opponent_batch)))
+            opponent_batch.append(one_opponent_batch)
+
         sample_batch["self_obs"] = sample_batch['obs'][:, :self_obs_dim]
         sample_batch["state"] = sample_batch['obs'][:, self_obs_dim:self_obs_dim + state_dim]
+        sample_batch["opponent_action"] = np.stack([opponent_batch[i]["actions"] for i in range(opponent_agents_num)],
+                                                   1)
 
         # overwrite default VF prediction with the central VF
         if pytorch:
@@ -165,12 +189,19 @@ def centralized_critic_postprocessing_coma(policy,
                 convert_to_torch_tensor(
                     sample_batch["self_obs"], policy.device),
                 convert_to_torch_tensor(
-                    sample_batch["state"], policy.device), ) \
+                    sample_batch["state"], policy.device),
+                convert_to_torch_tensor(
+                    sample_batch["opponent_action"], policy.device),
+            ) \
                 .cpu().detach().numpy().mean(1)
+            sample_batch[SampleBatch.VF_PREDS] = np.take(sample_batch[SampleBatch.VF_PREDS],
+                                                         np.expand_dims(sample_batch["actions"], axis=1)).squeeze(
+                axis=1)
         else:  # not used
             sample_batch["vf_preds"] = policy.compute_central_vf(
                 sample_batch["obs"], sample_batch["opponent_obs"],
                 sample_batch["opponent_action"])
+
     else:
         # Policy hasn't been initialized yet, use zeros.
         o = sample_batch[SampleBatch.CUR_OBS]
@@ -178,9 +209,11 @@ def centralized_critic_postprocessing_coma(policy,
                                             dtype=sample_batch[SampleBatch.CUR_OBS].dtype)
         sample_batch["state"] = np.zeros((o.shape[0], state_dim),
                                          dtype=sample_batch[SampleBatch.CUR_OBS].dtype)
-        sample_batch[SampleBatch.VF_PREDS] = np.zeros_like(
-            sample_batch[SampleBatch.REWARDS], dtype=np.float32)
-
+        sample_batch["opponent_action"] = np.zeros(
+            (sample_batch["actions"].shape[0], opponent_agents_num),
+            dtype=sample_batch["actions"].dtype)
+        sample_batch[SampleBatch.VF_PREDS] = np.take(sample_batch[SampleBatch.VF_PREDS],
+                                                     np.expand_dims(sample_batch["actions"], axis=1)).squeeze(axis=1)
     completed = sample_batch["dones"][-1]
     if completed:
         last_r = 0.0
@@ -197,17 +230,3 @@ def centralized_critic_postprocessing_coma(policy,
     return sample_batch
 
 
-# based on a3c torch policy
-COMATorchPolicy = build_policy_class(
-    name="COMATorchPolicy",
-    framework="torch",
-    get_default_config=lambda: ray.rllib.agents.a3c.a3c.DEFAULT_CONFIG,
-    loss_fn=coma_loss,
-    stats_fn=loss_and_entropy_stats,
-    postprocess_fn=centralized_critic_postprocessing_coma,
-    extra_action_out_fn=coma_model_value_predictions,  # may have bug as we have action dim vf function output in coma
-    extra_grad_process_fn=apply_grad_clipping,
-    optimizer_fn=torch_optimizer,
-    before_loss_init=setup_mixins,
-    mixins=[ValueNetworkMixin],
-)

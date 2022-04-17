@@ -144,8 +144,6 @@ def loss_with_central_critic(policy, model, dist_class, train_batch):
 
     model.value_function = vf_saved
 
-    # TODO record customized metric here and get from stat_fn()
-
     return loss
 
 
@@ -172,24 +170,3 @@ def central_vf_stats_ppo(policy, train_batch, grads):
             train_batch[Postprocessing.VALUE_TARGETS],
             policy._central_value_out)
     }
-
-# def central_vf_stats(policy, train_batch):
-#     # Report the explained variance of the central value function.
-#     return {
-#         # "vf_explained_var": explained_variance(train_batch[Postprocessing.VALUE_TARGETS], policy._central_value_out),
-#         "value_targets": torch.mean(train_batch[Postprocessing.VALUE_TARGETS]),
-#         "advantage_mean": torch.mean(train_batch[Postprocessing.ADVANTAGES]),
-#         "advantages_min": torch.min(train_batch[Postprocessing.ADVANTAGES]),
-#         "advantages_max": torch.max(train_batch[Postprocessing.ADVANTAGES]),
-#         "central_value_mean": torch.mean(policy._central_value_out),
-#         "central_value_min": torch.min(policy._central_value_out),
-#         "central_value_max": torch.max(policy._central_value_out),
-#         # "cur_kl_coeff": policy.kl_coeff,
-#         # "cur_lr": policy.cur_lr,
-#         # "total_loss": policy._total_loss,
-#         # "policy_loss": policy._mean_policy_loss,
-#         # "vf_loss": policy._mean_vf_loss,
-#         # "kl": policy._mean_kl,
-#         # "entropy": policy._mean_entropy,
-#         # "entropy_coeff": policy.entropy_coeff,
-#     }

@@ -84,3 +84,6 @@ class StarCraft2Env_Rllib(MultiAgentEnv):
 
     def get_env_info(self):
         return self.env.get_env_info()
+
+    def close(self):
+        self.env.close()

@@ -16,7 +16,7 @@ def get_train_parser():
         "--run",
         choices=["IQL", "QMIX", "VDN", "R2D2", "PG", "A2C", "A3C", "MAA2C", "PPO", "MAPPO", "COMA", "MIX-VDA2C", "SUM-VDA2C", "MIX-VDPPO", "SUM-VDPPO"],
         # "APPO" "IMPALA"
-        default="VDN",
+        default="MAA2C",
         help="The RLlib-registered algorithm to use.")
     parser.add_argument(
         "--map",
@@ -37,6 +37,11 @@ def get_train_parser():
         type=int,
         default=5,
         help="Maps should be registered")
+    parser.add_argument(
+        "--batchsize-reduce",
+        type=int,
+        default=1,
+        help="avoid too large batchsize (CUDA memory out)")
     parser.add_argument(
         "--evaluation-interval",
         type=int,
@@ -75,7 +80,7 @@ def get_train_parser():
     parser.add_argument(
         "--num-gpus-per-worker",
         type=float,
-        default=0.1)
+        default=0)
     parser.add_argument(
         "--num-seeds",
         type=int,

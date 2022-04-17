@@ -7,15 +7,26 @@ import numpy as np
 import tree  # pip install dm_tree
 from typing import Dict, List, Optional, TYPE_CHECKING
 from ray.rllib.execution.replay_buffer import *
-
+from ray.rllib.agents.trainer import Trainer
+from ray.rllib.evaluation.worker_set import WorkerSet
+from ray.rllib.execution.concurrency_ops import Concurrently
+from ray.rllib.execution.metric_ops import StandardMetricsReporting
+from ray.rllib.execution.replay_buffer import LocalReplayBuffer
+from ray.rllib.execution.replay_ops import Replay, StoreToReplayBuffer
+from ray.rllib.execution.rollout_ops import ParallelRollouts
+from ray.rllib.execution.train_ops import TrainOneStep, UpdateTargetNetwork, \
+    MultiGPUTrainOneStep
+from ray.rllib.utils.metrics.learner_info import LEARNER_STATS_KEY
+from ray.rllib.utils.typing import TrainerConfigDict
+from ray.util.iter import LocalIterator
 from ray.rllib.models.catalog import ModelCatalog
 from ray.rllib.policy.sample_batch import SampleBatch
 from ray.rllib.agents.qmix.qmix_policy import _mac, _validate, _unroll_mac
 from SMAC.model.torch_vdn_qmix_iql_model import GRUModel, UPDeTModel
 
 
-# the _unroll_mac for next observation is different from Pymarl.
-# we provide a new QMixloss here
+# original _unroll_mac for next observation is different from Pymarl.
+# thus we provide a new QMixloss here
 class Pymarl_QMixLoss(nn.Module):
     def __init__(self,
                  model,
@@ -437,7 +448,6 @@ class QMixTorchPolicy_Customized(Policy):
         if self.mixer is not None:
             self.target_mixer.load_state_dict(self.mixer.state_dict())
         logger.debug("Updated target networks")
-        print("Updated target networks")
 
     def set_epsilon(self, epsilon):
         self.cur_epsilon = epsilon
@@ -530,7 +540,6 @@ class QMixReplayBuffer(LocalReplayBuffer):
                                    buffer_size)
 
         self.replay_batch_size = replay_batch_size
-        # self.len_debug = 0
 
     @override(LocalReplayBuffer)
     def add_batch(self, batch: SampleBatchType) -> None:
@@ -557,7 +566,59 @@ class QMixReplayBuffer(LocalReplayBuffer):
                     self.replay_buffers[policy_id].add(
                         time_slice, weight=weight)
         self.num_added += batch.count
-        # if self.len_debug != len(self.replay_buffers["default_policy"]):
-        #     self.len_debug = len(self.replay_buffers["default_policy"])
-        # else:
-        #     print(1)
+
+
+def execution_plan_qmix(trainer: Trainer, workers: WorkerSet,
+                        config: TrainerConfigDict, **kwargs) -> LocalIterator[dict]:
+    # A copy of the DQN algorithm execution_plan.
+    # Modified to be compatiable with QMIX.
+    # Original QMIX replay bufferv(SimpleReplayBuffer) has bugs on replay() function
+    # here we use QMixReplayBuffer inherited from LocalReplayBuffer
+
+    local_replay_buffer = QMixReplayBuffer(
+        learning_starts=config["learning_starts"],
+        capacity=config["buffer_size"],
+        replay_batch_size=config["train_batch_size"],
+        replay_sequence_length=config.get("replay_sequence_length", 1),
+        replay_burn_in=config.get("burn_in", 0),
+        replay_zero_init_states=config.get("zero_init_states", True)
+    )
+    # Assign to Trainer, so we can store the LocalReplayBuffer's
+    # data when we save checkpoints.
+    trainer.local_replay_buffer = local_replay_buffer
+
+    rollouts = ParallelRollouts(workers, mode="bulk_sync")
+
+    # We execute the following steps concurrently:
+    # (1) Generate rollouts and store them in our local replay buffer. Calling
+    # next() on store_op drives this.
+    store_op = rollouts.for_each(
+        StoreToReplayBuffer(local_buffer=local_replay_buffer))
+
+    def update_prio(item):
+        samples, info_dict = item
+        return info_dict
+
+    # (2) Read and train on experiences from the replay buffer. Every batch
+    # returned from the LocalReplay() iterator is passed to TrainOneStep to
+    # take a SGD step, and then we decide whether to update the target network.
+    post_fn = config.get("before_learn_on_batch") or (lambda b, *a: b)
+
+    train_step_op = TrainOneStep(workers)
+
+    replay_op = Replay(local_buffer=local_replay_buffer) \
+        .for_each(lambda x: post_fn(x, workers, config)) \
+        .for_each(train_step_op) \
+        .for_each(update_prio) \
+        .for_each(UpdateTargetNetwork(
+        workers, config["target_network_update_freq"]))
+
+    # Alternate deterministically between (1) and (2). Only return the output
+    # of (2) since training metrics are not available until (2) runs.
+    train_op = Concurrently(
+        [store_op, replay_op],
+        mode="round_robin",
+        output_indexes=[1],
+        round_robin_weights=[1, 1])
+
+    return StandardMetricsReporting(train_op, workers, config)

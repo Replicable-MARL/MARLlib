@@ -7,7 +7,7 @@ from SMAC.util.mappo_tools import *
 from SMAC.util.maa2c_tools import *
 
 
-def run_mappo(args, common_config, env_config, stop):
+def run_mappo(args, common_config, env_config, stop, reporter):
     """
            for bug mentioned https://github.com/ray-project/ray/pull/20743
            make sure sgd_minibatch_size > max_seq_len
@@ -19,11 +19,11 @@ def run_mappo(args, common_config, env_config, stop):
     state_shape = env_config["state_shape"]
     n_actions = env_config["n_actions"]
     episode_limit = env_config["episode_limit"]
-
     episode_num = 10
-    iteration = 5
-    train_batch_size = episode_num * episode_limit
-    sgd_minibatch_size = train_batch_size // iteration + 1
+    iteration = 4
+    train_batch_size = episode_num * episode_limit // args.batchsize_reduce
+
+    sgd_minibatch_size = train_batch_size
     while sgd_minibatch_size < episode_limit:
         sgd_minibatch_size *= 2
 
@@ -96,6 +96,8 @@ def run_mappo(args, common_config, env_config, stop):
 
     results = tune.run(MAPPOTrainer, name=args.run + "_" + args.neural_arch + "_" + args.map, stop=stop,
                        config=config,
-                       verbose=1)
+                       verbose=1,
+                       progress_reporter=reporter
+                       )
 
     return results

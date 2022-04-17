@@ -1,6 +1,7 @@
 from ray import tune
 from ray.tune import register_env
 from ray.rllib.utils.test_utils import check_learning_achieved
+from ray.tune.utils import merge_dicts
 import random
 from SMAC.model.torch_mask_lstm import *
 from SMAC.model.torch_mask_lstm_cc import *
@@ -22,11 +23,13 @@ from SMAC.policy.vdppo import run_vdppo_sum_mix
 from SMAC.policy.maa2c import run_maa2c
 from SMAC.policy.mappo import run_mappo
 from SMAC.policy.coma import run_coma
+from SMAC.metric.smac_logger import SMACLogger
+from SMAC.metric.smac_reporter import SMACReporter
 
 if __name__ == '__main__':
 
     args = get_train_parser().parse_args()
-    ray.init(num_cpus=args.num_cpus or None, local_mode=args.local_mode)
+    ray.init(num_cpus=args.num_cpus or None, local_mode=args.local_mode, log_to_driver=False)
 
     ###################
     ### environment ###
@@ -129,9 +132,12 @@ if __name__ == '__main__':
             "policy_mapping_fn": policy_mapping_fn,
         },
         "callbacks": SmacCallbacks,
+        "logger_config": {
+            "type": SMACLogger,
+            "prefix": "",
+        },
         "framework": args.framework,
         "evaluation_interval": args.evaluation_interval,
-        # "evaluation_parallel_to_training": True,
     }
 
     stop = {
@@ -140,11 +146,26 @@ if __name__ == '__main__':
         "training_iteration": args.stop_iters,
     }
 
+    ################
+    ### reporter ###
+    ################
+
+    default_metric_columns = SMACReporter.DEFAULT_COLUMNS.copy()
+    customized_metric_columns = {
+        "battle_win": "battle_win_rate",
+        "ally_survive": "ally_survive_rate",
+        "enemy_kill": "enemy_kill_rate",
+    }
+    reporter = SMACReporter(
+        metric_columns=merge_dicts(default_metric_columns, customized_metric_columns),
+        sort_by_metric=True,
+    )
+
     ##################
     ### run script ###
     ##################
 
-    results = policy_function_dict[args.run](args, common_config, env_config, stop)
+    results = policy_function_dict[args.run](args, common_config, env_config, stop, reporter)
 
     if args.as_test:
         check_learning_achieved(results, args.stop_reward)
