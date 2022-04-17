@@ -20,14 +20,14 @@ def get_train_parser():
         choices=["PG", "A2C", "A3C", "MAA2C", "DDPG", "MADDPG", "PPO", "MAPPO", "SUM-VDA2C", "MIX-VDA2C", "SUM-VDPPO", "MIX-VDPPO", "HAPPO"],  # "APPO" "IMPALA"
         # choices=["HAPPO"],  # "APPO" "IMPALA"
         # default="A2C",
-        default="MAPPO",
         # default="MAPPO",
+        default="HAPPO",
         help="The RLlib-registered algorithm to use.")
     parser.add_argument(
         "--share-policy",
         type=bool,
-        default=False,
         # default=True,
+        default=False,
         help="Maps should be registered")
     parser.add_argument(
         "--map",
@@ -79,7 +79,7 @@ def get_train_parser():
     parser.add_argument(
         "--num-workers",
         type=int,
-        default=4,
+        default=8,
         help="Sampler number per trail")
     parser.add_argument(
         "--num-cpus-per-worker",
@@ -111,4 +111,9 @@ def get_train_parser():
     parser.add_argument(
         "--test",
         action="store_true")
+    parser.add_argument(
+        "--lr",
+        type=float,
+        default=1e-5,
+        help="set learning rate default is 1e-5")
     return parser
