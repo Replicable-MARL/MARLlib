@@ -14,7 +14,7 @@ class RllibLBF_QMIX(MultiAgentEnv):
             sight=env_config["sight"],
             force_coop=env_config["force_coop"],  # True or False
             # default setting
-            max_episode_steps=50,
+            max_episode_steps=env_config["max_episode_steps"],
             max_player_level=3,
         )
         self.action_space = self.env.action_space[0]

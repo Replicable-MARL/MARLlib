@@ -3,51 +3,49 @@ import argparse
 
 def get_train_parser():
     parser = argparse.ArgumentParser()
+    # parser.add_argument(
+    #     "--local-mode",
+    #     default=True,
+    #     type=bool,
+    #     help="Init Ray in local mode for easier debugging.")
     parser.add_argument(
         "--local-mode",
-        default=False,
-        type=bool,
+        action="store_true",
         help="Init Ray in local mode for easier debugging.")
     parser.add_argument(
-        "--parallel",
-        default=False,
-        type=bool,
-        help="Whether use tune grid research")
-    parser.add_argument(
         "--run",
-        choices=["QMIX", "VDN", "R2D2", "PG", "A2C", "A3C", "MAA2C", "PPO", "MAPPO", "COMA", "MIX-VDA2C", "SUM-VDA2C", "MIX-VDPPO", "SUM-VDPPO"],
+        choices=["IQL", "QMIX", "VDN", "R2D2", "PG", "A2C", "A3C", "MAA2C", "PPO", "MAPPO", "COMA", "MIX-VDA2C", "SUM-VDA2C", "MIX-VDPPO", "SUM-VDPPO"],
         # "APPO" "IMPALA"
-        default="MAPPO",
+        default="MAA2C",
         help="The RLlib-registered algorithm to use.")
     parser.add_argument(
         "--map",
         type=str,
-        default="3s5z",
+        default="3m",
         help="Maps should be registered")
+    # parser.add_argument(
+    #     "--share-policy",
+    #     type=bool,
+    #     default=True,
+    #     help="Maps should be registered")
     parser.add_argument(
         "--share-policy",
-        type=bool,
-        default=True,
+        action="store_true",
         help="Maps should be registered")
     parser.add_argument(
         "--token-dim",
         type=int,
-        default=6,
+        default=5,
         help="Maps should be registered")
     parser.add_argument(
-        "--train-batch-size",
+        "--batchsize-reduce",
         type=int,
-        default=1000,
-        help="train-batch-size")
-    parser.add_argument(
-        "--num-sgd-iter",
-        type=int,
-        default=15,
-        help="ppo specific parameter")
+        default=1,
+        help="avoid too large batchsize (CUDA memory out)")
     parser.add_argument(
         "--evaluation-interval",
         type=int,
-        default=1000,
+        default=10,
         help="evaluation_interval")
     parser.add_argument(
         "--neural-arch",
@@ -73,7 +71,7 @@ def get_train_parser():
     parser.add_argument(
         "--num-workers",
         type=int,
-        default=2,
+        default=0,
         help="Sampler number per trail")
     parser.add_argument(
         "--num-cpus-per-worker",
@@ -82,7 +80,7 @@ def get_train_parser():
     parser.add_argument(
         "--num-gpus-per-worker",
         type=float,
-        default=0.2)
+        default=0)
     parser.add_argument(
         "--num-seeds",
         type=int,
@@ -90,12 +88,12 @@ def get_train_parser():
     parser.add_argument(
         "--stop-iters",
         type=int,
-        default=100000,
+        default=200000,
         help="Number of iterations to train.")
     parser.add_argument(
         "--stop-timesteps",
         type=int,
-        default=1000000,
+        default=2000000,
         help="Number of timesteps to train.")
     parser.add_argument(
         "--stop-reward",

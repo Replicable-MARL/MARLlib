@@ -4,23 +4,30 @@ from ray.rllib.agents.a3c.a3c_torch_policy import A3CTorchPolicy
 from ray.rllib.agents.a3c.a2c import A2CTrainer
 from ray.tune.utils import merge_dicts
 from ray.rllib.agents.a3c.a2c import A2C_DEFAULT_CONFIG as A2C_CONFIG
+from ray.rllib.agents.ppo.ppo_torch_policy import ValueNetworkMixin
 from SMAC.util.vda2c_tools import *
 from SMAC.util.maa2c_tools import *
 
-def run_vda2c_sum_mix(args, common_config, env_config, stop):
 
+def run_vda2c_sum_mix(args, common_config, env_config, stop, reporter):
     obs_shape = env_config["obs_shape"]
     n_ally = env_config["n_ally"]
     n_enemy = env_config["n_enemy"]
     state_shape = env_config["state_shape"]
     n_actions = env_config["n_actions"]
-    rollout_fragment_length = env_config["rollout_fragment_length"]
+    episode_limit = env_config["episode_limit"]
+    episode_num = 10
+    train_batch_size = episode_num * episode_limit // args.batchsize_reduce
 
     config = {
         "env": "smac",
+        "batch_mode": "complete_episodes",
+        "train_batch_size": train_batch_size,
+        "lr": 0.0005,
+        "entropy_coeff": 0.01,
         "model": {
             "custom_model": "{}_ValueMixer".format(args.neural_arch),
-            "max_seq_len": rollout_fragment_length,
+            "max_seq_len": episode_limit,
             "custom_model_config": {
                 "token_dim": args.token_dim,
                 "ally_num": n_ally,
@@ -42,8 +49,6 @@ def run_vda2c_sum_mix(args, common_config, env_config, stop):
             "self_obs_dim": obs_shape,
         }
     )
-
-    VDA2C_CONFIG["rollout_fragment_length"] = rollout_fragment_length
 
     VDA2CTFPolicy = A3CTFPolicy.with_updates(
         name="VDA2CTFPolicy",
@@ -70,8 +75,6 @@ def run_vda2c_sum_mix(args, common_config, env_config, stop):
     )
 
     results = tune.run(VDA2CTrainer, name=args.run + "_" + args.neural_arch + "_" + args.map, stop=stop,
-                       config=config, verbose=1)
+                       config=config, verbose=1, progress_reporter=reporter)
 
     return results
-
-

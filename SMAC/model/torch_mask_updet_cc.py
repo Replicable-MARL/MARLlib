@@ -27,6 +27,8 @@ class Torch_ActionMask_Transformer_CentralizedCritic_Model(TorchRNN, nn.Module):
         self.token_dim = model_config["custom_model_config"]["token_dim"]
         self.ally_num = model_config["custom_model_config"]["ally_num"]
         self.enemy_num = model_config["custom_model_config"]["enemy_num"]
+        self.obs_dim = model_config["custom_model_config"]['self_obs_dim']
+        self.state_dim = model_config["custom_model_config"]['state_dim']
 
         nn.Module.__init__(self)
         super().__init__(obs_space, action_space, num_outputs, model_config,
@@ -42,9 +44,7 @@ class Torch_ActionMask_Transformer_CentralizedCritic_Model(TorchRNN, nn.Module):
         self._features = None
 
         # Central VF maps (obs, opp_obs, opp_act) -> vf_pred
-        obs_dim = kwargs['self_obs_dim']
-        state_dim = kwargs['state_dim']
-        input_size = obs_dim + state_dim  # obs + opp_obs + opp_act
+        input_size = self.obs_dim + self.state_dim + num_outputs * (self.ally_num - 1)  # obs + opp_obs + opp_act
         self.central_vf = nn.Sequential(
             SlimFC(input_size, 32, activation_fn=nn.Tanh),
             SlimFC(32, 1),
@@ -53,6 +53,7 @@ class Torch_ActionMask_Transformer_CentralizedCritic_Model(TorchRNN, nn.Module):
         self.coma_flag = False
         if "coma" in model_config["custom_model_config"]:
             self.coma_flag = True
+            self.value_branch = nn.Linear(self.emb * (self.ally_num + self.enemy_num), num_outputs)
             self.central_vf = nn.Sequential(
                 SlimFC(input_size, 16, activation_fn=nn.Tanh),
                 SlimFC(16, num_outputs),
@@ -147,15 +148,22 @@ class Torch_ActionMask_Transformer_CentralizedCritic_Model(TorchRNN, nn.Module):
         return reshaped_obs
 
     # here we use individual observation + global state as input of critic
-    def central_value_function(self, obs, state):
-        input_ = torch.cat([obs, state], 1)
+    def central_value_function(self, obs, state, opponent_actions):
+        opponent_actions_one_hot = [
+            torch.nn.functional.one_hot(opponent_actions[:, i].long(), self.num_outputs).float()
+            for i in
+            range(opponent_actions.shape[1])]
+        input_ = torch.cat([obs, state] + opponent_actions_one_hot, 1)
         if self.coma_flag:
             return torch.reshape(self.central_vf(input_), [-1, self.num_outputs])
         else:
             return torch.reshape(self.central_vf(input_), [-1])
 
-    @override(TorchRNN)  # not used
+    @override(TorchRNN)
     def value_function(self) -> TensorType:
         assert self._features is not None, "must call forward() first"
-        return torch.reshape(self.value_branch(self._features), [-1])
+        if self.coma_flag:
+            return torch.reshape(self.value_branch(self._features), [-1, self.num_outputs])
+        else:
+            return torch.reshape(self.value_branch(self._features), [-1])
 

@@ -190,6 +190,14 @@ def build_r2d2_model_and_distribution_with_mask(
 
     return model, distribution_cls
 
+def r2d2_avoid_bug_validate_config(config: TrainerConfigDict) -> None:
+    if config["replay_sequence_length"] == -1:
+        config["replay_sequence_length"] = \
+            config["burn_in"] + config["model"]["max_seq_len"]
+
+    if config.get("batch_mode") != "complete_episodes":
+        raise ValueError("`batch_mode` must be 'complete_episodes'!")
+
 
 R2D2WithMaskPolicy = build_policy_class(
     name="R2D2WithMaskPolicy",

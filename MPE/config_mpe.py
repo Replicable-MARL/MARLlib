@@ -3,31 +3,34 @@ import argparse
 
 def get_train_parser():
     parser = argparse.ArgumentParser()
+    # parser.add_argument(
+    #     "--local-mode",
+    #     default=True,
+    #     type=bool,
+    #     help="Init Ray in local mode for easier debugging.")
     parser.add_argument(
         "--local-mode",
-        default=True,
-        type=bool,
+        action="store_true",
         help="Init Ray in local mode for easier debugging.")
     parser.add_argument(
-        "--parallel",
-        default=False,
-        type=bool,
-        help="Whether use tune grid research")
-    parser.add_argument(
         "--run",
-        choices=["QMIX", "VDN", "R2D2", "PG", "A2C", "A3C", "DDPG", "MADDPG", "MAA2C", "PPO", "MAPPO", "COMA", "SUM-VDA2C", "MIX-VDA2C", "SUM-VDPPO", "MIX-VDPPO"],  # "APPO" "IMPALA"
-        default="A2C",
+        choices=["IQL", "QMIX", "VDN", "R2D2", "PG", "A2C", "A3C", "DDPG", "MADDPG", "MAA2C", "PPO", "MAPPO", "COMA", "SUM-VDA2C", "MIX-VDA2C", "SUM-VDPPO", "MIX-VDPPO"],  # "APPO" "IMPALA"
+        default="IQL",
         help="The RLlib-registered algorithm to use.")
+    # parser.add_argument(
+    #     "--share-policy",
+    #     type=bool,
+    #     default=True,
+    #     help="Maps should be registered")
     parser.add_argument(
         "--share-policy",
-        type=bool,
-        default=True,
+        action="store_true",
         help="Maps should be registered")
     parser.add_argument(
         "--map",
         choices=["simple", "simple_adversary", "simple_crypto", "simple_push", "simple_tag", "simple_spread",
                  "simple_reference", "simple_world_comm", "simple_speaker_listener"],
-        default="simple_speaker_listener",
+        default="simple_spread",
         help="Maps should be registered")
     parser.add_argument(
         "--continues",
@@ -40,6 +43,11 @@ def get_train_parser():
         type=str,
         default="GRU",
         help="Agent Neural Architecture")
+    parser.add_argument(
+        "--evaluation-interval",
+        type=int,
+        default=10,
+        help="evaluation_interval")
     parser.add_argument(
         "--framework",
         choices=["tf", "tf2", "tfe", "torch"],

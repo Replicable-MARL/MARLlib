@@ -8,19 +8,10 @@ from ray.rllib.utils.torch_ops import apply_grad_clipping, sequence_mask
 from ray.rllib.utils.typing import TrainerConfigDict, TensorType, \
     PolicyID, LocalOptimizer
 import numpy as np
-import scipy.signal
-from typing import Dict, Optional
 from ray.rllib.utils.numpy import convert_to_numpy
-
-from ray.rllib.evaluation.episode import MultiAgentEpisode
 from ray.rllib.policy.policy import Policy
 from ray.rllib.policy.sample_batch import SampleBatch
-from ray.rllib.utils.annotations import DeveloperAPI
-from ray.rllib.utils.typing import AgentID
-import numpy as np
 from ray.rllib.utils.framework import try_import_tf, try_import_torch
-from ray.rllib.utils.tf_ops import explained_variance, make_tf_callable
-from ray.rllib.agents.ppo.ppo_torch_policy import ValueNetworkMixin
 
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
@@ -72,8 +63,8 @@ def value_mix_centralized_critic_postprocessing(policy,
             (np.expand_dims(sample_batch["vf_preds"], axis=1), sample_batch["opponent_vf_preds"]), axis=1)
 
         sample_batch["vf_tot"] = convert_to_numpy(policy.model.mixing_value(
-            convert_to_torch_tensor(sample_batch["all_vf_preds"]),
-            convert_to_torch_tensor(sample_batch["state"])))
+            convert_to_torch_tensor(sample_batch["all_vf_preds"]).cuda(),
+            convert_to_torch_tensor(sample_batch["state"]).cuda()))
 
     else:
         # Policy hasn't been initialized yet, use zeros.
@@ -93,8 +84,8 @@ def value_mix_centralized_critic_postprocessing(policy,
             (np.expand_dims(sample_batch["vf_preds"], axis=1), sample_batch["opponent_vf_preds"]), axis=1)
 
         sample_batch["vf_tot"] = convert_to_numpy(policy.model.mixing_value(
-            convert_to_torch_tensor(sample_batch["all_vf_preds"]),
-            convert_to_torch_tensor(sample_batch["state"])))
+            convert_to_torch_tensor(sample_batch["all_vf_preds"]).cuda(),
+            convert_to_torch_tensor(sample_batch["state"]).cuda()))
 
     completed = sample_batch["dones"][-1]
     if completed:

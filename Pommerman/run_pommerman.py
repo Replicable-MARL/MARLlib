@@ -13,12 +13,12 @@ from Pommerman.model.torch_cnn_gru import Torch_CNN_GRU_Model
 from Pommerman.model.torch_cnn_gru_cc import Torch_CNN_GRU_CentralizedCritic_Model
 from Pommerman.model.torch_cnn_lstm_cc import Torch_CNN_LSTM_CentralizedCritic_Model
 from Pommerman.model.torch_cnn import Torch_CNN_Model
-from Pommerman.model.torch_vd_ppo_a2c_gru_lstm import Torch_CNN_GRU_Model_w_Mixer, Torch_CNN_LSTM_Model_w_Mixer
+from Pommerman.model.torch_vda2c_vdppo_model import Torch_CNN_GRU_Model_w_Mixer, Torch_CNN_LSTM_Model_w_Mixer
 from Pommerman.agent.simple_agent import SimpleAgent
 from Pommerman.agent.trainable_place_holder_agent import PlaceHolderAgent
 from Pommerman.agent.random_agent import RandomAgent
 from Pommerman.policy.pg_a2c_a3c_r2d2 import run_pg_a2c_a3c_r2d2
-from Pommerman.policy.vdn_qmix import run_vdn_qmix
+from Pommerman.policy.vdn_qmix_iql import run_vdn_qmix_iql
 from Pommerman.policy.ppo import run_ppo
 from Pommerman.policy.vda2c import run_vda2c_sum_mix
 from Pommerman.policy.vdppo import run_vdppo_sum_mix
@@ -110,8 +110,9 @@ if __name__ == "__main__":
         "A2C": run_pg_a2c_a3c_r2d2,
         "A3C": run_pg_a2c_a3c_r2d2,
         "R2D2": run_pg_a2c_a3c_r2d2,
-        "VDN": run_vdn_qmix,
-        "QMIX": run_vdn_qmix,
+        "IQL": run_vdn_qmix_iql,
+        "VDN": run_vdn_qmix_iql,
+        "QMIX": run_vdn_qmix_iql,
         "PPO": run_ppo,
         "MIX-VDA2C": run_vda2c_sum_mix,
         "SUM-VDA2C": run_vda2c_sum_mix,
@@ -147,6 +148,7 @@ if __name__ == "__main__":
     #####################
 
     common_config = {
+        "seed": 1,
         "num_gpus_per_worker": args.num_gpus_per_worker,
         "train_batch_size": 1000,
         "num_workers": args.num_workers,

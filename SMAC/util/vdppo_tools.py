@@ -4,25 +4,17 @@ PyTorch policy class used for PPO.
 import gym
 import logging
 from typing import Dict, List, Type, Union
-
-import ray
-from ray.rllib.agents.ppo.ppo_tf_policy import setup_config
 from ray.rllib.evaluation.postprocessing import compute_gae_for_sample_batch, \
     Postprocessing
 from ray.rllib.models.modelv2 import ModelV2
 from ray.rllib.models.torch.torch_action_dist import TorchDistributionWrapper
 from ray.rllib.policy.policy import Policy
-from ray.rllib.policy.policy_template import build_policy_class
 from ray.rllib.policy.sample_batch import SampleBatch
-from ray.rllib.policy.torch_policy import EntropyCoeffSchedule, \
-    LearningRateSchedule
 from ray.rllib.utils.framework import try_import_torch
 from ray.rllib.utils.torch_ops import apply_grad_clipping, \
     explained_variance, sequence_mask
 from ray.rllib.utils.typing import TensorType, TrainerConfigDict
 from ray.rllib.utils.torch_ops import convert_to_torch_tensor
-from ray.rllib.utils.numpy import convert_to_numpy
-
 from SMAC.util.vda2c_tools import MixingValueMixin
 torch, nn = try_import_torch()
 

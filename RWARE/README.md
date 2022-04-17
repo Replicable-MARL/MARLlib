@@ -16,7 +16,8 @@ at ray.rllib.evaluation.rollout_worker.py line 508
 > _update_env_seed_if_necessary(self.env, seed, worker_index, 0)
 
 ## current support algo
-- R2D2(IQL)
+- R2D2
+- IQL  
 - VDN
 - QMIX
 - PG

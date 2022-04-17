@@ -53,10 +53,30 @@ def centralized_critic_postprocessing(policy,
     pytorch = policy.config["framework"] == "torch"
     self_obs_dim = policy.config["self_obs_dim"]
     state_dim = policy.config["state_dim"]
+    n_agents = policy.config["model"]["custom_model_config"]["ally_num"]
+    opponent_agents_num = n_agents - 1
 
     if (pytorch and hasattr(policy, "compute_central_vf")) or \
             (not pytorch and policy.loss_initialized()):
         assert other_agent_batches is not None
+
+        opponent_batch_list = list(other_agent_batches.values())
+
+        # TODO sample batch size not equal across different batches.
+        # here we only provide a solution to force the same length with sample batch
+        raw_opponent_batch = [opponent_batch_list[i][1] for i in range(opponent_agents_num)]
+        opponent_batch = []
+        for one_opponent_batch in raw_opponent_batch:
+            if len(one_opponent_batch) == len(sample_batch):
+                pass
+            else:
+                if len(one_opponent_batch) > len(sample_batch):
+                    one_opponent_batch = one_opponent_batch.slice(0, len(sample_batch))
+                else:  # len(one_opponent_batch) < len(sample_batch):
+                    length_dif = len(sample_batch) - len(one_opponent_batch)
+                    one_opponent_batch = one_opponent_batch.concat(
+                        one_opponent_batch.slice(len(one_opponent_batch) - length_dif, len(one_opponent_batch)))
+            opponent_batch.append(one_opponent_batch)
 
         # here we use state instead of ally's observation
         # as the dimension will be too big with increasing ally number
@@ -65,6 +85,8 @@ def centralized_critic_postprocessing(policy,
         # also record the opponent obs and actions in the trajectory
         sample_batch["self_obs"] = sample_batch['obs'][:, :self_obs_dim]
         sample_batch["state"] = sample_batch['obs'][:, self_obs_dim:self_obs_dim + state_dim]
+        sample_batch["opponent_action"] = np.stack([opponent_batch[i]["actions"] for i in range(opponent_agents_num)],
+                                                   1)
 
         # overwrite default VF prediction with the central VF
         if pytorch:
@@ -72,7 +94,10 @@ def centralized_critic_postprocessing(policy,
                 convert_to_torch_tensor(
                     sample_batch["self_obs"], policy.device),
                 convert_to_torch_tensor(
-                    sample_batch["state"], policy.device), ) \
+                    sample_batch["state"], policy.device),
+                convert_to_torch_tensor(
+                    sample_batch["opponent_action"], policy.device),
+            ) \
                 .cpu().detach().numpy()
         else:
             raise NotImplementedError()
@@ -84,6 +109,9 @@ def centralized_critic_postprocessing(policy,
                                             dtype=sample_batch[SampleBatch.CUR_OBS].dtype)
         sample_batch["state"] = np.zeros((o.shape[0], state_dim),
                                          dtype=sample_batch[SampleBatch.CUR_OBS].dtype)
+        sample_batch["opponent_action"] = np.zeros(
+            (sample_batch["actions"].shape[0], opponent_agents_num),
+            dtype=sample_batch["actions"].dtype)
         sample_batch[SampleBatch.VF_PREDS] = np.zeros_like(
             sample_batch[SampleBatch.REWARDS], dtype=np.float32)
 
@@ -109,14 +137,12 @@ def loss_with_central_critic(policy, model, dist_class, train_batch):
 
     vf_saved = model.value_function
     model.value_function = lambda: policy.model.central_value_function(
-        train_batch["self_obs"], train_batch["state"])
+        train_batch["self_obs"], train_batch["state"], train_batch["opponent_action"])
 
     policy._central_value_out = model.value_function()
     loss = func(policy, model, dist_class, train_batch)
 
     model.value_function = vf_saved
-
-    # TODO record customized metric here and get from stat_fn()
 
     return loss
 
@@ -144,24 +170,3 @@ def central_vf_stats_ppo(policy, train_batch, grads):
             train_batch[Postprocessing.VALUE_TARGETS],
             policy._central_value_out)
     }
-
-# def central_vf_stats(policy, train_batch):
-#     # Report the explained variance of the central value function.
-#     return {
-#         # "vf_explained_var": explained_variance(train_batch[Postprocessing.VALUE_TARGETS], policy._central_value_out),
-#         "value_targets": torch.mean(train_batch[Postprocessing.VALUE_TARGETS]),
-#         "advantage_mean": torch.mean(train_batch[Postprocessing.ADVANTAGES]),
-#         "advantages_min": torch.min(train_batch[Postprocessing.ADVANTAGES]),
-#         "advantages_max": torch.max(train_batch[Postprocessing.ADVANTAGES]),
-#         "central_value_mean": torch.mean(policy._central_value_out),
-#         "central_value_min": torch.min(policy._central_value_out),
-#         "central_value_max": torch.max(policy._central_value_out),
-#         # "cur_kl_coeff": policy.kl_coeff,
-#         # "cur_lr": policy.cur_lr,
-#         # "total_loss": policy._total_loss,
-#         # "policy_loss": policy._mean_policy_loss,
-#         # "vf_loss": policy._mean_vf_loss,
-#         # "kl": policy._mean_kl,
-#         # "entropy": policy._mean_entropy,
-#         # "entropy_coeff": policy.entropy_coeff,
-#     }

@@ -1,11 +1,11 @@
 from ray.rllib.agents.callbacks import DefaultCallbacks
 from ray.rllib.evaluation import MultiAgentEpisode, RolloutWorker
 from typing import Dict, Optional, TYPE_CHECKING
-
+import numpy as np
 from ray.rllib.env import BaseEnv
 from ray.rllib.policy import Policy
 from ray.rllib.evaluation import MultiAgentEpisode
-
+from ray.rllib.policy.sample_batch import SampleBatch
 from ray.rllib.utils.typing import AgentID, PolicyID
 
 from queue import Queue
@@ -58,8 +58,12 @@ class SmacCallbacks(DefaultCallbacks):
                 "episode": episode,
             })
 
-        ally_state = worker.env.death_tracker_ally
-        enemy_state = worker.env.death_tracker_enemy
+        if "GroupAgentsWrapper" in worker.env.__class__.__name__:  # QMIX VDN
+            ally_state = worker.env.env.env.death_tracker_ally
+            enemy_state = worker.env.env.env.death_tracker_enemy
+        else:
+            ally_state = worker.env.env.death_tracker_ally
+            enemy_state = worker.env.env.death_tracker_enemy
 
         # count battle win rate in recent 100 games
         if self.battle_win_queue.full():
@@ -89,3 +93,36 @@ class SmacCallbacks(DefaultCallbacks):
 
         episode.custom_metrics["enemy_kill_rate"] = sum(
             self.enemy_killing_queue.queue) / self.enemy_killing_queue.qsize()
+
+    def on_train_result(self, *, trainer, result: dict, **kwargs):
+        result["battle_win"] = np.nan
+        result["ally_survive"] = np.nan
+        result["enemy_kill"] = np.nan
+        if "battle_win_rate_mean" in result["custom_metrics"]:
+            result["battle_win"] = result["custom_metrics"]["battle_win_rate_mean"]
+            result["ally_survive"] = result["custom_metrics"]["ally_survive_rate_mean"]
+            result["enemy_kill"] = result["custom_metrics"]["enemy_kill_rate_mean"]
+
+    # def on_learn_on_batch(self, *, policy: Policy, train_batch: SampleBatch,
+    #                       result: dict, **kwargs) -> None:
+    #     """Called at the beginning of Policy.learn_on_batch().
+    #
+    #     Note: This is called before 0-padding via
+    #     `pad_batch_to_sequences_of_same_size`.
+    #
+    #     Args:
+    #         policy (Policy): Reference to the current Policy object.
+    #         train_batch (SampleBatch): SampleBatch to be trained on. You can
+    #             mutate this object to modify the samples generated.
+    #         result (dict): A results dict to add custom metrics to.
+    #         kwargs: Forward compatibility placeholder.
+    #     """
+    #     battle_win_infos = train_batch["infos"]
+    #     battle_win = 0
+    #     game_num = 0
+    #     for info in battle_win_infos:
+    #         if info["game_end"]:
+    #             game_num += 1
+    #             if info["battle_won"]:
+    #                 battle_win += 1
+    #     result["battle_win"] = round(battle_win/game_num, 3)

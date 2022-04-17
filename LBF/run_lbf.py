@@ -15,12 +15,11 @@ from LBF.model.torch_gru import *
 from LBF.model.torch_gru_cc import *
 from LBF.model.torch_lstm import *
 from LBF.model.torch_lstm_cc import *
-
-from LBF.model.torch_vd_ppo_a2c_gru_lstm import *
+from LBF.model.torch_vda2c_vdppo_model import *
 from LBF.util.vdppo_tools import *
 
 from LBF.policy.pg_a2c_a3c_r2d2 import run_pg_a2c_a3c_r2d2
-from LBF.policy.vdn_qmix import run_vdn_qmix
+from LBF.policy.vdn_qmix_iql import run_vdn_qmix_iql
 from LBF.policy.ppo import run_ppo
 from LBF.policy.vda2c import run_vda2c_sum_mix
 from LBF.policy.vdppo import run_vdppo_sum_mix
@@ -44,6 +43,7 @@ if __name__ == "__main__":
         "max_food": args.max_food,
         "sight": args.sight,
         "force_coop": args.force_coop,
+        "max_episode_steps": args.episode_limit
     }
 
     map_name = "Foraging-{4}s-{0}x{0}-{1}p-{2}f{3}".format(
@@ -81,8 +81,9 @@ if __name__ == "__main__":
         "A2C": run_pg_a2c_a3c_r2d2,
         "A3C": run_pg_a2c_a3c_r2d2,
         "R2D2": run_pg_a2c_a3c_r2d2,
-        "VDN": run_vdn_qmix,
-        "QMIX": run_vdn_qmix,
+        "IQL": run_vdn_qmix_iql,
+        "VDN": run_vdn_qmix_iql,
+        "QMIX": run_vdn_qmix_iql,
         "PPO": run_ppo,
         "MIX-VDA2C": run_vda2c_sum_mix,
         "SUM-VDA2C": run_vda2c_sum_mix,
@@ -118,6 +119,7 @@ if __name__ == "__main__":
     #####################
 
     common_config = {
+        "seed": 1,
         "env": "lbf",
         "num_gpus_per_worker": args.num_gpus_per_worker,
         "train_batch_size": 1000,
