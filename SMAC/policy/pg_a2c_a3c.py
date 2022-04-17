@@ -10,7 +10,7 @@ def run_pg_a2c_a3c(args, common_config, env_config, stop, reporter):
     n_actions = env_config["n_actions"]
     episode_limit = env_config["episode_limit"]
     episode_num = 10
-    train_batch_size = episode_num * episode_limit
+    train_batch_size = episode_num * episode_limit // args.batchsize_reduce
 
     config = {
         "env": "smac",

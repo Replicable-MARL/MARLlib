@@ -164,7 +164,8 @@ pip install -U ray==1.8.0 # version important
 
 clone our fork of Ray
 ```
-git clone https://github.com/Theohhhu/ray_marl.git@marl_in_one
+git clone https://github.com/Theohhhu/ray_marl.git
+git checkout marl_in_one
 ```
 
 follow https://docs.ray.io/en/latest/ray-contribute/development.html#python-develop

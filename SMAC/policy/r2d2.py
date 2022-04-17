@@ -38,7 +38,7 @@ def run_r2d2(args, common_config, env_config, stop, reporter):
             return R2D2WithMaskPolicy
 
     train_batch_size = 32 * episode_limit
-    learning_starts = train_batch_size
+    learning_starts = train_batch_size // args.batchsize_reduce
 
     R2D2_CONFIG.update(
         {

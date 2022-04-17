@@ -82,7 +82,7 @@ def run_vdn_qmix_iql(args, common_config, env_config, stop, reporter):
     }
 
     learning_starts = episode_limit * 32
-    train_batch_size = 32
+    train_batch_size = 32 // args.batchsize_reduce
     QMIX_CONFIG.update(
         {
             "rollout_fragment_length": 1,

@@ -21,7 +21,7 @@ def run_mappo(args, common_config, env_config, stop, reporter):
     episode_limit = env_config["episode_limit"]
     episode_num = 10
     iteration = 4
-    train_batch_size = episode_num * episode_limit
+    train_batch_size = episode_num * episode_limit // args.batchsize_reduce
 
     sgd_minibatch_size = train_batch_size
     while sgd_minibatch_size < episode_limit:
