@@ -47,7 +47,7 @@ def get_train_parser():
             "ManyagentAnt",
         ],
         # default="ManyagentAnt",
-        default="2AgentHalfCheetah",
+        default="2AgentWalker",
         # default="2AgentWalker",
         help="Envs should be registered")
     parser.add_argument(
