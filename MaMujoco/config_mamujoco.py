@@ -48,7 +48,7 @@ def get_train_parser():
         ],
         # default="ManyagentAnt",
         default="2AgentWalker",
-        # default="2AgentWalker",
+        # default="2AgentHalfCheetah",
         help="Envs should be registered")
     parser.add_argument(
         "--neural-arch",

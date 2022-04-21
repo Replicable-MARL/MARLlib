@@ -59,11 +59,11 @@ def run_happo(args, common_config, env_config, stop):
     })
 
     PPO_CONFIG.update({
-        'critic_lr': 1e-2,
+        'critic_lr': 1e-3,
         # 'actor_lr': 5e-5,
-        'lr': 5e-5,
+        'lr': 5e-6,
         "lr_schedule": [
-            (0, 5e-5),
+            (0, 5e-6),
             (int(1e7), 1e-8),
         ]
     })
@@ -86,7 +86,7 @@ def run_happo(args, common_config, env_config, stop):
             return HAPPOTorchPolicy
 
     HAPPOTrainer = PPOTrainer.with_updates(
-        name="#04-08-8-Worker-add-value-normal-critical-lr-1e-2#-HAPPOTrainer-with-local-mode-False",
+        name="#Paper-same-performance-after-use-logits-optimization",
         default_policy=HAPPOTorchPolicy,
         get_policy_class=get_policy_class,
     )
