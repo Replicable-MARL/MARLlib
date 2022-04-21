@@ -21,6 +21,7 @@ from SMAC.policy.vdppo import run_vdppo_sum_mix
 from SMAC.policy.maa2c import run_maa2c
 from SMAC.policy.mappo import run_mappo
 from SMAC.policy.coma import run_coma
+from SMAC.policy.happo import run_happo
 
 if __name__ == '__main__':
 
@@ -108,6 +109,7 @@ if __name__ == '__main__':
         "MAA2C": run_maa2c,
         "MAPPO": run_mappo,
         "COMA": run_coma,
+        "HAPPO": run_happo,
     }
 
     #####################
