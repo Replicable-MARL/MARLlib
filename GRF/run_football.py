@@ -28,17 +28,12 @@ from GRF.policy.mappo import run_mappo
 from GRF.policy.coma import run_coma
 
 ally_num_dict = {
-    "academy_empty_goal": 2,
-    "academy_empty_goal_close": 2,
-    "academy_run_to_score_with_keeper": 2,
-    "academy_run_to_score": 2,
-    "academy_pass_and_shoot_with_keeper": 3,
-    "academy_run_pass_and_shoot_with_keeper": 3,
-    "academy_3_vs_1_with_keeper": 4,
+    "academy_pass_and_shoot_with_keeper": 2,
+    "academy_run_pass_and_shoot_with_keeper": 2,
+    "academy_3_vs_1_with_keeper": 3,
+    "academy_counterattack_easy": 4,
+    "academy_counterattack_hard": 4,
     "academy_single_goal_versus_lazy": 11,
-    "academy_corner": 11,
-    "academy_counterattack_easy": 11,
-    "academy_counterattack_hard": 11,
 }
 
 if __name__ == "__main__":
