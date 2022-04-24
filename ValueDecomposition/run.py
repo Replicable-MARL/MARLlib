@@ -4,15 +4,16 @@ import sys
 import collections
 import ray
 from copy import deepcopy
-from gym.spaces import Dict as Gym_Dict, Discrete, Box
+from gym.spaces import Dict as GymDict, Discrete, Box, Tuple
 from ray.rllib.models import ModelCatalog
 from ray.tune import register_env
 from ray import tune
 from ray.rllib.utils.test_utils import check_learning_achieved
 from ray.rllib.utils.framework import try_import_tf, try_import_torch
-from IndependentLearning.models.universal_model import Universal_Model
-from IndependentLearning.envs import ENV_REGISTRY
-from IndependentLearning.scripts import POlICY_REGISTRY
+from ValueDecomposition.models.offpolicy_rnn import Offpolicy_Universal_Model
+from ValueDecomposition.models.onpolicy_rnn import Onpolicy_Universal_Model
+from ValueDecomposition.scripts import POlICY_REGISTRY
+from ValueDecomposition.envs import ENV_REGISTRY
 
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
@@ -91,17 +92,40 @@ if __name__ == "__main__":
     ### environment ###
     ###################
 
-    register_env(config_dict["env"] + "_" + config_dict["env_args"]["map_name"],
-                 lambda _: ENV_REGISTRY[config_dict["env"]](config_dict["env_args"]))
-
     test_env = ENV_REGISTRY[config_dict["env"]](config_dict["env_args"])
     env_info_dict = test_env.get_env_info()
     test_env.close()
 
+    if config_dict["algorithm"] in ["qmix", "vdn", "iql"]:
+
+        space_obs = env_info_dict["space_obs"].spaces
+        space_act = env_info_dict["space_act"]
+        # check the action space condition:
+        if not isinstance(space_act, Discrete):
+            print("illegal action space")
+            raise ValueError()
+
+        n_agents = env_info_dict["num_agents"]
+        obs_space = Tuple([GymDict(space_obs)] * n_agents)
+        act_space = Tuple([space_act] * n_agents)
+
+        grouping = {
+            "group_1": ["agent_{}".format(i) for i in range(n_agents)],
+        }
+        env_reg_name = "grouped_" + config_dict["env"] + "_" + config_dict["env_args"]["map_name"]
+        register_env(env_reg_name,
+                     lambda _: ENV_REGISTRY[config_dict["env"]](config_dict["env_args"]).with_agent_groups(
+                         grouping, obs_space=obs_space, act_space=act_space))
+    else:
+        env_reg_name = config_dict["env"] + "_" + config_dict["env_args"]["map_name"]
+        register_env(env_reg_name,
+                     lambda _: ENV_REGISTRY[config_dict["env"]](config_dict["env_args"]))
+
+
     #############
     ### model ###
     #############
-    if isinstance(env_info_dict["space_obs"], Gym_Dict):
+    if isinstance(env_info_dict["space_obs"], GymDict):
         obs_dim = len(env_info_dict["space_obs"]["obs"].shape)
 
     elif isinstance(env_info_dict["space_obs"], Box):
@@ -114,7 +138,6 @@ if __name__ == "__main__":
         print("use cnn encoder")
         encoder = "cnn_encoder"
 
-
     # load model config according to env_info:
     # encoder config
     encoder_arch_config = _get_config({}, encoder, "models")
@@ -124,9 +147,15 @@ if __name__ == "__main__":
     rnn_arch_config = _get_config({}, "rnn", "models")
     config_dict = recursive_dict_update(config_dict, rnn_arch_config)
 
-    ModelCatalog.register_custom_model(
-        "Universal_Model", Universal_Model)
+    # core rnn config
+    mixer_arch_config = _get_config({}, "mixer", "models")
+    config_dict = recursive_dict_update(config_dict, mixer_arch_config)
 
+    ModelCatalog.register_custom_model(
+        "Offpolicy_Universal_Model", Offpolicy_Universal_Model)
+
+    ModelCatalog.register_custom_model(
+        "Onpolicy_Universal_Model", Onpolicy_Universal_Model)
     ##############
     ### policy ###
     ##############
@@ -150,7 +179,7 @@ if __name__ == "__main__":
 
     common_config = {
         "seed": config_dict["seed"],
-        "env": config_dict["env"] + "_" + config_dict["env_args"]["map_name"],
+        "env": env_reg_name,
         "num_gpus_per_worker": config_dict["num_gpus_per_worker"],
         "num_gpus": config_dict["num_gpus"],
         "num_workers": config_dict["num_workers"],

@@ -1,5 +1,12 @@
-All environment available for value decomposition based methods (VDN, QMIX, VDA2C VDPPO)
+Environment available for value decomposition based methods (VDN, QMIX, VDA2C VDPPO)
 
+- football
+- MPE (part, but can be settled in config file)
+- SMAC
+- mamujoco (VDA2C VDPPO)
+- RWARE
+- LBF (part, but can be settled in config file)
+- Pommerman
 
 ### Part IV. Getting started
 

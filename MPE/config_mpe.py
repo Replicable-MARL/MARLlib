@@ -3,29 +3,29 @@ import argparse
 
 def get_train_parser():
     parser = argparse.ArgumentParser()
-    # parser.add_argument(
-    #     "--local-mode",
-    #     default=True,
-    #     type=bool,
-    #     help="Init Ray in local mode for easier debugging.")
     parser.add_argument(
         "--local-mode",
-        action="store_true",
+        default=True,
+        type=bool,
         help="Init Ray in local mode for easier debugging.")
+    # parser.add_argument(
+    #     "--local-mode",
+    #     action="store_true",
+    #     help="Init Ray in local mode for easier debugging.")
     parser.add_argument(
         "--run",
         choices=["IQL", "QMIX", "VDN", "R2D2", "PG", "A2C", "A3C", "DDPG", "MADDPG", "MAA2C", "PPO", "MAPPO", "COMA", "SUM-VDA2C", "MIX-VDA2C", "SUM-VDPPO", "MIX-VDPPO"],  # "APPO" "IMPALA"
-        default="IQL",
+        default="A2C",
         help="The RLlib-registered algorithm to use.")
-    # parser.add_argument(
-    #     "--share-policy",
-    #     type=bool,
-    #     default=True,
-    #     help="Maps should be registered")
     parser.add_argument(
         "--share-policy",
-        action="store_true",
+        type=bool,
+        default=False,
         help="Maps should be registered")
+    # parser.add_argument(
+    #     "--share-policy",
+    #     action="store_true",
+    #     help="Maps should be registered")
     parser.add_argument(
         "--map",
         choices=["simple", "simple_adversary", "simple_crypto", "simple_push", "simple_tag", "simple_spread",

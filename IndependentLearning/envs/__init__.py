@@ -4,10 +4,10 @@ from IndependentLearning.envs.smac_rllib import RLlibSMAC
 from IndependentLearning.envs.football_rllib import RllibGFootball
 from IndependentLearning.envs.rware_rllib import RllibRWARE
 
-REGISTRY = {}
-
-REGISTRY["mpe"] = RllibMPE
-REGISTRY["rware"] = RllibRWARE
-REGISTRY["mamujoco"] = RllibMAMujoco
-REGISTRY["smac"] = RLlibSMAC
-REGISTRY["football"] = RllibGFootball
+ENV_REGISTRY = {
+    "mpe": RllibMPE,
+    "rware": RllibRWARE,
+    "mamujoco": RllibMAMujoco,
+    "smac": RLlibSMAC,
+    "football": RllibGFootball
+}
