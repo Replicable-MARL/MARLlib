@@ -152,7 +152,7 @@ class Universal_Model(TorchRNN, nn.Module):
 
         # Compute the unmasked logits.
         if "conv_layer" in self.custom_config["model_arch_args"]:
-            x = inputs.reshape(-1, 42, 42, 4).permute(0, 3, 1, 2)
+            x = inputs.reshape(-1, inputs.shape[2], inputs.shape[3], inputs.shape[4]).permute(0, 3, 1, 2)
             x = self.encoder(x)
             x = torch.mean(x, (2, 3))
             x = x.reshape(inputs.shape[0], inputs.shape[1], -1)
