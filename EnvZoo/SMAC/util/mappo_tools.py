@@ -54,6 +54,7 @@ def centralized_critic_postprocessing(policy,
     self_obs_dim = policy.config["self_obs_dim"]
     state_dim = policy.config["state_dim"]
     n_agents = policy.config["model"]["custom_model_config"]["ally_num"]
+    action_dim = policy.action_space.n
     opponent_agents_num = n_agents - 1
 
     if (pytorch and hasattr(policy, "compute_central_vf")) or \
@@ -83,8 +84,8 @@ def centralized_critic_postprocessing(policy,
         # [(_, opponent_batch)] = list(other_agent_batches.values())
 
         # also record the opponent obs and actions in the trajectory
-        sample_batch["self_obs"] = sample_batch['obs'][:, :self_obs_dim]
-        sample_batch["state"] = sample_batch['obs'][:, self_obs_dim:self_obs_dim + state_dim]
+        sample_batch["self_obs"] = sample_batch['obs'][:, action_dim: action_dim + self_obs_dim]
+        sample_batch["state"] = sample_batch['obs'][:, action_dim + self_obs_dim:]
         sample_batch["opponent_action"] = np.stack([opponent_batch[i]["actions"] for i in range(opponent_agents_num)],
                                                    1)
 

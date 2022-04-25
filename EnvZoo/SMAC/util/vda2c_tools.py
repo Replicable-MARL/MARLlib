@@ -32,6 +32,7 @@ def value_mix_centralized_critic_postprocessing(policy,
     state_dim = policy.config["state_dim"]
     n_agents = policy.config["agent_num"]
     opponent_agents_num = n_agents - 1
+    action_dim = policy.action_space.n
 
     if (pytorch and hasattr(policy, "mixing_vf")) or \
             (not pytorch and policy.loss_initialized()):
@@ -54,8 +55,8 @@ def value_mix_centralized_critic_postprocessing(policy,
                         one_opponent_batch.slice(len(one_opponent_batch) - length_dif, len(one_opponent_batch)))
             opponent_batch.append(one_opponent_batch)
 
-        sample_batch["self_obs"] = sample_batch['obs'][:, :self_obs_dim]
-        sample_batch["state"] = sample_batch['obs'][:, self_obs_dim:self_obs_dim + state_dim]
+        sample_batch["self_obs"] = sample_batch['obs'][:, action_dim: action_dim + self_obs_dim]
+        sample_batch["state"] = sample_batch['obs'][:, action_dim + self_obs_dim:]
         sample_batch["opponent_vf_preds"] = np.stack(
             [opponent_batch[i]["vf_preds"] for i in range(opponent_agents_num)],
             1)
