@@ -7,7 +7,7 @@ from ray.rllib.utils.annotations import override
 from ray.rllib.utils.framework import try_import_tf, try_import_torch, \
     TensorType
 from ray.rllib.policy.rnn_sequencing import add_time_dimension
-from ValueDecomposition.models.mixers import QMixer, VDNMixer
+from VD.models.mixers import QMixer, VDNMixer
 
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()

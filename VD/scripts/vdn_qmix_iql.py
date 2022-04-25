@@ -2,7 +2,7 @@ from ray import tune
 from ray.rllib.agents.qmix.qmix import DEFAULT_CONFIG as JointQ_Config
 from ray.tune.utils import merge_dicts
 from ray.tune import CLIReporter
-from ValueDecomposition.utils.offpolicy_tool import JointQTrainer
+from VD.utils.offpolicy_tool import JointQTrainer
 
 """
 This version is based on but different from that rllib built-in qmix_policy

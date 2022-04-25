@@ -10,9 +10,9 @@ from ray.tune import register_env
 from ray import tune
 from ray.rllib.utils.test_utils import check_learning_achieved
 from ray.rllib.utils.framework import try_import_tf, try_import_torch
-from IndependentLearning.models.universal_model import Universal_Model
-from IndependentLearning.envs import ENV_REGISTRY
-from IndependentLearning.scripts import POlICY_REGISTRY
+from IL.models.universal_model import Universal_Model
+from IL.envs import ENV_REGISTRY
+from IL.scripts import POlICY_REGISTRY
 
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()

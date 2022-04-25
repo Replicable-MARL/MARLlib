@@ -16,7 +16,7 @@ def get_train_parser():
         "--run",
         choices=["IQL", "QMIX", "VDN", "R2D2", "PG", "A2C", "A3C", "MAA2C", "PPO", "MAPPO", "COMA", "MIX-VDA2C", "SUM-VDA2C", "MIX-VDPPO", "SUM-VDPPO"],
         # "APPO" "IMPALA"
-        default="QMIX",
+        default="A2C",
         help="The RLlib-registered algorithm to use.")
     parser.add_argument(
         "--map",

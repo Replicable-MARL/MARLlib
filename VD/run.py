@@ -10,10 +10,10 @@ from ray.tune import register_env
 from ray import tune
 from ray.rllib.utils.test_utils import check_learning_achieved
 from ray.rllib.utils.framework import try_import_tf, try_import_torch
-from ValueDecomposition.models.offpolicy_rnn import Offpolicy_Universal_Model
-from ValueDecomposition.models.onpolicy_rnn import Onpolicy_Universal_Model
-from ValueDecomposition.scripts import POlICY_REGISTRY
-from ValueDecomposition.envs import ENV_REGISTRY
+from VD.models.offpolicy_rnn import Offpolicy_Universal_Model
+from VD.models.onpolicy_rnn import Onpolicy_Universal_Model
+from VD.scripts import POlICY_REGISTRY
+from VD.envs import ENV_REGISTRY
 
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
