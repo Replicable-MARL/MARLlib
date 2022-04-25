@@ -1,0 +1,9 @@
+env: smac
+
+env_args:
+  map_name: "3m"
+  difficulty: "7"
+  reward_scale_rate: 20
+
+mask_flag: True
+global_state_flag: True
