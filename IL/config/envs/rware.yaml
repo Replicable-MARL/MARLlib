@@ -1,0 +1,16 @@
+env: rware
+
+env_args:
+  n_agents: 4 # 2-20
+  map_size: "small" # "tiny", "small", "medium", "large"
+  difficulty: "easy" # "easy", "medium", "hard"
+  column_height: 8
+  max_inactivity_steps: null
+  max_steps: 500
+  fast_obs: True
+  msg_bits: 0
+  sensor_range: 1
+
+core_arch: "gru" # LSTM
+mask_flag: False
+global_state_flag: False

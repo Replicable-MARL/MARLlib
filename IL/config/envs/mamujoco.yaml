@@ -1,0 +1,8 @@
+env: mamujoco
+
+env_args:
+  map_name: "2AgentHalfCheetah"
+
+core_arch: "gru" # LSTM
+mask_flag: False
+global_state_flag: True
