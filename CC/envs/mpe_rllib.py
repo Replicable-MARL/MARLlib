@@ -6,15 +6,15 @@ from pettingzoo.mpe import simple_adversary_v2, simple_crypto_v2, simple_v2, sim
     simple_spread_v2, simple_reference_v2, simple_world_comm_v2, simple_speaker_listener_v3
 
 REGISTRY = {}
-REGISTRY["simple_adversary"] = simple_adversary_v2.env
-REGISTRY["simple_crypto"] = simple_crypto_v2.env
-REGISTRY["simple"] = simple_v2.env
-REGISTRY["simple_push"] = simple_push_v2.env
-REGISTRY["simple_tag"] = simple_tag_v2.env
-REGISTRY["simple_spread"] = simple_spread_v2.env
-REGISTRY["simple_reference"] = simple_reference_v2.env
-REGISTRY["simple_world_comm"] = simple_world_comm_v2.env
-REGISTRY["simple_speaker_listener"] = simple_speaker_listener_v3.env
+REGISTRY["simple_adversary"] = simple_adversary_v2.parallel_env
+REGISTRY["simple_crypto"] = simple_crypto_v2.parallel_env
+REGISTRY["simple"] = simple_v2.parallel_env
+REGISTRY["simple_push"] = simple_push_v2.parallel_env
+REGISTRY["simple_tag"] = simple_tag_v2.parallel_env
+REGISTRY["simple_spread"] = simple_spread_v2.parallel_env
+REGISTRY["simple_reference"] = simple_reference_v2.parallel_env
+REGISTRY["simple_world_comm"] = simple_world_comm_v2.parallel_env
+REGISTRY["simple_speaker_listener"] = simple_speaker_listener_v3.parallel_env
 
 
 class RllibMPE(MultiAgentEnv):

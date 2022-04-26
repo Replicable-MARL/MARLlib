@@ -1,6 +1,7 @@
 from ray.rllib.utils.torch_ops import FLOAT_MIN
 import numpy as np
 from typing import Dict, List, Any, Union
+from gym.spaces import Box
 from ray.rllib.models.modelv2 import ModelV2
 from ray.rllib.models.torch.recurrent_net import RecurrentNetwork as TorchRNN
 from ray.rllib.utils.annotations import override
@@ -71,11 +72,12 @@ class Onpolicy_Universal_Model(TorchRNN, nn.Module):
 
         # encoder for centralized function
         if "state" not in full_obs_space.spaces:
+            self.state_dim = full_obs_space["obs"].shape
             self.cc_encoder = copy.deepcopy(self.encoder)
             cc_input_dim = input_dim * custom_config["num_agents"]
         else:
-            state_dim = len(full_obs_space["state"].shape)
-            if state_dim > 1:  # TODO not right
+            self.state_dim = full_obs_space["state"].shape
+            if len(self.state_dim) > 1:  # env return a 3D global state
                 raise NotImplementedError()
             else:
                 cc_layers = []
@@ -107,7 +109,10 @@ class Onpolicy_Universal_Model(TorchRNN, nn.Module):
         self._features = None
 
         # Central VF
-        input_size = cc_input_dim + num_outputs * (custom_config["num_agents"] - 1)  # obs + opp_obs + opp_act
+        if isinstance(custom_config["space_act"], Box):  # continues
+            input_size = cc_input_dim + 2 * (custom_config["num_agents"] - 1)
+        else:
+            input_size = cc_input_dim + num_outputs * (custom_config["num_agents"] - 1)
         self.central_vf = nn.Sequential(
             nn.Linear(input_size, 1),
         )
@@ -211,12 +216,25 @@ class Onpolicy_Universal_Model(TorchRNN, nn.Module):
             raise ValueError()
 
     def central_value_function(self, state, opponent_actions):
-        opponent_actions_one_hot = [
-            torch.nn.functional.one_hot(opponent_actions[:, i].long(), self.num_outputs).float()
-            for i in
-            range(opponent_actions.shape[1])]
-        x = self.cc_encoder(state)
-        x = torch.cat([x] + opponent_actions_one_hot, 1)
+        B = state.shape[0]
+        if isinstance(self.custom_config["space_act"], Box):  # continues
+            opponent_actions_ls = [opponent_actions[:, i, :]
+                                   for i in
+                                   range(self.n_agents - 1)]
+        else:
+            opponent_actions_ls = [
+                torch.nn.functional.one_hot(opponent_actions[:, i].long(), self.num_outputs).float()
+                for i in
+                range(self.n_agents - 1)]
+
+        if "conv_layer" in self.custom_config["model_arch_args"]:
+            x = state.reshape(-1, self.state_dim[0], self.state_dim[1], self.state_dim[2]).permute(0, 3, 1, 2)
+            x = self.cc_encoder(x)
+            x = torch.mean(x, (2, 3))
+        else:
+            x = self.cc_encoder(state)
+
+        x = torch.cat([x.reshape(B, -1)] + opponent_actions_ls, 1)
         if self.coma_flag:
             return torch.reshape(self.central_vf(x), [-1, self.num_outputs])
         else:

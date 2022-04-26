@@ -110,9 +110,12 @@ def centralized_critic_postprocessing(policy,
 
         sample_batch["vf_preds"] = np.zeros_like(
             sample_batch[SampleBatch.REWARDS], dtype=np.float32)
-        sample_batch["opponent_action"] = np.zeros(
-            (sample_batch["actions"].shape[0], opponent_agents_num),
-            dtype=sample_batch["actions"].dtype)
+        sample_batch["opponent_action"] = np.stack(
+            [np.zeros_like(sample_batch["actions"], dtype=sample_batch["actions"].dtype) for _ in
+             range(opponent_agents_num)], axis=1)
+        # sample_batch["opponent_action"] = np.zeros(
+        #     (sample_batch["actions"].shape[0], opponent_agents_num),
+        #     dtype=sample_batch["actions"].dtype)
 
         if algorithm == "coma":
             sample_batch[SampleBatch.VF_PREDS] = np.take(sample_batch[SampleBatch.VF_PREDS],
@@ -236,14 +239,14 @@ MAPPOTrainer = PPOTrainer.with_updates(
 ############
 
 def central_critic_coma_loss(policy: Policy, model: ModelV2,
-                                 dist_class: ActionDistribution,
-                                 train_batch: SampleBatch) -> TensorType:
+                             dist_class: ActionDistribution,
+                             train_batch: SampleBatch) -> TensorType:
     CentralizedValueMixin.__init__(policy)
     logits, _ = model.from_batch(train_batch)
     values = model.central_value_function(convert_to_torch_tensor(
-                    train_batch["state"], policy.device),
-                convert_to_torch_tensor(
-                    train_batch["opponent_action"], policy.device))
+        train_batch["state"], policy.device),
+        convert_to_torch_tensor(
+            train_batch["opponent_action"], policy.device))
     pi = torch.nn.functional.softmax(logits, dim=-1)
 
     if policy.is_recurrent():
@@ -287,6 +290,7 @@ def central_critic_coma_loss(policy: Policy, model: ModelV2,
     model.tower_stats["value_err"] = value_err
 
     return total_loss
+
 
 def coma_model_value_predictions(
         policy: Policy, input_dict: Dict[str, TensorType], state_batches,
