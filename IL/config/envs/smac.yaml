@@ -5,6 +5,5 @@ env_args:
   difficulty: "7"
   reward_scale_rate: 20
 
-core_arch: "lstm" # lstm transformer
 mask_flag: True
 global_state_flag: True

@@ -4,7 +4,6 @@ from IL.envs.smac_rllib import RLlibSMAC
 from IL.envs.football_rllib import RllibGFootball
 from IL.envs.rware_rllib import RllibRWARE
 
-# cooperative only scenarios
 ENV_REGISTRY = {
     "mpe": RllibMPE,
     "rware": RllibRWARE,

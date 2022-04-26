@@ -10,7 +10,7 @@ from ray.tune import register_env
 from ray import tune
 from ray.rllib.utils.test_utils import check_learning_achieved
 from ray.rllib.utils.framework import try_import_tf, try_import_torch
-from IL.models.universal_model import Universal_Model
+from IL.models.onpolicy_rnn import Onpolicy_Universal_Model
 from IL.envs import ENV_REGISTRY
 from IL.scripts import POlICY_REGISTRY
 
@@ -125,7 +125,7 @@ if __name__ == "__main__":
     config_dict = recursive_dict_update(config_dict, rnn_arch_config)
 
     ModelCatalog.register_custom_model(
-        "Universal_Model", Universal_Model)
+        "Universal_Model", Onpolicy_Universal_Model)
 
     ##############
     ### policy ###

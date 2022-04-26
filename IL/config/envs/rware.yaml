@@ -11,6 +11,5 @@ env_args:
   msg_bits: 0
   sensor_range: 1
 
-core_arch: "gru" # LSTM
 mask_flag: False
 global_state_flag: False

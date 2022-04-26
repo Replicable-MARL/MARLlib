@@ -1,18 +1,20 @@
 from ray.rllib.utils.torch_ops import FLOAT_MIN
 import numpy as np
 from typing import Dict, List, Any, Union
+from gym.spaces import Box
 from ray.rllib.models.modelv2 import ModelV2
 from ray.rllib.models.torch.recurrent_net import RecurrentNetwork as TorchRNN
 from ray.rllib.utils.annotations import override
 from ray.rllib.utils.framework import try_import_tf, try_import_torch, \
     TensorType
 from ray.rllib.policy.rnn_sequencing import add_time_dimension
+import copy
 
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
 
 
-class Universal_Model(TorchRNN, nn.Module):
+class Onpolicy_Universal_Model(TorchRNN, nn.Module):
 
     def __init__(
             self,
@@ -29,16 +31,12 @@ class Universal_Model(TorchRNN, nn.Module):
 
         # judge the model arch
         custom_config = model_config["custom_model_config"]
-
-        if custom_config["global_state_flag"] or custom_config["mask_flag"]:
-            full_obs_space = getattr(obs_space, "original_space", obs_space)
-            self.obs_size = full_obs_space['obs'].shape[0]
-        else:
-            self.obs_size = obs_space.shape[0]
+        full_obs_space = getattr(obs_space, "original_space", obs_space)
 
         # encoder
         layers = []
         if "fc_layer" in custom_config["model_arch_args"]:
+            self.obs_size = full_obs_space['obs'].shape[0]
             input_dim = self.obs_size
             for i in range(custom_config["model_arch_args"]["fc_layer"]):
                 out_dim = custom_config["model_arch_args"]["out_dim_fc_{}".format(i)]
@@ -46,7 +44,8 @@ class Universal_Model(TorchRNN, nn.Module):
                 layers.append(fc_layer)
                 input_dim = out_dim
         elif "conv_layer" in custom_config["model_arch_args"]:
-            input_dim = obs_space.shape[2]
+            self.obs_size = full_obs_space['obs'].shape
+            input_dim = self.obs_size[2]
             for i in range(custom_config["model_arch_args"]["conv_layer"]):
                 conv_f = nn.Conv2d(
                     in_channels=input_dim,
@@ -74,9 +73,9 @@ class Universal_Model(TorchRNN, nn.Module):
         # core rnn
         self.hidden_state_size = custom_config["model_arch_args"]["hidden_state_size"]
 
-        if custom_config["core_arch"] == "gru":
+        if custom_config["model_arch_args"]["core_arch"] == "gru":
             self.rnn = nn.GRU(input_dim, self.hidden_state_size, batch_first=True)
-        elif custom_config["core_arch"] == "lstm":
+        elif custom_config["model_arch_args"]["core_arch"] == "lstm":
             self.rnn = nn.LSTM(input_dim, self.hidden_state_size, batch_first=True)
         else:
             raise ValueError()
@@ -89,11 +88,12 @@ class Universal_Model(TorchRNN, nn.Module):
 
         # record the custom config
         self.custom_config = custom_config
+        self.n_agents = custom_config["num_agents"]
 
     @override(ModelV2)
     def get_initial_state(self):
         # Place hidden states on same device as model.
-        if self.custom_config["core_arch"] == "gru":
+        if self.custom_config["model_arch_args"]["core_arch"] == "gru":
             h = [
                 self.value_branch.weight.new(1, self.hidden_state_size).zero_().squeeze(0),
             ]
@@ -123,7 +123,7 @@ class Universal_Model(TorchRNN, nn.Module):
                 action_mask = input_dict["obs"]["action_mask"]
                 inf_mask = torch.clamp(torch.log(action_mask), min=FLOAT_MIN)
         else:
-            flat_inputs = input_dict["obs"].float()
+            flat_inputs = input_dict["obs"]["obs"].float()
 
         if isinstance(seq_lens, np.ndarray):
             seq_lens = torch.Tensor(seq_lens).int()
@@ -161,12 +161,12 @@ class Universal_Model(TorchRNN, nn.Module):
 
         x = nn.functional.relu(x)
 
-        if self.custom_config["core_arch"] == "gru":
+        if self.custom_config["model_arch_args"]["core_arch"] == "gru":
             self._features, h = self.rnn(x, torch.unsqueeze(state[0], 0))
             logits = self.action_branch(self._features)
             return logits, [torch.squeeze(h, 0)]
 
-        elif self.custom_config["core_arch"] == "lstm":
+        elif self.custom_config["model_arch_args"]["core_arch"] == "lstm":
             self._features, [h, c] = self.rnn(
                 x, [torch.unsqueeze(state[0], 0),
                     torch.unsqueeze(state[1], 0)])

@@ -5,6 +5,5 @@ env_args:
   continuous_actions: False
   max_cycles: 25
 
-core_arch: "gru" # LSTM
 mask_flag: False
 global_state_flag: False
