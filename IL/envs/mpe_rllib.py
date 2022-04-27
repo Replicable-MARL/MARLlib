@@ -23,8 +23,7 @@ class RllibMPE(MultiAgentEnv):
     def __init__(self, env_config):
         map = env_config["map_name"]
         env_config.pop("map_name", None)
-        self.env_config = env_config
-        env = REGISTRY[map](**self.env_config)
+        env = REGISTRY[map](**env_config)
 
         # keep obs and action dim same across agents
         # pad_action_space_v0 will auto mask the padding actions
@@ -41,6 +40,7 @@ class RllibMPE(MultiAgentEnv):
         self.agents = self.env.agents
         self.num_agents = len(self.agents)
         env_config["map_name"] = map
+        self.env_config = env_config
 
     def reset(self):
         original_obs = self.env.reset()
@@ -51,14 +51,10 @@ class RllibMPE(MultiAgentEnv):
 
     def step(self, action_dict):
         o, r, d, info = self.env.step(action_dict)
-        # cooperative need global reward (specific to football)
-        reward = 0
-        for key in r.keys():
-            reward += r[key]
         rewards = {}
         obs = {}
         for key in action_dict.keys():
-            rewards[key] = reward
+            rewards[key] = r[key]
             obs[key] = {
                 "obs": o[key]
             }

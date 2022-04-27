@@ -59,15 +59,13 @@ class RllibRWARE(MultiAgentEnv):
         for key, value in sorted(action_dict.items()):
             actions.append(value)
         o, r, d, i = self.env.step(actions)
-        # cooperative need global reward
-        r = sum(r)
         rewards = {}
         obs = {}
         infos = {}
         done_flag = False
         for pos, key in enumerate(sorted(action_dict.keys())):
             infos[key] = i
-            rewards[key] = r
+            rewards[key] = r[pos]
             obs[key] = {
                 "obs": o[pos]
             }

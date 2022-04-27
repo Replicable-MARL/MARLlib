@@ -54,7 +54,6 @@ class RllibGFootball(MultiAgentEnv):
         for key, value in sorted(action_dict.items()):
             actions.append(value)
         o, r, d, i = self.env.step(actions)
-        # cooperative need global reward (specific to football)
         rewards = {}
         obs = {}
         infos = {}
