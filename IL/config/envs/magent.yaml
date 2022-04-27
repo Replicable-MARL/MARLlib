@@ -1,0 +1,8 @@
+env: magent
+
+env_args:
+  map_name: "adversarial_pursuit"
+  minimap_mode: True
+
+mask_flag: False
+global_state_flag: True

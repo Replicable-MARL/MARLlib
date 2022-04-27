@@ -1,0 +1,9 @@
+env: metadrive
+
+env_args:
+  start_seed: 0
+  num_agents: 5
+  crash_done: True
+
+mask_flag: False
+global_state_flag: False
