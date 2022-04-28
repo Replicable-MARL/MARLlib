@@ -1,4 +1,4 @@
-10 environment available for Independent Learning
+Currently, 10 environments are available for Independent Learning
 
 - Football
 - MPE 

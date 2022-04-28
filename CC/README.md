@@ -1,4 +1,4 @@
-9 environment available for Independent Learning
+Currently, 9 environments are available for Centralized Critic
 
 - Football
 - MPE 

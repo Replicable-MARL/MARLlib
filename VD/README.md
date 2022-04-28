@@ -1,4 +1,4 @@
-7 environments available for Value Decomposition
+Currently, 7 environments are available for Value Decomposition
 
 - Football
 - MPE 
