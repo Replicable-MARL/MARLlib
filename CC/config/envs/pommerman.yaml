@@ -1,0 +1,15 @@
+env: pommerman
+
+env_args:
+  map_name: "OneVsOne-v0" # "PommeFFACompetition-v0", "PommeTeamCompetition-v0",
+  agent_position: "0123"
+  # choices=["01"] for OneVsOne
+  # choices=["0", "1", "2", "3"] random combination for PommeFFACompetition like "023"
+  # choices=["01", "23", "0123"] for PommeTeamCompetition
+  builtin_ai_type: "human_rule" # random_rule
+
+core_arch: "lstm" # LSTM, Transformer
+mask_flag: False
+global_state_flag: False
+opp_action_in_cc: True
+

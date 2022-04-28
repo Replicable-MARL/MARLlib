@@ -7,3 +7,4 @@ env_args:
 
 mask_flag: True
 global_state_flag: True
+opp_action_in_cc: False
