@@ -5,8 +5,9 @@ from IL.envs.football_rllib import RllibGFootball
 from IL.envs.rware_rllib import RllibRWARE
 from IL.envs.lbf_rllib import RllibLBF
 from IL.envs.magent_rllib import RllibMAgent
-from IL.envs.metadrive_rllib import RllibMetaDrive
+# from IL.envs.metadrive_rllib import RllibMetaDrive # disable when not using
 from IL.envs.pommerman_rllib import RllibPommerman
+from IL.envs.hanabi_rllib import RLlibHanabi
 
 ENV_REGISTRY = {
     "mpe": RllibMPE,
@@ -16,6 +17,7 @@ ENV_REGISTRY = {
     "smac": RLlibSMAC,
     "football": RllibGFootball,
     "magent": RllibMAgent,
-    "metadrive": RllibMetaDrive,
-    "pommerman": RllibPommerman
+    # "metadrive": RllibMetaDrive, # disable when not using
+    "pommerman": RllibPommerman,
+    "hanabi": RLlibHanabi
 }
