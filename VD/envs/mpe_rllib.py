@@ -11,7 +11,6 @@ REGISTRY["simple_speaker_listener"] = simple_speaker_listener_v3.parallel_env
 
 
 class RllibMPE(MultiAgentEnv):
-    """An example of a wrapper for GFootball to make it compatible with rllib."""
 
     def __init__(self, env_config):
         map = env_config["map_name"]

@@ -20,7 +20,7 @@ torch, nn = try_import_torch()
 
 
 ##############
-### COMMON ###
+### Shared ###
 ##############
 
 def get_dim(a):
@@ -45,55 +45,62 @@ def centralized_critic_postprocessing(policy,
     pytorch = custom_config["framework"] == "torch"
     obs_dim = get_dim(custom_config["space_obs"]["obs"].shape)
     algorithm = custom_config["algorithm"]
-    if custom_config["global_state_flag"]:
-        state_dim = get_dim(custom_config["space_obs"]["state"].shape)
-    else:
-        state_dim = None
+    opp_action_in_cc = custom_config["opp_action_in_cc"]
+    global_state_flag = custom_config["global_state_flag"]
+    mask_flag = custom_config["mask_flag"]
 
-    if custom_config["mask_flag"]:
+    if mask_flag:
         action_mask_dim = custom_config["space_act"].n
     else:
         action_mask_dim = 0
+
     n_agents = custom_config["num_agents"]
     opponent_agents_num = n_agents - 1
 
     if (pytorch and hasattr(policy, "compute_central_vf")) or \
             (not pytorch and policy.loss_initialized()):
-        assert other_agent_batches is not None
-        opponent_batch_list = list(other_agent_batches.values())
-        raw_opponent_batch = [opponent_batch_list[i][1] for i in range(opponent_agents_num)]
-        opponent_batch = []
-        for one_opponent_batch in raw_opponent_batch:
-            if len(one_opponent_batch) == len(sample_batch):
-                pass
-            else:
-                if len(one_opponent_batch) > len(sample_batch):
-                    one_opponent_batch = one_opponent_batch.slice(0, len(sample_batch))
-                else:  # len(one_opponent_batch) < len(sample_batch):
-                    length_dif = len(sample_batch) - len(one_opponent_batch)
-                    one_opponent_batch = one_opponent_batch.concat(
-                        one_opponent_batch.slice(len(one_opponent_batch) - length_dif, len(one_opponent_batch)))
-            opponent_batch.append(one_opponent_batch)
 
-        if state_dim:
+        if not opp_action_in_cc and global_state_flag:
             sample_batch["state"] = sample_batch['obs'][:, action_mask_dim + obs_dim:]
-        else:  # all other agent obs as state
-            # sample_batch["state"] = sample_batch['obs'][:, action_mask_dim:action_mask_dim + obs_dim]
-            sample_batch["state"] = np.stack(
-                [sample_batch['obs'][:, action_mask_dim:action_mask_dim + obs_dim]] + [
-                    opponent_batch[i]["obs"][:, action_mask_dim:action_mask_dim + obs_dim] for i in
-                    range(opponent_agents_num)], 1)
+        else:  # need opponent info
+            assert other_agent_batches is not None
+            opponent_batch_list = list(other_agent_batches.values())
+            raw_opponent_batch = [opponent_batch_list[i][1] for i in range(opponent_agents_num)]
+            opponent_batch = []
+            for one_opponent_batch in raw_opponent_batch:
+                if len(one_opponent_batch) == len(sample_batch):
+                    pass
+                else:
+                    if len(one_opponent_batch) > len(sample_batch):
+                        one_opponent_batch = one_opponent_batch.slice(0, len(sample_batch))
+                    else:  # len(one_opponent_batch) < len(sample_batch):
+                        length_dif = len(sample_batch) - len(one_opponent_batch)
+                        one_opponent_batch = one_opponent_batch.concat(
+                            one_opponent_batch.slice(len(one_opponent_batch) - length_dif, len(one_opponent_batch)))
+                opponent_batch.append(one_opponent_batch)
 
-        sample_batch["opponent_action"] = np.stack([opponent_batch[i]["actions"] for i in range(opponent_agents_num)],
-                                                   1)
+            # all other agent obs as state
+            # sample_batch["state"] = sample_batch['obs'][:, action_mask_dim:action_mask_dim + obs_dim]
+            if global_state_flag:
+                sample_batch["state"] = sample_batch['obs'][:, action_mask_dim + obs_dim:]
+            else:
+                sample_batch["state"] = np.stack(
+                    [sample_batch['obs'][:, action_mask_dim:action_mask_dim + obs_dim]] + [
+                        opponent_batch[i]["obs"][:, action_mask_dim:action_mask_dim + obs_dim] for i in
+                        range(opponent_agents_num)], 1)
+
+            sample_batch["opponent_action"] = np.stack(
+                [opponent_batch[i]["actions"] for i in range(opponent_agents_num)],
+                1)
+
         if algorithm == "coma":
             sample_batch[SampleBatch.VF_PREDS] = policy.compute_central_vf(
                 convert_to_torch_tensor(
                     sample_batch["state"], policy.device),
                 convert_to_torch_tensor(
-                    sample_batch["opponent_action"], policy.device),
+                    sample_batch["opponent_action"], policy.device) if opp_action_in_cc else None,
             ) \
-                .cpu().detach().numpy().mean(1)
+                .cpu().detach().numpy()
             sample_batch[SampleBatch.VF_PREDS] = np.take(sample_batch[SampleBatch.VF_PREDS],
                                                          np.expand_dims(sample_batch["actions"], axis=1)).squeeze(
                 axis=1)
@@ -101,8 +108,8 @@ def centralized_critic_postprocessing(policy,
     else:
         # Policy hasn't been initialized yet, use zeros.
         o = sample_batch[SampleBatch.CUR_OBS]
-        if state_dim:
-            sample_batch["state"] = np.zeros((o.shape[0], state_dim),
+        if global_state_flag:
+            sample_batch["state"] = np.zeros((o.shape[0], get_dim(custom_config["space_obs"]["state"].shape)),
                                              dtype=sample_batch[SampleBatch.CUR_OBS].dtype)
         else:
             sample_batch["state"] = np.zeros((o.shape[0], n_agents, obs_dim),
@@ -110,9 +117,9 @@ def centralized_critic_postprocessing(policy,
 
         sample_batch["vf_preds"] = np.zeros_like(
             sample_batch[SampleBatch.REWARDS], dtype=np.float32)
-        sample_batch["opponent_action"] = np.zeros(
-            (sample_batch["actions"].shape[0], opponent_agents_num),
-            dtype=sample_batch["actions"].dtype)
+        sample_batch["opponent_action"] = np.stack(
+            [np.zeros_like(sample_batch["actions"], dtype=sample_batch["actions"].dtype) for _ in
+             range(opponent_agents_num)], axis=1)
 
         if algorithm == "coma":
             sample_batch[SampleBatch.VF_PREDS] = np.take(sample_batch[SampleBatch.VF_PREDS],
@@ -144,8 +151,10 @@ def central_critic_a2c_loss(policy, model, dist_class, train_batch):
     func = actor_critic_loss
 
     vf_saved = model.value_function
+    opp_action_in_cc = policy.config["model"]["custom_model_config"]["opp_action_in_cc"]
     model.value_function = lambda: policy.model.central_value_function(train_batch["state"],
-                                                                       train_batch["opponent_action"])
+                                                                       train_batch[
+                                                                           "opponent_action"] if opp_action_in_cc else None)
 
     # recording data
     policy._central_value_out = model.value_function()
@@ -196,8 +205,10 @@ def central_critic_ppo_loss(policy, model, dist_class, train_batch):
     func = ppo_surrogate_loss
 
     vf_saved = model.value_function
-    model.value_function = lambda: policy.model.central_value_function(
-        train_batch["state"], train_batch["opponent_action"])
+    opp_action_in_cc = policy.config["model"]["custom_model_config"]["opp_action_in_cc"]
+    model.value_function = lambda: policy.model.central_value_function(train_batch["state"],
+                                                                       train_batch[
+                                                                           "opponent_action"] if opp_action_in_cc else None)
 
     policy._central_value_out = model.value_function()
     loss = func(policy, model, dist_class, train_batch)
@@ -236,14 +247,15 @@ MAPPOTrainer = PPOTrainer.with_updates(
 ############
 
 def central_critic_coma_loss(policy: Policy, model: ModelV2,
-                                 dist_class: ActionDistribution,
-                                 train_batch: SampleBatch) -> TensorType:
+                             dist_class: ActionDistribution,
+                             train_batch: SampleBatch) -> TensorType:
     CentralizedValueMixin.__init__(policy)
     logits, _ = model.from_batch(train_batch)
+    opp_action_in_cc = policy.config["model"]["custom_model_config"]["opp_action_in_cc"]
     values = model.central_value_function(convert_to_torch_tensor(
-                    train_batch["state"], policy.device),
-                convert_to_torch_tensor(
-                    train_batch["opponent_action"], policy.device))
+        train_batch["state"], policy.device),
+        convert_to_torch_tensor(
+            train_batch["opponent_action"], policy.device) if opp_action_in_cc else None)
     pi = torch.nn.functional.softmax(logits, dim=-1)
 
     if policy.is_recurrent():
@@ -287,6 +299,7 @@ def central_critic_coma_loss(policy: Policy, model: ModelV2,
     model.tower_stats["value_err"] = value_err
 
     return total_loss
+
 
 def coma_model_value_predictions(
         policy: Policy, input_dict: Dict[str, TensorType], state_batches,

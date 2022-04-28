@@ -1,0 +1,15 @@
+env: lbf
+
+env_args:
+  players: 4
+  field_size_x: 8
+  field_size_y: 8
+  max_food: 2
+  sight: 3
+  force_coop: False
+  max_episode_steps: 50
+  max_player_level: 3
+
+mask_flag: False
+global_state_flag: False
+opp_action_in_cc: True

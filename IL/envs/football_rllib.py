@@ -1,11 +1,13 @@
 import gfootball.env as football_env
 import gym
+from gym.spaces import Dict as GymDict, Box
 from ray.rllib.env.multi_agent_env import MultiAgentEnv
 from ray.tune.utils import merge_dicts
 
 SMM_WIDTH = 42
 SMM_HEIGHT = 42
 
+# only cooperative scenario
 ally_num_dict = {
     "academy_pass_and_shoot_with_keeper": 2,
     "academy_run_pass_and_shoot_with_keeper": 2,
@@ -15,26 +17,25 @@ ally_num_dict = {
     "academy_single_goal_versus_lazy": 11,
 }
 
-
 class RllibGFootball(MultiAgentEnv):
     """An example of a wrapper for GFootball to make it compatible with rllib."""
 
     def __init__(self, env_config):
         env_config["env_name"] = env_config.pop("map_name")
         self.env_config = env_config
+        self.num_agents = ally_num_dict[self.env_config["env_name"]]
 
         extra_setting = {
-            "number_of_left_players_agent_controls": ally_num_dict[self.env_config["env_name"]],
+            "number_of_left_players_agent_controls": self.num_agents,
             "channel_dimensions": (SMM_WIDTH, SMM_HEIGHT),
         }
 
         self.env = football_env.create_environment(**merge_dicts(self.env_config, extra_setting))
         self.action_space = gym.spaces.Discrete(self.env.action_space.nvec[1])
-        self.observation_space = gym.spaces.Box(
+        self.observation_space = GymDict({"obs": Box(
             low=self.env.observation_space.low[0],
             high=self.env.observation_space.high[0],
-            dtype=self.env.observation_space.dtype)
-        self.num_agents = ally_num_dict[self.env_config["env_name"]]
+            dtype=self.env.observation_space.dtype)})
 
         # back to be compatible in run script
         env_config["map_name"] = env_config.pop("env_name")
@@ -43,10 +44,9 @@ class RllibGFootball(MultiAgentEnv):
         original_obs = self.env.reset()
         obs = {}
         for x in range(self.num_agents):
-            if self.num_agents > 1:
-                obs["agent_%d" % x] = original_obs[x]
-            else:
-                obs["agent_%d" % x] = original_obs
+            obs["agent_%d" % x] = {
+                "obs": original_obs[x]
+            }
         return obs
 
     def step(self, action_dict):
@@ -59,12 +59,10 @@ class RllibGFootball(MultiAgentEnv):
         infos = {}
         for pos, key in enumerate(sorted(action_dict.keys())):
             infos[key] = i
-            if self.num_agents > 1:
-                rewards[key] = r[pos]
-                obs[key] = o[pos]
-            else:
-                rewards[key] = r
-                obs[key] = o
+            rewards[key] = r[pos]
+            obs[key] = {
+                "obs": o[pos]
+            }
         dones = {"__all__": d}
         return obs, rewards, dones, infos
 

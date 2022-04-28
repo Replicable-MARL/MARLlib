@@ -5,3 +5,4 @@ env_args:
 
 mask_flag: False
 global_state_flag: True
+opp_action_in_cc: False

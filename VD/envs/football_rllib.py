@@ -18,7 +18,6 @@ ally_num_dict = {
 }
 
 class RllibGFootball(MultiAgentEnv):
-    """An example of a wrapper for GFootball to make it compatible with rllib."""
 
     def __init__(self, env_config):
         env_config["env_name"] = env_config.pop("map_name")
