@@ -12,7 +12,6 @@ _difficulty = {"easy": 2, "medium": 1, "hard": 0.5}
 
 
 class RllibRWARE(MultiAgentEnv):
-    """An example of a wrapper for GFootball to make it compatible with rllib."""
 
     def __init__(self, env_config):
 
