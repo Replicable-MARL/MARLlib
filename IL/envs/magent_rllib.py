@@ -40,12 +40,12 @@ class RllibMAgent(MultiAgentEnv):
         self.action_space = self.env.action_space
         self.observation_space = GymDict({
             "obs": Box(
-                low=self.env.observation_space.low[:, :, :self.mini_channel_dim],
-                high=self.env.observation_space.high[:, :, :self.mini_channel_dim],
+                low=self.env.observation_space.low[:, :, :-self.mini_channel_dim],
+                high=self.env.observation_space.high[:, :, :-self.mini_channel_dim],
                 dtype=self.env.observation_space.dtype),
             "state": Box(
-                low=self.env.observation_space.low[:, :, self.mini_channel_dim:],
-                high=self.env.observation_space.high[:, :, self.mini_channel_dim:],
+                low=self.env.observation_space.low[:, :, -self.mini_channel_dim:],
+                high=self.env.observation_space.high[:, :, -self.mini_channel_dim:],
                 dtype=self.env.observation_space.dtype),
         })
         self.agents = self.env.agents
@@ -59,8 +59,8 @@ class RllibMAgent(MultiAgentEnv):
         obs = {}
         for key in self.agents:
             obs[key] = {
-                "obs": original_obs[key][:, :, :self.env_config["mini_channel_dim"]],
-                "state": original_obs[key][:, :, self.env_config["mini_channel_dim"]:]
+                "obs": original_obs[key][:, :, :-self.env_config["mini_channel_dim"]],
+                "state": original_obs[key][:, :, -self.env_config["mini_channel_dim"]:]
             }
         return obs
 
@@ -71,8 +71,8 @@ class RllibMAgent(MultiAgentEnv):
         for key in action_dict.keys():
             rewards[key] = r[key]
             obs[key] = {
-                "obs": o[key][:, :, :self.env_config["mini_channel_dim"]],
-                "state": o[key][:, :, self.env_config["mini_channel_dim"]:]
+                "obs": o[key][:, :, :-self.env_config["mini_channel_dim"]],
+                "state": o[key][:, :, -self.env_config["mini_channel_dim"]:]
             }
         dones = {"__all__": d["__all__"]}
         return obs, rewards, dones, info
