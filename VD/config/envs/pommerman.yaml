@@ -1,0 +1,12 @@
+env: pommerman
+
+env_args:
+  map_name: "PommeTeamCompetition-v0"
+  agent_position: "01"
+  # choices=["01", "23"] for PommeTeamCompetition
+  builtin_ai_type: "human_rule" # random_rule
+
+core_arch: "lstm" # LSTM, Transformer
+mask_flag: False
+global_state_flag: False
+

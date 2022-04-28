@@ -1,0 +1,11 @@
+env: football
+
+env_args:
+  map_name: "academy_empty_goal"
+  logdir: ""
+  render: False
+  dump_frequency: 0
+
+mask_flag: False
+global_state_flag: False
+opp_action_in_cc: True

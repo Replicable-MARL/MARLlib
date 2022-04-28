@@ -1,29 +1,3 @@
-### TODO
-
-**basic algorithms** + **env**
-
-**minquan**
-
-- [ ] HAPPO: test in EnvZoo (SMAC and Mamujoco) and then should be incorporated into CC 
-- [ ] TRPO: test in EnvZoo (SMAC and Mamujoco) and then should be incorporated into CC 
-- [ ] HATRPO: test in EnvZoo (SMAC and Mamujoco) and then should be incorporated into CC 
-
-**weixun**
-
-- [ ] DDPG: add RNN support, test in EnvZoo (Mamujoco is enough) and then should be incorporated into CC 
-- [ ] MADDPG: cc version of DDPG with RNN support, test in EnvZoo (Mamujoco is enough) and then should be incorporated into CC 
-- [ ] off-policy RNN support investigation
-
-**Siyi**
-- [x] incorporate the rest of the environment into CC,IL and VD.
-- [ ] modularize the code, unified the common part in CC,IL and VD.
-- [ ] config setting reconstruct
-- [ ] reconstruct the EnvZoo with modularized code in CC, IL and VD part
-- [ ] off-policy RNN support investigation
-
-
-
-
 #  White Paper for [MARL in One](https://github.com/Theohhhu/[SMAC](HTTPS://GITHUB.COM/OXWHIRL/SMAC)_Ray) Benchmark
 -- multi-agent tasks and baselines under a unified framework
 
@@ -351,6 +325,26 @@ The basic structure of the repository. Here we take **[SMAC](HTTPS://GITHUB.COM/
 
 **(Note: this is not a comprehensive list. Only representative papers are selected.)**
 
+### TODO
+
+**basic algorithms**
+- [x] COMA 
+- [x] DDPG
+- [x] VDAC 
+- [x] VDPPO
+
+
+**extensions**
+- [x] Parameter Sharing
+- [ ] Message sending
+- [ ] Modelling others
+- [ ] Multi-task Learning
+
+**(optional) MARL environments**
+- [x] Multi-agent Mujoco
+- [ ] Overcooked-AI
+- [x] MAgent
+- [ ] Go-Bigger
 
 [comment]: <> (### **Part V. Extensions**)
 
