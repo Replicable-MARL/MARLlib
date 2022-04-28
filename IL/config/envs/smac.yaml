@@ -1,7 +1,7 @@
 env: smac
 
 env_args:
-  map_name: "3m"
+  map_name: "3m" # others can be found in /your/python/path/smac/env/starcraft2/maps/smac_maps.py
   difficulty: "7"
   reward_scale_rate: 20
 

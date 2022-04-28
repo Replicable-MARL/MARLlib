@@ -5,9 +5,6 @@ from gym.spaces import Dict as GymDict, Discrete, Box
 
 
 class RLlibHanabi(MultiAgentEnv):
-    """The StarCraft II environment for decentralised multi-agent
-    micromanagement scenarios.
-    """
 
     def __init__(self, env_config):
         self.env = HanabiEnv(env_config, env_config["seed"])

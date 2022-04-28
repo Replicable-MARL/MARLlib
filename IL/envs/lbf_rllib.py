@@ -4,7 +4,6 @@ from gym.spaces import Dict, Discrete, Box
 
 
 class RllibLBF(MultiAgentEnv):
-    """An example of a wrapper for GFootball to make it compatible with rllib."""
 
     def __init__(self, env_config):
         map_name = env_config["map_name"]

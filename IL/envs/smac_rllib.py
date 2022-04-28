@@ -5,9 +5,6 @@ from gym.spaces import Dict, Discrete, Box
 
 
 class RLlibSMAC(MultiAgentEnv):
-    """The StarCraft II environment for decentralised multi-agent
-    micromanagement scenarios.
-    """
 
     def __init__(self, map_name):
         map_name = map_name if isinstance(map_name, str) else map_name["map_name"]
@@ -26,9 +23,6 @@ class RLlibSMAC(MultiAgentEnv):
         self.action_space = Discrete(n_actions)
 
     def reset(self):
-        """Reset the environment. Required after each full episode.
-        Returns initial observations and states.
-        """
         self.env.reset()
         obs_smac = self.env.get_obs()
         state_smac = self.env.get_state()

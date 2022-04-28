@@ -1,6 +1,7 @@
 env: metadrive
 
 env_args:
+  map_name: "Bottleneck" # ParkingLot | Intersection | Roundabout | Tollgate |
   start_seed: 0
   num_agents: 5
   crash_done: True

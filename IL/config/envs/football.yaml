@@ -1,7 +1,7 @@
 env: football
 
 env_args:
-  map_name: "academy_empty_goal"
+  map_name: "academy_empty_goal" # other available maps can be found in IL/envs/football_rllib.py
   logdir: ""
   render: False
   dump_frequency: 0

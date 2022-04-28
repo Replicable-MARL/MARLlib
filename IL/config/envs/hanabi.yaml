@@ -1,7 +1,7 @@
 env: hanabi
 
 env_args:
-  map_name: "Hanabi-Very-Small"
+  map_name: "Hanabi-Very-Small" #  Hanabi-Full | Hanabi-Full-Minimal | Hanabi-Small
   num_agents: 3
   use_obs_instead_of_state: True
   seed: 123

@@ -1,7 +1,7 @@
 env: magent
 
 env_args:
-  map_name: "adversarial_pursuit"
+  map_name: "adversarial_pursuit" # others can be found in IL/envs/magent_rllib.py
   minimap_mode: True
 
 mask_flag: False
