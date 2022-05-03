@@ -126,7 +126,7 @@ class RllibPommerman(MultiAgentEnv):
                 s_c_a = all_state[self.neural_agent[x]]
                 obs_status = get_obs_dict(s_c_a)
                 states["agent_%d" % x] = obs_status
-                rewards["agent_%d" % x] = all_reward[self.neural_agent[x]] 
+                rewards["agent_%d" % x] = all_reward[self.neural_agent[x]]
                 infos["agent_%d" % x] = {}
 
             else:
