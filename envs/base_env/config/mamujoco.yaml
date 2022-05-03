@@ -1,0 +1,8 @@
+env: mamujoco
+
+env_args:
+  map_name: "2AgentHalfCheetah" # others can be found in IL/envs/mamujoco_rllib.py
+
+mask_flag: False
+global_state_flag: True
+opp_action_in_cc: True
