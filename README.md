@@ -16,7 +16,7 @@
 
 **Siyi**
 - [x] incorporate the rest of the environment into CC,IL and VD.
-- [ ] modularize the code, unified the common part in CC,IL and VD.
+- [x] modularize the code, unified the common part in CC,IL and VD.
 - [ ] config setting reconstruct
 - [ ] reconstruct the EnvZoo with modularized code in CC, IL and VD part
 - [ ] off-policy RNN support investigation
