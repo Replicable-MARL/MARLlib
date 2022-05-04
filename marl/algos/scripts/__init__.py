@@ -1,6 +1,5 @@
 from marl.algos.scripts.vda2c import run_vda2c
 from marl.algos.scripts.vdppo import run_vdppo
-from marl.algos.scripts.facmac import run_facmac
 from marl.algos.scripts.vdn_qmix_iql import run_joint_q
 from marl.algos.scripts.maa2c import run_maa2c
 from marl.algos.scripts.mappo import run_mappo
@@ -19,7 +18,6 @@ POlICY_REGISTRY = {
     "vdn": run_joint_q,
     "vda2c": run_vda2c,
     "vdppo": run_vdppo,
-    "facmac": run_facmac,
     "maa2c": run_maa2c,
     "mappo": run_mappo,
     "coma": run_coma

@@ -183,17 +183,8 @@ def value_mix_centralized_critic_postprocessing(policy,
                     opponent_batch[i]["obs"][:, action_mask_dim:action_mask_dim + obs_dim] for i in
                     range(opponent_agents_num)], 1)
 
-        if algorithm in ["facmac"]:
-            # pick the Q
-            sample_batch["opponent_vf_preds"] = np.stack(
-                [np.take(opponent_batch[i]["vf_preds"], np.expand_dims(opponent_batch[i]["actions"], axis=1)).squeeze(
-                    axis=1) for i in range(opponent_agents_num)], 1)
-            sample_batch["vf_preds"] = np.take(sample_batch[SampleBatch.VF_PREDS],
-                                                         np.expand_dims(sample_batch["actions"], axis=1)).squeeze(
-                axis=1)
-        else:
-            sample_batch["opponent_vf_preds"] = np.stack(
-                [opponent_batch[i]["vf_preds"] for i in range(opponent_agents_num)], 1)
+        sample_batch["opponent_vf_preds"] = np.stack(
+            [opponent_batch[i]["vf_preds"] for i in range(opponent_agents_num)], 1)
 
         sample_batch["all_vf_preds"] = np.concatenate(
             (np.expand_dims(sample_batch["vf_preds"], axis=1), sample_batch["opponent_vf_preds"]), axis=1)
