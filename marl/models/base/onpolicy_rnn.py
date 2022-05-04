@@ -87,6 +87,8 @@ class Onpolicy_Base_Model(TorchRNN, nn.Module):
 
         # record the custom config
         self.n_agents = self.custom_config["num_agents"]
+        self.q_flag = False
+
 
     @override(ModelV2)
     def get_initial_state(self):
@@ -105,7 +107,12 @@ class Onpolicy_Base_Model(TorchRNN, nn.Module):
     @override(ModelV2)
     def value_function(self):
         assert self._features is not None, "must call forward() first"
-        return torch.reshape(self.value_branch(self._features), [-1])
+        B = self._features.shape[0]
+        L = self._features.shape[1]
+        if self.q_flag:
+            return torch.reshape(self.value_branch(self._features), [B * L, -1])
+        else:
+            return torch.reshape(self.value_branch(self._features), [-1])
 
     @override(ModelV2)
     def forward(self, input_dict: Dict[str, TensorType],

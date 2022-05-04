@@ -31,6 +31,9 @@ class Onpolicy_VD_Model(Onpolicy_Base_Model):
         else:
             raise ValueError("Unknown mixer type {}".format(self.custom_config["algo_args"]["mixer"]))
 
+        if self.custom_config["algorithm"] in ["facmac"]:
+            self.q_flag = True
+            self.value_branch = nn.Linear(self.hidden_state_size, num_outputs)
 
     def mixing_value(self, all_agents_vf, state):
         # compatiable with rllib qmix mixer

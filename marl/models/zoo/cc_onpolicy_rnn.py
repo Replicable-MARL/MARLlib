@@ -79,9 +79,8 @@ class Onpolicy_CC_Model(Onpolicy_Base_Model):
             nn.Linear(input_size, 1),
         )
 
-        self.coma_flag = False
-        if "coma" == self.custom_config["algorithm"]:
-            self.coma_flag = True
+        if self.custom_config["algorithm"] in ["coma"]:
+            self.q_flag = True
             self.value_branch = nn.Linear(self.hidden_state_size, num_outputs)
             self.central_vf = nn.Sequential(
                 nn.Linear(input_size, num_outputs),
@@ -112,7 +111,7 @@ class Onpolicy_CC_Model(Onpolicy_Base_Model):
 
         else:
             x = torch.cat([x.reshape(B, -1)], 1)
-        if self.coma_flag:
+        if self.q_flag:
             return torch.reshape(self.central_vf(x), [-1, self.num_outputs])
         else:
             return torch.reshape(self.central_vf(x), [-1])

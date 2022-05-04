@@ -80,7 +80,7 @@ def centralized_critic_postprocessing(policy,
                 [opponent_batch[i]["actions"] for i in range(opponent_agents_num)],
                 1)
 
-        if algorithm == "coma":
+        if algorithm in ["coma"]:
             sample_batch[SampleBatch.VF_PREDS] = policy.compute_central_vf(
                 convert_to_torch_tensor(
                     sample_batch["state"], policy.device),
@@ -108,7 +108,7 @@ def centralized_critic_postprocessing(policy,
             [np.zeros_like(sample_batch["actions"], dtype=sample_batch["actions"].dtype) for _ in
              range(opponent_agents_num)], axis=1)
 
-        if algorithm == "coma":
+        if algorithm in ["coma"]:
             sample_batch[SampleBatch.VF_PREDS] = np.take(sample_batch[SampleBatch.VF_PREDS],
                                                          np.expand_dims(sample_batch["actions"], axis=1)).squeeze(
                 axis=1)
@@ -141,6 +141,7 @@ def value_mix_centralized_critic_postprocessing(policy,
                                                 other_agent_batches=None,
                                                 episode=None):
     custom_config = policy.config["model"]["custom_model_config"]
+    algorithm = custom_config["algorithm"]
     pytorch = custom_config["framework"] == "torch"
     obs_dim = get_dim(custom_config["space_obs"]["obs"].shape)  # 3d input this is channel dim of obs
     if custom_config["global_state_flag"]:
@@ -182,8 +183,18 @@ def value_mix_centralized_critic_postprocessing(policy,
                     opponent_batch[i]["obs"][:, action_mask_dim:action_mask_dim + obs_dim] for i in
                     range(opponent_agents_num)], 1)
 
-        sample_batch["opponent_vf_preds"] = np.stack(
-            [opponent_batch[i]["vf_preds"] for i in range(opponent_agents_num)], 1)
+        if algorithm in ["facmac"]:
+            # pick the Q
+            sample_batch["opponent_vf_preds"] = np.stack(
+                [np.take(opponent_batch[i]["vf_preds"], np.expand_dims(opponent_batch[i]["actions"], axis=1)).squeeze(
+                    axis=1) for i in range(opponent_agents_num)], 1)
+            sample_batch["vf_preds"] = np.take(sample_batch[SampleBatch.VF_PREDS],
+                                                         np.expand_dims(sample_batch["actions"], axis=1)).squeeze(
+                axis=1)
+        else:
+            sample_batch["opponent_vf_preds"] = np.stack(
+                [opponent_batch[i]["vf_preds"] for i in range(opponent_agents_num)], 1)
+
         sample_batch["all_vf_preds"] = np.concatenate(
             (np.expand_dims(sample_batch["vf_preds"], axis=1), sample_batch["opponent_vf_preds"]), axis=1)
 

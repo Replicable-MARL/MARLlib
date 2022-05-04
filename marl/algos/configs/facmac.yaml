@@ -1,4 +1,4 @@
-# VDA2C parameters
+# FACMAC parameters
 
 algo_args:
   batch_episode:  10
