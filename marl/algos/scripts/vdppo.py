@@ -1,7 +1,7 @@
 from ray import tune
 from ray.tune.utils import merge_dicts
 from ray.tune import CLIReporter
-from marl.algos.utils.VD.onpolicy_tool import VDPPOTrainer
+from marl.algos.utils.VD.vdppo import VDPPOTrainer
 
 
 def run_vdppo(config_dict, common_config, env_dict, stop):

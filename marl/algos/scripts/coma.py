@@ -1,7 +1,7 @@
 from ray import tune
 from ray.tune.utils import merge_dicts
 from ray.tune import CLIReporter
-from marl.algos.utils.CC.onpolicy_tool import COMATrainer
+from marl.algos.utils.CC.coma import COMATrainer
 
 
 def run_coma(config_dict, common_config, env_dict, stop):
