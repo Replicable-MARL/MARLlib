@@ -26,8 +26,8 @@ from ray.rllib.execution.concurrency_ops import Concurrently
 from ray.rllib.agents.qmix.qmix import DEFAULT_CONFIG
 from ray.rllib.policy.rnn_sequencing import chop_into_sequences
 
-from marl.models.VD.offpolicy_rnn import Offpolicy_Universal_Model
-from marl.models.VD.mixers import QMixer, VDNMixer
+from marl.models.zoo.vd_offpolicy_rnn import Offpolicy_Universal_Model
+from marl.models.zoo.vd_mixers import QMixer, VDNMixer
 
 
 # original _unroll_mac for next observation is different from Pymarl.

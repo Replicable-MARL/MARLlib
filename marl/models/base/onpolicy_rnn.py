@@ -7,13 +7,12 @@ from ray.rllib.utils.annotations import override
 from ray.rllib.utils.framework import try_import_tf, try_import_torch, \
     TensorType
 from ray.rllib.policy.rnn_sequencing import add_time_dimension
-from marl.models.VD.mixers import QMixer, VDNMixer
 
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
 
 
-class Onpolicy_Universal_Model(TorchRNN, nn.Module):
+class Onpolicy_Base_Model(TorchRNN, nn.Module):
 
     def __init__(
             self,
@@ -29,52 +28,53 @@ class Onpolicy_Universal_Model(TorchRNN, nn.Module):
                          name)
 
         # judge the model arch
-        custom_config = model_config["custom_model_config"]
-        full_obs_space = getattr(obs_space, "original_space", obs_space)
+        self.custom_config = model_config["custom_model_config"]
+        self.full_obs_space = getattr(obs_space, "original_space", obs_space)
 
         # encoder
         layers = []
-        if "fc_layer" in custom_config["model_arch_args"]:
-            self.obs_size = full_obs_space['obs'].shape[0]
+        if "fc_layer" in self.custom_config["model_arch_args"]:
+            self.obs_size = self.full_obs_space['obs'].shape[0]
             input_dim = self.obs_size
-            for i in range(custom_config["model_arch_args"]["fc_layer"]):
-                out_dim = custom_config["model_arch_args"]["out_dim_fc_{}".format(i)]
+            for i in range(self.custom_config["model_arch_args"]["fc_layer"]):
+                out_dim = self.custom_config["model_arch_args"]["out_dim_fc_{}".format(i)]
                 fc_layer = nn.Linear(input_dim, out_dim)
                 layers.append(fc_layer)
                 input_dim = out_dim
-        elif "conv_layer" in custom_config["model_arch_args"]:
-            self.obs_size = full_obs_space['obs'].shape
+        elif "conv_layer" in self.custom_config["model_arch_args"]:
+            self.obs_size = self.full_obs_space['obs'].shape
             input_dim = self.obs_size[2]
-            for i in range(custom_config["model_arch_args"]["conv_layer"]):
+            for i in range(self.custom_config["model_arch_args"]["conv_layer"]):
                 conv_f = nn.Conv2d(
                     in_channels=input_dim,
-                    out_channels=custom_config["model_arch_args"]["out_channel_layer_{}".format(i)],
-                    kernel_size=custom_config["model_arch_args"]["kernel_size_layer_{}".format(i)],
-                    stride=custom_config["model_arch_args"]["stride_layer_{}".format(i)],
-                    padding=custom_config["model_arch_args"]["padding_layer_{}".format(i)],
+                    out_channels=self.custom_config["model_arch_args"]["out_channel_layer_{}".format(i)],
+                    kernel_size=self.custom_config["model_arch_args"]["kernel_size_layer_{}".format(i)],
+                    stride=self.custom_config["model_arch_args"]["stride_layer_{}".format(i)],
+                    padding=self.custom_config["model_arch_args"]["padding_layer_{}".format(i)],
                 )
                 relu_f = nn.ReLU()
-                pool_f = nn.MaxPool2d(kernel_size=custom_config["model_arch_args"]["pool_size_layer_{}".format(i)])
+                pool_f = nn.MaxPool2d(kernel_size=self.custom_config["model_arch_args"]["pool_size_layer_{}".format(i)])
 
                 layers.append(conv_f)
                 layers.append(relu_f)
                 layers.append(pool_f)
 
-                input_dim = custom_config["model_arch_args"]["out_channel_layer_{}".format(i)]
+                input_dim = self.custom_config["model_arch_args"]["out_channel_layer_{}".format(i)]
 
         else:
             raise ValueError()
 
+        self.input_dim = input_dim
         self.encoder = nn.Sequential(
             *layers
         )
 
         # core rnn
-        self.hidden_state_size = custom_config["model_arch_args"]["hidden_state_size"]
+        self.hidden_state_size = self.custom_config["model_arch_args"]["hidden_state_size"]
 
-        if custom_config["model_arch_args"]["core_arch"] == "gru":
+        if self.custom_config["model_arch_args"]["core_arch"] == "gru":
             self.rnn = nn.GRU(input_dim, self.hidden_state_size, batch_first=True)
-        elif custom_config["model_arch_args"]["core_arch"] == "lstm":
+        elif self.custom_config["model_arch_args"]["core_arch"] == "lstm":
             self.rnn = nn.LSTM(input_dim, self.hidden_state_size, batch_first=True)
         else:
             raise ValueError()
@@ -82,24 +82,11 @@ class Onpolicy_Universal_Model(TorchRNN, nn.Module):
         self.action_branch = nn.Linear(self.hidden_state_size, num_outputs)
         self.value_branch = nn.Linear(self.hidden_state_size, 1)
 
-        # mixer:
-        if custom_config["global_state_flag"]:
-            state_dim = custom_config["space_obs"]["state"].shape
-        else:
-            state_dim = custom_config["space_obs"]["obs"].shape + (custom_config["num_agents"], )
-        if custom_config["algo_args"]["mixer"] == "qmix":
-            self.mixer = QMixer(custom_config, state_dim)
-        elif custom_config["algo_args"]["mixer"] == "vdn":
-            self.mixer = VDNMixer()
-        else:
-            raise ValueError("Unknown mixer type {}".format(custom_config["algo_args"]["mixer"]))
-
         # Holds the current "base" output (before logits layer).
         self._features = None
 
         # record the custom config
-        self.custom_config = custom_config
-        self.n_agents = custom_config["num_agents"]
+        self.n_agents = self.custom_config["num_agents"]
 
     @override(ModelV2)
     def get_initial_state(self):
@@ -185,12 +172,4 @@ class Onpolicy_Universal_Model(TorchRNN, nn.Module):
             return logits, [torch.squeeze(h, 0), torch.squeeze(c, 0)]
 
         else:
-            raise ValueError()
-
-    def mixing_value(self, all_agents_vf, state):
-        # compatiable with rllib qmix mixer
-        all_agents_vf = all_agents_vf.view(-1, 1, self.n_agents)
-        v_tot = self.mixer(all_agents_vf, state)
-
-        # shape to [B]
-        return v_tot.flatten(start_dim=0)
+            raise ValueError("rnn core_arch wrong: {}".format(self.custom_config["model_arch_args"]["core_arch"]))

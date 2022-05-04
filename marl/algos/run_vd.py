@@ -1,17 +1,12 @@
-import yaml
-import os
-import sys
-import collections
 import ray
-from copy import deepcopy
 from gym.spaces import Dict as GymDict, Discrete, Box, Tuple
 from ray.rllib.models import ModelCatalog
 from ray.tune import register_env
 from ray import tune
 from ray.rllib.utils.test_utils import check_learning_achieved
 from ray.rllib.utils.framework import try_import_tf, try_import_torch
-from marl.models.VD.offpolicy_rnn import Offpolicy_Universal_Model
-from marl.models.VD.onpolicy_rnn import Onpolicy_Universal_Model
+from marl.models.zoo.vd_offpolicy_rnn import Offpolicy_Universal_Model
+from marl.models.zoo.vd_onpolicy_rnn import Onpolicy_VD_Model
 from marl.algos.scripts import POlICY_REGISTRY
 from envs.force_coop import COOP_ENV_REGISTRY as ENV_REGISTRY
 from marl.common import _get_model_config, recursive_dict_update
@@ -116,7 +111,7 @@ def run_vd(config_dict):
         "Offpolicy_Universal_Model", Offpolicy_Universal_Model)
 
     ModelCatalog.register_custom_model(
-        "Onpolicy_Universal_Model", Onpolicy_Universal_Model)
+        "Onpolicy_Universal_Model", Onpolicy_VD_Model)
 
     ##############
     ### policy ###
