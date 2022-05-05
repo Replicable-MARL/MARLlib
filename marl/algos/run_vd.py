@@ -96,15 +96,15 @@ def run_vd(config_dict):
 
     # load model config according to env_info:
     # encoder config
-    encoder_arch_config = _get_model_config({}, encoder)
+    encoder_arch_config = _get_model_config(encoder)
     config_dict = recursive_dict_update(config_dict, encoder_arch_config)
 
     # core rnn config
-    rnn_arch_config = _get_model_config({}, "rnn")
+    rnn_arch_config = _get_model_config("rnn")
     config_dict = recursive_dict_update(config_dict, rnn_arch_config)
 
     # core rnn config
-    mixer_arch_config = _get_model_config({}, "mixer")
+    mixer_arch_config = _get_model_config("mixer")
     config_dict = recursive_dict_update(config_dict, mixer_arch_config)
 
     ModelCatalog.register_custom_model(

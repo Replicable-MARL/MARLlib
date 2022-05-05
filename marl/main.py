@@ -1,13 +1,11 @@
-from marl.algos.run_il import run_il
-from marl.algos.run_vd import run_vd
-from marl.algos.run_cc import run_cc
 import yaml
 import os
 import sys
-import collections
 from copy import deepcopy
-from marl.common import _get_algo_config, _get_env_config, recursive_dict_update, check_algo_type
-
+from marl.common import _get_config, recursive_dict_update, check_algo_type
+from marl.algos.run_il import run_il
+from marl.algos.run_vd import run_vd
+from marl.algos.run_cc import run_cc
 
 if __name__ == '__main__':
     params = deepcopy(sys.argv)
@@ -17,7 +15,7 @@ if __name__ == '__main__':
         f.close()
 
     # env
-    env_config = _get_env_config(params, "--env-config")
+    env_config = _get_config(params, "--env-config")
     config_dict = recursive_dict_update(config_dict, env_config)
 
     for param in params:
@@ -26,14 +24,14 @@ if __name__ == '__main__':
             config_dict["env_args"]["map_name"] = map_name
 
     # algorithm
-    algo_type = None
+    algo_type = ""
     for param in params:
         if param.startswith("--algo_config"):
             algo_name = param.split("=")[1]
             config_dict["algorithm"] = algo_name
             algo_type = check_algo_type(algo_name)
 
-    algo_config = _get_algo_config(params, "--algo_config")
+    algo_config = _get_config(params, "--algo_config")
     config_dict = recursive_dict_update(config_dict, algo_config)
 
     if algo_type == "IL":
@@ -43,4 +41,4 @@ if __name__ == '__main__':
     elif algo_type == "CC":
         run_cc(config_dict)
     else:
-        raise ValueError("not supported algo")
+        raise ValueError("algo not in supported algo_type")

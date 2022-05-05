@@ -9,13 +9,16 @@ algo_type_dict = {
     "CC": ["maa2c", "maddpg", "mappo", "matrpo", "happo", "hatrpo", "coma"]
 }
 
+
 def check_algo_type(algo_name):
     for key in algo_type_dict.keys():
         if algo_name in algo_type_dict[key]:
             return key
     raise ValueError("{} current not supported".format(algo_name))
 
-def _get_model_config(params, arg_name):
+
+def _get_model_config(arg_name):
+
     with open(os.path.join(os.path.dirname(__file__), "models/configs", "{}.yaml".format(arg_name)),
               "r") as f:
         try:
@@ -25,7 +28,7 @@ def _get_model_config(params, arg_name):
     return config_dict
 
 
-def _get_algo_config(params, arg_name):
+def _get_config(params, arg_name):
     config_name = None
 
     for _i, _v in enumerate(params):
@@ -34,29 +37,16 @@ def _get_algo_config(params, arg_name):
             del params[_i]
             break
 
+    if "algo" in arg_name:
+        path = "algos/configs"
+    elif "env" in arg_name:
+        path = "../envs/base_env/config"
+    else:
+        raise ValueError("wrong type: {}".format(type))
+
     if config_name is not None:
-        with open(os.path.join(os.path.dirname(__file__), "algos/configs", "{}.yaml".format(config_name)),
+        with open(os.path.join(os.path.dirname(__file__), path, "{}.yaml".format(config_name)),
                   "r") as f:
-            try:
-                config_dict = yaml.load(f, Loader=yaml.FullLoader)
-            except yaml.YAMLError as exc:
-                assert False, "{}.yaml error: {}".format(config_name, exc)
-        return config_dict
-
-
-def _get_env_config(params, arg_name):
-    config_name = None
-
-    for _i, _v in enumerate(params):
-        if _v.split("=")[0] == arg_name:
-            config_name = _v.split("=")[1]
-            del params[_i]
-            break
-
-    if config_name is not None:
-        with open(
-                os.path.join(os.path.dirname(__file__), "../envs/base_env/config", "{}.yaml".format(config_name)),
-                "r") as f:
             try:
                 config_dict = yaml.load(f, Loader=yaml.FullLoader)
             except yaml.YAMLError as exc:
