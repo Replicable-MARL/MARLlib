@@ -74,6 +74,32 @@ class RNNDDPGTorchModel(DDPGTorchModel):
         self.policy_model = self.build_policy_model(
             self.obs_space, action_outs, policy_model_config, "policy_model")
 
+        class _Lambda(nn.Module):
+            def __init__(self_):
+                super().__init__()
+                low_action = nn.Parameter(
+                    torch.from_numpy(self.action_space.low).float())
+                low_action.requires_grad = False
+                self_.register_parameter("low_action", low_action)
+                action_range = nn.Parameter(
+                    torch.from_numpy(self.action_space.high -
+                                     self.action_space.low).float())
+                action_range.requires_grad = False
+                self_.register_parameter("action_range", action_range)
+
+            def forward(self_, x):
+                sigmoid_out = nn.Sigmoid()(2.0 * x)
+                squashed = self_.action_range * sigmoid_out + self_.low_action
+                return squashed
+
+        # Only squash if we have bounded actions.
+        if self.bounded:
+            self.policy_model.add_module("action_out_squashed", _Lambda())
+
+        # Build the Q-network(s).
+        self.q_model = self.build_q_model(self.obs_space, self.action_space,
+                                          q_outs, q_model_config, "q")
+
         # Build the Q-network(s).
         self.q_model = self.build_q_model(self.obs_space, self.action_space,
                                           q_outs, q_model_config, "q")
