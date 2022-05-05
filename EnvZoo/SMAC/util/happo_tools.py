@@ -22,7 +22,7 @@ from ray.rllib.policy.sample_batch import SampleBatch
 from ray.rllib.utils.framework import try_import_tf, try_import_torch, get_variable
 from ray.rllib.utils.torch_ops import convert_to_torch_tensor as _d2t
 from torch import nn
-from MaMujoco.util.valuenorm import ValueNorm
+from CC.utils.valuenorm import ValueNorm
 from ray.rllib.utils.typing import TrainerConfigDict, TensorType, \
     LocalOptimizer
 
@@ -59,6 +59,7 @@ GLOBAL_NEED_COLLECT = [SampleBatch.ACTION_LOGP, SampleBatch.ACTIONS]
 GLOBAL_PREFIX = 'GLOBAL_'
 GLOBAL_MODEL_LOGITS = f'{GLOBAL_PREFIX}_model_logits'
 STATE = 'state'
+SELF_OBS = 'self_obs'
 convert_to_torch_tensor = _d2t
 
 
@@ -106,18 +107,67 @@ def collect_other_agents_model_output(agents_batch):
     return other_agents_logits
 
 
+def compute_gae_from_sample_batch_customized(policy, sample_batch, other_agent_batches, episode):
+    pytorch = policy.config["framework"] == "torch"
+    self_obs_dim = policy.config["self_obs_dim"]
+    state_dim = policy.config["state_dim"]
+
+    if (pytorch and hasattr(policy, "compute_central_vf")) or \
+            (not pytorch and policy.loss_initialized()):
+        assert other_agent_batches is not None
+
+        # here we use state instead of ally's observation
+        # as the dimension will be too big with increasing ally number
+        # [(_, opponent_batch)] = list(other_agent_batches.values())
+
+        # also record the opponent obs and actions in the trajectory
+        sample_batch[SELF_OBS] = sample_batch[SampleBatch.OBS][:, :self_obs_dim]
+        sample_batch[STATE] = sample_batch[SampleBatch.OBS][:, self_obs_dim:self_obs_dim + state_dim]
+
+        # overwrite default VF prediction with the central VF
+        if pytorch:
+            sample_batch[SampleBatch.VF_PREDS] = policy.compute_central_vf(
+                convert_to_torch_tensor(
+                    sample_batch[SELF_OBS], policy.device),
+                convert_to_torch_tensor(
+                    sample_batch[STATE], policy.device), ) \
+                .cpu().detach().numpy()
+        else:
+            raise NotImplementedError()
+
+    else:
+        # Policy hasn't been initialized yet, use zeros.
+        o = sample_batch[SampleBatch.CUR_OBS]
+        sample_batch[SELF_OBS] = np.zeros((o.shape[0], self_obs_dim),
+                                            dtype=sample_batch[SampleBatch.CUR_OBS].dtype)
+        sample_batch[STATE] = np.zeros((o.shape[0], state_dim),
+                                         dtype=sample_batch[SampleBatch.CUR_OBS].dtype)
+        sample_batch[SampleBatch.VF_PREDS] = np.zeros_like(
+            sample_batch[SampleBatch.REWARDS], dtype=np.float32)
+
+    completed = sample_batch[SampleBatch.DONES][-1]
+    if completed:
+        last_r = 0.0
+    else:
+        last_r = sample_batch[SampleBatch.VF_PREDS][-1]
+
+    train_batch = compute_advantages(
+        sample_batch,
+        last_r,
+        policy.config["gamma"],
+        policy.config["lambda"],
+        use_gae=policy.config["use_gae"])
+    return train_batch
+
+
 def add_another_agent_and_gae(policy, sample_batch, other_agent_batches=None, episode=None):
     # train_batch = centralized_critic_postprocessing(policy, sample_batch, other_agent_batches, episode)
     global value_normalizer
 
+    train_batch = compute_gae_from_sample_batch_customized(policy, sample_batch, other_agent_batches, episode)
+
     if value_normalizer.updated:
         sample_batch[SampleBatch.VF_PREDS] = value_normalizer.denormalize(sample_batch[SampleBatch.VF_PREDS])
-
-    train_batch = compute_gae_for_sample_batch(policy, sample_batch, other_agent_batches, episode)
-
-    state_dim = policy.config["model"]["custom_model_config"]["state_dim"]
-
-    sample_batch[STATE] = sample_batch[SampleBatch.OBS][:, -state_dim:]
 
     if other_agent_batches:
         for key in GLOBAL_NEED_COLLECT:
@@ -196,7 +246,9 @@ def ppo_surrogate_loss(
 
     if contain_global_obs(train_batch):
         model.value_function = lambda: policy.model.central_value_function(
-            train_batch[STATE], train_batch[get_global_name(SampleBatch.ACTIONS)])
+            train_batch[SELF_OBS],
+            train_batch[STATE]
+        )
 
         policy._central_value_out = model.value_function()  # change value function to calculate all agents information
 
@@ -228,7 +280,7 @@ def ppo_surrogate_loss(
                 current_action_dist = dist_class(current_action_logits, None)
                 # current_action_dist = train_batch[GLOBAL_MODEL_LOGITS][:, agent_id, :]
                 old_action_log_dist = train_batch[get_global_name(SampleBatch.ACTION_LOGP)][:, agent_id].detach()
-                actions = train_batch[get_global_name(SampleBatch.ACTIONS)][:, agent_id, :].detach()
+                actions = train_batch[get_global_name(SampleBatch.ACTIONS)][:, agent_id].detach()
 
             importance_sampling = torch.exp(current_action_dist.logp(actions) - old_action_log_dist)
 
