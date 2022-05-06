@@ -6,6 +6,7 @@ from marl.algos.scripts.mappo import run_mappo
 from marl.algos.scripts.coma import run_coma
 from marl.algos.scripts.pg_a2c_a3c import run_pg_a2c_a3c
 from marl.algos.scripts.ppo import run_ppo
+from marl.algos.scripts.ddpg import run_ddpg
 
 
 POlICY_REGISTRY = {
@@ -20,7 +21,8 @@ POlICY_REGISTRY = {
     "vdppo": run_vdppo,
     "maa2c": run_maa2c,
     "mappo": run_mappo,
-    "coma": run_coma
+    "coma": run_coma,
+    "ddpg": run_ddpg
 }
 
 

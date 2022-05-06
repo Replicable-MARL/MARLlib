@@ -1,11 +1,11 @@
 from ray.rllib.utils.framework import try_import_tf, try_import_torch
-from marl.models.zoo.vd_mixers import QMixer, VDNMixer
-from marl.models.base.onpolicy_rnn import Onpolicy_Base_Model
+from marl.models.zoo.mixers import QMixer, VDNMixer
+from marl.models.base.base_rnn import BaseRNN
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
 
 
-class Onpolicy_VD_Model(Onpolicy_Base_Model):
+class VD_RNN(BaseRNN):
 
     def __init__(
             self,

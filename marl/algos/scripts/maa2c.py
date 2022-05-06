@@ -17,7 +17,7 @@ def run_maa2c(config_dict, common_config, env_dict, stop):
         "lr": lr,
         "entropy_coeff": 0.01,
         "model": {
-            "custom_model": "Onpolicy_Universal_Model",
+            "custom_model": "Centralized_Critic_Model",
             "max_seq_len": episode_limit,
             "custom_model_config": merge_dicts(config_dict, env_dict),
         },

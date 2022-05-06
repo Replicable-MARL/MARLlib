@@ -4,7 +4,7 @@ from ray.tune import register_env
 from ray import tune
 from ray.rllib.utils.test_utils import check_learning_achieved
 from ray.rllib.utils.framework import try_import_tf, try_import_torch
-from marl.models.zoo.cc_onpolicy_rnn import Onpolicy_CC_Model
+from marl.models.zoo.cc_rnn import CC_RNN
 from marl.algos.scripts import POlICY_REGISTRY
 from envs.base_env import ENV_REGISTRY
 from marl.common import _get_model_config, recursive_dict_update
@@ -54,7 +54,7 @@ def run_cc(config_dict):
     config_dict = recursive_dict_update(config_dict, rnn_arch_config)
 
     ModelCatalog.register_custom_model(
-        "Onpolicy_Universal_Model", Onpolicy_CC_Model)
+        "Centralized_Critic_Model", CC_RNN)
 
     ##############
     ### policy ###

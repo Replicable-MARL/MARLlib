@@ -5,8 +5,8 @@ from ray.tune import register_env
 from ray import tune
 from ray.rllib.utils.test_utils import check_learning_achieved
 from ray.rllib.utils.framework import try_import_tf, try_import_torch
-from marl.models.zoo.vd_offpolicy_rnn import Offpolicy_Universal_Model
-from marl.models.zoo.vd_onpolicy_rnn import Onpolicy_VD_Model
+from marl.models.zoo.jointQ_rnn import Joint_Q_RNN
+from marl.models.zoo.vd_rnn import VD_RNN
 from marl.algos.scripts import POlICY_REGISTRY
 from envs.force_coop import COOP_ENV_REGISTRY as ENV_REGISTRY
 from marl.common import _get_model_config, recursive_dict_update
@@ -108,10 +108,10 @@ def run_vd(config_dict):
     config_dict = recursive_dict_update(config_dict, mixer_arch_config)
 
     ModelCatalog.register_custom_model(
-        "Offpolicy_Universal_Model", Offpolicy_Universal_Model)
+        "Joint_Q_Model", Joint_Q_RNN)
 
     ModelCatalog.register_custom_model(
-        "Onpolicy_Universal_Model", Onpolicy_VD_Model)
+        "Value_Decomposition_Model", VD_RNN)
 
     ##############
     ### policy ###

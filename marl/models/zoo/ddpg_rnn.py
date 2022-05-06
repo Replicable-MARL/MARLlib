@@ -12,7 +12,7 @@ tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
 
 
-class Onpolicy_Base_Model(TorchRNN, nn.Module):
+class DDPG_RNN_Model(TorchRNN, nn.Module):
 
     def __init__(
             self,
@@ -64,13 +64,17 @@ class Onpolicy_Base_Model(TorchRNN, nn.Module):
         else:
             raise ValueError()
 
-        self.input_dim = input_dim
         self.encoder = nn.Sequential(
             *layers
         )
 
+        self.action_encoder = nn.Linear(self.custom_config["extra_action"], input_dim)
+        if "q" in name:
+            input_dim *= 2
+
         # core rnn
         self.hidden_state_size = self.custom_config["model_arch_args"]["hidden_state_size"]
+        self.input_dim = input_dim
 
         if self.custom_config["model_arch_args"]["core_arch"] == "gru":
             self.rnn = nn.GRU(input_dim, self.hidden_state_size, batch_first=True)
@@ -121,14 +125,15 @@ class Onpolicy_Base_Model(TorchRNN, nn.Module):
         """
         Adds time dimension to batch before sending inputs to forward_rnn()
         """
-        if self.custom_config["global_state_flag"] or self.custom_config["mask_flag"]:
-            flat_inputs = input_dict["obs"]["obs"].float()
-            # Convert action_mask into a [0.0 || -inf]-type mask.
-            if self.custom_config["mask_flag"]:
-                action_mask = input_dict["obs"]["action_mask"]
-                inf_mask = torch.clamp(torch.log(action_mask), min=FLOAT_MIN)
+        flat_inputs = input_dict["obs"]["obs"].float()
+        if "actions" in input_dict:
+            action_inputs = input_dict["actions"].float()
         else:
-            flat_inputs = input_dict["obs"]["obs"].float()
+            action_inputs = None
+        # Convert action_mask into a [0.0 || -inf]-type mask.
+        if self.custom_config["mask_flag"]:
+            action_mask = input_dict["obs"]["action_mask"]
+            inf_mask = torch.clamp(torch.log(action_mask), min=FLOAT_MIN)
 
         if isinstance(seq_lens, np.ndarray):
             seq_lens = torch.Tensor(seq_lens).int()
@@ -137,13 +142,20 @@ class Onpolicy_Base_Model(TorchRNN, nn.Module):
         max_seq_len = flat_inputs.shape[0] // seq_lens.shape[0]
 
         self.time_major = self.model_config.get("_time_major", False)
-        inputs = add_time_dimension(
+        obs_inputs = add_time_dimension(
             flat_inputs,
             max_seq_len=max_seq_len,
             framework="torch",
             time_major=self.time_major,
         )
-        output, new_state = self.forward_rnn(inputs, state, seq_lens)
+        if "actions" in input_dict:
+            action_inputs = add_time_dimension(
+                action_inputs,
+                max_seq_len=max_seq_len,
+                framework="torch",
+                time_major=self.time_major,
+            )
+        output, new_state = self.forward_rnn(obs_inputs, action_inputs, state, seq_lens)
         output = torch.reshape(output, [-1, self.num_outputs])
 
         if self.custom_config["mask_flag"]:
@@ -152,17 +164,21 @@ class Onpolicy_Base_Model(TorchRNN, nn.Module):
         return output, new_state
 
     @override(TorchRNN)
-    def forward_rnn(self, inputs, state, seq_lens):
+    def forward_rnn(self, obs_inputs, action_inputs, state, seq_lens):
         # Extract the available actions tensor from the observation.
 
         # Compute the unmasked logits.
         if "conv_layer" in self.custom_config["model_arch_args"]:
-            x = inputs.reshape(-1, inputs.shape[2], inputs.shape[3], inputs.shape[4]).permute(0, 3, 1, 2)
+            x = obs_inputs.reshape(-1, obs_inputs.shape[2], obs_inputs.shape[3], obs_inputs.shape[4]).permute(0, 3, 1, 2)
             x = self.encoder(x)
             x = torch.mean(x, (2, 3))
-            x = x.reshape(inputs.shape[0], inputs.shape[1], -1)
+            x = x.reshape(obs_inputs.shape[0], obs_inputs.shape[1], -1)
         else:
-            x = self.encoder(inputs)
+            x = self.encoder(obs_inputs)
+
+        if action_inputs is not None:
+            a = self.action_encoder(action_inputs)
+            x = torch.cat((x, a), -1)
 
         x = nn.functional.relu(x)
 

@@ -12,7 +12,7 @@ def run_pg_a2c_a3c(config_dict, common_config, env_dict, stop):
         "train_batch_size": train_batch_size,
         "lr": config_dict["algo_args"]["lr"],
         "model": {
-            "custom_model": "Universal_Model",
+            "custom_model": "Base_Model",
             "max_seq_len": episode_limit,
             "custom_model_config": merge_dicts(config_dict, env_dict),
         },

@@ -28,7 +28,7 @@ def run_mappo(config_dict, common_config, env_dict, stop):
         "entropy_coeff": 0.01,
         "num_sgd_iter": iteration,
         "model": {
-            "custom_model": "Onpolicy_Universal_Model",
+            "custom_model": "Centralized_Critic_Model",
             "max_seq_len": episode_limit,
             "custom_model_config": merge_dicts(config_dict, env_dict),
         },

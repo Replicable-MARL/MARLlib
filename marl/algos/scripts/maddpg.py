@@ -1,30 +1,33 @@
 from ray import tune
 from ray.tune.utils import merge_dicts
 from ray.tune import CLIReporter
-from marl.algos.utils.CC.coma import COMATrainer
+from marl.algos.utils.IL.ddpg import RNNDDPGTrainer as DDPGTrainer
 
 
-def run_coma(config_dict, common_config, env_dict, stop):
-    algorithm = config_dict["algorithm"]
+def run_ddpg(config_dict, common_config, env_dict, stop):
+    train_batch_size = config_dict["algo_args"]["batch_episode"] * env_dict["episode_limit"]
     episode_limit = env_dict["episode_limit"]
-    train_batch_episode = config_dict["algo_args"]["batch_episode"]
+    algorithm = config_dict["algorithm"]
     batch_mode = config_dict["algo_args"]["batch_mode"]
     lr = config_dict["algo_args"]["lr"]
 
     config = {
         "batch_mode": batch_mode,
-        "train_batch_size": train_batch_episode * episode_limit,
-        "lr": lr,
-        "entropy_coeff": 0.01,
+        "buffer_size": 5000,
+        "train_batch_size": train_batch_size,
+        "critic_lr": lr,
+        "actor_lr": lr,
         "model": {
-            "custom_model": "Centralized_Critic_Model",
             "max_seq_len": episode_limit,
             "custom_model_config": merge_dicts(config_dict, env_dict),
         },
+        "prioritized_replay": True,
+        "zero_init_states": True
+
     }
     config.update(common_config)
 
-    results = tune.run(COMATrainer, name=algorithm + "_" + config_dict["model_arch_args"]["core_arch"] + "_" +
+    results = tune.run(DDPGTrainer, name=algorithm + "_" + config_dict["model_arch_args"]["core_arch"] + "_" +
                                          config_dict["env_args"][
                                              "map_name"],
                        stop=stop,
