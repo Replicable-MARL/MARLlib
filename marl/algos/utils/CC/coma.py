@@ -29,7 +29,7 @@ def central_critic_coma_loss(policy: Policy, model: ModelV2,
     values = model.central_value_function(convert_to_torch_tensor(
         train_batch["state"], policy.device),
         convert_to_torch_tensor(
-            train_batch["opponent_action"], policy.device) if opp_action_in_cc else None)
+            train_batch["opponent_actions"], policy.device) if opp_action_in_cc else None)
     pi = torch.nn.functional.softmax(logits, dim=-1)
 
     if policy.is_recurrent():

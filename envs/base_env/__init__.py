@@ -5,7 +5,7 @@ from envs.base_env.football import RllibGFootball
 from envs.base_env.rware import RllibRWARE
 from envs.base_env.lbf import RllibLBF
 from envs.base_env.magent import RllibMAgent
-# from EnvZoo.base_env.metadrive import RllibMetaDrive  # disable when not using
+# from envs.base_env.metadrive import RllibMetaDrive  # disable when not using
 from envs.base_env.pommerman import RllibPommerman
 from envs.base_env.hanabi import RLlibHanabi
 

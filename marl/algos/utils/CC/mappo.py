@@ -29,7 +29,7 @@ def central_critic_ppo_loss(policy, model, dist_class, train_batch):
     opp_action_in_cc = policy.config["model"]["custom_model_config"]["opp_action_in_cc"]
     model.value_function = lambda: policy.model.central_value_function(train_batch["state"],
                                                                        train_batch[
-                                                                           "opponent_action"] if opp_action_in_cc else None)
+                                                                           "opponent_actions"] if opp_action_in_cc else None)
 
     policy._central_value_out = model.value_function()
     loss = func(policy, model, dist_class, train_batch)

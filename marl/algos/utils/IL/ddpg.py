@@ -25,6 +25,7 @@ from ray.rllib.policy.view_requirement import ViewRequirement
 from ray.rllib.utils.framework import try_import_torch
 from ray.rllib.utils.typing import ModelConfigDict, TensorType
 from ray.rllib.models.catalog import ModelCatalog
+from marl.algos.utils.common import MADDPGCentralizedValueMixin
 
 torch, nn = try_import_torch()
 
@@ -336,13 +337,15 @@ class DDPG_RNN_TorchModel(DDPGTorchModel):
             twin_q=twin_q,
             add_layer_norm=add_layer_norm)
 
-        self.use_prev_action = (model_config["lstm_use_prev_action"]
-                                or policy_model_config["lstm_use_prev_action"]
-                                or q_model_config["lstm_use_prev_action"])
+        self.cc_flag = False
+        if model_config["custom_model_config"]["algorithm"] in ["maddpg"]:
+            self.cc_flag = True
+            self.state_flag = model_config["custom_model_config"]["global_state_flag"]
 
-        self.use_prev_reward = (model_config["lstm_use_prev_reward"]
-                                or policy_model_config["lstm_use_prev_reward"]
-                                or q_model_config["lstm_use_prev_reward"])
+        self.use_prev_action = model_config["lstm_use_prev_action"]
+
+        self.use_prev_reward = model_config["lstm_use_prev_reward"]
+
         if self.use_prev_action:
             self.view_requirements[SampleBatch.PREV_ACTIONS] = \
                 ViewRequirement(SampleBatch.ACTIONS, space=self.action_space,
@@ -358,17 +361,20 @@ class DDPG_RNN_TorchModel(DDPGTorchModel):
 
         # Build the policy network.
         self.policy_model = self.build_policy_model(
-            self.obs_space, self.action_space, action_outs, policy_model_config, "policy_model")
+            self.obs_space, self.action_space, action_outs, {}, "policy_model")
 
         # Build the Q-network(s).
         self.q_model = self.build_q_model(self.obs_space, self.action_space,
-                                          q_outs, q_model_config, "q")
+                                          q_outs, {}, "q")
         if twin_q:
             self.twin_q_model = self.build_q_model(self.obs_space,
                                                    self.action_space, q_outs,
-                                                   q_model_config, "twin_q")
+                                                   {}, "twin_q")
         else:
             self.twin_q_model = None
+
+        self.state_flag = model_config["custom_model_config"]["global_state_flag"]
+        self.num_agents = model_config["custom_model_config"]["num_agents"]
 
     def build_policy_model(self, obs_space, action_space, num_outputs, policy_model_config,
                            name):

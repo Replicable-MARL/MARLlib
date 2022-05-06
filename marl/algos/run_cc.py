@@ -5,6 +5,7 @@ from ray import tune
 from ray.rllib.utils.test_utils import check_learning_achieved
 from ray.rllib.utils.framework import try_import_tf, try_import_torch
 from marl.models.zoo.cc_rnn import CC_RNN
+from marl.models.zoo.ddpg_rnn import DDPG_RNN_Model
 from marl.algos.scripts import POlICY_REGISTRY
 from envs.base_env import ENV_REGISTRY
 from marl.common import _get_model_config, recursive_dict_update
@@ -55,6 +56,9 @@ def run_cc(config_dict):
 
     ModelCatalog.register_custom_model(
         "Centralized_Critic_Model", CC_RNN)
+
+    ModelCatalog.register_custom_model(
+        "DDPG_Model", DDPG_RNN_Model)
 
     ##############
     ### policy ###

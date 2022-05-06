@@ -1,10 +1,10 @@
 from ray import tune
 from ray.tune.utils import merge_dicts
 from ray.tune import CLIReporter
-from marl.algos.utils.IL.ddpg import DDPGRNNTrainer as DDPGTrainer
+from marl.algos.utils.CC.maddpg import MADDPGRNNTrainer as MADDPGTrainer
 
 
-def run_ddpg(config_dict, common_config, env_dict, stop):
+def run_maddpg(config_dict, common_config, env_dict, stop):
     train_batch_size = config_dict["algo_args"]["batch_episode"] * env_dict["episode_limit"]
     episode_limit = env_dict["episode_limit"]
     algorithm = config_dict["algorithm"]
@@ -27,7 +27,7 @@ def run_ddpg(config_dict, common_config, env_dict, stop):
     }
     config.update(common_config)
 
-    results = tune.run(DDPGTrainer, name=algorithm + "_" + config_dict["model_arch_args"]["core_arch"] + "_" +
+    results = tune.run(MADDPGTrainer, name=algorithm + "_" + config_dict["model_arch_args"]["core_arch"] + "_" +
                                          config_dict["env_args"][
                                              "map_name"],
                        stop=stop,
