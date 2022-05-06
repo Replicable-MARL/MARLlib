@@ -10,8 +10,8 @@
 
 **weixun**
 
-- [ ] DDPG: add RNN support, test in EnvZoo (Mamujoco is enough) and then should be incorporated into CC 
-- [ ] MADDPG: cc version of DDPG with RNN support, test in EnvZoo (Mamujoco is enough) and then should be incorporated into CC 
+- [x] DDPG: add RNN support, test in EnvZoo (Mamujoco is enough) and then should be incorporated into CC 
+- [x] MADDPG: cc version of DDPG with RNN support, test in EnvZoo (Mamujoco is enough) and then should be incorporated into CC 
 - [ ] off-policy RNN support investigation
 
 **Siyi**
