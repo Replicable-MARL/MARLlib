@@ -43,7 +43,7 @@ def build_rnnddpg_models(policy, observation_space, action_space, config):
         num_outputs=num_outputs,
         model_config=config["model"],
         framework=config["framework"],
-        default_model=RNNDDPGTorchModel,
+        default_model=DDPG_RNN_TorchModel,
         name="rnnddpg_model",
         policy_model_config=policy_model_config,
         q_model_config=q_model_config,
@@ -58,7 +58,7 @@ def build_rnnddpg_models(policy, observation_space, action_space, config):
         num_outputs=num_outputs,
         model_config=config["model"],
         framework=config["framework"],
-        default_model=RNNDDPGTorchModel,
+        default_model=DDPG_RNN_TorchModel,
         name="rnnddpg_model",
         policy_model_config=policy_model_config,
         q_model_config=q_model_config,
@@ -303,7 +303,7 @@ def ddpg_actor_critic_loss(policy: Policy, model: ModelV2, _,
     return actor_loss, critic_loss
 
 
-class RNNDDPGTorchModel(DDPGTorchModel):
+class DDPG_RNN_TorchModel(DDPGTorchModel):
     """Extension of standard DDPGTorchModel for RNNDDPG.
 
     Data flow:
@@ -518,7 +518,7 @@ class RNNDDPGTorchModel(DDPGTorchModel):
 
 logger = logging.getLogger(__name__)
 
-RNNDDPG_DEFAULT_CONFIG = DDPGTrainer.merge_trainer_configs(
+DDPG_RNN_DEFAULT_CONFIG = DDPGTrainer.merge_trainer_configs(
     DDPG_DEFAULT_CONFIG,
     {
         "batch_mode": "complete_episodes",
@@ -539,9 +539,9 @@ def validate_config(config: TrainerConfigDict) -> None:
         config["burn_in"] + config["model"]["max_seq_len"]
 
 
-RNNDDPGTorchPolicy = DDPGTorchPolicy.with_updates(
+DDPGRNNTorchPolicy = DDPGTorchPolicy.with_updates(
     name="RNNDDPGTorchPolicy",
-    get_default_config=lambda: RNNDDPG_DEFAULT_CONFIG,
+    get_default_config=lambda: DDPG_RNN_DEFAULT_CONFIG,
     action_distribution_fn=action_distribution_fn,
     make_model_and_action_dist=build_rnnddpg_models_and_action_dist,
     loss_fn=ddpg_actor_critic_loss,
@@ -550,13 +550,13 @@ RNNDDPGTorchPolicy = DDPGTorchPolicy.with_updates(
 
 def get_policy_class(config: TrainerConfigDict) -> Optional[Type[Policy]]:
     if config["framework"] == "torch":
-        return RNNDDPGTorchPolicy
+        return DDPGRNNTorchPolicy
 
 
-RNNDDPGTrainer = DDPGTrainer.with_updates(
+DDPGRNNTrainer = DDPGTrainer.with_updates(
     name="RNNDDPGTrainer",
-    default_config=RNNDDPG_DEFAULT_CONFIG,
-    default_policy=RNNDDPGTorchPolicy,
+    default_config=DDPG_RNN_DEFAULT_CONFIG,
+    default_policy=DDPGRNNTorchPolicy,
     get_policy_class=get_policy_class,
     validate_config=validate_config,
     allow_unknown_subkeys=["Q_model", "policy_model"]
