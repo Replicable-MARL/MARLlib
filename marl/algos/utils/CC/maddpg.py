@@ -86,16 +86,16 @@ class MADDPG_RNN_TorchModel(DDPG_RNN_TorchModel):
         For rnn support remove input_dict filter and pass state and seq_lens
         """
         model_out = {"obs": input_dict[SampleBatch.OBS]}
-        if "prev_opponent_actions" in input_dict:  # add additional info to model out
+        if "opponent_actions" in input_dict:  # add additional info to model out
             model_out["state"] = input_dict["state"]
-            model_out["opponent_actions"] = input_dict["prev_opponent_actions"]
+            model_out["opponent_actions"] = input_dict["opponent_actions"]
         else:  # haven't gone trough postprocessing
             o = input_dict["obs"]
             if self.state_flag:
                 model_out["state"] = torch.zeros_like(o["state"], dtype=o["state"].dtype)
             else:
                 model_out["state"] = torch.zeros((o["obs"].shape[0], self.num_agents, o["obs"].shape[1]),
-                                                  dtype=o["obs"].dtype)
+                                                 dtype=o["obs"].dtype)
 
             if "actions" not in input_dict:
                 input_dict["actions"] = input_dict["prev_actions"]
@@ -105,13 +105,17 @@ class MADDPG_RNN_TorchModel(DDPG_RNN_TorchModel):
 
         if self.use_prev_action:
             model_out["prev_actions"] = input_dict[SampleBatch.PREV_ACTIONS]
+            model_out["prev_opponent_actions"] = input_dict["prev_opponent_actions"]
+
         if self.use_prev_reward:
             model_out["prev_rewards"] = input_dict[SampleBatch.PREV_REWARDS]
 
         return model_out, state
 
-    def _get_cc_q_value(self, model_out: TensorType, actions, net,
+    def _get_cc_q_value(self, model_out: TensorType,
                         state_in: List[TensorType],
+                        net,
+                        actions,
                         seq_lens: TensorType):
         # Continuous case -> concat actions to model_out.
         model_out = copy.deepcopy(model_out)
@@ -120,7 +124,7 @@ class MADDPG_RNN_TorchModel(DDPG_RNN_TorchModel):
         else:
             actions = torch.zeros(
                 list(model_out[SampleBatch.OBS]["obs"].shape[:-1]) + [self.action_dim])
-            model_out["actions"] = actions
+            model_out["actions"] = actions.to(state_in[0].device)
 
         # Switch on training mode (when getting Q-values, we are usually in
         # training).
@@ -134,7 +138,7 @@ class MADDPG_RNN_TorchModel(DDPG_RNN_TorchModel):
                         state_in: List[TensorType],
                         seq_lens: TensorType,
                         actions: Optional[TensorType] = None) -> TensorType:
-        return self._get_cc_q_value(model_out, actions, self.q_model, state_in,
+        return self._get_cc_q_value(model_out, state_in, self.q_model, actions,
                                     seq_lens)
 
 
@@ -163,6 +167,7 @@ def central_critic_ddpg_loss(policy, model, dist_class, train_batch):
         "state": train_batch["state"],
         "is_training": True,
         "prev_actions": train_batch[SampleBatch.PREV_ACTIONS],
+        "opponent_actions": train_batch["opponent_actions"],
         "prev_opponent_actions": train_batch["prev_opponent_actions"],
         "prev_rewards": train_batch[SampleBatch.PREV_REWARDS],
     }
@@ -174,6 +179,7 @@ def central_critic_ddpg_loss(policy, model, dist_class, train_batch):
         "state": train_batch["new_state"],
         "is_training": True,
         "prev_actions": train_batch[SampleBatch.ACTIONS],
+        "opponent_actions": train_batch["next_opponent_actions"],
         "prev_opponent_actions": train_batch["opponent_actions"],
         "prev_rewards": train_batch[SampleBatch.REWARDS],
     }
@@ -328,9 +334,14 @@ def central_critic_ddpg_loss(policy, model, dist_class, train_batch):
     return actor_loss, critic_loss
 
 
+def vf_preds_fetches(policy, input_dict, state_batches, model, action_dist):
+    return dict()
+
+
 MADDPGRNNTorchPolicy = DDPGRNNTorchPolicy.with_updates(
     name="MADDPGRNNTorchPolicy",
     postprocess_fn=centralized_critic_offpolicy,
+    extra_action_out_fn=vf_preds_fetches,
     make_model_and_action_dist=build_maddpg_models_and_action_dist,
     loss_fn=central_critic_ddpg_loss,
     mixins=[

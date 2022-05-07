@@ -263,6 +263,7 @@ class MADDPGCentralizedValueMixin:
     def __init__(self):
         self.compute_central_q = self.model.get_cc_q_values
 
+
 def centralized_critic_offpolicy(policy: Policy,
                                  sample_batch: SampleBatch,
                                  other_agent_batches=None,
@@ -330,6 +331,21 @@ def centralized_critic_offpolicy(policy: Policy,
                 [opponent_batch[i]["prev_actions"] for i in range(opponent_agents_num)],
                 1)
 
+            # grab the opponent next action manually
+            all_opponent_batch_next_action_ls = []
+            for opp_index in range(opponent_agents_num):
+                opponent_batch_next_action_ls = []
+                opp_batch = opponent_batch[opp_index]
+                start_point = 0
+                for ep_index in opp_batch["seq_lens"]:
+                    opp_batch_next_action = np.roll(opp_batch["actions"][start_point: start_point + ep_index], -1, axis=0)
+                    opponent_batch_next_action_ls.append(opp_batch_next_action)
+                    start_point = ep_index
+                opponent_batch_next_action_all_eq = np.concatenate(opponent_batch_next_action_ls)
+                all_opponent_batch_next_action_ls.append(opponent_batch_next_action_all_eq)
+            sample_batch["next_opponent_actions"] = np.stack(
+                all_opponent_batch_next_action_ls, 1)
+
     else:
         # Policy hasn't been initialized yet, use zeros.
         o = sample_batch[SampleBatch.CUR_OBS]
@@ -337,12 +353,12 @@ def centralized_critic_offpolicy(policy: Policy,
             sample_batch["state"] = np.zeros((o.shape[0], get_dim(custom_config["space_obs"]["state"].shape)),
                                              dtype=sample_batch[SampleBatch.CUR_OBS].dtype)
             sample_batch["new_state"] = np.zeros((o.shape[0], get_dim(custom_config["space_obs"]["state"].shape)),
-                                             dtype=sample_batch[SampleBatch.CUR_OBS].dtype)
+                                                 dtype=sample_batch[SampleBatch.CUR_OBS].dtype)
         else:
             sample_batch["state"] = np.zeros((o.shape[0], n_agents, obs_dim),
                                              dtype=sample_batch[SampleBatch.CUR_OBS].dtype)
             sample_batch["new_state"] = np.zeros((o.shape[0], n_agents, obs_dim),
-                                             dtype=sample_batch[SampleBatch.CUR_OBS].dtype)
+                                                 dtype=sample_batch[SampleBatch.CUR_OBS].dtype)
 
         sample_batch["vf_preds"] = np.zeros_like(
             sample_batch[SampleBatch.REWARDS], dtype=np.float32)
@@ -350,6 +366,9 @@ def centralized_critic_offpolicy(policy: Policy,
             [np.zeros_like(sample_batch["actions"], dtype=sample_batch["actions"].dtype) for _ in
              range(opponent_agents_num)], axis=1)
         sample_batch["prev_opponent_actions"] = np.stack(
+            [np.zeros_like(sample_batch["actions"], dtype=sample_batch["actions"].dtype) for _ in
+             range(opponent_agents_num)], axis=1)
+        sample_batch["next_opponent_actions"] = np.stack(
             [np.zeros_like(sample_batch["actions"], dtype=sample_batch["actions"].dtype) for _ in
              range(opponent_agents_num)], axis=1)
 

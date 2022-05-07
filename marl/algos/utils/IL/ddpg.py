@@ -448,8 +448,10 @@ class DDPG_RNN_TorchModel(DDPGTorchModel):
 
         return model_out, state
 
-    def _get_q_value(self, model_out: TensorType, actions, net,
+    def _get_q_value(self, model_out: TensorType,
                      state_in: List[TensorType],
+                     net,
+                     actions,
                      seq_lens: TensorType):
         # Continuous case -> concat actions to model_out.
         model_out = copy.deepcopy(model_out)
@@ -458,7 +460,7 @@ class DDPG_RNN_TorchModel(DDPGTorchModel):
         else:
             actions = torch.zeros(
                 list(model_out[SampleBatch.OBS]["obs"].shape[:-1]) + [self.action_dim])
-            model_out["actions"] = actions
+            model_out["actions"] = actions.to(state_in[0].device)
 
         # Switch on training mode (when getting Q-values, we are usually in
         # training).
@@ -467,13 +469,14 @@ class DDPG_RNN_TorchModel(DDPGTorchModel):
         out, state_out = net(model_out, state_in, seq_lens)
         return out, state_out
 
+
     @override(DDPGTorchModel)
     def get_q_values(self,
                      model_out: TensorType,
                      state_in: List[TensorType],
                      seq_lens: TensorType,
                      actions: Optional[TensorType] = None) -> TensorType:
-        return self._get_q_value(model_out, actions, self.q_model, state_in,
+        return self._get_q_value(model_out, state_in, self.q_model, actions,
                                  seq_lens)
 
     @override(DDPGTorchModel)

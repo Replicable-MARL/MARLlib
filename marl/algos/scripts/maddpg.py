@@ -14,7 +14,7 @@ def run_maddpg(config_dict, common_config, env_dict, stop):
     config = {
         "batch_mode": batch_mode,
         "buffer_size": 5000,
-        "train_batch_size": train_batch_size,
+        "train_batch_size": 1000,
         "critic_lr": lr,
         "actor_lr": lr,
         "model": {

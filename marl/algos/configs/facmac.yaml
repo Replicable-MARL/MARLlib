@@ -1,8 +1,10 @@
 # FACMAC parameters
 
 algo_args:
-  batch_episode:  10
-  batch_mode: "complete_episodes"
+  batch_episode:  32
   lr: 0.0005
-  episode_limit: 999
-  mixer: "qmix" # vdn
+  rollout_fragment_length: 1
+  buffer_size: 5000
+  target_network_update_freq: 100
+  batch_mode: "complete_episodes"
+
