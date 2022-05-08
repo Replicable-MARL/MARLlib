@@ -183,13 +183,14 @@ def central_critic_ddpg_loss(policy, model, dist_class, train_batch):
         "prev_opponent_actions": train_batch["opponent_actions"],
         "prev_rewards": train_batch[SampleBatch.REWARDS],
     }
-    model_out_tp1, state_in_tp1 = model(
-        input_dict_next, state_batches, seq_lens)
-    states_in_tp1 = model.select_state(state_in_tp1, ["policy", "q", "twin_q"])
+
+    # model_out_tp1, state_in_tp1 = model(
+    #     input_dict_next, state_batches, seq_lens)
+    # states_in_tp1 = model.select_state(state_in_tp1, ["policy", "q", "twin_q"])
 
     target_model_out_tp1, target_state_in_tp1 = target_model(
         input_dict_next, state_batches, seq_lens)
-    target_states_in_tp1 = target_model.select_state(state_in_tp1,
+    target_states_in_tp1 = target_model.select_state(target_state_in_tp1,
                                                      ["policy", "q", "twin_q"])
 
     # Policy network evaluation.

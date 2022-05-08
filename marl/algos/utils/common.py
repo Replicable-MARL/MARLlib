@@ -497,7 +497,7 @@ def q_value_mixing_offpolicy(policy: Policy,
             sample_batch["opponent_q"] = np.stack(
                 all_opponent_batch_q_ls, 1)
 
-            # grab the opponent next action & compute next Q manually
+            # grab the opponent next action & compute next Q use target net
             all_opponent_batch_next_q_ls = []
             for opp_index in range(opponent_agents_num):
                 opp_policy = opponent_batch_list[opp_index][0]
@@ -518,7 +518,7 @@ def q_value_mixing_offpolicy(policy: Policy,
                 state = [torch.stack(state_ls, 0)]
 
                 input_dict = convert_to_torch_tensor(input_dict, policy.device)
-                opp_next_action, _ = opp_policy.model.policy_model(input_dict, state, seq_lens)
+                opp_next_action, _ = opp_policy.target_model.policy_model(input_dict, state, seq_lens)
 
                 state_ls = []
                 start_point = 0
@@ -529,12 +529,15 @@ def q_value_mixing_offpolicy(policy: Policy,
                 state = [torch.stack(state_ls, 0)]
 
                 input_dict["actions"] = opp_next_action
-                next_opp_q, _ = opp_policy.model.q_model(input_dict, state, seq_lens)
+                next_opp_q, _ = opp_policy.target_model.q_model(input_dict, state, seq_lens)
 
                 next_opp_q = convert_to_numpy(next_opp_q.squeeze(1))
                 all_opponent_batch_next_q_ls.append(next_opp_q)
             sample_batch["next_opponent_q"] = np.stack(
                 all_opponent_batch_next_q_ls, 1)
+
+
+
 
 
     else:
