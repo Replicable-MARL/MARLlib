@@ -7,6 +7,7 @@ from ray.rllib.utils.annotations import override
 from ray.rllib.utils.framework import try_import_tf, try_import_torch, \
     TensorType
 from ray.rllib.policy.rnn_sequencing import add_time_dimension
+from marl.models.zoo.mixers import QMixer, VDNMixer
 
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
@@ -14,7 +15,7 @@ torch, nn = try_import_torch()
 
 class DDPG_RNN_Model(TorchRNN, nn.Module):
     """
-    DDOG and MADDPG agent arch in one model
+    DDOG/MADDPG/FACMAC agent arch in one model
     """
 
     def __init__(
@@ -82,7 +83,7 @@ class DDPG_RNN_Model(TorchRNN, nn.Module):
                 else:
                     input_dim = input_dim * self.custom_config["num_agents"] + all_action_dim
 
-        else:  # ddpg
+        else:  # no centralized critic -> iddpg
             if "q" in name:
                 input_dim = input_dim + self.custom_config["space_act"].shape[0]
 
@@ -99,6 +100,19 @@ class DDPG_RNN_Model(TorchRNN, nn.Module):
         # action branch and value branch
         self.action_branch = nn.Linear(self.hidden_state_size, num_outputs)
         self.value_branch = nn.Linear(self.hidden_state_size, 1)
+
+        if self.custom_config["algorithm"] in ["facmac"]:
+            # mixer:
+            if self.custom_config["global_state_flag"]:
+                state_dim = self.custom_config["space_obs"]["state"].shape
+            else:
+                state_dim = self.custom_config["space_obs"]["obs"].shape + (self.custom_config["num_agents"],)
+            if self.custom_config["algo_args"]["mixer"] == "qmix":
+                self.mixer = QMixer(self.custom_config, state_dim)
+            elif self.custom_config["algo_args"]["mixer"] == "vdn":
+                self.mixer = VDNMixer()
+            else:
+                raise ValueError("Unknown mixer type {}".format(self.custom_config["algo_args"]["mixer"]))
 
         # Holds the current "base" output (before logits layer).
         self._features = None
@@ -120,16 +134,6 @@ class DDPG_RNN_Model(TorchRNN, nn.Module):
                 self.value_branch.weight.new(1, self.hidden_state_size).zero_().squeeze(0)
             ]
         return h
-
-    @override(ModelV2)
-    def value_function(self):
-        assert self._features is not None, "must call forward() first"
-        B = self._features.shape[0]
-        L = self._features.shape[1]
-        if self.q_flag:
-            return torch.reshape(self.value_branch(self._features), [B * L, -1])
-        else:
-            return torch.reshape(self.value_branch(self._features), [-1])
 
     @override(ModelV2)
     def forward(self, input_dict: Dict[str, TensorType],
@@ -259,3 +263,11 @@ class DDPG_RNN_Model(TorchRNN, nn.Module):
 
         else:
             raise ValueError("rnn core_arch wrong: {}".format(self.custom_config["model_arch_args"]["core_arch"]))
+
+    def mixing_value(self, all_agents_q, state):
+        # compatiable with rllib qmix mixer
+        all_agents_q = all_agents_q.view(-1, 1, self.n_agents)
+        q_tot = self.mixer(all_agents_q, state)
+
+        # shape to [B]
+        return q_tot.flatten(start_dim=0)

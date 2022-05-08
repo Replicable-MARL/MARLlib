@@ -7,6 +7,7 @@ from ray.rllib.utils.test_utils import check_learning_achieved
 from ray.rllib.utils.framework import try_import_tf, try_import_torch
 from marl.models.zoo.jointQ_rnn import Joint_Q_RNN
 from marl.models.zoo.vd_rnn import VD_RNN
+from marl.models.zoo.ddpg_rnn import DDPG_RNN_Model
 from marl.algos.scripts import POlICY_REGISTRY
 from envs.force_coop import COOP_ENV_REGISTRY as ENV_REGISTRY
 from marl.common import _get_model_config, recursive_dict_update
@@ -112,6 +113,9 @@ def run_vd(config_dict):
 
     ModelCatalog.register_custom_model(
         "Value_Decomposition_Model", VD_RNN)
+
+    ModelCatalog.register_custom_model(
+        "DDPG_Model", DDPG_RNN_Model)
 
     ##############
     ### policy ###

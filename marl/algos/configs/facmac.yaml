@@ -7,4 +7,5 @@ algo_args:
   buffer_size: 5000
   target_network_update_freq: 100
   batch_mode: "complete_episodes"
+  mixer: "qmix"
 
