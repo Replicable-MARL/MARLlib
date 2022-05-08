@@ -1,5 +1,5 @@
 from marl.algos.utils.IL.ddpg import *
-from marl.algos.utils.common import q_value_mixing_offpolicy, FACMACMixingValueMixin
+from marl.algos.utils.postprocessing import q_value_mixing_offpolicy, FACMACMixingValueMixin
 from ray.rllib.agents.ddpg.ddpg_torch_policy import TargetNetworkMixin, ComputeTDErrorMixin
 
 torch, nn = try_import_torch()

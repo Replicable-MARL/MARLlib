@@ -12,7 +12,7 @@ tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
 
 
-class BaseRNN(TorchRNN, nn.Module):
+class Base_RNN(TorchRNN, nn.Module):
 
     def __init__(
             self,

@@ -13,7 +13,7 @@ tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
 
 
-class DDPG_RNN_Model(TorchRNN, nn.Module):
+class DDPG_RNN(TorchRNN, nn.Module):
     """
     DDOG/MADDPG/FACMAC agent arch in one model
     """

@@ -1,13 +1,13 @@
 from gym.spaces import Box
 from ray.rllib.utils.framework import try_import_tf, try_import_torch
-from marl.models.base.base_rnn import BaseRNN
+from marl.models.base.base_rnn import Base_RNN
 import copy
 
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
 
 
-class CC_RNN(BaseRNN):
+class CC_RNN(Base_RNN):
 
     def __init__(
             self,

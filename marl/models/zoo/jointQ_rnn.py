@@ -7,7 +7,7 @@ from ray.rllib.models.preprocessors import get_preprocessor
 torch, nn = try_import_torch()
 
 
-class Joint_Q_RNN(TorchModelV2, nn.Module):
+class JointQ_RNN(TorchModelV2, nn.Module):
     """The default GRU model for QMIX."""
 
     def __init__(self, obs_space, action_space, num_outputs, model_config,

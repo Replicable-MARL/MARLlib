@@ -19,7 +19,7 @@ def get_dim(a):
         dim *= i
     return dim
 
-
+################################################################################################
 class CentralizedValueMixin:
     """Add method to evaluate the central value function from the model."""
 
@@ -131,7 +131,7 @@ def centralized_critic_postprocessing(policy,
     return train_batch
 
 
-######################
+################################################################################################
 class MixingValueMixin:
     """Add method to evaluate the central value function from the model."""
 
@@ -257,7 +257,7 @@ def compute_advantages_vf_tot(rollout: SampleBatch,
     return rollout
 
 
-################################################
+################################################################################################
 class MADDPGCentralizedValueMixin:
     """Add method to evaluate the central value function from the model."""
 
@@ -405,7 +405,7 @@ def centralized_critic_offpolicy(policy: Policy,
     return sample_batch
 
 
-################################################
+################################################################################################
 class FACMACMixingValueMixin:
     """Add method to evaluate the central value function from the model."""
 
@@ -535,10 +535,6 @@ def q_value_mixing_offpolicy(policy: Policy,
                 all_opponent_batch_next_q_ls.append(next_opp_q)
             sample_batch["next_opponent_q"] = np.stack(
                 all_opponent_batch_next_q_ls, 1)
-
-
-
-
 
     else:
         # Policy hasn't been initialized yet, use zeros.

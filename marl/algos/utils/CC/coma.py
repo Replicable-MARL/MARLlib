@@ -11,7 +11,7 @@ from ray.rllib.evaluation.postprocessing import compute_advantages, Postprocessi
 from ray.rllib.policy.sample_batch import SampleBatch
 from ray.rllib.utils.torch_ops import convert_to_torch_tensor
 from typing import Dict, Tuple
-from marl.algos.utils.common import CentralizedValueMixin, centralized_critic_postprocessing
+from marl.algos.utils.postprocessing import CentralizedValueMixin, centralized_critic_postprocessing
 
 torch, nn = try_import_torch()
 

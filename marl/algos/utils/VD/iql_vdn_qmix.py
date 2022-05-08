@@ -26,7 +26,7 @@ from ray.rllib.execution.concurrency_ops import Concurrently
 from ray.rllib.agents.qmix.qmix import DEFAULT_CONFIG
 from ray.rllib.policy.rnn_sequencing import chop_into_sequences
 
-from marl.models.zoo.jointQ_rnn import Joint_Q_RNN
+from marl.models.zoo.jointQ_rnn import JointQ_RNN
 from marl.models.zoo.mixers import QMixer, VDNMixer
 
 
@@ -205,7 +205,7 @@ class JointQPolicy(Policy):
             config["model"],
             framework="torch",
             name="model",
-            default_model=Joint_Q_RNN).to(self.device)
+            default_model=JointQ_RNN).to(self.device)
 
         self.target_model = ModelCatalog.get_model_v2(
             agent_obs_space,
@@ -214,7 +214,7 @@ class JointQPolicy(Policy):
             config["model"],
             framework="torch",
             name="target_model",
-            default_model=Joint_Q_RNN).to(self.device)
+            default_model=JointQ_RNN).to(self.device)
 
         self.exploration = self._create_exploration()
 

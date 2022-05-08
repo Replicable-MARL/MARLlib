@@ -14,7 +14,7 @@ from ray.rllib.utils.torch_ops import convert_to_torch_tensor
 from ray.rllib.agents.ppo.ppo_torch_policy import PPOTorchPolicy, KLCoeffMixin, ValueNetworkMixin
 from ray.rllib.policy.torch_policy import LearningRateSchedule, EntropyCoeffSchedule
 from ray.rllib.agents.ppo.ppo import PPOTrainer, DEFAULT_CONFIG as PPO_CONFIG
-from marl.algos.utils.common import MixingValueMixin, value_mix_centralized_critic_postprocessing
+from marl.algos.utils.postprocessing import MixingValueMixin, value_mix_centralized_critic_postprocessing
 from copy import deepcopy
 import numpy as np
 

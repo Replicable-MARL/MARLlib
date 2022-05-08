@@ -1,11 +1,11 @@
 from ray.rllib.utils.framework import try_import_tf, try_import_torch
 from marl.models.zoo.mixers import QMixer, VDNMixer
-from marl.models.base.base_rnn import BaseRNN
+from marl.models.base.base_rnn import Base_RNN
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
 
 
-class VD_RNN(BaseRNN):
+class VD_RNN(Base_RNN):
 
     def __init__(
             self,

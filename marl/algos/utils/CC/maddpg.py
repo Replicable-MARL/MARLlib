@@ -1,5 +1,5 @@
 from marl.algos.utils.IL.ddpg import *
-from marl.algos.utils.common import centralized_critic_offpolicy, MADDPGCentralizedValueMixin
+from marl.algos.utils.postprocessing import centralized_critic_offpolicy, MADDPGCentralizedValueMixin
 from ray.rllib.agents.ddpg.ddpg_torch_policy import TargetNetworkMixin, ComputeTDErrorMixin
 
 torch, nn = try_import_torch()

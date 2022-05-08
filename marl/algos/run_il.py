@@ -9,8 +9,8 @@ from ray.tune import register_env
 from ray import tune
 from ray.rllib.utils.test_utils import check_learning_achieved
 from ray.rllib.utils.framework import try_import_tf, try_import_torch
-from marl.models.base.base_rnn import BaseRNN
-from marl.models.zoo.ddpg_rnn import DDPG_RNN_Model
+from marl.models.base.base_rnn import Base_RNN
+from marl.models.zoo.ddpg_rnn import DDPG_RNN
 from envs.base_env import ENV_REGISTRY
 from marl.algos.scripts import POlICY_REGISTRY
 from marl.common import _get_model_config, recursive_dict_update
@@ -59,10 +59,10 @@ def run_il(config_dict):
     config_dict = recursive_dict_update(config_dict, rnn_arch_config)
 
     ModelCatalog.register_custom_model(
-        "Base_Model", BaseRNN)
+        "Base_Model", Base_RNN)
 
     ModelCatalog.register_custom_model(
-        "DDPG_Model", DDPG_RNN_Model)
+        "DDPG_Model", DDPG_RNN)
 
     ##############
     ### policy ###
