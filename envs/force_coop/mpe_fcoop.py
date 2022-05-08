@@ -18,7 +18,7 @@ class RllibMPE_FCOOP(RllibMPE):
         rewards = {}
         obs = {}
         for key in action_dict.keys():
-            rewards[key] = reward
+            rewards[key] = reward / self.num_agents
             obs[key] = {
                 "obs": o[key]
             }

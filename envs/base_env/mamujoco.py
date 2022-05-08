@@ -121,7 +121,7 @@ class RllibMAMujoco(MultiAgentEnv):
         infos = {}
         # to float32 for RLLIB check
         for pos, key in enumerate(sorted(action_dict.keys())):
-            rewards[key] = r
+            rewards[key] = r / self.num_agents
             obs[key] = o[pos]
             obs[key] = {
                 "obs": np.float32(o[pos]),

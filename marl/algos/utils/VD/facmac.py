@@ -161,6 +161,7 @@ def value_mixing_ddpg_loss(policy, model, dist_class, train_batch):
         "obs": train_batch[SampleBatch.CUR_OBS],
         "state": train_batch["state"],
         "is_training": True,
+        "opponent_q": train_batch["opponent_q"],
         "prev_actions": train_batch[SampleBatch.PREV_ACTIONS],
         "prev_rewards": train_batch[SampleBatch.PREV_REWARDS],
     }
@@ -171,6 +172,7 @@ def value_mixing_ddpg_loss(policy, model, dist_class, train_batch):
         "obs": train_batch[SampleBatch.NEXT_OBS],
         "state": train_batch["new_state"],
         "is_training": True,
+        "opponent_q": train_batch["next_opponent_q"],
         "prev_actions": train_batch[SampleBatch.ACTIONS],
         "prev_rewards": train_batch[SampleBatch.REWARDS],
     }

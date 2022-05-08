@@ -16,7 +16,7 @@ class RllibRWARE_FCOOP(RllibRWARE):
         done_flag = False
         for pos, key in enumerate(sorted(action_dict.keys())):
             infos[key] = i
-            rewards[key] = r
+            rewards[key] = r / self.num_agents
             obs[key] = {
                 "obs": o[pos]
             }

@@ -73,7 +73,7 @@ class RLlibSMAC(MultiAgentEnv):
                 "state": state_one_agent,
                 "action_mask": action_mask_one_agent
             }
-            reward_dict[agent_index] = reward
+            reward_dict[agent_index] = reward / self.num_agents
 
         dones = {"__all__": terminated}
 

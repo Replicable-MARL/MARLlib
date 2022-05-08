@@ -51,7 +51,7 @@ class RllibPommerman_FCOOP(RllibPommerman):
                 s_c_a = all_state[self.neural_agent[x]]
                 obs_status = get_obs_dict(s_c_a)
                 states["agent_%d" % x] = obs_status
-                rewards["agent_%d" % x] = r
+                rewards["agent_%d" % x] = r / self.num_agents
                 infos["agent_%d" % x] = {}
 
             else:
