@@ -1,7 +1,7 @@
 from ray import tune
 from ray.tune.utils import merge_dicts
 from ray.tune import CLIReporter
-from marl.algos.utils.VD.vda2c import VDA2CTrainer
+from marl.algos.core.VD.vda2c import VDA2CTrainer
 
 
 def run_vda2c(config_dict, common_config, env_dict, stop):

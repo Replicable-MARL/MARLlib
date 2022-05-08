@@ -1,7 +1,7 @@
 from ray import tune
 from ray.tune.utils import merge_dicts
 from ray.tune import CLIReporter
-from marl.algos.utils.VD.facmac import FACMACRNNTrainer as FACMACTrainer
+from marl.algos.core.VD.facmac import FACMACRNNTrainer as FACMACTrainer
 
 
 def run_facmac(config_dict, common_config, env_dict, stop):

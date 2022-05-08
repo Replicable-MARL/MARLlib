@@ -25,7 +25,6 @@ from ray.rllib.policy.view_requirement import ViewRequirement
 from ray.rllib.utils.framework import try_import_torch
 from ray.rllib.utils.typing import ModelConfigDict, TensorType
 from ray.rllib.models.catalog import ModelCatalog
-from marl.algos.utils.postprocessing import MADDPGCentralizedValueMixin
 
 torch, nn = try_import_torch()
 

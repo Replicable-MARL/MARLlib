@@ -1,11 +1,11 @@
-from marl.algos.utils.IL.ddpg import *
-from marl.algos.utils.postprocessing import centralized_critic_offpolicy, MADDPGCentralizedValueMixin
+from marl.algos.core.IL.ddpg import *
+from marl.algos.utils.postprocessing import q_value_mixing_offpolicy, FACMACMixingValueMixin
 from ray.rllib.agents.ddpg.ddpg_torch_policy import TargetNetworkMixin, ComputeTDErrorMixin
 
 torch, nn = try_import_torch()
 
 
-def build_maddpg_models(policy, observation_space, action_space, config):
+def build_facmac_models(policy, observation_space, action_space, config):
     num_outputs = int(np.product(observation_space.shape))
 
     policy_model_config = MODEL_DEFAULTS.copy()
@@ -19,7 +19,7 @@ def build_maddpg_models(policy, observation_space, action_space, config):
         num_outputs=num_outputs,
         model_config=config["model"],
         framework=config["framework"],
-        default_model=MADDPG_RNN_TorchModel,
+        default_model=FACMAC_RNN_TorchModel,
         name="rnnddpg_model",
         policy_model_config=policy_model_config,
         q_model_config=q_model_config,
@@ -34,7 +34,7 @@ def build_maddpg_models(policy, observation_space, action_space, config):
         num_outputs=num_outputs,
         model_config=config["model"],
         framework=config["framework"],
-        default_model=MADDPG_RNN_TorchModel,
+        default_model=FACMAC_RNN_TorchModel,
         name="rnnddpg_model",
         policy_model_config=policy_model_config,
         q_model_config=q_model_config,
@@ -46,11 +46,11 @@ def build_maddpg_models(policy, observation_space, action_space, config):
     return policy.model
 
 
-def build_maddpg_models_and_action_dist(
+def build_facmac_models_and_action_dist(
         policy: Policy, obs_space: gym.spaces.Space,
         action_space: gym.spaces.Space,
         config: TrainerConfigDict) -> Tuple[ModelV2, ActionDistribution]:
-    model = build_maddpg_models(policy, obs_space, action_space, config)
+    model = build_facmac_models(policy, obs_space, action_space, config)
 
     assert model.get_initial_state() != [], \
         "RNNDDPG requires its model to be a recurrent one!"
@@ -61,7 +61,7 @@ def build_maddpg_models_and_action_dist(
         return model, TorchDeterministic
 
 
-class MADDPG_RNN_TorchModel(DDPG_RNN_TorchModel):
+class FACMAC_RNN_TorchModel(DDPG_RNN_TorchModel):
     """
     Data flow:
         obs -> forward() -> model_out
@@ -73,7 +73,7 @@ class MADDPG_RNN_TorchModel(DDPG_RNN_TorchModel):
     implement forward() in a subclass.
     """
 
-    @override(DDPG_RNN_TorchModel)
+    @override(DDPGTorchModel)
     def forward(self, input_dict: Dict[str, TensorType],
                 state: List[TensorType],
                 seq_lens: TensorType):
@@ -86,37 +86,31 @@ class MADDPG_RNN_TorchModel(DDPG_RNN_TorchModel):
         For rnn support remove input_dict filter and pass state and seq_lens
         """
         model_out = {"obs": input_dict[SampleBatch.OBS]}
-        if "opponent_actions" in input_dict:  # add additional info to model out
+        if "opponent_q" in input_dict:  # add additional info to model out
+            model_out["opponent_q"] = input_dict["opponent_q"]
             model_out["state"] = input_dict["state"]
-            model_out["opponent_actions"] = input_dict["opponent_actions"]
-        else:  # haven't gone trough postprocessing
+        else:
             o = input_dict["obs"]
             if self.state_flag:
                 model_out["state"] = torch.zeros_like(o["state"], dtype=o["state"].dtype)
             else:
                 model_out["state"] = torch.zeros((o["obs"].shape[0], self.num_agents, o["obs"].shape[1]),
                                                  dtype=o["obs"].dtype)
-
-            if "actions" not in input_dict:
-                input_dict["actions"] = input_dict["prev_actions"]
-            model_out["opponent_actions"] = torch.stack(
-                [torch.zeros_like(input_dict["actions"], dtype=input_dict["actions"].dtype) for _ in
-                 range(self.num_agents - 1)], axis=1)
+            model_out["opponent_q"] = torch.zeros((o["obs"].shape[0], self.num_agents - 1),
+                                                  dtype=o["obs"].dtype)
 
         if self.use_prev_action:
             model_out["prev_actions"] = input_dict[SampleBatch.PREV_ACTIONS]
-            model_out["prev_opponent_actions"] = input_dict["prev_opponent_actions"]
-
         if self.use_prev_reward:
             model_out["prev_rewards"] = input_dict[SampleBatch.PREV_REWARDS]
 
         return model_out, state
 
-    def _get_cc_q_value(self, model_out: TensorType,
-                        state_in: List[TensorType],
-                        net,
-                        actions,
-                        seq_lens: TensorType):
+    def _get_q_value_and_mixing(self, model_out: TensorType,
+                                state_in: List[TensorType],
+                                net,
+                                actions,
+                                seq_lens: TensorType):
         # Continuous case -> concat actions to model_out.
         model_out = copy.deepcopy(model_out)
         if actions is not None:
@@ -131,20 +125,21 @@ class MADDPG_RNN_TorchModel(DDPG_RNN_TorchModel):
         model_out["is_training"] = True
 
         out, state_out = net(model_out, state_in, seq_lens)
-        return out, state_out
+        mixing_out = net.mixing_value(torch.cat((out, model_out["opponent_q"]), 1), model_out["state"])
+        return mixing_out, state_out
 
-    def get_cc_q_values(self,
-                        model_out: TensorType,
-                        state_in: List[TensorType],
-                        seq_lens: TensorType,
-                        actions: Optional[TensorType] = None) -> TensorType:
-        return self._get_cc_q_value(model_out, state_in, self.q_model, actions,
-                                    seq_lens)
+    def get_q_values_and_mixing(self,
+                                model_out: TensorType,
+                                state_in: List[TensorType],
+                                seq_lens: TensorType,
+                                actions: Optional[TensorType] = None) -> TensorType:
+        return self._get_q_value_and_mixing(model_out, state_in, self.q_model, actions,
+                                            seq_lens)
 
 
 # Copied from rnnddpg but optimizing the central q function.
-def central_critic_ddpg_loss(policy, model, dist_class, train_batch):
-    MADDPGCentralizedValueMixin.__init__(policy)
+def value_mixing_ddpg_loss(policy, model, dist_class, train_batch):
+    FACMACMixingValueMixin.__init__(policy)
     target_model = policy.target_models[model]
 
     i = 0
@@ -166,9 +161,8 @@ def central_critic_ddpg_loss(policy, model, dist_class, train_batch):
         "obs": train_batch[SampleBatch.CUR_OBS],
         "state": train_batch["state"],
         "is_training": True,
+        "opponent_q": train_batch["opponent_q"],
         "prev_actions": train_batch[SampleBatch.PREV_ACTIONS],
-        "opponent_actions": train_batch["opponent_actions"],
-        "prev_opponent_actions": train_batch["prev_opponent_actions"],
         "prev_rewards": train_batch[SampleBatch.PREV_REWARDS],
     }
     model_out_t, state_in_t = model(input_dict, state_batches, seq_lens)
@@ -178,9 +172,8 @@ def central_critic_ddpg_loss(policy, model, dist_class, train_batch):
         "obs": train_batch[SampleBatch.NEXT_OBS],
         "state": train_batch["new_state"],
         "is_training": True,
+        "opponent_q": train_batch["next_opponent_q"],  # this from target Q net
         "prev_actions": train_batch[SampleBatch.ACTIONS],
-        "opponent_actions": train_batch["next_opponent_actions"],
-        "prev_opponent_actions": train_batch["opponent_actions"],
         "prev_rewards": train_batch[SampleBatch.REWARDS],
     }
 
@@ -230,11 +223,11 @@ def central_critic_ddpg_loss(policy, model, dist_class, train_batch):
     # Q-net(s) evaluation.
     # prev_update_ops = set(tf1.get_collection(tf.GraphKeys.UPDATE_OPS))
     # Q-values for given actions & observations in given current
-    q_t = model.get_cc_q_values(
+    q_t = model.get_q_values_and_mixing(
         model_out_t, states_in_t["q"], seq_lens, train_batch[SampleBatch.ACTIONS])[0]
 
     # Q-values for current policy (no noise) in given current state
-    q_t_det_policy = model.get_cc_q_values(
+    q_t_det_policy = model.get_q_values_and_mixing(
         model_out_t, states_in_t["q"], seq_lens, policy_t)[0]
 
     actor_loss = -torch.mean(q_t_det_policy)
@@ -246,7 +239,7 @@ def central_critic_ddpg_loss(policy, model, dist_class, train_batch):
     #     set(tf1.get_collection(tf.GraphKeys.UPDATE_OPS)) - prev_update_ops)
 
     # Target q-net(s) evaluation.
-    q_tp1 = target_model.get_cc_q_values(
+    q_tp1 = target_model.get_q_values_and_mixing(
         target_model_out_tp1, target_states_in_tp1["q"], seq_lens, policy_tp1_smoothed)[0]
 
     if twin_q:
@@ -335,33 +328,28 @@ def central_critic_ddpg_loss(policy, model, dist_class, train_batch):
     return actor_loss, critic_loss
 
 
-def vf_preds_fetches(policy, input_dict, state_batches, model, action_dist):
-    return dict()
-
-
-MADDPGRNNTorchPolicy = DDPGRNNTorchPolicy.with_updates(
-    name="MADDPGRNNTorchPolicy",
-    postprocess_fn=centralized_critic_offpolicy,
-    extra_action_out_fn=vf_preds_fetches,
-    make_model_and_action_dist=build_maddpg_models_and_action_dist,
-    loss_fn=central_critic_ddpg_loss,
+FACMACRNNTorchPolicy = DDPGRNNTorchPolicy.with_updates(
+    name="FACMACRNNTorchPolicy",
+    postprocess_fn=q_value_mixing_offpolicy,
+    make_model_and_action_dist=build_facmac_models_and_action_dist,
+    loss_fn=value_mixing_ddpg_loss,
     mixins=[
         TargetNetworkMixin,
         ComputeTDErrorMixin,
-        MADDPGCentralizedValueMixin
+        FACMACMixingValueMixin
     ]
 )
 
 
 def get_policy_class(config: TrainerConfigDict) -> Optional[Type[Policy]]:
     if config["framework"] == "torch":
-        return MADDPGRNNTorchPolicy
+        return FACMACRNNTorchPolicy
 
 
-MADDPGRNNTrainer = DDPGRNNTrainer.with_updates(
-    name="MADDPGRNNTrainer",
+FACMACRNNTrainer = DDPGRNNTrainer.with_updates(
+    name="FACMACRNNTrainer",
     default_config=DDPG_RNN_DEFAULT_CONFIG,
-    default_policy=MADDPGRNNTorchPolicy,
+    default_policy=FACMACRNNTorchPolicy,
     get_policy_class=get_policy_class,
     validate_config=validate_config,
     allow_unknown_subkeys=["Q_model", "policy_model"]

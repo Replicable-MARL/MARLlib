@@ -1,7 +1,7 @@
 from ray import tune
 from ray.tune.utils import merge_dicts
 from ray.tune import CLIReporter
-from marl.algos.utils.CC.maddpg import MADDPGRNNTrainer as MADDPGTrainer
+from marl.algos.core.CC.maddpg import MADDPGRNNTrainer as MADDPGTrainer
 
 
 def run_maddpg(config_dict, common_config, env_dict, stop):

@@ -1,7 +1,7 @@
 from ray import tune
 from ray.tune.utils import merge_dicts
 from ray.tune import CLIReporter
-from marl.algos.utils.CC.maa2c import MAA2CTrainer
+from marl.algos.core.CC.maa2c import MAA2CTrainer
 
 
 def run_maa2c(config_dict, common_config, env_dict, stop):

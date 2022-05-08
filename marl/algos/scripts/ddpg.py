@@ -1,7 +1,7 @@
 from ray import tune
 from ray.tune.utils import merge_dicts
 from ray.tune import CLIReporter
-from marl.algos.utils.IL.ddpg import DDPGRNNTrainer as DDPGTrainer
+from marl.algos.core.IL.ddpg import DDPGRNNTrainer as DDPGTrainer
 
 
 def run_ddpg(config_dict, common_config, env_dict, stop):
