@@ -10,15 +10,18 @@
 
 **weixun**
 
-- [x] DDPG: add RNN support, test in EnvZoo (Mamujoco is enough) and then should be incorporated into CC 
-- [x] MADDPG: cc version of DDPG with RNN support, test in EnvZoo (Mamujoco is enough) and then should be incorporated into CC 
+- [x] DDPG: add RNN support, test in Mamujoco/MPE and then should be incorporated into IL 
+- [x] MADDPG: cc version of DDPG with RNN support, test in Mamujoco/MPE and then should be incorporated into CC 
 - [ ] off-policy RNN support investigation
 
 **Siyi**
 - [x] incorporate the rest of the environment into CC,IL and VD.
 - [x] modularize the code, unified the common part in CC,IL and VD.
-- [ ] config setting reconstruct
-- [ ] reconstruct the EnvZoo with modularized code in CC, IL and VD part
+- [x] DDPG: add RNN support, test in EnvZoo (Mamujoco is enough) and then should be incorporated into IL 
+- [x] MADDPG: cc version of DDPG with RNN support, test in Mamujoco/MPE and then should be incorporated into CC
+- [x] FACMAC: VD version of DDPG with RNN support, test in Mamujoco/MPE and then should be incorporated into CC
+- [x] config setting reconstruct
+- [x] reconstruct the EnvZoo with modularized code in CC, IL and VD part
 - [ ] off-policy RNN support investigation
 
 
