@@ -17,11 +17,11 @@ def get_train_parser():
         help="Whether use tune grid research")
     parser.add_argument(
         "--run",
-        choices=["PG", "A2C", "A3C", "MAA2C", "DDPG", "MADDPG", "PPO", "MAPPO", "SUM-VDA2C", "MIX-VDA2C", "SUM-VDPPO", "MIX-VDPPO", "HAPPO"],  # "APPO" "IMPALA"
+        choices=["PG", "A2C", "A3C", "MAA2C", "DDPG", "MADDPG", "PPO", "MAPPO", "SUM-VDA2C", "MIX-VDA2C", "SUM-VDPPO", "MIX-VDPPO", "HAPPO", "HATRPO"],  # "APPO" "IMPALA"
         # choices=["HAPPO"],  # "APPO" "IMPALA"
         # default="A2C",
         # default="MAPPO",
-        default="HAPPO",
+        default="HATRPO",
         help="The RLlib-registered algorithm to use.")
     parser.add_argument(
         "--share-policy",
@@ -47,7 +47,7 @@ def get_train_parser():
             "ManyagentAnt",
         ],
         # default="ManyagentAnt",
-        default="2AgentWalker",
+        default="2AgentHalfCheetah",
         # default="2AgentHalfCheetah",
         help="Envs should be registered")
     parser.add_argument(
@@ -74,7 +74,7 @@ def get_train_parser():
     parser.add_argument(
         "--num-gpus",
         type=float,
-        default=0.2,
+        default=0,
         help="GPU number per trail")
     parser.add_argument(
         "--num-workers",
@@ -88,11 +88,11 @@ def get_train_parser():
     parser.add_argument(
         "--num-gpus-per-worker",
         type=float,
-        default=0.1)
+        default=0)
     parser.add_argument(
         "--num-gpus-per-trial",
         type=float,
-        default=1)
+        default=0)
     parser.add_argument(
         "--stop-iters",
         type=int,

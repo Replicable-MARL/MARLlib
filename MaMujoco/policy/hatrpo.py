@@ -18,11 +18,13 @@ from MaMujoco.util.mappo_tools import TorchKLCoeffMixin
 from MaMujoco.util.mappo_tools import TorchEntropyCoeffSchedule
 from MaMujoco.util.mappo_tools import CentralizedValueMixin
 from ray.rllib.utils.torch_ops import apply_grad_clipping
+from MaMujoco.util.happo_tools import grad_extra_for_trpo
 import torch
 
 from ray.rllib.agents.ppo import ppo
 
-def run_happo(args, common_config, env_config, stop):
+
+def run_hatrpo(args, common_config, env_config, stop):
     """
             for bug mentioned https://github.com/ray-project/ray/pull/20743
             make sure sgd_minibatch_size > max_seq_len
@@ -72,10 +74,10 @@ def run_happo(args, common_config, env_config, stop):
         name="HAPPOTorchPolicy",
         get_default_config=lambda: PPO_CONFIG,
         postprocess_fn=add_another_agent_and_gae,
-        loss_fn=surrogate_loss_for_ppo_and_trpo('PPO'),
+        loss_fn=surrogate_loss_for_ppo_and_trpo('TRPO'),
         before_init=setup_torch_mixins,
         # optimizer_fn=make_happo_optimizers,
-        extra_grad_process_fn=apply_grad_clipping,
+        extra_grad_process_fn=grad_extra_for_trpo,
         mixins=[
             TorchEntropyCoeffSchedule, TorchKLCoeffMixin,
             CentralizedValueMixin, TorchLR

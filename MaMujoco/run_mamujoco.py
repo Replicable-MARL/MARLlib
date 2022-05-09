@@ -26,6 +26,7 @@ from MaMujoco.policy.mappo import run_mappo
 from MaMujoco.policy.ddpg import run_ddpg
 from MaMujoco.policy.maddpg import run_maddpg
 from MaMujoco.policy.happo import run_happo
+from MaMujoco.policy.hatrpo import run_hatrpo
 
 # from https://github.com/schroederdewitt/multiagent_mujoco
 
@@ -135,6 +136,7 @@ if __name__ == "__main__":
         "DDPG": run_ddpg,
         "MADDPG": run_maddpg,
         "HAPPO": run_happo,
+        "HATRPO": run_hatrpo,
     }
 
     #############

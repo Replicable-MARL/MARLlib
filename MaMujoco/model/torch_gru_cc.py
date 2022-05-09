@@ -113,11 +113,11 @@ class Torch_GRU_CentralizedCritic_Model(TorchRNN, nn.Module):
         input_ = torch.cat([state, opponent_action.reshape(-1, (self.n_agents-1) * self.num_outputs//2)], 1)
         return torch.reshape(self.central_vf(input_), [-1])
 
-    def policy_variables(self):
+    def actor_parameters(self):
         return reduce(lambda x, y: x + y, map(lambda p: list(p.parameters()), [self.fc1, self.gru, self.action_branch]))
         # return self.fc1.variables() + self.gru.variables() + self.action_branch.variables()
         # return self.fc1.parameters() +
 
-    def critic_variables(self):
+    def critic_parameters(self):
         # return self.central_vf.variables() + self.value_branch.variables()
         return reduce(lambda x, y: x + y, map(lambda p: list(p.parameters()), [self.central_vf, self.value_branch]))
