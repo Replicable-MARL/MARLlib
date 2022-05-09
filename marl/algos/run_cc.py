@@ -109,7 +109,7 @@ def run_cc(config_dict):
     #####################
 
     common_config = {
-        "seed": config_dict["seed"],
+        # "seed": config_dict["seed"],
         "env": env_reg_name,
         "num_gpus_per_worker": config_dict["num_gpus_per_worker"],
         "num_gpus": config_dict["num_gpus"],
