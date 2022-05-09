@@ -27,7 +27,8 @@ from ray.rllib.utils.typing import TrainerConfigDict, TensorType, \
     LocalOptimizer
 from MaMujoco.util.trpo_utilities import (
     conjugate_gradient,
-    hessian_vector_product
+    hessian_vector_product,
+    flat_grad,
 )
 
 tf1, tf, tfv = try_import_tf()
@@ -230,6 +231,8 @@ def ppo_surrogate_loss(
 
     vf_saved = model.value_function
 
+    policy.obs = train_batch[SampleBatch.OBS]
+
     if contain_global_obs(train_batch):
         model.value_function = lambda: policy.model.central_value_function(
             train_batch[STATE], train_batch[get_global_name(SampleBatch.ACTIONS)])
@@ -369,10 +372,12 @@ def grad_extra_for_trpo(policy, optimizer, loss):
                 grad_norm = grad_norm.cpu().numpy()
             info['grad_norm'] = grad_norm
 
+        _compute_descent_step(policy, params, loss)
+
     return info
 
 
-def _compute_descent_step(policy: Policy, pol_grad, obs):
+def _compute_descent_step(policy: Policy, params, sur_loss):
     """Approximately compute the Natural gradient using samples.
 
     This is based on the Fisher Matrix formulation as the hessian of the average
@@ -383,11 +388,13 @@ def _compute_descent_step(policy: Policy, pol_grad, obs):
         pol_grad (Tensor): The vector to compute the Fisher vector product with.
         obs (Tensor): The observations to evaluate the policy in.
     """
-    params = list(policy.module.actor.parameters())
 
     fvp_samples = 10
     cg_damping = 1e-3
     cg_iters = 10
+
+    obs = policy.obs
+    pol_grad = flat_grad(params, sur_loss)
 
     with torch.no_grad():
         ent_acts, _ = policy.module.actor.sample(obs, fvp_samples)
