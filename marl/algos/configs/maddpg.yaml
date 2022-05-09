@@ -1,4 +1,4 @@
-# VDN parameters
+# MADDPG parameters
 
 algo_args:
   batch_episode:  32

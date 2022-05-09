@@ -31,7 +31,7 @@ if __name__ == '__main__':
             config_dict["algorithm"] = algo_name
             algo_type = check_algo_type(algo_name)
 
-    algo_config = _get_config(params, "--algo_config")
+    algo_config = _get_config(params, "--algo_config", env_config)
     config_dict = recursive_dict_update(config_dict, algo_config)
 
     if algo_type == "IL":

@@ -18,7 +18,6 @@ def check_algo_type(algo_name):
 
 
 def _get_model_config(arg_name):
-
     with open(os.path.join(os.path.dirname(__file__), "models/configs", "{}.yaml".format(arg_name)),
               "r") as f:
         try:
@@ -28,7 +27,7 @@ def _get_model_config(arg_name):
     return config_dict
 
 
-def _get_config(params, arg_name):
+def _get_config(params, arg_name, info=None):
     config_name = None
 
     for _i, _v in enumerate(params):
@@ -38,11 +37,16 @@ def _get_config(params, arg_name):
             break
 
     if "algo" in arg_name:
-        path = "algos/configs"
+        if "--finetuned" in params:
+            path = "algos/configs/finetuned/{}".format(info["env"])
+        else:
+            path = "algos/configs"
+
     elif "env" in arg_name:
         path = "../envs/base_env/config"
+
     else:
-        raise ValueError("wrong type: {}".format(type))
+        raise ValueError()
 
     if config_name is not None:
         with open(os.path.join(os.path.dirname(__file__), path, "{}.yaml".format(config_name)),

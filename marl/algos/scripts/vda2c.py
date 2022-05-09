@@ -10,12 +10,13 @@ def run_vda2c(config_dict, common_config, env_dict, stop):
     train_batch_episode = config_dict["algo_args"]["batch_episode"]
     batch_mode = config_dict["algo_args"]["batch_mode"]
     lr = config_dict["algo_args"]["lr"]
+    entropy_coeff = config_dict["algo_args"]["entropy_coeff"]
 
     config = {
         "batch_mode": batch_mode,
         "train_batch_size": train_batch_episode * episode_limit,
         "lr": lr,
-        "entropy_coeff": 0.01,
+        "entropy_coeff": entropy_coeff,
         "model": {
             "custom_model": "Value_Decomposition_Model",
             "max_seq_len": episode_limit,
