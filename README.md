@@ -24,6 +24,10 @@
 - [x] reconstruct the EnvZoo with modularized code in CC, IL and VD part
 - [ ] off-policy RNN support investigation
 
+```
+CUDA_VISIBLE_DEVICES=0 python marl/run.py --algo_config=qmix --finetuned --env-config=smac with env_args.map_name=3m
+```
+
 
 
 
