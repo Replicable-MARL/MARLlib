@@ -11,6 +11,7 @@ from marl.models.zoo.ddpg_rnn import DDPG_RNN
 from marl.algos.scripts import POlICY_REGISTRY
 from envs.global_reward_env import COOP_ENV_REGISTRY as ENV_REGISTRY
 from marl.common import _get_model_config, recursive_dict_update
+from tabulate import tabulate
 
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
@@ -22,6 +23,21 @@ def run_vd(config_dict):
     ###################
     ### environment ###
     ###################
+
+    env_reg_ls = []
+    check_current_used_env_flag = False
+    for env_reg_info in ENV_REGISTRY.keys():
+        if not ENV_REGISTRY[env_reg_info]:
+            env_reg_ls.append([env_reg_info, "Error", "envs/base_env/config/{}.yaml".format(env_reg_info)])
+        else:
+            env_reg_ls.append([env_reg_info, "Ready", "envs/base_env/config/{}.yaml".format(env_reg_info)])
+            if env_reg_info == config_dict["env"]:
+                check_current_used_env_flag = True
+
+    print(tabulate(env_reg_ls, headers=['Env_Name', 'Check_Status', "Config_File_Location"], tablefmt='grid'))
+
+    if not check_current_used_env_flag:
+        raise ValueError("environment \"{}\" not installed properly or not registered yet".format(config_dict["env"]))
 
     map_name = config_dict["env_args"]["map_name"]
     test_env = ENV_REGISTRY[config_dict["env"]](config_dict["env_args"])
