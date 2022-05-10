@@ -114,10 +114,10 @@ class Torch_GRU_CentralizedCritic_Model(TorchRNN, nn.Module):
         return torch.reshape(self.central_vf(input_), [-1])
 
     def actor_parameters(self):
+        # return [list(m.parameters()) for m in [self.fc1, self.gru, self.action_branch]]
         return reduce(lambda x, y: x + y, map(lambda p: list(p.parameters()), [self.fc1, self.gru, self.action_branch]))
         # return self.fc1.variables() + self.gru.variables() + self.action_branch.variables()
         # return self.fc1.parameters() +
 
     def critic_parameters(self):
-        # return self.central_vf.variables() + self.value_branch.variables()
-        return reduce(lambda x, y: x + y, map(lambda p: list(p.parameters()), [self.central_vf, self.value_branch]))
+        return list(self.central_vf.parameters())
