@@ -25,11 +25,15 @@ from torch import nn
 from MaMujoco.util.valuenorm import ValueNorm
 from ray.rllib.utils.typing import TrainerConfigDict, TensorType, \
     LocalOptimizer
+
 from MaMujoco.util.trpo_utilities import (
-    conjugate_gradient,
-    hessian_vector_product,
-    flat_grad,
+    _flat_grad,
+    _flat_params,
+    _flat_hessian,
+    _fisher_vector_product,
+    _conjugate_gradient,
 )
+
 from functools import partial
 
 from torch.nn.utils import parameters_to_vector, vector_to_parameters
@@ -392,61 +396,6 @@ def clip_norm(policy, optimizer, loss):
     return info, params
 
 
-def _flat_hessian(hessians):
-    hessians_flatten = []
-    for hessian in hessians:
-        if hessian is None:
-            continue
-        hessians_flatten.append(hessian.contiguous().view(-1))
-    hessians_flatten = torch.cat(hessians_flatten).data
-    return hessians_flatten
-
-
-def _flat_params(params):
-    _params = []
-    for param in params:
-        _params.append(param.data.view(-1))
-
-    params_flatten = torch.cat(_params)
-    return params_flatten
-
-
-def _fisher_vector_product(policy, params, p):
-    p.detach()
-
-    logits, state = policy.model(policy.train_batch)
-    curr_action_dist = policy.dist_class(logits, policy.model)
-
-    kl_mean = policy.reduce_mean(policy.prev_action_dist.kl(curr_action_dist))
-    kl_grad = torch.autograd.grad(kl_mean, params, create_graph=True, allow_unused=True)
-    kl_grad = flat_grad(kl_grad)
-    kl_grad_p = (kl_grad * p).sum()
-    kl_hessian_p = torch.autograd.grad(kl_grad_p, params, allow_unused=True)
-    kl_hessian_p = _flat_hessian(kl_hessian_p)
-
-    return kl_hessian_p + 0.1 * p
-
-
-def _conjugate_gradient(policy, params, b, nsteps, residual_tol=1e-10):
-    x = torch.zeros(b.size())
-    r = b.clone()
-    p = b.clone()
-    rdotr = torch.dot(r, r)
-    for i in range(nsteps):
-        _Avp = _fisher_vector_product(policy, params, p)
-        alpha = rdotr / torch.dot(p, _Avp)
-        x += alpha * p
-        r -= alpha * _Avp
-        new_rdotr = torch.dot(r, r)
-        betta = new_rdotr / rdotr
-        p = r + betta * p
-        rdotr = new_rdotr
-        if rdotr < residual_tol:
-            break
-        # print(f'Conjugate : {i} success!')
-    return x
-
-
 def grad_extra_for_trpo(policy, optimizer, loss):
 
     info, params = clip_norm(policy, optimizer, loss)
@@ -457,7 +406,7 @@ def grad_extra_for_trpo(policy, optimizer, loss):
         critic_parameters_num = len(policy.model.critic_parameters())
         actor_params = params[:-critic_parameters_num]
         loss_grads = [p.grad for p in actor_params]
-        loss_grads = flat_grad(loss_grads)
+        loss_grads = _flat_grad(loss_grads)
 
         info['grad_norm(pg)'] = loss_grads.norm().item()
 
@@ -506,40 +455,6 @@ def grad_extra_for_trpo(policy, optimizer, loss):
         vector_to_parameters(new_params, policy.model.actor_parameters())
 
     return info
-
-
-def _compute_descent_step(policy: Policy, params, loss):
-    """Approximately compute the Natural gradient using samples.
-
-    This is based on the Fisher Matrix formulation as the hessian of the average
-    entropy. For more information, see:
-    https://en.wikipedia.org/wiki/Fisher_information#Matrix_form
-
-    Args:
-        pol_grad (Tensor): The vector to compute the Fisher vector product with.
-    """
-    cg_damping = 1e-3
-    cg_iters = 10
-
-    pol_grad = flat_grad(loss, params)
-
-    def fvp(vec):
-        entropy = policy.entropy
-
-        return hessian_vector_product(entropy, params, vec)
-
-    descent_direction, elapsed_iters, residual = conjugate_gradient(
-        lambda x: fvp(x) + cg_damping * x,
-        pol_grad,
-        cg_iters=cg_iters,
-    )
-
-    fisher_norm = pol_grad.dot(descent_direction)
-    delta = 1e-2
-    scale = 0 if fisher_norm < 0 else torch.sqrt(2 * delta / (fisher_norm + 1e-8))
-
-    descent_direction = descent_direction * scale
-    return descent_direction
 
 
 ppo_surrogate_loss = partial(_surrogate_loss, run='PPO')
