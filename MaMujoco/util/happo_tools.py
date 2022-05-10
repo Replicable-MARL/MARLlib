@@ -30,6 +30,9 @@ from MaMujoco.util.trpo_utilities import (
     hessian_vector_product,
     flat_grad,
 )
+from functools import partial
+
+from torch.nn.utils import parameters_to_vector, vector_to_parameters
 
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
@@ -175,20 +178,21 @@ def surrogate_loss_for_ppo_and_trpo(run: str):
     return wrap
 
 
-def get_loss(run, advantages, importance_sampling, log_probs, eps):
+def get_loss(run, advantages, importance_sampling, eps):
     if run == PPO:
         sub_loss = ppo_surrogate_for_one_agent(importance_sampling=importance_sampling,
                                                advantage=advantages,
                                                epsilon=eps)
     elif run == TRPO:
+        log_probs = torch.prod(importance_sampling)
         sub_loss = trpo_surrogate_for_one_agent(advantages=advantages, log_probs=log_probs)
     else:
-        raise TypeError('unsupported algorithm type')
+        raise TypeError(f'Unsupported algorithm type: {run}')
 
     return sub_loss
 
 
-def ppo_surrogate_loss(
+def _surrogate_loss(
         policy: Policy, model: ModelV2,
         dist_class: Type[TorchDistributionWrapper],
         train_batch: SampleBatch, run='PPO') -> Union[TensorType, List[TensorType]]:
@@ -207,6 +211,8 @@ def ppo_surrogate_loss(
 
     logits, state = model(train_batch)
     curr_action_dist = dist_class(logits, model)
+
+    policy.entropy = curr_action_dist.logp(train_batch[SampleBatch.ACTIONS]).neg().mean()
 
     # print(f'agent-{train_batch[SampleBatch.AGENT_INDEX][0]} with advantage: {torch.mean(train_batch[Postprocessing.ADVANTAGES])}')
 
@@ -230,8 +236,6 @@ def ppo_surrogate_loss(
         reduce_mean_valid = torch.mean
 
     vf_saved = model.value_function
-
-    policy.obs = train_batch[SampleBatch.OBS]
 
     if contain_global_obs(train_batch):
         model.value_function = lambda: policy.model.central_value_function(
@@ -275,7 +279,8 @@ def ppo_surrogate_loss(
 
             m_advantage = importance_sampling * m_advantage
 
-            sub_loss = get_loss(run=run, advantages=m_advantage, importance_sampling=importance_sampling, log_probs=log_prob,
+            sub_loss = get_loss(run=run, advantages=m_advantage,
+                                importance_sampling=importance_sampling,
                                 eps=policy.config['clip_param'])
 
             sub_losses.append(sub_loss)
@@ -286,8 +291,10 @@ def ppo_surrogate_loss(
             curr_action_dist.logp(train_batch[SampleBatch.ACTIONS]) -
             train_batch[SampleBatch.ACTION_LOGP])
 
-        surrogate_loss = get_loss(run, advantages=train_batch[Postprocessing.ADVANTAGES], importance_sampling=logp_ratio,
-                                  eps=policy.config['clip_param'], log_probs=curr_action_dist.logp(train_batch[SampleBatch.ACTIONS]))
+        surrogate_loss = get_loss(run=run,
+                                  advantages=train_batch[Postprocessing.ADVANTAGES],
+                                  importance_sampling=logp_ratio,
+                                  eps=policy.config['clip_param'])
 
     mean_policy_loss = reduce_mean_valid(-surrogate_loss)
 
@@ -337,6 +344,15 @@ def ppo_surrogate_loss(
     model.tower_stats["mean_entropy"] = mean_entropy
     model.tower_stats["mean_kl_loss"] = mean_kl_loss
 
+    # attain information into policy
+
+    policy.dist_class = dist_class
+    policy.action_dist_inputs = train_batch[SampleBatch.ACTION_DIST_INPUTS]
+    policy.reduce_mean = reduce_mean_valid
+    policy.train_batch = train_batch
+    policy.prev_action_dist = prev_action_dist
+    policy.old_action_log_probs_batch = train_batch[SampleBatch.ACTION_LOGP]
+
     return total_loss
 
 
@@ -357,8 +373,9 @@ def make_happo_optimizers(policy: Policy,
     return policy._actor_optimizer, policy._critic_optimizer
 
 
-def grad_extra_for_trpo(policy, optimizer, loss):
+def clip_norm(policy, optimizer, loss):
     info = {}
+    params = None
 
     for param_group in optimizer.param_groups:
         # Make sure we only pass params with grad != None into torch
@@ -372,12 +389,126 @@ def grad_extra_for_trpo(policy, optimizer, loss):
                 grad_norm = grad_norm.cpu().numpy()
             info['grad_norm'] = grad_norm
 
-        _compute_descent_step(policy, params, loss)
+    return info, params
+
+
+def _flat_hessian(hessians):
+    hessians_flatten = []
+    for hessian in hessians:
+        if hessian is None:
+            continue
+        hessians_flatten.append(hessian.contiguous().view(-1))
+    hessians_flatten = torch.cat(hessians_flatten).data
+    return hessians_flatten
+
+
+def _flat_params(params):
+    _params = []
+    for param in params:
+        _params.append(param.data.view(-1))
+
+    params_flatten = torch.cat(_params)
+    return params_flatten
+
+
+def _fisher_vector_product(policy, params, p):
+    p.detach()
+
+    logits, state = policy.model(policy.train_batch)
+    curr_action_dist = policy.dist_class(logits, policy.model)
+
+    kl_mean = policy.reduce_mean(policy.prev_action_dist.kl(curr_action_dist))
+    kl_grad = torch.autograd.grad(kl_mean, params, create_graph=True, allow_unused=True)
+    kl_grad = flat_grad(kl_grad)
+    kl_grad_p = (kl_grad * p).sum()
+    kl_hessian_p = torch.autograd.grad(kl_grad_p, params, allow_unused=True)
+    kl_hessian_p = _flat_hessian(kl_hessian_p)
+
+    return kl_hessian_p + 0.1 * p
+
+
+def _conjugate_gradient(policy, params, b, nsteps, residual_tol=1e-10):
+    x = torch.zeros(b.size())
+    r = b.clone()
+    p = b.clone()
+    rdotr = torch.dot(r, r)
+    for i in range(nsteps):
+        _Avp = _fisher_vector_product(policy, params, p)
+        alpha = rdotr / torch.dot(p, _Avp)
+        x += alpha * p
+        r -= alpha * _Avp
+        new_rdotr = torch.dot(r, r)
+        betta = new_rdotr / rdotr
+        p = r + betta * p
+        rdotr = new_rdotr
+        if rdotr < residual_tol:
+            break
+        # print(f'Conjugate : {i} success!')
+    return x
+
+
+def grad_extra_for_trpo(policy, optimizer, loss):
+
+    info, params = clip_norm(policy, optimizer, loss)
+
+    # descent_step = _compute_descent_step(policy, params, loss)
+
+    if params:
+        critic_parameters_num = len(policy.model.critic_parameters())
+        actor_params = params[:-critic_parameters_num]
+        loss_grads = [p.grad for p in actor_params]
+        loss_grads = flat_grad(loss_grads)
+
+        info['grad_norm(pg)'] = loss_grads.norm().item()
+
+        step_dir = _conjugate_gradient(policy, actor_params, b=loss_grads.data, nsteps=10)
+
+        # fvp = _fisher_vector_product(policy, actor_params, p=loss_grads.data)
+
+        # shs = 0.5 * (step_dir * fvp).sum(0, keepdim=True)
+
+        fisher_norm = loss_grads.dot(step_dir)
+
+        # print(fisher_norm)
+
+        kl_threshold = 0.01
+        # step_size = 1 / torch.sqrt(shs / kl_threshold)[0]
+        step_size = 0 if fisher_norm < 0 else torch.sqrt(2 * kl_threshold / (fisher_norm + 1e-8))
+
+        full_step = step_size * step_dir
+        # print(f'shape of full_step {full_step.shape}')
+
+        # excepted_improve = (loss_grads * full_step).sum(0, keepdim=True)
+        # excepted_improve = excepted_improve.data.cpu().numpy()
+
+        # print(f'excepted improve: {excepted_improve}')
+
+        # backtracking line search
+        # flag = False
+        # fraction = 1
+        # ls_step = 10
+
+        # old_action_log_probs_batch = policy.old_action_log_probs_batch
+
+        # actor_params = _flat_params(actor_params)
+
+        # for i in range(ls_step):
+        #     actor_params = actor_params + fraction * full_step
+        #     value_fn_out = policy.model.value_function()
+        #     print('mean of value fn out: ', torch.mean(value_fn_out))
+
+        info['grad_norm(nat)'] = full_step.norm().item()
+
+        new_params = (
+            parameters_to_vector(policy.model.actor_parameters()) - full_step
+        )
+
+        vector_to_parameters(new_params, policy.model.actor_parameters())
 
     return info
 
 
-def _compute_descent_step(policy: Policy, params, sur_loss):
+def _compute_descent_step(policy: Policy, params, loss):
     """Approximately compute the Natural gradient using samples.
 
     This is based on the Fisher Matrix formulation as the hessian of the average
@@ -386,25 +517,16 @@ def _compute_descent_step(policy: Policy, params, sur_loss):
 
     Args:
         pol_grad (Tensor): The vector to compute the Fisher vector product with.
-        obs (Tensor): The observations to evaluate the policy in.
     """
-
-    fvp_samples = 10
     cg_damping = 1e-3
     cg_iters = 10
 
-    obs = policy.obs
-    pol_grad = flat_grad(params, sur_loss)
-
-    with torch.no_grad():
-        ent_acts, _ = policy.module.actor.sample(obs, fvp_samples)
-
-    def entropy():
-        # return policy.compute_log_likelihoods()
-        return policy.module.actor.log_prob(obs, ent_acts).neg().mean()
+    pol_grad = flat_grad(loss, params)
 
     def fvp(vec):
-        return hessian_vector_product(entropy(), params, vec)
+        entropy = policy.entropy
+
+        return hessian_vector_product(entropy, params, vec)
 
     descent_direction, elapsed_iters, residual = conjugate_gradient(
         lambda x: fvp(x) + cg_damping * x,
@@ -418,3 +540,7 @@ def _compute_descent_step(policy: Policy, params, sur_loss):
 
     descent_direction = descent_direction * scale
     return descent_direction
+
+
+ppo_surrogate_loss = partial(_surrogate_loss, run='PPO')
+trpo_surrogate_loss = partial(_surrogate_loss, run='TRPO')
