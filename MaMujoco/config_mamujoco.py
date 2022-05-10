@@ -20,7 +20,7 @@ def get_train_parser():
         choices=["PG", "A2C", "A3C", "MAA2C", "DDPG", "MADDPG", "PPO", "MAPPO", "SUM-VDA2C", "MIX-VDA2C", "SUM-VDPPO", "MIX-VDPPO", "HAPPO", "HATRPO"],  # "APPO" "IMPALA"
         # choices=["HAPPO"],  # "APPO" "IMPALA"
         # default="A2C",
-        # default="MAPPO",
+        # default="HAPPO",
         default="HATRPO",
         help="The RLlib-registered algorithm to use.")
     parser.add_argument(
