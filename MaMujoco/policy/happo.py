@@ -10,7 +10,7 @@ from ray.rllib.agents.ppo.ppo_torch_policy import PPOTorchPolicy
 from ray.rllib.agents.ppo.ppo_tf_policy import PPOTFPolicy
 
 from MaMujoco.util.happo_tools import add_another_agent_and_gae, make_happo_optimizers
-from MaMujoco.util.happo_tools import surrogate_loss_for_ppo_and_trpo
+from MaMujoco.util.happo_tools import ppo_surrogate_loss
 
 from MaMujoco.util.mappo_tools import setup_torch_mixins
 from MaMujoco.util.mappo_tools import TorchLR
@@ -18,9 +18,11 @@ from MaMujoco.util.mappo_tools import TorchKLCoeffMixin
 from MaMujoco.util.mappo_tools import TorchEntropyCoeffSchedule
 from MaMujoco.util.mappo_tools import CentralizedValueMixin
 from ray.rllib.utils.torch_ops import apply_grad_clipping
+from functools import partial
 import torch
 
 from ray.rllib.agents.ppo import ppo
+
 
 def run_happo(args, common_config, env_config, stop):
     """
@@ -72,7 +74,7 @@ def run_happo(args, common_config, env_config, stop):
         name="HAPPOTorchPolicy",
         get_default_config=lambda: PPO_CONFIG,
         postprocess_fn=add_another_agent_and_gae,
-        loss_fn=surrogate_loss_for_ppo_and_trpo('PPO'),
+        loss_fn=ppo_surrogate_loss,
         before_init=setup_torch_mixins,
         # optimizer_fn=make_happo_optimizers,
         extra_grad_process_fn=apply_grad_clipping,
