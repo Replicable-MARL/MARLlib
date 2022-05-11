@@ -16,7 +16,6 @@ torch, nn = try_import_torch()
 
 
 def run_cc(config_dict):
-
     ray.init(local_mode=config_dict["local_mode"])
 
     ###################
@@ -25,15 +24,20 @@ def run_cc(config_dict):
 
     env_reg_ls = []
     check_current_used_env_flag = False
-    for env_reg_info in ENV_REGISTRY.keys():
-        if not ENV_REGISTRY[env_reg_info]:
-            env_reg_ls.append([env_reg_info, "Error", "envs/base_env/config/{}.yaml".format(env_reg_info)])
+    for env_n in ENV_REGISTRY.keys():
+        if not ENV_REGISTRY[env_n]:
+            info = [env_n, "Error", "envs/base_env/config/{}.yaml".format(env_n),
+                    "envs/base_env/{}.py".format(env_n)]
+            env_reg_ls.append(info)
         else:
-            env_reg_ls.append([env_reg_info, "Ready", "envs/base_env/config/{}.yaml".format(env_reg_info)])
-            if env_reg_info == config_dict["env"]:
+            info = [env_n, "Ready", "envs/base_env/config/{}.yaml".format(env_n),
+                    "envs/base_env/{}.py".format(env_n)]
+            env_reg_ls.append(info)
+            if env_n == config_dict["env"]:
                 check_current_used_env_flag = True
 
-    print(tabulate(env_reg_ls, headers=['Env_Name', 'Check_Status', "Config_File_Location"], tablefmt='grid'))
+    print(tabulate(env_reg_ls, headers=['Env_Name', 'Check_Status', "Config_File_Location", "Env_File_Location"],
+                   tablefmt='grid'))
 
     if not check_current_used_env_flag:
         raise ValueError("environment \"{}\" not installed properly or not registered yet".format(config_dict["env"]))
@@ -47,7 +51,6 @@ def run_cc(config_dict):
     env_reg_name = config_dict["env"] + "_" + config_dict["env_args"]["map_name"]
     register_env(env_reg_name,
                  lambda _: ENV_REGISTRY[config_dict["env"]](config_dict["env_args"]))
-
 
     #############
     ### model ###
@@ -89,7 +92,7 @@ def run_cc(config_dict):
 
     if config_dict["share_policy"] == "all":
         if not policy_mapping_info["all_agents_one_policy"]:
-            raise ValueError("in {}, policy can not be shared".format(map_name))
+            raise ValueError("in {}, policy can not be shared, change it to 1. group 2. individual".format(map_name))
 
         policies = {"shared_policy"}
         policy_mapping_fn = (

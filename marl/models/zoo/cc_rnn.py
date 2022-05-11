@@ -31,7 +31,8 @@ class CC_RNN(Base_RNN):
             self.state_dim = self.full_obs_space["state"].shape
             if len(self.state_dim) > 1:  # env return a 3D global state
                 cc_layers = []
-                cc_input_dim = self.state_dim[2]
+                self.state_dim_last = self.full_obs_space["state"].shape[2] + self.full_obs_space["obs"].shape[2]
+                cc_input_dim = self.state_dim_last
                 for i in range(self.custom_config["model_arch_args"]["conv_layer"]):
                     cc_conv_f = nn.Conv2d(
                         in_channels=cc_input_dim,
@@ -50,21 +51,19 @@ class CC_RNN(Base_RNN):
 
                     cc_input_dim = self.custom_config["model_arch_args"]["out_channel_layer_{}".format(i)]
 
-                self.cc_encoder = nn.Sequential(
-                    *cc_layers
-                )
             else:
                 cc_layers = []
-                cc_input_dim = self.full_obs_space["state"].shape[0]
+                cc_input_dim = self.full_obs_space["state"].shape[0] + self.full_obs_space["obs"].shape[0]
                 for i in range(self.custom_config["model_arch_args"]["fc_layer"]):
                     cc_out_dim = self.custom_config["model_arch_args"]["out_dim_fc_{}".format(i)]
                     cc_fc_layer = nn.Linear(cc_input_dim, cc_out_dim)
                     cc_layers.append(cc_fc_layer)
                     cc_input_dim = cc_out_dim
 
-                self.cc_encoder = nn.Sequential(
-                    *cc_layers
-                )
+            cc_layers.append(nn.Tanh())
+            self.cc_encoder = nn.Sequential(
+                *cc_layers
+            )
 
         # Central VF
         if self.custom_config["opp_action_in_cc"]:
@@ -90,7 +89,7 @@ class CC_RNN(Base_RNN):
         B = state.shape[0]
 
         if "conv_layer" in self.custom_config["model_arch_args"]:
-            x = state.reshape(-1, self.state_dim[0], self.state_dim[1], self.state_dim[2]).permute(0, 3, 1, 2)
+            x = state.reshape(-1, self.state_dim[0], self.state_dim[1], self.state_dim_last).permute(0, 3, 1, 2)
             x = self.cc_encoder(x)
             x = torch.mean(x, (2, 3))
         else:
@@ -111,6 +110,7 @@ class CC_RNN(Base_RNN):
 
         else:
             x = torch.cat([x.reshape(B, -1)], 1)
+
         if self.q_flag:
             return torch.reshape(self.central_vf(x), [-1, self.num_outputs])
         else:
