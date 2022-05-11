@@ -1,5 +1,5 @@
 from marl.algos.core.IL.ddpg import *
-from marl.algos.utils.postprocessing import centralized_critic_offpolicy, MADDPGCentralizedValueMixin
+from marl.algos.utils.postprocessing import centralized_critic_q, CentralizedQValueMixin
 from ray.rllib.agents.ddpg.ddpg_torch_policy import TargetNetworkMixin, ComputeTDErrorMixin
 
 torch, nn = try_import_torch()
@@ -144,7 +144,7 @@ class MADDPG_RNN_TorchModel(DDPG_RNN_TorchModel):
 
 # Copied from rnnddpg but optimizing the central q function.
 def central_critic_ddpg_loss(policy, model, dist_class, train_batch):
-    MADDPGCentralizedValueMixin.__init__(policy)
+    CentralizedQValueMixin.__init__(policy)
     target_model = policy.target_models[model]
 
     i = 0
@@ -341,14 +341,14 @@ def vf_preds_fetches(policy, input_dict, state_batches, model, action_dist):
 
 MADDPGRNNTorchPolicy = DDPGRNNTorchPolicy.with_updates(
     name="MADDPGRNNTorchPolicy",
-    postprocess_fn=centralized_critic_offpolicy,
+    postprocess_fn=centralized_critic_q,
     extra_action_out_fn=vf_preds_fetches,
     make_model_and_action_dist=build_maddpg_models_and_action_dist,
     loss_fn=central_critic_ddpg_loss,
     mixins=[
         TargetNetworkMixin,
         ComputeTDErrorMixin,
-        MADDPGCentralizedValueMixin
+        CentralizedQValueMixin
     ]
 )
 

@@ -12,7 +12,7 @@ from ray.rllib.utils.torch_ops import convert_to_torch_tensor
 from ray.rllib.agents.a3c.a3c_torch_policy import A3CTorchPolicy
 from ray.rllib.agents.a3c.a2c import A2C_DEFAULT_CONFIG as A2C_CONFIG, A2CTrainer
 from ray.rllib.agents.ppo.ppo_torch_policy import PPOTorchPolicy, KLCoeffMixin, ValueNetworkMixin
-from marl.algos.utils.postprocessing import MixingValueMixin, value_mix_centralized_critic_postprocessing
+from marl.algos.utils.postprocessing import MixingValueMixin, value_mixing_postprocessing
 
 torch, nn = try_import_torch()
 
@@ -77,7 +77,7 @@ def value_mix_actor_critic_loss(policy: Policy, model: ModelV2,
 VDA2CTorchPolicy = A3CTorchPolicy.with_updates(
     name="VDA2CTorchPolicy",
     get_default_config=lambda: A2C_CONFIG,
-    postprocess_fn=value_mix_centralized_critic_postprocessing,
+    postprocess_fn=value_mixing_postprocessing,
     loss_fn=value_mix_actor_critic_loss,
     mixins=[ValueNetworkMixin, MixingValueMixin],
 )

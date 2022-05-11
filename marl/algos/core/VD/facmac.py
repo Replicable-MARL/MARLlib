@@ -1,5 +1,5 @@
 from marl.algos.core.IL.ddpg import *
-from marl.algos.utils.postprocessing import q_value_mixing_offpolicy, FACMACMixingValueMixin
+from marl.algos.utils.postprocessing import q_value_mixing, MixingQValueMixin
 from ray.rllib.agents.ddpg.ddpg_torch_policy import TargetNetworkMixin, ComputeTDErrorMixin
 
 torch, nn = try_import_torch()
@@ -139,7 +139,7 @@ class FACMAC_RNN_TorchModel(DDPG_RNN_TorchModel):
 
 # Copied from rnnddpg but optimizing the central q function.
 def value_mixing_ddpg_loss(policy, model, dist_class, train_batch):
-    FACMACMixingValueMixin.__init__(policy)
+    MixingQValueMixin.__init__(policy)
     target_model = policy.target_models[model]
 
     i = 0
@@ -330,13 +330,13 @@ def value_mixing_ddpg_loss(policy, model, dist_class, train_batch):
 
 FACMACRNNTorchPolicy = DDPGRNNTorchPolicy.with_updates(
     name="FACMACRNNTorchPolicy",
-    postprocess_fn=q_value_mixing_offpolicy,
+    postprocess_fn=q_value_mixing,
     make_model_and_action_dist=build_facmac_models_and_action_dist,
     loss_fn=value_mixing_ddpg_loss,
     mixins=[
         TargetNetworkMixin,
         ComputeTDErrorMixin,
-        FACMACMixingValueMixin
+        MixingQValueMixin
     ]
 )
 

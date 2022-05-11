@@ -22,7 +22,6 @@ def get_dim(a):
 
 ################################################################################################
 class CentralizedValueMixin:
-    """Add method to evaluate the central value function from the model."""
 
     def __init__(self):
         self.compute_central_vf = self.model.central_value_function
@@ -147,17 +146,16 @@ def centralized_critic_postprocessing(policy,
 
 ################################################################################################
 class MixingValueMixin:
-    """Add method to evaluate the central value function from the model."""
 
     def __init__(self):
         self.mixing_vf = "mixing"
 
 
 # get opponent value vf
-def value_mix_centralized_critic_postprocessing(policy,
-                                                sample_batch,
-                                                other_agent_batches=None,
-                                                episode=None):
+def value_mixing_postprocessing(policy,
+                                sample_batch,
+                                other_agent_batches=None,
+                                episode=None):
     custom_config = policy.config["model"]["custom_model_config"]
     algorithm = custom_config["algorithm"]
     pytorch = custom_config["framework"] == "torch"
@@ -272,17 +270,16 @@ def compute_advantages_vf_tot(rollout: SampleBatch,
 
 
 ################################################################################################
-class MADDPGCentralizedValueMixin:
-    """Add method to evaluate the central value function from the model."""
+class CentralizedQValueMixin:
 
     def __init__(self):
         self.compute_central_q = self.model.get_cc_q_values
 
 
-def centralized_critic_offpolicy(policy: Policy,
-                                 sample_batch: SampleBatch,
-                                 other_agent_batches=None,
-                                 episode=None) -> SampleBatch:
+def centralized_critic_q(policy: Policy,
+                         sample_batch: SampleBatch,
+                         other_agent_batches=None,
+                         episode=None) -> SampleBatch:
     custom_config = policy.config["model"]["custom_model_config"]
     pytorch = custom_config["framework"] == "torch"
     obs_dim = get_dim(custom_config["space_obs"]["obs"].shape)
@@ -421,17 +418,16 @@ def centralized_critic_offpolicy(policy: Policy,
 
 
 ################################################################################################
-class FACMACMixingValueMixin:
-    """Add method to evaluate the central value function from the model."""
+class MixingQValueMixin:
 
     def __init__(self):
         self.compute_mixing_q = True
 
 
-def q_value_mixing_offpolicy(policy: Policy,
-                             sample_batch: SampleBatch,
-                             other_agent_batches=None,
-                             episode=None) -> SampleBatch:
+def q_value_mixing(policy: Policy,
+                   sample_batch: SampleBatch,
+                   other_agent_batches=None,
+                   episode=None) -> SampleBatch:
     custom_config = policy.config["model"]["custom_model_config"]
     pytorch = custom_config["framework"] == "torch"
     obs_dim = get_dim(custom_config["space_obs"]["obs"].shape)
