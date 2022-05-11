@@ -28,9 +28,6 @@ from ray.rllib.utils.typing import TrainerConfigDict, TensorType, \
 
 from MaMujoco.util.trpo_utilities import (
     _flat_grad,
-    _flat_params,
-    _flat_hessian,
-    _fisher_vector_product,
     _conjugate_gradient,
 )
 
@@ -126,6 +123,9 @@ def add_another_agent_and_gae(policy, sample_batch, other_agent_batches=None, ep
         sample_batch[SampleBatch.VF_PREDS] = value_normalizer.denormalize(sample_batch[SampleBatch.VF_PREDS])
 
     train_batch = compute_gae_for_sample_batch(policy, sample_batch, other_agent_batches, episode)
+
+    rewards = sample_batch[SampleBatch.REWARDS]
+    print(f'current mean-rewards, max-rewards, min-rewards: {np.mean(rewards)}, {np.min(rewards)}, {np.max(rewards)}')
 
     state_dim = policy.config["model"]["custom_model_config"]["state_dim"]
 

@@ -87,7 +87,7 @@ env_args_dict = {
 
 if __name__ == "__main__":
     args = get_train_parser().parse_args()
-    ray.init(local_mode=True)
+    ray.init(local_mode=False)
 
     ###################
     ### environment ###

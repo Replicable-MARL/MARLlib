@@ -8,6 +8,7 @@ from ray.rllib.agents import trainer
 from ray.rllib.agents.ppo.ppo import PPOTrainer, DEFAULT_CONFIG as PPO_CONFIG
 from ray.rllib.agents.ppo.ppo_torch_policy import PPOTorchPolicy
 from ray.rllib.agents.ppo.ppo_tf_policy import PPOTFPolicy
+from ray.tune.logger import TBXLogger
 
 from MaMujoco.util.happo_tools import add_another_agent_and_gae, make_happo_optimizers
 from MaMujoco.util.happo_tools import trpo_surrogate_loss
@@ -62,15 +63,15 @@ def run_hatrpo(args, common_config, env_config, stop):
     PPO_CONFIG.update({
         'critic_lr': 1e-3,
         # 'actor_lr': 5e-5,
-        'lr': 5e-6,
+        'lr': 5e-5,
         "lr_schedule": [
-            (0, 5e-6),
+            (0, 5e-5),
             (int(1e7), 1e-8),
         ]
     })
 
     HAPPOTorchPolicy = PPOTorchPolicy.with_updates(
-        name="HAPPOTorchPolicy",
+        name="HATRPOTorchPolicy",
         get_default_config=lambda: PPO_CONFIG,
         postprocess_fn=add_another_agent_and_gae,
         loss_fn=trpo_surrogate_loss,
@@ -94,6 +95,7 @@ def run_hatrpo(args, common_config, env_config, stop):
 
     results = tune.run(HAPPOTrainer, name=args.run + "_" + args.neural_arch + "_" + args.map, stop=stop,
                        config=config,
-                       verbose=1)
+                       verbose=1,
+                       loggers=[TBXLogger])
 
     return results
