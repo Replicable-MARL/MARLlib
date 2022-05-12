@@ -1,7 +1,0 @@
-# IQL parameters
-
-algo_args:
-  batch_episode:  10
-  batch_mode: "complete_episodes"
-  lr: 0.0005
-  episode_limit: 999
