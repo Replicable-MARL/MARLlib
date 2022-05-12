@@ -5,7 +5,7 @@ __data__: March-29-2022
 """
 
 import logging
-from typing import Dict, List, Type, Union
+from typing import Dict, List, Type, Union, Tuple
 from ray.rllib.models.torch.torch_action_dist import TorchDistributionWrapper
 from ray.rllib.policy.policy import Policy
 from ray.rllib.models.modelv2 import ModelV2
@@ -19,13 +19,18 @@ from ray.rllib.agents.ppo.ppo_tf_policy import (
 )
 from ray.rllib.evaluation.postprocessing import compute_advantages, Postprocessing, compute_gae_for_sample_batch
 from ray.rllib.policy.sample_batch import SampleBatch
-from ray.rllib.utils.framework import try_import_tf, try_import_torch
+from ray.rllib.utils.framework import try_import_tf, try_import_torch, get_variable
 from ray.rllib.utils.torch_ops import convert_to_torch_tensor as _d2t
 from torch import nn
+from MaMujoco.util.valuenorm import ValueNorm
+from ray.rllib.utils.typing import TrainerConfigDict, TensorType, \
+    LocalOptimizer
 
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
 
+
+value_normalizer = ValueNorm(1)
 
 torch, nn = try_import_torch()
 
@@ -62,8 +67,10 @@ def add_other_agent_info(agents_batch: dict, key: str):
 
     _POLICY_INDEX, _BATCH_INDEX = 0, 1
 
+    agent_ids = sorted([agent_id for agent_id in agents_batch])
+
     return np.stack([
-        agents_batch[agent_id][_BATCH_INDEX][key] for agent_id in agents_batch],
+        agents_batch[agent_id][_BATCH_INDEX][key] for agent_id in agent_ids],
         axis=1
     )
 
@@ -76,26 +83,37 @@ def get_global_name(key):
 
 def collect_other_agents_model_output(agents_batch):
 
-    other_agents_logits = []
+    # other_agents_logits = []
 
-    for agent_id, (policy, obs) in agents_batch.items():
-        agent_model = policy.model
-        assert isinstance(obs, SampleBatch)
-        agent_logits, state = agent_model(_d2t(obs))
+    agent_ids = sorted([agent_id for agent_id in agents_batch])
+
+    other_agents_logits = np.stack([
+        agents_batch[_id][1][SampleBatch.ACTION_DIST_INPUTS] for _id in agent_ids
+    ], axis=1)
+
+    # for agent_id, (policy, obs) in agents_batch.items():
+        # agent_model = policy.model
+        # assert isinstance(obs, SampleBatch)
+        # agent_logits, state = agent_model(_d2t(obs))
         # dis_class = TorchDistributionWrapper
         # curr_action_dist = dis_class(agent_logits, agent_model)
         # action_log_dist = curr_action_dist.logp(obs[SampleBatch.ACTIONS])
 
-        other_agents_logits.append(agent_logits)
+        # other_agents_logits.append(obs[SampleBatch.ACTION_DIST_INPUTS])
 
-    other_agents_logits = np.stack(other_agents_logits, axis=1)
+    # other_agents_logits = np.stack(other_agents_logits, axis=1)
 
     return other_agents_logits
 
 
 def add_another_agent_and_gae(policy, sample_batch, other_agent_batches=None, episode=None):
-    train_batch = compute_gae_for_sample_batch(policy, sample_batch, other_agent_batches, episode)
     # train_batch = centralized_critic_postprocessing(policy, sample_batch, other_agent_batches, episode)
+    global value_normalizer
+
+    if value_normalizer.updated:
+        sample_batch[SampleBatch.VF_PREDS] = value_normalizer.denormalize(sample_batch[SampleBatch.VF_PREDS])
+
+    train_batch = compute_gae_for_sample_batch(policy, sample_batch, other_agent_batches, episode)
 
     state_dim = policy.config["model"]["custom_model_config"]["state_dim"]
 
@@ -244,9 +262,13 @@ def ppo_surrogate_loss(
     mean_entropy = reduce_mean_valid(curr_entropy)
 
     # Compute a value function loss.
+    if policy.model.model_config['custom_model_config']['normal_value']:
+        value_normalizer.update(train_batch[Postprocessing.VALUE_TARGETS])
+        train_batch[Postprocessing.VALUE_TARGETS] = value_normalizer.normalize(train_batch[Postprocessing.VALUE_TARGETS])
+
     if policy.config["use_critic"]:
-        prev_value_fn_out = train_batch[SampleBatch.VF_PREDS]
-        value_fn_out = model.value_function()
+        prev_value_fn_out = train_batch[SampleBatch.VF_PREDS] #
+        value_fn_out = model.value_function()  # same as values
         vf_loss1 = torch.pow(
             value_fn_out - train_batch[Postprocessing.VALUE_TARGETS], 2.0)
         vf_clipped = prev_value_fn_out + torch.clamp(
@@ -279,3 +301,21 @@ def ppo_surrogate_loss(
     model.tower_stats["mean_kl_loss"] = mean_kl_loss
 
     return total_loss
+
+
+def make_happo_optimizers(policy: Policy,
+                          config: TrainerConfigDict) -> Tuple[LocalOptimizer]:
+    """Create separate optimizers for actor & critic losses."""
+
+    # Set epsilons to match tf.keras.optimizers.Adam's epsilon default.
+    policy._actor_optimizer = torch.optim.Adam(
+        params=policy.model.policy_variables(),
+        lr=config["actor_lr"],
+        eps=1e-7)
+
+    policy._critic_optimizer = torch.optim.Adam(
+        params=policy.model.critic_variables(), lr=config["critic_lr"], eps=1e-5)
+
+    # Return them in the same order as the respective loss terms are returned.
+    return policy._actor_optimizer, policy._critic_optimizer
+

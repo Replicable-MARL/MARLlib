@@ -15,8 +15,9 @@ def get_train_parser():
         help="Whether use tune grid research")
     parser.add_argument(
         "--run",
-        choices=["R2D2", "PG", "A2C", "A3C", "MAA2C", "PPO", "MAPPO", "COMA"],  # "APPO" "IMPALA"
-        default="COMA",
+        choices=["QMIX", "VDN", "R2D2", "PG", "A2C", "A3C", "MAA2C", "PPO", "MAPPO", "COMA", "MIX-VDA2C", "SUM-VDA2C", "MIX-VDPPO", "SUM-VDPPO", "HAPPO"],
+        # "APPO" "IMPALA"
+        default="HAPPO",
         help="The RLlib-registered algorithm to use.")
     parser.add_argument(
         "--share-policy",

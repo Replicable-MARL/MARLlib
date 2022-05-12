@@ -236,8 +236,7 @@ def central_critic_ddpg_loss(policy, model, dist_class, train_batch):
     # Q-values for current policy (no noise) in given current state
     q_t_det_policy = model.get_cc_q_values(
         model_out_t, states_in_t["q"], seq_lens, policy_t)[0]
-
-    actor_loss = -torch.mean(q_t_det_policy)
+    q_t_det_policy = torch.squeeze(input=q_t_det_policy, axis=len(q_t_det_policy.shape) - 1)
 
     if twin_q:
         twin_q_t = model.get_twin_q_values(model_out_t, states_in_t["twin_q"], seq_lens,
@@ -302,6 +301,7 @@ def central_critic_ddpg_loss(policy, model, dist_class, train_batch):
             errors = 0.5 * torch.pow(td_error, 2.0)
 
     critic_loss = torch.mean(train_batch[PRIO_WEIGHTS] * errors)
+    actor_loss = -torch.mean(q_t_det_policy * seq_mask)
 
     # Add l2-regularization if required.
     if l2_reg is not None:
