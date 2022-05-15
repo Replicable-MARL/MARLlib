@@ -144,6 +144,7 @@ def run_il(config_dict):
         },
         "framework": config_dict["framework"],
         "evaluation_interval": config_dict["evaluation_interval"],
+        "simple_optimizer": False  # force using better optimizer
     }
 
     stop = {

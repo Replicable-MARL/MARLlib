@@ -103,7 +103,7 @@ def centralized_critic_postprocessing(policy,
                     convert_to_torch_tensor(
                         sample_batch["state"], policy.device),
                     convert_to_torch_tensor(
-                        sample_batch["opponent_actions"], policy.device),
+                        sample_batch["opponent_actions"], policy.device) if opp_action_in_cc else None,
                 ) \
                     .cpu().detach().numpy()
 

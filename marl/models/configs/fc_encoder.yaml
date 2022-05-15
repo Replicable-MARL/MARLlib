@@ -1,6 +1,6 @@
 # fc encoder
 
 model_arch_args:
-  fc_layer:  2
-  out_dim_fc_0: 32
+  fc_layer: 2
+  out_dim_fc_0: 128
   out_dim_fc_1: 64
