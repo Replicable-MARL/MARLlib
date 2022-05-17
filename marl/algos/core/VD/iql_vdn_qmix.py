@@ -18,16 +18,12 @@ from ray.rllib.models.catalog import ModelCatalog
 from ray.rllib.policy.sample_batch import SampleBatch
 from ray.rllib.agents.qmix.qmix_policy import _mac, _validate, _unroll_mac
 from ray.rllib.agents.dqn.dqn import GenericOffPolicyTrainer
-from ray.rllib.execution.replay_ops import Replay, StoreToReplayBuffer
-from ray.rllib.execution.rollout_ops import ParallelRollouts, ConcatBatches
-from ray.rllib.execution.train_ops import TrainOneStep, UpdateTargetNetwork
-from ray.rllib.execution.metric_ops import StandardMetricsReporting
-from ray.rllib.execution.concurrency_ops import Concurrently
 from ray.rllib.agents.qmix.qmix import DEFAULT_CONFIG
 from ray.rllib.policy.rnn_sequencing import chop_into_sequences
 
 from marl.models.zoo.jointQ_rnn import JointQ_RNN
 from marl.models.zoo.mixers import QMixer, VDNMixer
+from marl.algos.utils.episode_execution_plan import episode_execution_plan
 
 
 # original _unroll_mac for next observation is different from Pymarl.
@@ -518,114 +514,10 @@ class JointQPolicy(Policy):
         return obs, action_mask, state
 
 
-# customized the LocalReplayBuffer to ensure the return batchsize = 32
-# be aware, although the rllib doc says, capacity is sequence number not one step data when replay_sequence_length > 1,
-# in our testing, it is not when sampling.
-class EpisodeBasedReplayBuffer(LocalReplayBuffer):
-
-    def __init__(
-            self,
-            num_shards: int = 1,
-            learning_starts: int = 1000,
-            capacity: int = 10000,
-            replay_batch_size: int = 32,
-            prioritized_replay_alpha: float = 0.6,
-            prioritized_replay_beta: float = 0.4,
-            prioritized_replay_eps: float = 1e-6,
-            replay_mode: str = "independent",
-            replay_sequence_length: int = 1,
-            replay_burn_in: int = 0,
-            replay_zero_init_states: bool = True,
-            buffer_size=DEPRECATED_VALUE,
-    ):
-        LocalReplayBuffer.__init__(self, num_shards, learning_starts, capacity, replay_batch_size,
-                                   prioritized_replay_alpha, prioritized_replay_beta,
-                                   prioritized_replay_eps, replay_mode, replay_sequence_length, replay_burn_in,
-                                   replay_zero_init_states,
-                                   buffer_size)
-
-        self.replay_batch_size = replay_batch_size
-
-    @override(LocalReplayBuffer)
-    def add_batch(self, batch: SampleBatchType) -> None:
-        # Make a copy so the replay buffer doesn't pin plasma memory.
-        batch = batch.copy()
-        # Handle everything as if multiagent
-        if isinstance(batch, SampleBatch):
-            batch = MultiAgentBatch({DEFAULT_POLICY_ID: batch}, batch.count)
-
-        with self.add_batch_timer:
-            for policy_id, sample_batch in batch.policy_batches.items():
-                timeslices = [sample_batch]
-                for time_slice in timeslices:
-                    if "weights" in time_slice and \
-                            len(time_slice["weights"]):
-                        weight = np.mean(time_slice["weights"])
-                    else:
-                        weight = None
-                    self.replay_buffers[policy_id].add(
-                        time_slice, weight=weight)
-        self.num_added += batch.count
-
-
-def execution_plan_joint_Q_learning(trainer: Trainer, workers: WorkerSet,
-                                    config: TrainerConfigDict, **kwargs) -> LocalIterator[dict]:
-    # A copy of the DQN algorithm execution_plan.
-    # Modified to be compatiable with joint Q learning.
-    # here we use EpisodeBasedReplayBuffer inherited from LocalReplayBuffer instead of SimpleReplayBuffer
-
-    local_replay_buffer = EpisodeBasedReplayBuffer(
-        learning_starts=config["learning_starts"],
-        capacity=config["buffer_size"],
-        replay_batch_size=config["train_batch_size"],
-        replay_sequence_length=config.get("replay_sequence_length", 1),
-        replay_burn_in=config.get("burn_in", 0),
-        replay_zero_init_states=config.get("zero_init_states", True)
-    )
-    # Assign to Trainer, so we can store the LocalReplayBuffer's
-    # data when we save checkpoints.
-    trainer.local_replay_buffer = local_replay_buffer
-
-    rollouts = ParallelRollouts(workers, mode="bulk_sync")
-
-    # We execute the following steps concurrently:
-    # (1) Generate rollouts and store them in our local replay buffer. Calling
-    # next() on store_op drives this.
-    store_op = rollouts.for_each(
-        StoreToReplayBuffer(local_buffer=local_replay_buffer))
-
-    def update_prio(item):
-        samples, info_dict = item
-        return info_dict
-
-    # (2) Read and train on experiences from the replay buffer. Every batch
-    # returned from the LocalReplay() iterator is passed to TrainOneStep to
-    # take a SGD step, and then we decide whether to update the target network.
-    post_fn = config.get("before_learn_on_batch") or (lambda b, *a: b)
-
-    train_step_op = TrainOneStep(workers)
-
-    replay_op = Replay(local_buffer=local_replay_buffer) \
-        .for_each(lambda x: post_fn(x, workers, config)) \
-        .for_each(train_step_op) \
-        .for_each(update_prio) \
-        .for_each(UpdateTargetNetwork(
-        workers, config["target_network_update_freq"]))
-
-    # Alternate deterministically between (1) and (2). Only return the output
-    # of (2) since training metrics are not available until (2) runs.
-    train_op = Concurrently(
-        [store_op, replay_op],
-        mode="round_robin",
-        output_indexes=[1],
-        round_robin_weights=[1, 1])
-
-    return StandardMetricsReporting(train_op, workers, config)
-
 
 JointQTrainer = GenericOffPolicyTrainer.with_updates(
     name="JointQ",
     default_config=DEFAULT_CONFIG,
     default_policy=JointQPolicy,
     get_policy_class=None,
-    execution_plan=execution_plan_joint_Q_learning)
+    execution_plan=episode_execution_plan)

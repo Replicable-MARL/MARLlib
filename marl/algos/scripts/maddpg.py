@@ -11,6 +11,7 @@ def run_maddpg(config_dict, common_config, env_dict, stop):
     algorithm = config_dict["algorithm"]
     batch_mode = config_dict["algo_args"]["batch_mode"]
     lr = config_dict["algo_args"]["lr"]
+    learning_starts = episode_limit * train_batch_size
 
     config = {
         "batch_mode": batch_mode,
@@ -23,8 +24,8 @@ def run_maddpg(config_dict, common_config, env_dict, stop):
             "custom_model_config": merge_dicts(config_dict, env_dict),
         },
         "prioritized_replay": True,
-        "zero_init_states": True
-
+        "zero_init_states": True,
+        "learning_starts": learning_starts
     }
     config.update(common_config)
 
