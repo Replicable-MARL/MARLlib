@@ -54,7 +54,7 @@ def surrogate_for_one_agent(importance_sampling, advantage, epsilon):
 
     return surrogate_loss
 
-def ppo_surrogate_loss(
+def happo_surrogate_loss(
         policy: Policy, model: ModelV2,
         dist_class: Type[TorchDistributionWrapper],
         train_batch: SampleBatch) -> Union[TensorType, List[TensorType]]:
@@ -227,7 +227,7 @@ HAPPOTorchPolicy = lambda config: PPOTorchPolicy.with_updates(
         name="HAPPOTorchPolicy",
         get_default_config=lambda: config,
         postprocess_fn=add_all_agents_gae,
-        loss_fn=ppo_surrogate_loss,
+        loss_fn=happo_surrogate_loss,
         before_init=setup_torch_mixins,
         # optimizer_fn=make_happo_optimizers,
         extra_grad_process_fn=apply_grad_clipping,

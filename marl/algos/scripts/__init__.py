@@ -10,6 +10,8 @@ from marl.algos.scripts.ddpg import run_ddpg
 from marl.algos.scripts.maddpg import run_maddpg
 from marl.algos.scripts.facmac import run_facmac
 from marl.algos.scripts.happo import run_happo
+from marl.algos.scripts.trpo import run_trpo
+from marl.algos.scripts.hatrpo import run_hatrpo
 
 
 POlICY_REGISTRY = {
@@ -29,6 +31,8 @@ POlICY_REGISTRY = {
     "maddpg": run_maddpg,
     "facmac": run_facmac,
     'happo': run_happo,
+    'trpo': run_trpo,
+    'hatrpo': run_hatrpo,
 }
 
 
