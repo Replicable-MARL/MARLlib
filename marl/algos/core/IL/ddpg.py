@@ -25,6 +25,10 @@ from ray.rllib.policy.view_requirement import ViewRequirement
 from ray.rllib.utils.framework import try_import_torch
 from ray.rllib.utils.typing import ModelConfigDict, TensorType
 from ray.rllib.models.catalog import ModelCatalog
+from ray.rllib.execution.replay_buffer import *
+
+from marl.algos.utils.episode_execution_plan import episode_execution_plan
+
 
 torch, nn = try_import_torch()
 
@@ -205,8 +209,7 @@ def ddpg_actor_critic_loss(policy: Policy, model: ModelV2, _,
     # Q-values for current policy (no noise) in given current state
     q_t_det_policy = model.get_q_values(
         model_out_t, states_in_t["q"], seq_lens, policy_t)[0]
-
-    actor_loss = -torch.mean(q_t_det_policy)
+    q_t_det_policy = torch.squeeze(input=q_t_det_policy, axis=len(q_t_det_policy.shape) - 1)
 
     if twin_q:
         twin_q_t = model.get_twin_q_values(model_out_t, states_in_t["twin_q"], seq_lens,
@@ -271,6 +274,7 @@ def ddpg_actor_critic_loss(policy: Policy, model: ModelV2, _,
             errors = 0.5 * torch.pow(td_error, 2.0)
 
     critic_loss = torch.mean(train_batch[PRIO_WEIGHTS] * errors)
+    actor_loss = -torch.mean(q_t_det_policy * seq_mask)
 
     # Add l2-regularization if required.
     if l2_reg is not None:
@@ -585,12 +589,12 @@ def get_policy_class(config: TrainerConfigDict) -> Optional[Type[Policy]]:
     if config["framework"] == "torch":
         return DDPGRNNTorchPolicy
 
-
 DDPGRNNTrainer = DDPGTrainer.with_updates(
     name="RNNDDPGTrainer",
     default_config=DDPG_RNN_DEFAULT_CONFIG,
     default_policy=DDPGRNNTorchPolicy,
     get_policy_class=get_policy_class,
     validate_config=validate_config,
-    allow_unknown_subkeys=["Q_model", "policy_model"]
+    allow_unknown_subkeys=["Q_model", "policy_model"],
+    execution_plan=episode_execution_plan
 )

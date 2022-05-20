@@ -40,7 +40,7 @@ def run_vd(config_dict):
 
     print(tabulate(env_reg_ls, headers=['Env_Name', 'Check_Status', "Config_File_Location", "Env_File_Location"],
                    tablefmt='grid'))
-    
+
     if not check_current_used_env_flag:
         raise ValueError("environment \"{}\" not installed properly or not registered yet".format(config_dict["env"]))
 
@@ -196,6 +196,7 @@ def run_vd(config_dict):
         },
         "framework": config_dict["framework"],
         "evaluation_interval": config_dict["evaluation_interval"],
+        "simple_optimizer": False  # force using better optimizer
     }
 
     stop = {

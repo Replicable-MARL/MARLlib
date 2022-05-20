@@ -3,28 +3,30 @@ from ray.tune import register_env
 from ray.rllib.utils.test_utils import check_learning_achieved
 from ray.tune.utils import merge_dicts
 import random
-from SMAC.model.torch_mask_lstm import *
-from SMAC.model.torch_mask_lstm_cc import *
-from SMAC.model.torch_mask_gru import *
-from SMAC.model.torch_mask_gru_cc import *
-from SMAC.model.torch_mask_updet_cc import *
-from SMAC.metric.smac_callback import *
-from SMAC.util.r2d2_tools import *
-from SMAC.model.torch_vdn_qmix_iql_model import *
-from SMAC.model.torch_vda2c_vdppo_model import *
-from SMAC.env.starcraft2_rllib import StarCraft2Env_Rllib as SMAC
+from EnvZoo.SMAC.model.torch_mask_lstm import *
+from EnvZoo.SMAC.model.torch_mask_lstm_cc import *
+from EnvZoo.SMAC.model.torch_mask_gru import *
+from EnvZoo.SMAC.model.torch_mask_gru_cc import *
+from EnvZoo.SMAC.model.torch_mask_updet_cc import *
+from EnvZoo.SMAC.model.torch_mask_updet import *
+from EnvZoo.SMAC.metric.smac_callback import *
+from EnvZoo.SMAC.util.r2d2_tools import *
+from EnvZoo.SMAC.model.torch_vdn_qmix_iql_model import *
+from EnvZoo.SMAC.model.torch_vda2c_vdppo_model import *
+from EnvZoo.SMAC.env.starcraft2_rllib import StarCraft2Env_Rllib as SMAC
 from config_smac import *
-from SMAC.policy.vdn_qmix_iql import run_vdn_qmix_iql
-from SMAC.policy.pg_a2c_a3c import run_pg_a2c_a3c
-from SMAC.policy.r2d2 import run_r2d2
-from SMAC.policy.ppo import run_ppo
-from SMAC.policy.vda2c import run_vda2c_sum_mix
-from SMAC.policy.vdppo import run_vdppo_sum_mix
-from SMAC.policy.maa2c import run_maa2c
-from SMAC.policy.mappo import run_mappo
-from SMAC.policy.coma import run_coma
-from SMAC.metric.smac_logger import SMACLogger
-from SMAC.metric.smac_reporter import SMACReporter
+from EnvZoo.SMAC.policy.vdn_qmix_iql import run_vdn_qmix_iql
+from EnvZoo.SMAC.policy.pg_a2c_a3c import run_pg_a2c_a3c
+from EnvZoo.SMAC.policy.r2d2 import run_r2d2
+from EnvZoo.SMAC.policy.ppo import run_ppo
+from EnvZoo.SMAC.policy.vda2c import run_vda2c_sum_mix
+from EnvZoo.SMAC.policy.vdppo import run_vdppo_sum_mix
+from EnvZoo.SMAC.policy.maa2c import run_maa2c
+from EnvZoo.SMAC.policy.mappo import run_mappo
+from EnvZoo.SMAC.policy.coma import run_coma
+from EnvZoo.SMAC.policy.happo import run_happo
+from EnvZoo.SMAC.metric.smac_logger import SMACLogger
+from EnvZoo.SMAC.metric.smac_reporter import SMACReporter
 
 if __name__ == '__main__':
 
@@ -91,6 +93,7 @@ if __name__ == '__main__':
         "MAA2C": run_maa2c,
         "MAPPO": run_mappo,
         "COMA": run_coma,
+        "HAPPO": run_happo,
     }
 
     #############
