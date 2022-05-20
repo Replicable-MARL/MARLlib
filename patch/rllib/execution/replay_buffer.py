@@ -230,9 +230,10 @@ class PrioritizedReplayBuffer(ReplayBuffer):
             # TODO(szymon): should we ensure no repeats?
             mass = random.random() * self._it_sum.sum(0, len(self._storage))
             idx = self._it_sum.find_prefixsum_idx(mass)
-            while idx in res:  # ensure no repeats
-                mass = random.random() * self._it_sum.sum(0, len(self._storage))
-                idx = self._it_sum.find_prefixsum_idx(mass)
+            if len(self._storage) > num_items:
+                while idx in res:  # ensure no repeats
+                    mass = random.random() * self._it_sum.sum(0, len(self._storage))
+                    idx = self._it_sum.find_prefixsum_idx(mass)
             res.append(idx)
         return res
 

@@ -5,16 +5,18 @@ from marl.algos.core.VD.facmac import FACMACRNNTrainer as FACMACTrainer
 
 
 def run_facmac(config_dict, common_config, env_dict, stop):
-    train_batch_size = config_dict["algo_args"]["batch_episode"] * env_dict["episode_limit"]
+    train_batch_size = config_dict["algo_args"]["batch_episode"]
+    buffer_size = config_dict["algo_args"]["buffer_size"]
     episode_limit = env_dict["episode_limit"]
     algorithm = config_dict["algorithm"]
     batch_mode = config_dict["algo_args"]["batch_mode"]
     lr = config_dict["algo_args"]["lr"]
+    learning_starts = episode_limit * train_batch_size
 
     config = {
         "batch_mode": batch_mode,
-        "buffer_size": 5000,
-        "train_batch_size": 1000,
+        "buffer_size": buffer_size,
+        "train_batch_size": train_batch_size,
         "critic_lr": lr,
         "actor_lr": lr,
         "n_step": 10,
@@ -23,8 +25,8 @@ def run_facmac(config_dict, common_config, env_dict, stop):
             "custom_model_config": merge_dicts(config_dict, env_dict),
         },
         "prioritized_replay": True,
-        "zero_init_states": True
-
+        "zero_init_states": True,
+        "learning_starts": learning_starts
     }
     config.update(common_config)
 

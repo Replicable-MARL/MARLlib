@@ -25,6 +25,10 @@ from ray.rllib.policy.view_requirement import ViewRequirement
 from ray.rllib.utils.framework import try_import_torch
 from ray.rllib.utils.typing import ModelConfigDict, TensorType
 from ray.rllib.models.catalog import ModelCatalog
+from ray.rllib.execution.replay_buffer import *
+
+from marl.algos.utils.episode_execution_plan import episode_execution_plan
+
 
 torch, nn = try_import_torch()
 
@@ -585,12 +589,12 @@ def get_policy_class(config: TrainerConfigDict) -> Optional[Type[Policy]]:
     if config["framework"] == "torch":
         return DDPGRNNTorchPolicy
 
-
 DDPGRNNTrainer = DDPGTrainer.with_updates(
     name="RNNDDPGTrainer",
     default_config=DDPG_RNN_DEFAULT_CONFIG,
     default_policy=DDPGRNNTorchPolicy,
     get_policy_class=get_policy_class,
     validate_config=validate_config,
-    allow_unknown_subkeys=["Q_model", "policy_model"]
+    allow_unknown_subkeys=["Q_model", "policy_model"],
+    execution_plan=episode_execution_plan
 )
