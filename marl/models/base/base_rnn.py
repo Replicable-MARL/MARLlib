@@ -7,6 +7,7 @@ from ray.rllib.utils.annotations import override
 from ray.rllib.utils.framework import try_import_tf, try_import_torch, \
     TensorType
 from ray.rllib.policy.rnn_sequencing import add_time_dimension
+from functools import reduce
 
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
@@ -89,6 +90,7 @@ class Base_RNN(TorchRNN, nn.Module):
         self.n_agents = self.custom_config["num_agents"]
         self.q_flag = False
 
+        self.actors = [self.encoder, self.rnn, self.action_branch]
 
     @override(ModelV2)
     def get_initial_state(self):
@@ -180,3 +182,9 @@ class Base_RNN(TorchRNN, nn.Module):
 
         else:
             raise ValueError("rnn core_arch wrong: {}".format(self.custom_config["model_arch_args"]["core_arch"]))
+
+    def actor_parameters(self):
+        # return [list(m.parameters()) for m in [self.fc1, self.gru, self.action_branch]]
+        return reduce(lambda x, y: x + y, map(lambda p: list(p.parameters()), self.actors))
+        # return self.fc1.variables() + self.gru.variables() + self.action_branch.variables()
+        # return self.fc1.parameters() +
