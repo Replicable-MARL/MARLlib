@@ -18,12 +18,19 @@ from ray.rllib.utils.torch_ops import convert_to_torch_tensor as _d2t
 from marl.algos.utils.valuenorm import ValueNorm
 from ray.rllib.utils.typing import TrainerConfigDict, TensorType, \
     LocalOptimizer
-from ray.rllib.agents.ppo.ppo_torch_policy import PPOTorchPolicy
 from ray.rllib.agents.ppo.ppo import PPOTrainer, DEFAULT_CONFIG as PPO_CONFIG
 from ray.rllib.agents.ppo.ppo_torch_policy import PPOTorchPolicy, ValueNetworkMixin, KLCoeffMixin
 from ray.rllib.utils.torch_ops import apply_grad_clipping
 from ray.rllib.policy.torch_policy import LearningRateSchedule, EntropyCoeffSchedule
-
+from marl.algos.utils.setup_utils import setup_torch_mixins
+from marl.algos.utils.get_hetero_info import (
+    get_global_name,
+    contain_global_obs,
+    STATE,
+    GLOBAL_MODEL_LOGITS,
+    add_all_agents_gae,
+)
+from ray.rllib.examples.centralized_critic import CentralizedValueMixin
 
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
@@ -34,93 +41,6 @@ value_normalizer = ValueNorm(1)
 torch, nn = try_import_torch()
 
 logger = logging.getLogger(__name__)
-
-"""
-def postprocess_fn(policy, sample_batch, other_agent_batches, episode):
-    agents = ["agent_1", "agent_2", "agent_3"]  # simple example of 3 agents
-    global_obs_batch = np.stack(
-        [other_agent_batches[agent_id][1]["obs"] for agent_id in agents],
-        axis=1)
-    # add the global obs and global critic value
-    sample_batch["global_obs"] = global_obs_batch
-    sample_batch["central_vf"] = self.sess.run(
-        self.critic_network, feed_dict={"obs": global_obs_batch})
-    return sample_batch
-
-"""
-from ray.rllib.examples.centralized_critic import CentralizedValueMixin
-
-
-# Grabs the opponent obs/act and includes it in the experience train_batch,
-# and computes GAE using the central vf predictions.
-
-GLOBAL_NEED_COLLECT = [SampleBatch.ACTION_LOGP, SampleBatch.ACTIONS]
-GLOBAL_PREFIX = 'GLOBAL_'
-GLOBAL_MODEL_LOGITS = f'{GLOBAL_PREFIX}_model_logits'
-STATE = 'state'
-convert_to_torch_tensor = _d2t
-
-
-def add_other_agent_info(agents_batch: dict, key: str):
-    # get other-agents information by specific key
-
-    _POLICY_INDEX, _BATCH_INDEX = 0, 1
-
-    return np.stack([
-        agents_batch[agent_id][_BATCH_INDEX][key] for agent_id in agents_batch],
-        axis=1
-    )
-
-
-def get_global_name(key):
-    # converts a key to global format
-
-    return f'{GLOBAL_PREFIX}{key}'
-
-
-def collect_other_agents_model_output(agents_batch):
-
-    other_agents_logits = []
-
-    for agent_id, (policy, obs) in agents_batch.items():
-        agent_model = policy.model
-        assert isinstance(obs, SampleBatch)
-        agent_logits, state = agent_model(_d2t(obs))
-        # dis_class = TorchDistributionWrapper
-        # curr_action_dist = dis_class(agent_logits, agent_model)
-        # action_log_dist = curr_action_dist.logp(obs[SampleBatch.ACTIONS])
-
-        other_agents_logits.append(agent_logits)
-
-    other_agents_logits = np.stack(other_agents_logits, axis=1)
-
-    return other_agents_logits
-
-
-def add_another_agent_and_gae(policy, sample_batch, other_agent_batches=None, episode=None):
-    # train_batch = centralized_critic_postprocessing(policy, sample_batch, other_agent_batches, episode)
-    global value_normalizer
-
-    if value_normalizer.updated:
-        sample_batch[SampleBatch.VF_PREDS] = value_normalizer.denormalize(sample_batch[SampleBatch.VF_PREDS])
-
-    train_batch = compute_gae_for_sample_batch(policy, sample_batch, other_agent_batches, episode)
-
-    state_dim = policy.config["model"]["custom_model_config"]["state_dim"]
-
-    sample_batch[STATE] = sample_batch[SampleBatch.OBS][:, -state_dim:]
-
-    if other_agent_batches:
-        for key in GLOBAL_NEED_COLLECT:
-            train_batch[get_global_name(key)] = add_other_agent_info(agents_batch=other_agent_batches, key=key)
-
-        train_batch[GLOBAL_MODEL_LOGITS] = collect_other_agents_model_output(other_agent_batches)
-
-    return train_batch
-
-
-def contain_global_obs(train_batch):
-    return any(key.startswith(GLOBAL_PREFIX) for key in train_batch)
 
 
 def surrogate_for_one_agent(importance_sampling, advantage, epsilon):
@@ -133,14 +53,6 @@ def surrogate_for_one_agent(importance_sampling, advantage, epsilon):
     )
 
     return surrogate_loss
-
-
-def get_action_from_batch(train_batch, model, dist_class):
-    logits, state = model(train_batch)
-    curr_action_dist = dist_class(logits, model)
-
-    return curr_action_dist
-
 
 def ppo_surrogate_loss(
         policy: Policy, model: ModelV2,
@@ -294,14 +206,6 @@ def ppo_surrogate_loss(
     return total_loss
 
 
-def setup_torch_mixins(policy, obs_space, action_space, config):
-    # Copied from PPOTorchPolicy  (w/o ValueNetworkMixin).
-    KLCoeffMixin.__init__(policy, config)
-    EntropyCoeffSchedule.__init__(policy, config["entropy_coeff"],
-                                  config["entropy_coeff_schedule"])
-    LearningRateSchedule.__init__(policy, config["lr"], config["lr_schedule"])
-
-
 def make_happo_optimizers(policy: Policy,
                           config: TrainerConfigDict) -> Tuple[LocalOptimizer]:
     """Create separate optimizers for actor & critic losses."""
@@ -322,7 +226,7 @@ def make_happo_optimizers(policy: Policy,
 HAPPOTorchPolicy = lambda config: PPOTorchPolicy.with_updates(
         name="HAPPOTorchPolicy",
         get_default_config=lambda: config,
-        postprocess_fn=add_another_agent_and_gae,
+        postprocess_fn=add_all_agents_gae,
         loss_fn=ppo_surrogate_loss,
         before_init=setup_torch_mixins,
         # optimizer_fn=make_happo_optimizers,
