@@ -1,7 +1,22 @@
 # HATRPO parameters
 
 algo_args:
-  batch_episode:  10
-  batch_mode: "complete_episodes"
-  lr: 0.0005
+  batch_episode: 10
+  batch_mode: complete_episodes
   iteration: 4
+  horizon: 1000,
+  num_sgd_iter: 5,  # ppo-epoch
+  train_batch_size: 4000,
+  sgd_minibatch_size: 128,
+  grad_clip: 10
+  clip_param: 0.3  # ppo-clip
+  use_critic: True
+  gamma: 0.99
+  normal_value: True
+  vf_share_layers: True
+  critic_lr: 1e-2
+  lr: 5e-5
+  lr_sh_min: 0
+  lr_sh_max: 5e-5
+  lr_sh_step: 1e7
+  lr_min: 1e-8
