@@ -9,6 +9,7 @@ from marl.algos.scripts.ppo import run_ppo
 from marl.algos.scripts.ddpg import run_ddpg
 from marl.algos.scripts.maddpg import run_maddpg
 from marl.algos.scripts.facmac import run_facmac
+from marl.algos.scripts.happo import run_happo
 
 
 POlICY_REGISTRY = {
@@ -27,6 +28,7 @@ POlICY_REGISTRY = {
     "ddpg": run_ddpg,
     "maddpg": run_maddpg,
     "facmac": run_facmac,
+    'happo': run_happo,
 }
 
 
