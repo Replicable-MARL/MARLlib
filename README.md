@@ -4,7 +4,7 @@
 
 **minquan**
 
-- [ ] HAPPO: test in EnvZoo (SMAC and Mamujoco) and then should be incorporated into CC 
+- [x] HAPPO: test in EnvZoo (SMAC and Mamujoco) and then should be incorporated into CC 
 - [ ] TRPO: test in EnvZoo (SMAC and Mamujoco) and then should be incorporated into CC 
 - [ ] HATRPO: test in EnvZoo (SMAC and Mamujoco) and then should be incorporated into CC 
 
