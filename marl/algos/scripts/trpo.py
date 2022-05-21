@@ -5,13 +5,12 @@ from ray.rllib.agents.ppo.ppo import DEFAULT_CONFIG as PPO_CONFIG
 from marl.algos.core.IL.trpo import TRPOTrainer
 from ray.rllib.utils.framework import try_import_tf, try_import_torch, get_variable
 from marl.algos.utils.setup_utils import _algos_var
-from functools import partial
 
 torch, nn = try_import_torch()
 
 
 def run_trpo(config_dict, common_config, env_dict, stop):
-    _param = partial(_algos_var, config=config_dict)
+    _param = _algos_var(config_dict)
 
     sgd_minibatch_size = _param('sgd_minibatch_size')
     episode_limit = _param('horizon')
@@ -22,14 +21,11 @@ def run_trpo(config_dict, common_config, env_dict, stop):
     config = {}
     config.update(common_config)
 
-    map_name = config_dict["env_args"]["map_name"],
+    map_name = config_dict["env_args"]["map_name"]
     arch = config_dict["model_arch_args"]["core_arch"]
-
-    config['normal_value'] = _param('normal_value')
 
     config.update({
         "seed": 1,
-        "env": map_name,
         "horizon": episode_limit,
         "num_sgd_iter": _param('num_sgd_iter'),
         "train_batch_size": _param('train_batch_size'),
@@ -39,7 +35,7 @@ def run_trpo(config_dict, common_config, env_dict, stop):
         "use_critic": _param('use_critic'),
         "gamma": _param('gamma'),
         "model": {
-            "custom_model": "{}_CentralizedCritic".format(arch),
+            "custom_model": "Base_Model",
             "custom_model_config": merge_dicts(config_dict, env_dict),
             "vf_share_layers": _param('vf_share_layers')
         },

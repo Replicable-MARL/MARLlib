@@ -28,8 +28,8 @@ from marl.algos.utils.setup_utils import setup_torch_mixins, get_policy_class
 from marl.algos.utils.get_hetero_info import (
     get_global_name,
     contain_global_obs,
-    STATE,
     trpo_post_process,
+    value_normalizer,
 )
 
 from marl.algos.utils.trust_regions import update_model_use_trust_region
@@ -39,8 +39,6 @@ from ray.rllib.examples.centralized_critic import CentralizedValueMixin
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
 
-
-value_normalizer = ValueNorm(1)
 
 logger = logging.getLogger(__name__)
 
@@ -62,7 +60,7 @@ def trpo_loss_fn(
 
     TRPO, HATRPO = 'TRPO', 'HATRPO'
 
-    CentralizedValueMixin.__init__(policy)
+    # CentralizedValueMixin.__init__(policy)
 
     logits, state = model(train_batch)
     curr_action_dist = dist_class(logits, model)
@@ -86,12 +84,12 @@ def trpo_loss_fn(
         mask = None
         reduce_mean_valid = torch.mean
 
-    vf_saved = model.value_function
+    # vf_saved = model.value_function
 
-    if contain_global_obs(train_batch):
-        model.value_function = lambda: policy.model.central_value_function(
-            train_batch[STATE], train_batch[get_global_name(SampleBatch.ACTIONS)]
-        )
+    # if contain_global_obs(train_batch):
+    #     model.value_function = lambda: policy.model.central_value_function(
+    #         train_batch[SampleBatch.OBS], train_batch[get_global_name(SampleBatch.ACTIONS)]
+    #     )
 
     policy_loss_for_rllib, action_kl = update_model_use_trust_region(
             model=model,
@@ -108,9 +106,8 @@ def trpo_loss_fn(
     curr_entropy = curr_action_dist.entropy()
 
     # Compute a value function loss.
-    if policy.model.model_config['custom_model_config']['normal_value']:
-        value_normalizer.update(train_batch[Postprocessing.VALUE_TARGETS])
-        train_batch[Postprocessing.VALUE_TARGETS] = value_normalizer.normalize(train_batch[Postprocessing.VALUE_TARGETS])
+    value_normalizer.update(train_batch[Postprocessing.VALUE_TARGETS])
+    train_batch[Postprocessing.VALUE_TARGETS] = value_normalizer.normalize(train_batch[Postprocessing.VALUE_TARGETS])
 
     if policy.config["use_critic"]:
         prev_value_fn_out = train_batch[SampleBatch.VF_PREDS] #
@@ -129,7 +126,7 @@ def trpo_loss_fn(
         vf_loss = mean_vf_loss = 0.0
 
 
-    model.value_function = vf_saved
+    # model.value_function = vf_saved
     # recovery the value function.
 
     total_loss = reduce_mean_valid(policy_loss_for_rllib +
