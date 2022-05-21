@@ -2,6 +2,7 @@ from ray.rllib.utils.torch_ops import convert_to_torch_tensor as _d2t
 from ray.rllib.policy.sample_batch import SampleBatch
 import numpy as np
 from ray.rllib.evaluation.postprocessing import discount_cumsum, Postprocessing, compute_gae_for_sample_batch
+from marl.algos.utils.valuenorm import ValueNorm
 
 
 GLOBAL_NEED_COLLECT = [SampleBatch.ACTION_LOGP, SampleBatch.ACTIONS]
@@ -9,7 +10,10 @@ GLOBAL_PREFIX = 'GLOBAL_'
 GLOBAL_MODEL_LOGITS = f'{GLOBAL_PREFIX}_model_logits'
 GLOBAL_MODEL = f'{GLOBAL_PREFIX}_model'
 GLOBAL_TRAIN_BATCH = f'{GLOBAL_PREFIX}_train_batch'
-STATE = 'state'
+# STATE = 'state'
+
+
+value_normalizer = ValueNorm(1)
 
 
 def add_other_agent_info(agents_batch: dict, key: str):
@@ -79,9 +83,9 @@ def add_all_agents_gae(policy, sample_batch, other_agent_batches=None, episode=N
 
     train_batch = compute_gae_for_sample_batch(policy, sample_batch, other_agent_batches, episode)
 
-    state_dim = policy.config["model"]["custom_model_config"]["state_dim"]
-
-    sample_batch[STATE] = sample_batch[SampleBatch.OBS][:, -state_dim:]
+    # state_dim = policy.config["model"]["custom_model_config"]["state_dim"]
+    # sample_batch[STATE] = sample_batch[SampleBatch.OBS][:, -state_dim:]
+    # sample_batch[STATE] = sample_batch[SampleBatch.OBS]
 
     if other_agent_batches:
         for key in GLOBAL_NEED_COLLECT:

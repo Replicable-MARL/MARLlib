@@ -23,7 +23,6 @@ def run_happo(config_dict, common_config, env_dict, stop):
 
     config.update({
         "seed": 1,
-        "env": map_name,
         "horizon": episode_limit,
         "num_sgd_iter": _param('num_sgd_iter'),
         "train_batch_size": _param('train_batch_size'),
@@ -33,7 +32,7 @@ def run_happo(config_dict, common_config, env_dict, stop):
         "use_critic": _param('use_critic'),
         "gamma": _param('gamma'),
         "model": {
-            "custom_model": "{}_CentralizedCritic".format(arch),
+            "custom_model": "Centralized_Critic_Model",
             "custom_model_config": merge_dicts(config_dict, env_dict),
             "vf_share_layers": _param('vf_share_layers')
         },
