@@ -22,7 +22,7 @@ from ray.rllib.agents.ppo.ppo import PPOTrainer, DEFAULT_CONFIG as PPO_CONFIG
 from ray.rllib.agents.ppo.ppo_torch_policy import PPOTorchPolicy, ValueNetworkMixin, KLCoeffMixin
 from ray.rllib.utils.torch_ops import apply_grad_clipping
 from ray.rllib.policy.torch_policy import LearningRateSchedule, EntropyCoeffSchedule
-from marl.algos.utils.setup_utils import setup_torch_mixins
+from marl.algos.utils.setup_utils import setup_torch_mixins, get_policy_class
 from marl.algos.utils.get_hetero_info import (
     get_global_name,
     contain_global_obs,
@@ -53,6 +53,7 @@ def surrogate_for_one_agent(importance_sampling, advantage, epsilon):
     )
 
     return surrogate_loss
+
 
 def happo_surrogate_loss(
         policy: Policy, model: ModelV2,
@@ -237,15 +238,8 @@ HAPPOTorchPolicy = lambda config: PPOTorchPolicy.with_updates(
         ])
 
 
-def get_policy_class(ppo_config):
-    def _get_policy_class(config_):
-        if config_["framework"] == "torch":
-            return HAPPOTorchPolicy(ppo_config)
-    return _get_policy_class()
-
-
 HAPPOTrainer = lambda ppo_config: PPOTrainer.with_updates(
-    name="#04-08-8-Worker-add-value-normal-critical-lr-1e-2#-HAPPOTrainer-with-local-mode-False",
+    name="#happo-trainer",
     default_policy=HAPPOTorchPolicy(ppo_config),
     get_policy_class=get_policy_class(ppo_config),
 )
