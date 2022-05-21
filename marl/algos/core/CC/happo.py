@@ -241,5 +241,5 @@ HAPPOTorchPolicy = lambda config: PPOTorchPolicy.with_updates(
 HAPPOTrainer = lambda ppo_config: PPOTrainer.with_updates(
     name="#happo-trainer",
     default_policy=HAPPOTorchPolicy(ppo_config),
-    get_policy_class=get_policy_class(ppo_config),
+    get_policy_class=get_policy_class(ppo_config, default_policy=HAPPOTorchPolicy),
 )

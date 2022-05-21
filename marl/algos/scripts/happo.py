@@ -4,11 +4,10 @@ from ray.tune import CLIReporter
 from ray.rllib.agents.ppo.ppo import DEFAULT_CONFIG as PPO_CONFIG
 from marl.algos.core.CC.happo import HAPPOTrainer
 from marl.algos.utils.setup_utils import _algos_var
-from functools import partial
 
 
 def run_happo(config_dict, common_config, env_dict, stop):
-    _param = partial(_algos_var, config=config_dict)
+    _param = _algos_var(config_dict)
 
     sgd_minibatch_size = _param('sgd_minibatch_size')
     episode_limit = _param('horizon')
@@ -19,10 +18,8 @@ def run_happo(config_dict, common_config, env_dict, stop):
     config = {}
     config.update(common_config)
 
-    map_name = config_dict["env_args"]["map_name"],
+    map_name = config_dict["env_args"]["map_name"]
     arch = config_dict["model_arch_args"]["core_arch"]
-
-    config['normal_value'] = _param('normal_value')
 
     config.update({
         "seed": 1,
