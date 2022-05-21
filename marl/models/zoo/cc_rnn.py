@@ -68,7 +68,7 @@ class CC_RNN(Base_RNN):
         # Central VF
         if self.custom_config["opp_action_in_cc"]:
             if isinstance(self.custom_config["space_act"], Box):  # continues
-                input_size = cc_input_dim + 2 * (self.custom_config["num_agents"] - 1)
+                input_size = cc_input_dim + num_outputs * (self.custom_config["num_agents"] - 1) // 2
             else:
                 input_size = cc_input_dim + num_outputs * (self.custom_config["num_agents"] - 1)
         else:
