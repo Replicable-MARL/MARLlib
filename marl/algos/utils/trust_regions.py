@@ -80,10 +80,8 @@ def linesearch(model,
     return False, x
 
 
-def update_model_use_trust_region(model, train_batch, advantages, obs, actions, action_logp, action_dist_inputs, dist_class, mean_fn):
+def update_model_use_trust_region(model, train_batch, advantages, actions, action_logp, action_dist_inputs, dist_class, mean_fn):
     # reference: https://github.com/ikostrikov/pytorch-trpo
-
-    __obs = {'obs': {'obs': obs}} # to match network forward
 
     def _get_policy_loss(volatile=False, mean=False):
         if volatile:
@@ -92,7 +90,10 @@ def update_model_use_trust_region(model, train_batch, advantages, obs, actions, 
         else:
             _logits, _state = model(train_batch)
 
-        _curr_action_dist = dist_class(_logits, model)
+        try:
+            _curr_action_dist = dist_class(_logits, model)
+        except ValueError as e:
+            print(_logits)
         _logp_ratio = torch.exp(
             _curr_action_dist.logp(actions) -
             action_logp,

@@ -28,24 +28,29 @@ from marl.algos.utils.setup_utils import setup_torch_mixins, get_policy_class
 from marl.algos.utils.get_hetero_info import (
     get_global_name,
     contain_global_obs,
-    STATE,
     GLOBAL_MODEL_LOGITS,
     GLOBAL_TRAIN_BATCH,
     GLOBAL_MODEL,
+    GLOBAL_IS_TRAINING,
+    GLOBAL_STATE,
     hatrpo_post_process,
+    value_normalizer,
 )
 
 from marl.algos.utils.trust_regions import update_model_use_trust_region
 
 from ray.rllib.examples.centralized_critic import CentralizedValueMixin
+import ctypes
 
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
 
 
-value_normalizer = ValueNorm(1)
-
 logger = logging.getLogger(__name__)
+
+
+def recovery_obj(_id):
+    return ctypes.cast(_id, ctypes.py_object).value
 
 
 def hatrpo_loss_fn(
@@ -91,7 +96,7 @@ def hatrpo_loss_fn(
 
     if contain_global_obs(train_batch):
         model.value_function = lambda: policy.model.central_value_function(
-            train_batch[STATE], train_batch[get_global_name(SampleBatch.ACTIONS)]
+            train_batch[SampleBatch.OBS], train_batch[get_global_name(SampleBatch.ACTIONS)]
         )
 
     want_hatrpo_but_no_other_batches_info = not contain_global_obs(train_batch)
@@ -101,7 +106,6 @@ def hatrpo_loss_fn(
             model=model,
             train_batch=train_batch,
             advantages=train_batch[Postprocessing.ADVANTAGES],
-            obs=train_batch[SampleBatch.OBS],
             actions=train_batch[SampleBatch.ACTIONS],
             action_logp=train_batch[SampleBatch.ACTION_LOGP],
             action_dist_inputs=train_batch[SampleBatch.ACTION_DIST_INPUTS],
@@ -109,8 +113,8 @@ def hatrpo_loss_fn(
             mean_fn=reduce_mean_valid,
         )
     else:
-        for _ in range(10):
-            print('step into HATRPO')
+        # for _ in range(10):
+        #     print('step into HATRPO')
         m_advantage = train_batch[Postprocessing.ADVANTAGES]
         agents_num = train_batch[GLOBAL_MODEL_LOGITS].shape[1] + 1
         random_indices = np.random.permutation(range(agents_num))
@@ -128,43 +132,63 @@ def hatrpo_loss_fn(
                 old_action_log_dist = train_batch[SampleBatch.ACTION_LOGP]
                 actions = train_batch[SampleBatch.ACTIONS]
                 train_batch_for_trpo_update = train_batch
+                action_dist_input = train_batch[SampleBatch.ACTION_DIST_INPUTS]
             else:
-                train_batch_for_trpo_update = train_batch[GLOBAL_TRAIN_BATCH][agent_id]
-                current_model = train_batch[GLOBAL_MODEL][agent_id]
+                current_model = recovery_obj(int(train_batch[GLOBAL_MODEL][agent_id]))
+                # train_batch_for_trpo_update = train_batch[GLOBAL_TRAIN_BATCH][agent_id]
                 current_action_logits = train_batch[GLOBAL_MODEL_LOGITS][:, agent_id, :].detach()
                 current_action_dist = dist_class(current_action_logits, None)
                 # current_action_dist = train_batch[GLOBAL_MODEL_LOGITS][:, agent_id, :]
                 old_action_log_dist = train_batch[get_global_name(SampleBatch.ACTION_LOGP)][:, agent_id].detach()
                 actions = train_batch[get_global_name(SampleBatch.ACTIONS)][:, agent_id, :].detach()
                 # actions = train_batch_for_trpo_update[SampleBatch.ACTIONS]
+                action_dist_input = train_batch[get_global_name(SampleBatch.ACTION_DIST_INPUTS)][:, agent_id].detach()
+
+                train_batch_for_trpo_update = SampleBatch(
+                    obs={SampleBatch.OBS:train_batch[get_global_name(SampleBatch.OBS)][agent_id]},
+                    seq_lens=train_batch[get_global_name(SampleBatch.SEQ_LENS)][agent_id]
+                )
+
+                train_batch_for_trpo_update.is_training = bool(train_batch[GLOBAL_IS_TRAINING][agent_id])
+
+                for i, s in enumerate(train_batch[GLOBAL_STATE][agent_id]):
+                    train_batch_for_trpo_update['state_in_{}'] = s
 
             importance_sampling = torch.exp(current_action_dist.logp(actions) - old_action_log_dist)
 
-            kl_loss, policy_loss = update_model_use_trust_region(
-                model=current_model,
-                train_batch=train_batch_for_trpo_update,
-                advantages=m_advantage,
-                actions=actions,
-                action_logp=train_batch_for_trpo_update[SampleBatch.ACTION_LOGP],
-                action_dist_inputs=train_batch_for_trpo_update[SampleBatch.ACTION_DIST_INPUTS],
-                mean_fn=reduce_mean_valid
-            )
+            try:
+                kl_loss, policy_loss = update_model_use_trust_region(
+                    model=current_model,
+                    train_batch=train_batch_for_trpo_update,
+                    advantages=m_advantage,
+                    actions=actions,
+                    action_logp=old_action_log_dist,
+                    action_dist_inputs=action_dist_input,
+                    mean_fn=reduce_mean_valid,
+                    dist_class=dist_class,
+                )
+                kl_losses.append(kl_loss)
+                policy_losses.append(policy_loss)
+            except RuntimeError as e:
+                print(f'this patch matrix dimension error: {train_batch_for_trpo_update["obs"]["obs"].shape}')
+            else:
+                print('evaluate other model is okay')
 
             m_advantage = importance_sampling * m_advantage
 
             # sub_losses.append(sub_loss)
-            kl_losses.append(kl_loss)
-            policy_losses.append(policy_loss)
 
         policy_loss_for_rllib = torch.mean(torch.stack(policy_losses, axis=1), axis=1)
         action_kl = torch.mean(torch.stack(kl_losses, axis=1), axis=1)
 
+        del train_batch[GLOBAL_MODEL]
+
     curr_entropy = curr_action_dist.entropy()
 
     # Compute a value function loss.
-    if policy.model.model_config['custom_model_config']['normal_value']:
-        value_normalizer.update(train_batch[Postprocessing.VALUE_TARGETS])
-        train_batch[Postprocessing.VALUE_TARGETS] = value_normalizer.normalize(train_batch[Postprocessing.VALUE_TARGETS])
+    # if policy.model.model_config['custom_model_config']['normal_value']:
+    value_normalizer.update(train_batch[Postprocessing.VALUE_TARGETS])
+    train_batch[Postprocessing.VALUE_TARGETS] = value_normalizer.normalize(train_batch[Postprocessing.VALUE_TARGETS])
 
     if policy.config["use_critic"]:
         prev_value_fn_out = train_batch[SampleBatch.VF_PREDS] #
@@ -223,6 +247,6 @@ HAPTRPOTorchPolicy = lambda _config: PPOTorchPolicy.with_updates(
 
 HATRPOTrainer = lambda ppo_config: PPOTrainer.with_updates(
     name="#hatrpo-trainer",
-    default_policy=HATRPOTrainer(ppo_config),
+    default_policy=HAPTRPOTorchPolicy(ppo_config),
     get_policy_class=get_policy_class(ppo_config, default_policy=HAPTRPOTorchPolicy),
 )

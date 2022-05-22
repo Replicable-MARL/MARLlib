@@ -11,7 +11,7 @@ evaluation_interval: 10
 framework: "torch"
 num_workers: 1
 num_gpus: 0
-num_cpus_per_worker: 10
+num_cpus_per_worker: 1
 num_gpus_per_worker: 0
 stop_iters: 9999999
 stop_timesteps: 9999999

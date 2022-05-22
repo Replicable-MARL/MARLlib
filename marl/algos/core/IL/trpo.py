@@ -58,7 +58,7 @@ def trpo_loss_fn(
             of loss tensors.
     """
 
-    TRPO, HATRPO = 'TRPO', 'HATRPO'
+    # TRPO, HATRPO = 'TRPO', 'HATRPO'
 
     # CentralizedValueMixin.__init__(policy)
 
