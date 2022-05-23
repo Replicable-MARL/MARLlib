@@ -95,7 +95,6 @@ def trpo_loss_fn(
             model=model,
             train_batch=train_batch,
             advantages=train_batch[Postprocessing.ADVANTAGES],
-            obs=train_batch[SampleBatch.OBS],
             actions=train_batch[SampleBatch.ACTIONS],
             action_logp=train_batch[SampleBatch.ACTION_LOGP],
             action_dist_inputs=train_batch[SampleBatch.ACTION_DIST_INPUTS],
@@ -125,11 +124,10 @@ def trpo_loss_fn(
     else:
         vf_loss = mean_vf_loss = 0.0
 
-
     # model.value_function = vf_saved
     # recovery the value function.
 
-    total_loss = reduce_mean_valid(policy_loss_for_rllib +
+    total_loss = reduce_mean_valid(-policy_loss_for_rllib +
                                    policy.kl_coeff * action_kl +
                                    policy.config["vf_loss_coeff"] * vf_loss -
                                    policy.entropy_coeff * curr_entropy)
@@ -137,7 +135,7 @@ def trpo_loss_fn(
     # Store values for stats function in model (tower), such that for
     # multi-GPU, we do not override them during the parallel loss phase.
     mean_kl_loss = reduce_mean_valid(action_kl)
-    mean_policy_loss = reduce_mean_valid(policy_loss_for_rllib)
+    mean_policy_loss = reduce_mean_valid(-policy_loss_for_rllib)
     mean_entropy = reduce_mean_valid(curr_entropy)
 
     model.tower_stats["total_loss"] = total_loss

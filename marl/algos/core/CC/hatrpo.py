@@ -106,6 +106,7 @@ def hatrpo_loss_fn(
             model=model,
             train_batch=train_batch,
             advantages=train_batch[Postprocessing.ADVANTAGES],
+            # pre_action_dist=train_batch[SampleBatch.]
             actions=train_batch[SampleBatch.ACTIONS],
             action_logp=train_batch[SampleBatch.ACTION_LOGP],
             action_dist_inputs=train_batch[SampleBatch.ACTION_DIST_INPUTS],
@@ -145,19 +146,23 @@ def hatrpo_loss_fn(
                 action_dist_input = train_batch[get_global_name(SampleBatch.ACTION_DIST_INPUTS)][:, agent_id].detach()
 
                 train_batch_for_trpo_update = SampleBatch(
-                    obs={SampleBatch.OBS:train_batch[get_global_name(SampleBatch.OBS)][agent_id]},
-                    seq_lens=train_batch[get_global_name(SampleBatch.SEQ_LENS)][agent_id]
+                    obs=train_batch[get_global_name(SampleBatch.OBS)][:, agent_id],
+                    seq_lens=train_batch[get_global_name(SampleBatch.SEQ_LENS)][:, agent_id]
                 )
 
                 train_batch_for_trpo_update.is_training = bool(train_batch[GLOBAL_IS_TRAINING][agent_id])
 
-                for i, s in enumerate(train_batch[GLOBAL_STATE][agent_id]):
-                    train_batch_for_trpo_update['state_in_{}'] = s
+                train_batch_for_trpo_update['state_in_0'] = train_batch[GLOBAL_STATE][:, agent_id].reshape(
+                    train_batch['state_in_0'].shape
+                )
+                # for i, s in enumerate(train_batch[GLOBAL_STATE][:, agent_id]):
+                #     state_name = f'state_in_{i}'
+                #     state = s.reshape(train_batch[state_name].shape)
+                #     train_batch_for_trpo_update[state_name] = state
 
             importance_sampling = torch.exp(current_action_dist.logp(actions) - old_action_log_dist)
 
-            try:
-                kl_loss, policy_loss = update_model_use_trust_region(
+            kl_loss, policy_loss = update_model_use_trust_region(
                     model=current_model,
                     train_batch=train_batch_for_trpo_update,
                     advantages=m_advantage,
@@ -166,13 +171,9 @@ def hatrpo_loss_fn(
                     action_dist_inputs=action_dist_input,
                     mean_fn=reduce_mean_valid,
                     dist_class=dist_class,
-                )
-                kl_losses.append(kl_loss)
-                policy_losses.append(policy_loss)
-            except RuntimeError as e:
-                print(f'this patch matrix dimension error: {train_batch_for_trpo_update["obs"]["obs"].shape}')
-            else:
-                print('evaluate other model is okay')
+            )
+            kl_losses.append(kl_loss)
+            policy_losses.append(policy_loss)
 
             m_advantage = importance_sampling * m_advantage
 
@@ -180,8 +181,6 @@ def hatrpo_loss_fn(
 
         policy_loss_for_rllib = torch.mean(torch.stack(policy_losses, axis=1), axis=1)
         action_kl = torch.mean(torch.stack(kl_losses, axis=1), axis=1)
-
-        del train_batch[GLOBAL_MODEL]
 
     curr_entropy = curr_action_dist.entropy()
 
@@ -210,7 +209,7 @@ def hatrpo_loss_fn(
     model.value_function = vf_saved
     # recovery the value function.
 
-    total_loss = reduce_mean_valid(policy_loss_for_rllib +
+    total_loss = reduce_mean_valid(-policy_loss_for_rllib +
                                    policy.kl_coeff * action_kl +
                                    policy.config["vf_loss_coeff"] * vf_loss -
                                    policy.entropy_coeff * curr_entropy)
@@ -218,7 +217,7 @@ def hatrpo_loss_fn(
     # Store values for stats function in model (tower), such that for
     # multi-GPU, we do not override them during the parallel loss phase.
     mean_kl_loss = reduce_mean_valid(action_kl)
-    mean_policy_loss = reduce_mean_valid(policy_loss_for_rllib)
+    mean_policy_loss = reduce_mean_valid(-policy_loss_for_rllib)
     mean_entropy = reduce_mean_valid(curr_entropy)
 
     model.tower_stats["total_loss"] = total_loss
