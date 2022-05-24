@@ -113,6 +113,8 @@ def pad_batch_to_sequences_of_same_size(
                 isinstance(v, np.ndarray):
             feature_keys_.append(k)
 
+    feature_keys_ = [f for f in feature_keys_ if not f.startswith('GLOBAL')]
+
     feature_sequences, initial_states, seq_lens = \
         chop_into_sequences(
             feature_columns=[batch[k] for k in feature_keys_],

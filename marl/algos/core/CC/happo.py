@@ -15,29 +15,24 @@ from ray.rllib.evaluation.postprocessing import Postprocessing, compute_gae_for_
 from ray.rllib.policy.sample_batch import SampleBatch
 from ray.rllib.utils.framework import try_import_tf, try_import_torch
 from ray.rllib.utils.torch_ops import convert_to_torch_tensor as _d2t
-from marl.algos.utils.valuenorm import ValueNorm
 from ray.rllib.utils.typing import TrainerConfigDict, TensorType, \
     LocalOptimizer
 from ray.rllib.agents.ppo.ppo import PPOTrainer, DEFAULT_CONFIG as PPO_CONFIG
 from ray.rllib.agents.ppo.ppo_torch_policy import PPOTorchPolicy, ValueNetworkMixin, KLCoeffMixin
 from ray.rllib.utils.torch_ops import apply_grad_clipping
 from ray.rllib.policy.torch_policy import LearningRateSchedule, EntropyCoeffSchedule
-from marl.algos.utils.setup_utils import setup_torch_mixins
+from marl.algos.utils.setup_utils import setup_torch_mixins, get_policy_class
 from marl.algos.utils.get_hetero_info import (
     get_global_name,
     contain_global_obs,
-    STATE,
+    # STATE,
     GLOBAL_MODEL_LOGITS,
     add_all_agents_gae,
+    value_normalizer,
 )
 from ray.rllib.examples.centralized_critic import CentralizedValueMixin
 
 tf1, tf, tfv = try_import_tf()
-torch, nn = try_import_torch()
-
-
-value_normalizer = ValueNorm(1)
-
 torch, nn = try_import_torch()
 
 logger = logging.getLogger(__name__)
@@ -53,6 +48,7 @@ def surrogate_for_one_agent(importance_sampling, advantage, epsilon):
     )
 
     return surrogate_loss
+
 
 def happo_surrogate_loss(
         policy: Policy, model: ModelV2,
@@ -99,7 +95,7 @@ def happo_surrogate_loss(
 
     if contain_global_obs(train_batch):
         model.value_function = lambda: policy.model.central_value_function(
-            train_batch[STATE], train_batch[get_global_name(SampleBatch.ACTIONS)])
+            train_batch[SampleBatch.OBS], train_batch[get_global_name(SampleBatch.ACTIONS)])
 
         policy._central_value_out = model.value_function()  # change value function to calculate all agents information
 
@@ -165,9 +161,9 @@ def happo_surrogate_loss(
     mean_entropy = reduce_mean_valid(curr_entropy)
 
     # Compute a value function loss.
-    if policy.model.model_config['custom_model_config']['normal_value']:
-        value_normalizer.update(train_batch[Postprocessing.VALUE_TARGETS])
-        train_batch[Postprocessing.VALUE_TARGETS] = value_normalizer.normalize(train_batch[Postprocessing.VALUE_TARGETS])
+    # if policy.model.model_config['custom_model_config']['normal_value']:
+    value_normalizer.update(train_batch[Postprocessing.VALUE_TARGETS])
+    train_batch[Postprocessing.VALUE_TARGETS] = value_normalizer.normalize(train_batch[Postprocessing.VALUE_TARGETS])
 
     if policy.config["use_critic"]:
         prev_value_fn_out = train_batch[SampleBatch.VF_PREDS] #
@@ -237,15 +233,8 @@ HAPPOTorchPolicy = lambda config: PPOTorchPolicy.with_updates(
         ])
 
 
-def get_policy_class(ppo_config):
-    def _get_policy_class(config_):
-        if config_["framework"] == "torch":
-            return HAPPOTorchPolicy(ppo_config)
-    return _get_policy_class()
-
-
 HAPPOTrainer = lambda ppo_config: PPOTrainer.with_updates(
-    name="#04-08-8-Worker-add-value-normal-critical-lr-1e-2#-HAPPOTrainer-with-local-mode-False",
+    name="#happo-trainer",
     default_policy=HAPPOTorchPolicy(ppo_config),
-    get_policy_class=get_policy_class(ppo_config),
+    get_policy_class=get_policy_class(ppo_config, default_policy=HAPPOTorchPolicy),
 )

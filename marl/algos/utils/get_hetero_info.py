@@ -2,14 +2,23 @@ from ray.rllib.utils.torch_ops import convert_to_torch_tensor as _d2t
 from ray.rllib.policy.sample_batch import SampleBatch
 import numpy as np
 from ray.rllib.evaluation.postprocessing import discount_cumsum, Postprocessing, compute_gae_for_sample_batch
+from marl.algos.utils.valuenorm import ValueNorm
+from copy import deepcopy
+from ray.rllib.policy.rnn_sequencing import pad_batch_to_sequences_of_same_size
 
 
-GLOBAL_NEED_COLLECT = [SampleBatch.ACTION_LOGP, SampleBatch.ACTIONS]
-GLOBAL_PREFIX = 'GLOBAL_'
-GLOBAL_MODEL_LOGITS = f'{GLOBAL_PREFIX}_model_logits'
-GLOBAL_MODEL = f'{GLOBAL_PREFIX}_model'
-GLOBAL_TRAIN_BATCH = f'{GLOBAL_PREFIX}_train_batch'
-STATE = 'state'
+GLOBAL_NEED_COLLECT = [SampleBatch.ACTION_LOGP, SampleBatch.ACTIONS,
+                       SampleBatch.ACTION_DIST_INPUTS, SampleBatch.OBS, SampleBatch.SEQ_LENS]
+GLOBAL_PREFIX = 'GLOBAL-'
+GLOBAL_MODEL_LOGITS = f'{GLOBAL_PREFIX}model_logits'
+GLOBAL_MODEL = f'{GLOBAL_PREFIX}model'
+GLOBAL_STATE = f'{GLOBAL_PREFIX}state'
+GLOBAL_IS_TRAINING = f'{GLOBAL_PREFIX}is_trainable'
+GLOBAL_TRAIN_BATCH = f'{GLOBAL_PREFIX}train_batch'
+# STATE = 'state'
+
+
+value_normalizer = ValueNorm(1)
 
 
 def add_other_agent_info(agents_batch: dict, key: str):
@@ -79,9 +88,9 @@ def add_all_agents_gae(policy, sample_batch, other_agent_batches=None, episode=N
 
     train_batch = compute_gae_for_sample_batch(policy, sample_batch, other_agent_batches, episode)
 
-    state_dim = policy.config["model"]["custom_model_config"]["state_dim"]
-
-    sample_batch[STATE] = sample_batch[SampleBatch.OBS][:, -state_dim:]
+    # state_dim = policy.config["model"]["custom_model_config"]["state_dim"]
+    # sample_batch[STATE] = sample_batch[SampleBatch.OBS][:, -state_dim:]
+    # sample_batch[STATE] = sample_batch[SampleBatch.OBS]
 
     if other_agent_batches:
         for key in GLOBAL_NEED_COLLECT:
@@ -151,16 +160,38 @@ def trpo_post_process(policy, sample_batch, other_agent_batches=None, epsisode=N
     return sample_batch
 
 
+def get_one_batch_state(batch):
+    i = 0
+    state = []
+    while "state_in_{}".format(i) in batch:
+        state_i = batch['state_in_{}'.format(i)]
+        state.append(state_i)
+        i += 1
+
+    return state
+
+
 def hatrpo_post_process(policy, sample_batch, other_agent_batches=None, epsisode=None):
 
     sample_batch = trpo_post_process(policy, sample_batch, other_agent_batches, epsisode)
 
     if other_agent_batches:
         models = extract_all_other_agents_model(other_agent_batches=other_agent_batches)
-        sample_batch[GLOBAL_MODEL] = models
+        sample_batch[GLOBAL_MODEL] = np.array([id(m) for m in models])
 
         train_batches = extract_other_agents_train_batch(other_agent_batches=other_agent_batches)
-        sample_batch[GLOBAL_TRAIN_BATCH] = train_batches
+
+        # train_batches = pad_batch_to_sequences_of_same_size(train_batches, max_seq_len=policy.config['max_len'])
+        # train_batches = [(t, max_seq_len=policy.max_seq_len, multi_agent=True) for t in train_batches]
+
+        sample_batch[GLOBAL_STATE] = np.array([get_one_batch_state(b) for b in train_batches])
+        sample_batch[GLOBAL_IS_TRAINING] = np.array([int(b.is_training) for b in train_batches])
+
+
+        # sample_batch[GLOBAL_TRAIN_BATCH] = [t.copy(shallow=True) for t in train_batches]
+        # sample_batch[GLOBAL_OBS] = [batch[SampleBatch.OBS] for batch in train_batches]
+        # sample_batch[GLOBAL_ACTION_LOGP] = [batch[SampleBatch.ACTION_LOGP] for batch in train_batches]
+        # sample_batch[GLOBAL_OBS] = [batch[SampleBatch.OBS] for batch in train_batches]
 
     return sample_batch
 
