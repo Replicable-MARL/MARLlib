@@ -11,13 +11,6 @@ def setup_torch_mixins(policy, obs_space, action_space, config):
     LearningRateSchedule.__init__(policy, config["lr"], config["lr_schedule"])
 
 
-def get_policy_class(ppo_config, default_policy):
-    def _get_policy_class(config_):
-        if config_["framework"] == "torch":
-            return default_policy(ppo_config)
-    return _get_policy_class
-
-
 def _algos_var(config):
     def _inner(key):
         expr = config['algo_args'][key]
