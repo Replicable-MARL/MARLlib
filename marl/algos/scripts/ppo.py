@@ -40,9 +40,10 @@ def run_ppo(config_dict, common_config, env_dict, stop):
 
     config.update(common_config)
 
-    results = tune.run(config_dict["algorithm"].upper(),
-                       name=config_dict["algorithm"] + "_" + config_dict["core_arch"] + "_" + config_dict["env_args"][
-                           "map_name"], stop=stop, config=config,
+    results = tune.run(algorithm.upper(),
+                       name=config_dict["algorithm"] + "_" + config_dict["model_arch_args"]["core_arch"] + "_" +
+                            config_dict["env_args"][
+                                "map_name"], stop=stop, config=config,
                        verbose=1, progress_reporter=CLIReporter())
 
     return results
