@@ -24,23 +24,22 @@ from ray.rllib.agents.ppo.ppo_torch_policy import PPOTorchPolicy, ValueNetworkMi
 from ray.rllib.utils.torch_ops import apply_grad_clipping
 from ray.rllib.policy.torch_policy import LearningRateSchedule, EntropyCoeffSchedule
 from functools import partial
-from marl.algos.utils.setup_utils import setup_torch_mixins, get_policy_class
+from marl.algos.utils.setup_utils import setup_torch_mixins
 from marl.algos.utils.get_hetero_info import (
     get_global_name,
     contain_global_obs,
-    GLOBAL_MODEL_LOGITS,
-    GLOBAL_TRAIN_BATCH,
     GLOBAL_MODEL,
     GLOBAL_IS_TRAINING,
-    GLOBAL_STATE,
     hatrpo_post_process,
     value_normalizer,
+    STATE,
 )
 
 from marl.algos.utils.trust_regions import update_model_use_trust_region
 
 from ray.rllib.examples.centralized_critic import CentralizedValueMixin
 import ctypes
+from icecream import ic
 
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
@@ -95,13 +94,19 @@ def hatrpo_loss_fn(
     vf_saved = model.value_function
 
     if contain_global_obs(train_batch):
+        opp_action_in_cc = policy.config["model"]["custom_model_config"]["opp_action_in_cc"]
         model.value_function = lambda: policy.model.central_value_function(
-            train_batch[SampleBatch.OBS], train_batch[get_global_name(SampleBatch.ACTIONS)]
+            train_batch[STATE],
+            train_batch[get_global_name(SampleBatch.ACTIONS)]
+            if opp_action_in_cc else None
         )
+        # model.value_function = lambda: policy.model.central_value_function(
+        #     train_batch[SampleBatch.OBS], train_batch[get_global_name(SampleBatch.ACTIONS)]
+        # )
 
-    want_hatrpo_but_no_other_batches_info = not contain_global_obs(train_batch)
+    want_hatrpo_but_other_opponent_not_initialized = (GLOBAL_MODEL not in train_batch)
 
-    if want_hatrpo_but_no_other_batches_info:
+    if want_hatrpo_but_other_opponent_not_initialized:
         policy_loss_for_rllib, action_kl = update_model_use_trust_region(
             model=model,
             train_batch=train_batch,
@@ -117,7 +122,7 @@ def hatrpo_loss_fn(
         # for _ in range(10):
         #     print('step into HATRPO')
         m_advantage = train_batch[Postprocessing.ADVANTAGES]
-        agents_num = train_batch[GLOBAL_MODEL_LOGITS].shape[1] + 1
+        agents_num = train_batch[get_global_name(SampleBatch.ACTION_DIST_INPUTS)].shape[1] + 1
         random_indices = np.random.permutation(range(agents_num))
 
         policy_losses = []
@@ -137,11 +142,11 @@ def hatrpo_loss_fn(
             else:
                 current_model = recovery_obj(int(train_batch[GLOBAL_MODEL][agent_id]))
                 # train_batch_for_trpo_update = train_batch[GLOBAL_TRAIN_BATCH][agent_id]
-                current_action_logits = train_batch[GLOBAL_MODEL_LOGITS][:, agent_id, :].detach()
+                current_action_logits = train_batch[get_global_name(SampleBatch.ACTION_DIST_INPUTS)][:, agent_id, :].detach()
                 current_action_dist = dist_class(current_action_logits, None)
                 # current_action_dist = train_batch[GLOBAL_MODEL_LOGITS][:, agent_id, :]
                 old_action_log_dist = train_batch[get_global_name(SampleBatch.ACTION_LOGP)][:, agent_id].detach()
-                actions = train_batch[get_global_name(SampleBatch.ACTIONS)][:, agent_id, :].detach()
+                actions = train_batch[get_global_name(SampleBatch.ACTIONS)][:, agent_id].detach()
                 # actions = train_batch_for_trpo_update[SampleBatch.ACTIONS]
                 action_dist_input = train_batch[get_global_name(SampleBatch.ACTION_DIST_INPUTS)][:, agent_id].detach()
 
@@ -152,15 +157,26 @@ def hatrpo_loss_fn(
 
                 train_batch_for_trpo_update.is_training = bool(train_batch[GLOBAL_IS_TRAINING][agent_id])
 
-                train_batch_for_trpo_update['state_in_0'] = train_batch[GLOBAL_STATE][:, agent_id].reshape(
-                    train_batch['state_in_0'].shape
-                )
+                i = 0
+
+                def _state_name(i): return f'state_in_{i}'
+
+                while _state_name(i) in train_batch:
+                    train_batch_for_trpo_update[_state_name(i)] = train_batch[get_global_name(_state_name(i))][:, agent_id]
+                    i += 1
+
+                # train_batch_for_trpo_update['state_in_0'] = train_batch[GLOBAL_STATE][:, agent_id].reshape(
+                #     train_batch['state_in_0'].shape
+                # )
                 # for i, s in enumerate(train_batch[GLOBAL_STATE][:, agent_id]):
                 #     state_name = f'state_in_{i}'
                 #     state = s.reshape(train_batch[state_name].shape)
                 #     train_batch_for_trpo_update[state_name] = state
 
             importance_sampling = torch.exp(current_action_dist.logp(actions) - old_action_log_dist)
+
+            ic(train_batch_for_trpo_update['obs'].shape)
+            ic(train_batch_for_trpo_update['state_in_0'].shape)
 
             kl_loss, policy_loss = update_model_use_trust_region(
                     model=current_model,
@@ -244,8 +260,13 @@ HAPTRPOTorchPolicy = lambda _config: PPOTorchPolicy.with_updates(
         ])
 
 
+def get_policy_class_hatrpo(config_):
+    if config_["framework"] == "torch":
+        return HAPTRPOTorchPolicy
+
+
 HATRPOTrainer = lambda ppo_config: PPOTrainer.with_updates(
     name="#hatrpo-trainer",
-    default_policy=HAPTRPOTorchPolicy(ppo_config),
-    get_policy_class=get_policy_class(ppo_config, default_policy=HAPTRPOTorchPolicy),
+    default_policy=None,
+    get_policy_class=get_policy_class_hatrpo,
 )

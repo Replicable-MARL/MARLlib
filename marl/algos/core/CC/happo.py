@@ -21,16 +21,19 @@ from ray.rllib.agents.ppo.ppo import PPOTrainer, DEFAULT_CONFIG as PPO_CONFIG
 from ray.rllib.agents.ppo.ppo_torch_policy import PPOTorchPolicy, ValueNetworkMixin, KLCoeffMixin
 from ray.rllib.utils.torch_ops import apply_grad_clipping
 from ray.rllib.policy.torch_policy import LearningRateSchedule, EntropyCoeffSchedule
-from marl.algos.utils.setup_utils import setup_torch_mixins, get_policy_class
+from marl.algos.utils.setup_utils import setup_torch_mixins
+from marl.algos.utils.postprocessing import centralized_critic_postprocessing
 from marl.algos.utils.get_hetero_info import (
     get_global_name,
     contain_global_obs,
-    # STATE,
+    STATE,
     GLOBAL_MODEL_LOGITS,
-    add_all_agents_gae,
+    # add_all_agents_gae,
     value_normalizer,
+    original_sy_get_central_critical,
 )
 from ray.rllib.examples.centralized_critic import CentralizedValueMixin
+from icecream import ic
 
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
@@ -93,17 +96,28 @@ def happo_surrogate_loss(
 
     vf_saved = model.value_function
 
-    if contain_global_obs(train_batch):
-        model.value_function = lambda: policy.model.central_value_function(
-            train_batch[SampleBatch.OBS], train_batch[get_global_name(SampleBatch.ACTIONS)])
+    opp_action_in_cc = policy.config["model"]["custom_model_config"]["opp_action_in_cc"]
 
-        policy._central_value_out = model.value_function()  # change value function to calculate all agents information
+    # if contain_global_obs(train_batch):
+    #     opp_action_in_cc = policy.config["model"]["custom_model_config"]["opp_action_in_cc"]
+    model.value_function = lambda: policy.model.central_value_function(
+        train_batch[STATE],
+        # train_batch[get_global_name(SampleBatch.ACTIONS)]
+        train_batch['opponent_actions']
+        if opp_action_in_cc else None
+    )
 
+    value_out = model.value_function()
+
+    # if contain_global_obs(train_batch):
+    need_other_agent = False
+    # if contain_global_obs(train_batch):
+    if need_other_agent:
         sub_losses = []
 
         m_advantage = train_batch[Postprocessing.ADVANTAGES]
 
-        agents_num = train_batch[GLOBAL_MODEL_LOGITS].shape[1] + 1
+        agents_num = train_batch[get_global_name(SampleBatch.ACTION_DIST_INPUTS)].shape[1] + 1
         # all_agents = [SELF] + train_batch[get_global_name(SampleBatch.OBS)]
 
         random_indices = np.random.permutation(range(agents_num))
@@ -123,11 +137,11 @@ def happo_surrogate_loss(
                 old_action_log_dist = train_batch[SampleBatch.ACTION_LOGP]
                 actions = train_batch[SampleBatch.ACTIONS]
             else:
-                current_action_logits = train_batch[GLOBAL_MODEL_LOGITS][:, agent_id, :].detach()
+                current_action_logits = train_batch[get_global_name(SampleBatch.ACTION_DIST_INPUTS)][:, agent_id].detach()
                 current_action_dist = dist_class(current_action_logits, None)
                 # current_action_dist = train_batch[GLOBAL_MODEL_LOGITS][:, agent_id, :]
                 old_action_log_dist = train_batch[get_global_name(SampleBatch.ACTION_LOGP)][:, agent_id].detach()
-                actions = train_batch[get_global_name(SampleBatch.ACTIONS)][:, agent_id, :].detach()
+                actions = train_batch[get_global_name(SampleBatch.ACTIONS)][:, agent_id].detach()
 
             importance_sampling = torch.exp(current_action_dist.logp(actions) - old_action_log_dist)
 
@@ -219,22 +233,31 @@ def make_happo_optimizers(policy: Policy,
     return policy._actor_optimizer, policy._critic_optimizer
 
 
-HAPPOTorchPolicy = lambda config: PPOTorchPolicy.with_updates(
+from marl.algos.core.CC.mappo import central_critic_ppo_loss
+
+HAPPOTorchPolicy = PPOTorchPolicy.with_updates(
         name="HAPPOTorchPolicy",
-        get_default_config=lambda: config,
-        postprocess_fn=add_all_agents_gae,
-        loss_fn=happo_surrogate_loss,
+        get_default_config=lambda: PPO_CONFIG,
+        # postprocess_fn=original_sy_get_central_critical,
+        postprocess_fn=centralized_critic_postprocessing,
+        # loss_fn=happo_surrogate_loss,
+        loss_fn=central_critic_ppo_loss,
         before_init=setup_torch_mixins,
         # optimizer_fn=make_happo_optimizers,
         extra_grad_process_fn=apply_grad_clipping,
         mixins=[
-            EntropyCoeffSchedule, KLCoeffMixin,
-            CentralizedValueMixin, LearningRateSchedule,
+            LearningRateSchedule, EntropyCoeffSchedule, KLCoeffMixin,
+            CentralizedValueMixin
         ])
 
 
-HAPPOTrainer = lambda ppo_config: PPOTrainer.with_updates(
+def get_policy_class_happo(config_):
+    if config_["framework"] == "torch":
+        return HAPPOTorchPolicy
+
+
+HAPPOTrainer = PPOTrainer.with_updates(
     name="#happo-trainer",
-    default_policy=HAPPOTorchPolicy(ppo_config),
-    get_policy_class=get_policy_class(ppo_config, default_policy=HAPPOTorchPolicy),
+    default_policy=None,
+    get_policy_class=get_policy_class_happo,
 )

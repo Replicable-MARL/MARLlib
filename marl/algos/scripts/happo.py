@@ -2,9 +2,10 @@ from ray import tune
 from ray.tune.utils import merge_dicts
 from ray.tune import CLIReporter
 from marl.algos.core.CC.mappo import MAPPOTrainer
+# from marl.algos.core.CC.happo import HAPPOTrainer
 
 
-def run_mappo(config_dict, common_config, env_dict, stop):
+def run_happo(config_dict, common_config, env_dict, stop):
     """
     for bug mentioned https://github.com/ray-project/ray/pull/20743
     make sure sgd_minibatch_size > max_seq_len

@@ -24,7 +24,7 @@ from ray.rllib.agents.ppo.ppo_torch_policy import PPOTorchPolicy, ValueNetworkMi
 from ray.rllib.utils.torch_ops import apply_grad_clipping
 from ray.rllib.policy.torch_policy import LearningRateSchedule, EntropyCoeffSchedule
 from functools import partial
-from marl.algos.utils.setup_utils import setup_torch_mixins, get_policy_class
+from marl.algos.utils.setup_utils import setup_torch_mixins
 from marl.algos.utils.get_hetero_info import (
     get_global_name,
     contain_global_obs,
@@ -163,8 +163,13 @@ TRPOTorchPolicy = lambda _config: PPOTorchPolicy.with_updates(
         ])
 
 
+def get_policy_class_trpo(config_):
+    if config_["framework"] == "torch":
+        return TRPOTorchPolicy
+
+
 TRPOTrainer = lambda _config: PPOTrainer.with_updates(
     name="#trpo-trainer",
-    default_policy=TRPOTorchPolicy(_config),
-    get_policy_class=get_policy_class(_config, default_policy=TRPOTorchPolicy),
+    default_policy=None,
+    get_policy_class=get_policy_class_trpo,
 )

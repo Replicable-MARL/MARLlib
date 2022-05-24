@@ -39,7 +39,7 @@ def run_hatrpo(config_dict, common_config, env_dict, stop):
         },
     })
 
-    PPO_CONFIG.update({
+    config.update({
         'critic_lr': _param('critic_lr'),
         'lr': _param('lr'),
         "lr_schedule": [
@@ -51,7 +51,7 @@ def run_hatrpo(config_dict, common_config, env_dict, stop):
     algorithm = config_dict["algorithm"]
     RUNNING_NAME = '_'.join([algorithm, arch, map_name])
 
-    results = tune.run(HATRPOTrainer(PPO_CONFIG),
+    results = tune.run(HATRPOTrainer,
                        name=RUNNING_NAME,
                        stop=stop,
                        config=config,
