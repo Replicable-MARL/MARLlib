@@ -9,26 +9,31 @@ from icecream import ic
 from marl.algos.utils.postprocessing import get_dim, convert_to_torch_tensor, centralized_critic_postprocessing
 from ray.rllib.evaluation.postprocessing import compute_advantages
 import re
+from collections import defaultdict
+from marl.algos.utils.setup_utils import get_agent_num
 
 
 GLOBAL_NEED_COLLECT = [SampleBatch.ACTION_LOGP, SampleBatch.ACTIONS,
-                       SampleBatch.ACTION_DIST_INPUTS, SampleBatch.SEQ_LENS]
-GLOBAL_PREFIX = 'opponent_'
+                       SampleBatch.ACTION_DIST_INPUTS, SampleBatch.OBS]
+GLOBAL_PREFIX = 'global_'
 GLOBAL_MODEL_LOGITS = f'{GLOBAL_PREFIX}model_logits'
-GLOBAL_MODEL = f'{GLOBAL_PREFIX}model'
 GLOBAL_IS_TRAINING = f'{GLOBAL_PREFIX}is_trainable'
 GLOBAL_TRAIN_BATCH = f'{GLOBAL_PREFIX}train_batch'
 STATE = 'state'
 # STATE = 'state'
+MODEL = 'model'
+TRAINING = 'training'
 
 
 value_normalizer = ValueNorm(1)
 
 
-def get_global_name(key):
+def get_global_name(key, i=None):
     # converts a key to global format
 
-    return f'{GLOBAL_PREFIX}{key}'
+    if i is None: i = 'all'
+
+    return f'{GLOBAL_PREFIX}{key}_agent_{i}'
 
 
 # def collect_other_agents_model_output(agents_batch):
@@ -155,14 +160,36 @@ def hatrpo_post_process(policy, sample_batch, other_agent_batches=None, epsisode
 
     sample_batch = trpo_post_process(policy, sample_batch, other_agent_batches, epsisode)
 
-    if other_agent_batches:
+    n_agents = get_agent_num(policy)
 
-        for agent_id, (_policy, _samply_batch)  in other_agent_batches.items():
-            _id = re.findall(r'\d+', agent_id)[0]
-            _id = int(_id)
+    for i in range(n_agents - 1):
 
-            sample_batch['opponent_model_{}'.format(_id)] = np.array([int(id(_policy.model))], dtype=np.int)
-            sample_batch['opponent_training_{}'.format(_id)] = np.array([int(_samply_batch.is_training)], dtype=np.int)
+        cur_model_id = 0
+        cur_training = 0
+
+        if other_agent_batches:
+            name = exist_in_opponent(opponent_index=i, opponent_batches=other_agent_batches)
+            if name:
+                _p, _b = other_agent_batches[name]
+                cur_model_id = id(_p.model)
+                cur_training = _b.is_training
+
+        sample_batch[get_global_name(MODEL, i)] = np.array([
+            int(cur_model_id)
+        ] * len(sample_batch))
+
+        sample_batch[get_global_name(TRAINING, i)] = np.array([
+            int(cur_training)
+        ] * len(sample_batch))
+
+    # if other_agent_batches:
+    #
+    #     for agent_id, (_policy, _samply_batch)  in other_agent_batches.items():
+    #         _id = re.findall(r'\d+', agent_id)[0]
+    #         _id = int(_id)
+    #
+    #         sample_batch[get_global_name(f'model_{_id}')] = np.array([int(id(_policy.model))], dtype=np.int)
+    #         sample_batch[get_global_name(f'training_{_id}')] = np.array([int(_samply_batch.is_training)], dtype=np.int)
 
         # train_batches = extract_other_agents_train_batch(other_agent_batches=other_agent_batches)
 
@@ -193,61 +220,77 @@ def get_action_from_batch(train_batch, model, dist_class):
     return curr_action_dist
 
 
-def add_other_agent_mul_info(agent_batch, to_initialize=False, sample_batch=None):
+def add_other_agent_mul_info(sample_batch, other_agent_info, agent_num):
     global GLOBAL_NEED_COLLECT
 
-    for key in GLOBAL_NEED_COLLECT:
-        if key not in sample_batch: continue
+    for agent_i in range(agent_num - 1):
+        for key in GLOBAL_NEED_COLLECT:
+            if key not in sample_batch: continue
 
-        sample_batch[get_global_name(key)] = add_other_agent_one_info(
-            agent_batch, key=key,
-            to_initialize=to_initialize,
-            sample_batch=sample_batch
-        )
+            value_added = False
+
+            if other_agent_info:
+                name = exist_in_opponent(opponent_index=agent_i, opponent_batches=other_agent_info)
+                if name:
+                    _p, _b = other_agent_info[name]
+                    sample_batch[get_global_name(key, agent_i)] = _b[key]
+                    value_added = True
+
+            if not value_added:
+                sample_batch[get_global_name(key, agent_i)] = np.zeros_like(
+                    sample_batch[key],
+                    dtype=sample_batch[key].dtype
+                )
+
+    if SampleBatch.ACTIONS in GLOBAL_NEED_COLLECT:
+        sample_batch[get_global_name(SampleBatch.ACTIONS)] = np.stack([
+            sample_batch[get_global_name(SampleBatch.ACTIONS, a_i)]
+            for a_i in range(agent_num-1)
+        ], axis=1)
 
     return sample_batch
 
 
-def add_mul_opponents_agent_real_obs_info(opponent_batches: list, obs_dim, action_mask_dim, global_state_flag,
-                                          sample_batch,
-                                          initialize=False):
-    if initialize:
-        sample_batch[get_global_name(SampleBatch.OBS)] = np.stack([
-            np.zeros_like(sample_batch[SampleBatch.OBS], dtype=sample_batch[STATE].dtype)for _ in range(len(opponent_batches))
-        ], axis=1)
-    else:
-        if global_state_flag:
-            sample_batch[get_global_name(SampleBatch.OBS)] = np.stack([
-                sample_batch[SampleBatch.OBS] for _ in range(len(opponent_batches))
-            ], axis=1)
-        else:
-            # action_mask_dim = action_mask_dim or 0   # set to zero if action is None
-            # start = action_mask_dim
+# def add_mul_opponents_agent_real_obs_info(opponent_batches: list, obs_dim, action_mask_dim, global_state_flag,
+#                                           sample_batch,
+#                                           initialize=False):
+#     if initialize:
+#         sample_batch[get_global_name(SampleBatch.OBS)] = np.stack([
+#             np.zeros_like(sample_batch[SampleBatch.OBS], dtype=sample_batch[STATE].dtype)for _ in range(len(opponent_batches))
+#         ], axis=1)
+#     else:
+#         if global_state_flag:
+#             sample_batch[get_global_name(SampleBatch.OBS)] = np.stack([
+#                 sample_batch[SampleBatch.OBS] for _ in range(len(opponent_batches))
+#             ], axis=1)
+#         else:
+#             action_mask_dim = action_mask_dim or 0   # set to zero if action is None
+#             start = action_mask_dim
+            #
+            # sample_batch[get_global_name(SampleBatch.OBS)] = np.stack([
+            #     batch[SampleBatch.OBS] for batch in opponent_batches], axis=1
+            # )
 
-            sample_batch[get_global_name(SampleBatch.OBS)] = np.stack([
-                batch[SampleBatch.OBS] for batch in opponent_batches], axis=1
-            )
-
-    return sample_batch
+    # return sample_batch
 
 
-def add_other_agent_one_info(opponent_batch: list, key: str, to_initialize=False, sample_batch=None,
-                             opponent_agents_num=None,
-                             ):
-    # get other-agents information by specific key
-
-    opponent_agents_num = opponent_agents_num or len(opponent_batch)
-
-    if to_initialize:
-        return np.stack([
-            np.zeros_like(sample_batch[key], dtype=sample_batch[key].dtype) for _ in range(opponent_agents_num)
-        ], axis=1)
-    else:
-        return np.stack([
-            opponent_batch[i][key] for i in range(opponent_agents_num)],
-            axis=1
-        )
-
+# def add_other_agent_one_info(opponent_batch: list, key: str, to_initialize=False, sample_batch=None,
+#                              opponent_agents_num=None,
+#                              ):
+#     # get other-agents information by specific key
+#
+#     opponent_agents_num = opponent_agents_num or len(opponent_batch)
+#
+#     if to_initialize:
+#         return np.stack([
+#             np.zeros_like(sample_batch[key], dtype=sample_batch[key].dtype) for _ in range(opponent_agents_num)
+#         ], axis=1)
+#     else:
+#         return np.stack([
+#             opponent_batch[i][key] for i in range(opponent_agents_num)],
+#             axis=1
+#         )
+#
 
 def get_vf_pred(policy, algorithm, sample_batch, opp_action_in_cc):
     if algorithm in ["coma"]:
@@ -301,32 +344,57 @@ def collect_opponent_array(other_agent_batches: dict, opponent_agents_num, sampl
     return opponent_batch
 
 
-def add_state_in_for_opponent(sample_batch, other_agent_batches):
+def state_name(i): return f'state_in_{i}'
 
-    def _name(i):return f'state_in_{i}'
 
-    i = 0
-    while _name(i) in sample_batch:
-        sample_batch[get_global_name(_name(i))] = []
-        for batch in other_agent_batches:
-            if batch and _name(i) in batch:
-                sample_batch[get_global_name(_name(i))].append(batch[_name(i)])
-            else:
-                sample_batch[get_global_name(_name(i))].append(np.zeros_like(sample_batch[_name(i)]))
+def global_state_name(i, ai): return f'state_in_{i}_of_agent_{ai}'
 
-        sample_batch[get_global_name(_name(i))] = np.stack(
-            sample_batch[get_global_name(_name(i))], axis=1
-        )
 
-        i += 1
+def exist_in_opponent(opponent_index, opponent_batches: dict):
+    possible_1 = f'agent_{opponent_index}'
+    possible_2 = f'adversary_{opponent_index}'
+
+    if possible_1 in opponent_batches: return possible_1
+    elif possible_2 in opponent_batches: return possible_2
+    else:
+        return False
+
+
+def add_state_in_for_opponent(sample_batch, other_agent_batches, agent_num):
+
+    state_in_num = 0
+
+    while state_name(state_in_num) in sample_batch:
+        state_in_num += 1
+
+    # get how many state in layer
+    # agent_indices = [0, 1, 2]
+
+    for a_i in range(agent_num - 1):
+        # name = agent(a_i)
+
+        for s_i in range(state_in_num):
+            opponent_state_exist = False
+            if other_agent_batches:
+                name = exist_in_opponent(opponent_index=a_i, opponent_batches=other_agent_batches)
+                if name and state_name(s_i) in other_agent_batches[name]:
+                    _policy, _batch = other_agent_batches[name]
+                    sample_batch[global_state_name(s_i, a_i)] = _batch[state_name(s_i)]
+                    opponent_state_exist = True
+
+            if not opponent_state_exist:
+                sample_batch[global_state_name(s_i, a_i)] = np.zeros_like(
+                    sample_batch[state_name(s_i)],
+                    dtype=sample_batch[state_name(s_i)].dtype
+                )
 
     return sample_batch
 
 
 def add_opponent_information_and_critical_vf(policy,
-                                                    sample_batch,
-                                                    other_agent_batches=None,
-                                                    episode=None):
+                                             sample_batch,
+                                             other_agent_batches=None,
+                                             episode=None):
     custom_config = policy.config["model"]["custom_model_config"]
     pytorch = custom_config["framework"] == "torch"
     obs_dim = get_dim(custom_config["space_obs"]["obs"].shape)
@@ -340,7 +408,7 @@ def add_opponent_information_and_critical_vf(policy,
     else:
         action_mask_dim = 0
 
-    n_agents = custom_config["num_agents"]
+    n_agents = get_agent_num(policy)
     opponent_agents_num = n_agents - 1
 
     opponent_info_exists = (pytorch and hasattr(policy, "compute_central_vf")) or (not pytorch and policy.loss_initialized())
@@ -379,29 +447,29 @@ def add_opponent_information_and_critical_vf(policy,
             sample_batch[STATE] = np.zeros((o.shape[0], n_agents, obs_dim),
                                            dtype=sample_batch[SampleBatch.CUR_OBS].dtype)
 
-
     need_initialize_opponent_info = not opponent_info_exists
 
     sample_batch = add_other_agent_mul_info(
-        agent_batch=opponent_batch,
-        to_initialize=need_initialize_opponent_info,
         sample_batch=sample_batch,
+        other_agent_info=other_agent_batches,
+        agent_num=n_agents,
     )
 
-    sample_batch = add_mul_opponents_agent_real_obs_info(
-        opponent_batches=opponent_batch,
-        obs_dim=obs_dim,
-        action_mask_dim=action_mask_dim,
-        global_state_flag=global_state_flag,
-        initialize=need_initialize_opponent_info,
-        sample_batch=sample_batch,
-    )
+    # sample_batch = add_mul_opponents_agent_real_obs_info(
+    #     opponent_batches=opponent_batch,
+    #     obs_dim=obs_dim,
+    #     action_mask_dim=action_mask_dim,
+    #     global_state_flag=global_state_flag,
+    #     initialize=need_initialize_opponent_info,
+    #     sample_batch=sample_batch,
+    # )
 
     # sample_batch[SampleBatch.OBS] = sample_batch[STATE]
 
     sample_batch = add_state_in_for_opponent(
         sample_batch=sample_batch,
-        other_agent_batches=opponent_batch,
+        other_agent_batches=other_agent_batches,
+        agent_num=n_agents,
     )
 
     if opponent_info_exists:

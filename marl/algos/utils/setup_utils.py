@@ -3,6 +3,13 @@ from ray.rllib.policy.torch_policy import LearningRateSchedule, EntropyCoeffSche
 import re
 
 
+def get_agent_num(policy):
+    custom_config = policy.config["model"]["custom_model_config"]
+    n_agents = custom_config["num_agents"]
+
+    return n_agents
+
+
 def setup_torch_mixins(policy, obs_space, action_space, config):
     # Copied from PPOTorchPolicy  (w/o ValueNetworkMixin).
     KLCoeffMixin.__init__(policy, config)

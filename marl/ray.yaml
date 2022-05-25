@@ -6,7 +6,7 @@ env: ""
 env_args: {}
 algo_args: {}
 model_arch_args: {}
-share_policy: "all" #  individual / group / all
+share_policy: "individual" #  individual / group / all
 evaluation_interval: 10
 framework: "torch"
 num_workers: 1

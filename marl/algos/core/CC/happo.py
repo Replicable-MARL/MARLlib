@@ -21,7 +21,7 @@ from ray.rllib.agents.ppo.ppo import PPOTrainer, DEFAULT_CONFIG as PPO_CONFIG
 from ray.rllib.agents.ppo.ppo_torch_policy import PPOTorchPolicy, ValueNetworkMixin, KLCoeffMixin
 from ray.rllib.utils.torch_ops import apply_grad_clipping
 from ray.rllib.policy.torch_policy import LearningRateSchedule, EntropyCoeffSchedule
-from marl.algos.utils.setup_utils import setup_torch_mixins
+from marl.algos.utils.setup_utils import setup_torch_mixins, get_agent_num
 from marl.algos.utils.postprocessing import centralized_critic_postprocessing
 from marl.algos.utils.get_hetero_info import (
     get_global_name,
@@ -33,6 +33,7 @@ from marl.algos.utils.get_hetero_info import (
 )
 from ray.rllib.examples.centralized_critic import CentralizedValueMixin
 from icecream import ic
+import re
 
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
@@ -99,22 +100,34 @@ def happo_surrogate_loss(
 
     # if contain_global_obs(train_batch):
     #     opp_action_in_cc = policy.config["model"]["custom_model_config"]["opp_action_in_cc"]
+    global_actions = train_batch[get_global_name(SampleBatch.ACTIONS)]
+
     model.value_function = lambda: policy.model.central_value_function(
         train_batch[STATE],
-        # train_batch[get_global_name(SampleBatch.ACTIONS)]
-        train_batch['opponent_actions']
-        if opp_action_in_cc else None
+        global_actions if opp_action_in_cc else None
+        # train_batch['opponent_actions']
     )
 
     # if contain_global_obs(train_batch):
     # need_other_agent = False
-    if contain_global_obs(train_batch):
+    contain_global_information = bool(torch.any(global_actions > 0))
+    # if contain_global_obs(train_batch):
+    if contain_global_information:
         sub_losses = []
 
         m_advantage = train_batch[Postprocessing.ADVANTAGES]
 
-        agents_num = train_batch[get_global_name(SampleBatch.ACTION_DIST_INPUTS)].shape[1] + 1
+        # agent_model_pat = get_global_name(SampleBatch.ACTIONS, '(\d+)')
+        # matched_keys = [re.findall(agent_model_pat, key) for key in train_batch]
+
+        # collected_agent_ids = [int(m[0]) for m in matched_keys if m]
+
+        # agents_num = train_batch[get_global_name(SampleBatch.ACTION_DIST_INPUTS)].shape[1] + 1
         # all_agents = [SELF] + train_batch[get_global_name(SampleBatch.OBS)]
+
+        # agents_num = len(collected_agent_ids)
+
+        agents_num = get_agent_num(policy)
 
         random_indices = np.random.permutation(range(agents_num))
         # print(f'there are {agents_num} agents, training as {random_indices}')
@@ -122,9 +135,9 @@ def happo_surrogate_loss(
         # this as our current_agent, and get the information from generally train batch.
         # otherwise, we get the agent information from "GLOBAL_LOGITS", "GLOBAL_ACTIONS", etc
 
-        def is_current_agent(i): return i == agents_num - 1
+        def is_current_agent(i): return i == (agents_num - 1)
 
-        torch.autograd.set_detect_anomaly(True)
+        # torch.autograd.set_detect_anomaly(True)
 
         for agent_id in random_indices:
             if is_current_agent(agent_id):
@@ -133,11 +146,13 @@ def happo_surrogate_loss(
                 old_action_log_dist = train_batch[SampleBatch.ACTION_LOGP]
                 actions = train_batch[SampleBatch.ACTIONS]
             else:
-                current_action_logits = train_batch[get_global_name(SampleBatch.ACTION_DIST_INPUTS)][:, agent_id].detach()
+                # current_action_logits = train_batch[get_global_name(SampleBatch.ACTION_DIST_INPUTS)][:, agent_id].detach()
+                current_action_logits = train_batch[get_global_name(SampleBatch.ACTION_DIST_INPUTS, agent_id)]
                 current_action_dist = dist_class(current_action_logits, None)
                 # current_action_dist = train_batch[GLOBAL_MODEL_LOGITS][:, agent_id, :]
-                old_action_log_dist = train_batch[get_global_name(SampleBatch.ACTION_LOGP)][:, agent_id].detach()
-                actions = train_batch[get_global_name(SampleBatch.ACTIONS)][:, agent_id].detach()
+
+                old_action_log_dist = train_batch[get_global_name(SampleBatch.ACTION_LOGP, agent_id)]
+                actions = train_batch[get_global_name(SampleBatch.ACTIONS, agent_id)]
 
             importance_sampling = torch.exp(current_action_dist.logp(actions) - old_action_log_dist)
 

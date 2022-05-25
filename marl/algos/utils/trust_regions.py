@@ -78,6 +78,7 @@ def linesearch(model,
     # print('fval === ', fval)
     # print("fval before", fval.item())
     for (_n_backtracks, stepfrac) in enumerate(.5**np.arange(max_backtracks)):
+        # print(f'linea search... {_n_backtracks}')
         # stepfrac: 1, 0.5, 0.5 ** 2, 0.5 ** 3, ..
         xnew = x + stepfrac * fullstep
         set_flat_actor_params_to(model, xnew)

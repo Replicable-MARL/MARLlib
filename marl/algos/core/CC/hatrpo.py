@@ -25,15 +25,18 @@ from ray.rllib.agents.ppo.ppo_torch_policy import PPOTorchPolicy, ValueNetworkMi
 from ray.rllib.utils.torch_ops import apply_grad_clipping
 from ray.rllib.policy.torch_policy import LearningRateSchedule, EntropyCoeffSchedule
 from functools import partial
-from marl.algos.utils.setup_utils import setup_torch_mixins
+from marl.algos.utils.setup_utils import setup_torch_mixins, get_agent_num
 from marl.algos.utils.get_hetero_info import (
     get_global_name,
     contain_global_obs,
-    GLOBAL_MODEL,
     GLOBAL_IS_TRAINING,
     hatrpo_post_process,
     value_normalizer,
+    MODEL,
+    global_state_name,
     STATE,
+    TRAINING,
+    state_name,
 )
 
 from marl.algos.utils.trust_regions import update_model_use_trust_region
@@ -105,7 +108,15 @@ def hatrpo_loss_fn(
         #     train_batch[SampleBatch.OBS], train_batch[get_global_name(SampleBatch.ACTIONS)]
         # )
 
-    contain_opponent_info = any(key.startswith('opponent_model_') for key in train_batch)
+    agent_model_pat = get_global_name(MODEL, '(\d+)')
+    matched_keys = [re.findall(agent_model_pat, key) for key in train_batch]
+
+    collected_agent_ids = [int(m[0]) for m in matched_keys if m]
+
+    contain_opponent_info = all(
+        len(train_batch[get_global_name(MODEL, i)]) > 0 and train_batch[get_global_name(MODEL, i)][0] > 0
+        for i in collected_agent_ids
+    )
 
     if not contain_opponent_info:
         policy_loss_for_rllib, action_kl = update_model_use_trust_region(
@@ -124,18 +135,14 @@ def hatrpo_loss_fn(
         #     print('step into HATRPO')
         m_advantage = train_batch[Postprocessing.ADVANTAGES]
 
-        agents_num = policy.config["model"]["custom_model_config"]['num_agents']
+        agents_num = get_agent_num(policy)
         random_indices = np.random.permutation(range(agents_num))
 
         policy_losses = []
         kl_losses = []
 
-        opponent_ids = [
-            int(re.findall(r'\d+', key)[0]) for key in train_batch if key.startswith('opponent_model_')
-        ] # will get [1, 2, 3] or [0, 2, 3]
-
-        def is_current_agent(i):
-            return i not in opponent_ids
+        def is_current_agent(i): return i == (agents_num - 1)
+        # the opponent indices is 0, 1, 2, 3, .. N
 
         for agent_id in random_indices:
             if is_current_agent(agent_id):
@@ -147,31 +154,49 @@ def hatrpo_loss_fn(
                 train_batch_for_trpo_update = train_batch
                 action_dist_input = train_batch[SampleBatch.ACTION_DIST_INPUTS]
             else:
-                # current_model = recovery_obj(int(train_batch[GLOBAL_MODEL][agent_id]))
-                current_model_id = int(train_batch['opponent_model_{}'.format(agent_id)])
+                model_id = int(train_batch[get_global_name(MODEL, agent_id)][0])
+
+                assert model_id > 0, 'model is must > 0, if set to 0 means no model at all'
+                current_model = recovery_obj(model_id)
+
                 # train_batch_for_trpo_update = train_batch[GLOBAL_TRAIN_BATCH][agent_id]
-                current_action_logits = train_batch[get_global_name(SampleBatch.ACTION_DIST_INPUTS)][:, agent_id, :].detach()
+                current_action_logits = train_batch[
+                    get_global_name(SampleBatch.ACTION_DIST_INPUTS, agent_id)
+                ]
+
+                # current_action_logits = train_batch[get_global_name(SampleBatch.ACTION_DIST_INPUTS)][:, agent_id].detach()
                 current_action_dist = dist_class(current_action_logits, None)
+
                 # current_action_dist = train_batch[GLOBAL_MODEL_LOGITS][:, agent_id, :]
-                old_action_log_dist = train_batch[get_global_name(SampleBatch.ACTION_LOGP)][:, agent_id].detach()
-                actions = train_batch[get_global_name(SampleBatch.ACTIONS)][:, agent_id].detach()
+                # old_action_log_dist = train_batch[get_global_name(SampleBatch.ACTION_LOGP)][:, agent_id].detach()
+                old_action_log_dist = train_batch[
+                    get_global_name(SampleBatch.ACTION_LOGP, agent_id)
+                ]
+
+                # actions = train_batch[get_global_name(SampleBatch.ACTIONS)][:, agent_id].detach()
+                actions = train_batch[get_global_name(SampleBatch.ACTIONS, agent_id)]
+
                 # actions = train_batch_for_trpo_update[SampleBatch.ACTIONS]
-                action_dist_input = train_batch[get_global_name(SampleBatch.ACTION_DIST_INPUTS)][:, agent_id].detach()
+                # action_dist_input = train_batch[get_global_name(SampleBatch.ACTION_DIST_INPUTS)][:, agent_id].detach()
+                action_dist_input = train_batch[
+                    get_global_name(SampleBatch.ACTION_DIST_INPUTS, agent_id)
+                ]
+
+                obs = train_batch[get_global_name(SampleBatch.OBS, agent_id)]
 
                 train_batch_for_trpo_update = SampleBatch(
-                    obs=train_batch[get_global_name(SampleBatch.OBS)][:, agent_id],
-                    seq_lens=train_batch[get_global_name(SampleBatch.SEQ_LENS)][:, agent_id]
+                    obs=obs,
+                    seq_lens=train_batch[SampleBatch.SEQ_LENS]
                 )
 
                 # train_batch_for_trpo_update.is_training = bool(train_batch[GLOBAL_IS_TRAINING][agent_id])
-                train_batch_for_trpo_update.is_training = bool(train_batch[f'opponent_training_{agent_id}'])
+                train_batch_for_trpo_update.is_training = bool(train_batch[get_global_name(TRAINING, agent_id)][0])
 
                 i = 0
 
-                def _state_name(i): return f'state_in_{i}'
-
-                while _state_name(i) in train_batch:
-                    train_batch_for_trpo_update[_state_name(i)] = train_batch[get_global_name(_state_name(i))][:, agent_id]
+                while state_name(i) in train_batch:
+                    agent_state_name = global_state_name(i, agent_id)
+                    train_batch_for_trpo_update[state_name(i)] = train_batch[agent_state_name]
                     i += 1
 
                 # train_batch_for_trpo_update['state_in_0'] = train_batch[GLOBAL_STATE][:, agent_id].reshape(
