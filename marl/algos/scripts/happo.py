@@ -1,8 +1,7 @@
 from ray import tune
 from ray.tune.utils import merge_dicts
 from ray.tune import CLIReporter
-from marl.algos.core.CC.mappo import MAPPOTrainer
-# from marl.algos.core.CC.happo import HAPPOTrainer
+from marl.algos.core.CC.happo import HAPPOTrainer
 
 
 def run_happo(config_dict, common_config, env_dict, stop):
@@ -41,7 +40,7 @@ def run_happo(config_dict, common_config, env_dict, stop):
     }
     config.update(common_config)
 
-    results = tune.run(MAPPOTrainer, name=algorithm + "_" + config_dict["model_arch_args"]["core_arch"] + "_" +
+    results = tune.run(HAPPOTrainer, name=algorithm + "_" + config_dict["model_arch_args"]["core_arch"] + "_" +
                                           config_dict["env_args"][
                                               "map_name"],
                        stop=stop,

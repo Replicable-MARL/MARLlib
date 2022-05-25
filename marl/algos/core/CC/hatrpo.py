@@ -5,6 +5,7 @@ __data__: May-15
 """
 
 import logging
+import re
 from typing import Dict, List, Type, Union, Tuple
 from ray.rllib.models.torch.torch_action_dist import TorchDistributionWrapper
 from ray.rllib.policy.policy import Policy
@@ -104,9 +105,9 @@ def hatrpo_loss_fn(
         #     train_batch[SampleBatch.OBS], train_batch[get_global_name(SampleBatch.ACTIONS)]
         # )
 
-    want_hatrpo_but_other_opponent_not_initialized = (GLOBAL_MODEL not in train_batch)
+    contain_opponent_info = any(key.startswith('opponent_model_') for key in train_batch)
 
-    if want_hatrpo_but_other_opponent_not_initialized:
+    if not contain_opponent_info:
         policy_loss_for_rllib, action_kl = update_model_use_trust_region(
             model=model,
             train_batch=train_batch,
@@ -122,13 +123,19 @@ def hatrpo_loss_fn(
         # for _ in range(10):
         #     print('step into HATRPO')
         m_advantage = train_batch[Postprocessing.ADVANTAGES]
-        agents_num = train_batch[get_global_name(SampleBatch.ACTION_DIST_INPUTS)].shape[1] + 1
+
+        agents_num = policy.config["model"]["custom_model_config"]['num_agents']
         random_indices = np.random.permutation(range(agents_num))
 
         policy_losses = []
         kl_losses = []
 
-        def is_current_agent(i): return i == agents_num - 1
+        opponent_ids = [
+            int(re.findall(r'\d+', key)[0]) for key in train_batch if key.startswith('opponent_model_')
+        ] # will get [1, 2, 3] or [0, 2, 3]
+
+        def is_current_agent(i):
+            return i not in opponent_ids
 
         for agent_id in random_indices:
             if is_current_agent(agent_id):
@@ -140,7 +147,8 @@ def hatrpo_loss_fn(
                 train_batch_for_trpo_update = train_batch
                 action_dist_input = train_batch[SampleBatch.ACTION_DIST_INPUTS]
             else:
-                current_model = recovery_obj(int(train_batch[GLOBAL_MODEL][agent_id]))
+                # current_model = recovery_obj(int(train_batch[GLOBAL_MODEL][agent_id]))
+                current_model_id = int(train_batch['opponent_model_{}'.format(agent_id)])
                 # train_batch_for_trpo_update = train_batch[GLOBAL_TRAIN_BATCH][agent_id]
                 current_action_logits = train_batch[get_global_name(SampleBatch.ACTION_DIST_INPUTS)][:, agent_id, :].detach()
                 current_action_dist = dist_class(current_action_logits, None)
@@ -155,7 +163,8 @@ def hatrpo_loss_fn(
                     seq_lens=train_batch[get_global_name(SampleBatch.SEQ_LENS)][:, agent_id]
                 )
 
-                train_batch_for_trpo_update.is_training = bool(train_batch[GLOBAL_IS_TRAINING][agent_id])
+                # train_batch_for_trpo_update.is_training = bool(train_batch[GLOBAL_IS_TRAINING][agent_id])
+                train_batch_for_trpo_update.is_training = bool(train_batch[f'opponent_training_{agent_id}'])
 
                 i = 0
 
@@ -175,8 +184,8 @@ def hatrpo_loss_fn(
 
             importance_sampling = torch.exp(current_action_dist.logp(actions) - old_action_log_dist)
 
-            ic(train_batch_for_trpo_update['obs'].shape)
-            ic(train_batch_for_trpo_update['state_in_0'].shape)
+            # ic(train_batch_for_trpo_update['obs'].shape)
+            # ic(train_batch_for_trpo_update['state_in_0'].shape)
 
             kl_loss, policy_loss = update_model_use_trust_region(
                     model=current_model,
@@ -247,9 +256,9 @@ def hatrpo_loss_fn(
     return total_loss
 
 
-HAPTRPOTorchPolicy = lambda _config: PPOTorchPolicy.with_updates(
+HAPTRPOTorchPolicy = PPOTorchPolicy.with_updates(
         name="HAPPOTorchPolicy",
-        get_default_config=lambda: _config,
+        get_default_config=lambda: PPO_CONFIG,
         postprocess_fn=hatrpo_post_process,
         loss_fn=hatrpo_loss_fn,
         before_init=setup_torch_mixins,
@@ -265,7 +274,7 @@ def get_policy_class_hatrpo(config_):
         return HAPTRPOTorchPolicy
 
 
-HATRPOTrainer = lambda ppo_config: PPOTrainer.with_updates(
+HATRPOTrainer = PPOTrainer.with_updates(
     name="#hatrpo-trainer",
     default_policy=None,
     get_policy_class=get_policy_class_hatrpo,

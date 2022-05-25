@@ -8,6 +8,7 @@ from ray.rllib.policy.rnn_sequencing import pad_batch_to_sequences_of_same_size
 from icecream import ic
 from marl.algos.utils.postprocessing import get_dim, convert_to_torch_tensor, centralized_critic_postprocessing
 from ray.rllib.evaluation.postprocessing import compute_advantages
+import re
 
 
 GLOBAL_NEED_COLLECT = [SampleBatch.ACTION_LOGP, SampleBatch.ACTIONS,
@@ -63,19 +64,13 @@ def _extract_from_all_others(take_fn):
     return inner
 
 
-def extract_all_other_agents_model(other_agent_batches):
-    return _extract_from_all_others(lambda a: a[0].model)(other_agent_batches)
-
-
 def extract_other_agents_train_batch(other_agent_batches):
     return _extract_from_all_others(lambda a: a[1])(other_agent_batches)
 
 
 def add_all_agents_gae(policy, sample_batch, other_agent_batches=None, episode=None):
 
-    # sample_batch = add_opponent_information_and_critical_vf(policy, sample_batch, other_agent_batches, episode=episode)
-
-    # train_batch = centralized_critic_postprocessing(policy, sample_batch, other_agent_batches, episode)
+    sample_batch = add_opponent_information_and_critical_vf(policy, sample_batch, other_agent_batches, episode=episode)
 
 
     global value_normalizer
@@ -145,10 +140,7 @@ def _add_returns(sample_batch, last_r, gamma):
 
 
 def trpo_post_process(policy, sample_batch, other_agent_batches=None, episode=None):
-    # sample_batch = add_all_agents_gae(policy, sample_batch, other_agent_batches, epsisode)
-    # sample_batch = centralized_critic_postprocessing(policy, sample_batch, other_agent_batches, epsisode)
-
-    sample_batch = original_sy_get_central_critical(policy, sample_batch, other_agent_batches, episode)
+    sample_batch = add_all_agents_gae(policy, sample_batch, other_agent_batches, episode)
 
     last_r = _get_last_r(policy, sample_batch)
     gamma = policy.config["gamma"]
@@ -164,20 +156,22 @@ def hatrpo_post_process(policy, sample_batch, other_agent_batches=None, epsisode
     sample_batch = trpo_post_process(policy, sample_batch, other_agent_batches, epsisode)
 
     if other_agent_batches:
-        models = extract_all_other_agents_model(other_agent_batches=other_agent_batches)
 
-        # sample_batch[GLOBAL_MODEL] = [[i, id(m)] for i, m in enumerate(models)]
+        for agent_id, (_policy, _samply_batch)  in other_agent_batches.items():
+            _id = re.findall(r'\d+', agent_id)[0]
+            _id = int(_id)
 
-        sample_batch[GLOBAL_MODEL] = np.array([id(m) for m in models])
+            sample_batch['opponent_model_{}'.format(_id)] = np.array([int(id(_policy.model))], dtype=np.int)
+            sample_batch['opponent_training_{}'.format(_id)] = np.array([int(_samply_batch.is_training)], dtype=np.int)
 
-        train_batches = extract_other_agents_train_batch(other_agent_batches=other_agent_batches)
+        # train_batches = extract_other_agents_train_batch(other_agent_batches=other_agent_batches)
 
         # train_batches = pad_batch_to_sequences_of_same_size(train_batches, max_seq_len=policy.config['max_len'])
         # train_batches = [(t, max_seq_len=policy.max_seq_len, multi_agent=True) for t in train_batches]
 
         # sample_batch[GLOBAL_STATE] = np.array([get_one_batch_state(b) for b in train_batches])
         # ic(sample_batch[GLOBAL_STATE].shape)
-        sample_batch[GLOBAL_IS_TRAINING] = np.array([int(b.is_training) for b in train_batches])
+        # sample_batch[GLOBAL_IS_TRAINING] = np.stack([ [int(b.is_training)] for b in train_batches], axis=1)
 
 
         # sample_batch[GLOBAL_TRAIN_BATCH] = [t.copy(shallow=True) for t in train_batches]
@@ -227,13 +221,12 @@ def add_mul_opponents_agent_real_obs_info(opponent_batches: list, obs_dim, actio
                 sample_batch[SampleBatch.OBS] for _ in range(len(opponent_batches))
             ], axis=1)
         else:
-            action_mask_dim = action_mask_dim or 0   # set to zero if action is None
-            start = action_mask_dim
+            # action_mask_dim = action_mask_dim or 0   # set to zero if action is None
+            # start = action_mask_dim
 
             sample_batch[get_global_name(SampleBatch.OBS)] = np.stack([
-                batch[SampleBatch.OBS][:, start: (start + obs_dim if obs_dim else len(batch))]
-                for batch in opponent_batches
-            ], axis=1)
+                batch[SampleBatch.OBS] for batch in opponent_batches], axis=1
+            )
 
     return sample_batch
 
@@ -330,136 +323,7 @@ def add_state_in_for_opponent(sample_batch, other_agent_batches):
     return sample_batch
 
 
-def original_sy_get_central_critical(policy, sample_batch, other_agent_batches, episode):
-    custom_config = policy.config["model"]["custom_model_config"]
-    pytorch = custom_config["framework"] == "torch"
-    obs_dim = get_dim(custom_config["space_obs"]["obs"].shape)
-    algorithm = custom_config["algorithm"]
-    opp_action_in_cc = custom_config["opp_action_in_cc"]
-    global_state_flag = custom_config["global_state_flag"]
-    mask_flag = custom_config["mask_flag"]
-
-    if mask_flag:
-        action_mask_dim = custom_config["space_act"].n
-    else:
-        action_mask_dim = 0
-
-    n_agents = custom_config["num_agents"]
-    opponent_agents_num = n_agents - 1
-
-    if (pytorch and hasattr(policy, "compute_central_vf")) or \
-            (not pytorch and policy.loss_initialized()):
-
-        if not opp_action_in_cc and global_state_flag:
-            sample_batch["state"] = sample_batch['obs'][:, action_mask_dim:]
-            sample_batch[SampleBatch.VF_PREDS] = policy.compute_central_vf(
-                convert_to_torch_tensor(
-                    sample_batch["state"], policy.device),
-            ).cpu().detach().numpy()
-        else:  # need opponent info
-            assert other_agent_batches is not None
-            opponent_batch_list = list(other_agent_batches.values())
-            raw_opponent_batch = [opponent_batch_list[i][1] for i in range(opponent_agents_num)]
-            opponent_batch = []
-            for one_opponent_batch in raw_opponent_batch:
-                if len(one_opponent_batch) == len(sample_batch):
-                    pass
-                else:
-                    if len(one_opponent_batch) > len(sample_batch):
-                        one_opponent_batch = one_opponent_batch.slice(0, len(sample_batch))
-                    else:  # len(one_opponent_batch) < len(sample_batch):
-                        length_dif = len(sample_batch) - len(one_opponent_batch)
-                        one_opponent_batch = one_opponent_batch.concat(
-                            one_opponent_batch.slice(len(one_opponent_batch) - length_dif, len(one_opponent_batch)))
-                opponent_batch.append(one_opponent_batch)
-
-            # all other agent obs as state
-            # sample_batch["state"] = sample_batch['obs'][:, action_mask_dim:action_mask_dim + obs_dim]
-            if global_state_flag:  # include self obs and global state
-                sample_batch["state"] = sample_batch['obs'][:, action_mask_dim:]
-            else:
-                sample_batch["state"] = np.stack(
-                    [sample_batch['obs'][:, action_mask_dim:action_mask_dim + obs_dim]] + [
-                        opponent_batch[i]["obs"][:, action_mask_dim:action_mask_dim + obs_dim] for i in
-                        range(opponent_agents_num)], 1)
-
-            for key in GLOBAL_NEED_COLLECT:
-                # sample_batch["opponent_actions"] = np.stack(
-                #     [opponent_batch[i]["actions"] for i in range(opponent_agents_num)],
-                #     1)
-                if key not in sample_batch: continue
-
-                sample_batch[get_global_name(key)] = np.stack(
-                    [opponent_batch[i][key] for i in range(opponent_agents_num)], axis=1
-                )
-
-            if algorithm in ["coma"]:
-                sample_batch[SampleBatch.VF_PREDS] = policy.compute_central_vf(
-                    convert_to_torch_tensor(
-                        sample_batch["state"], policy.device),
-                    convert_to_torch_tensor(
-                        sample_batch[get_global_name(SampleBatch.ACTIONS)], policy.device) if opp_action_in_cc else None,
-                ) \
-                    .cpu().detach().numpy()
-                sample_batch[SampleBatch.VF_PREDS] = np.take(sample_batch[SampleBatch.VF_PREDS],
-                                                             np.expand_dims(sample_batch["actions"],
-                                                                            axis=1)).squeeze(
-                    axis=1)
-            else:
-                sample_batch[SampleBatch.VF_PREDS] = policy.compute_central_vf(
-                    convert_to_torch_tensor(
-                        sample_batch["state"], policy.device),
-                    convert_to_torch_tensor(
-                        sample_batch[get_global_name(SampleBatch.ACTIONS)], policy.device) if opp_action_in_cc else None,
-                ) \
-                    .cpu().detach().numpy()
-
-    else:
-        # Policy hasn't been initialized yet, use zeros.
-        o = sample_batch[SampleBatch.CUR_OBS]
-        if global_state_flag:
-            sample_batch["state"] = np.zeros(
-                (o.shape[0], get_dim(custom_config["space_obs"]["state"].shape) + get_dim(
-                    custom_config["space_obs"]["obs"].shape)),
-                dtype=sample_batch[SampleBatch.CUR_OBS].dtype)
-        else:
-            sample_batch["state"] = np.zeros((o.shape[0], n_agents, obs_dim),
-                                             dtype=sample_batch[SampleBatch.CUR_OBS].dtype)
-
-        sample_batch["vf_preds"] = np.zeros_like(
-            sample_batch[SampleBatch.REWARDS], dtype=np.float32)
-
-        for key in GLOBAL_NEED_COLLECT:
-            # sample_batch["opponent_actions"] = np.stack(
-            #     [np.zeros_like(sample_batch["actions"], dtype=sample_batch["actions"].dtype) for _ in
-            #      range(opponent_agents_num)], axis=1)
-            if key not in sample_batch: continue
-
-            sample_batch[get_global_name(key)] = np.stack(
-                [np.zeros_like(sample_batch[key], dtype=sample_batch[key].dtype) for _ in
-                 range(opponent_agents_num)], axis=1)
-
-        # if algorithm in ["coma"]:
-        #     sample_batch[SampleBatch.VF_PREDS] = np.take(sample_batch[SampleBatch.VF_PREDS],
-        #                                                  np.expand_dims(sample_batch["actions"], axis=1)).squeeze(
-        #         axis=1)
-
-    completed = sample_batch["dones"][-1]
-    if completed:
-        last_r = 0.0
-    else:
-        last_r = sample_batch[SampleBatch.VF_PREDS][-1]
-
-    train_batch = compute_advantages(
-        sample_batch,
-        last_r,
-        policy.config["gamma"],
-        policy.config["lambda"],
-        use_gae=policy.config["use_gae"])
-    return train_batch
-
-
-def myself_add_opponent_information_and_critical_vf(policy,
+def add_opponent_information_and_critical_vf(policy,
                                                     sample_batch,
                                                     other_agent_batches=None,
                                                     episode=None):
@@ -549,9 +413,9 @@ def myself_add_opponent_information_and_critical_vf(policy,
     # ic(sample_batch[SampleBatch.OBS].shape)
     # ic(sample_batch[get_global_name(SampleBatch.OBS)].shape)
 
-    ic(sample_batch[get_global_name('state_in_0')].shape)
-    ic(sample_batch['obs'].shape)
-    ic(sample_batch[get_global_name('obs')].shape)
-    ic(sample_batch[get_global_name('actions')].shape)
+    # ic(sample_batch[get_global_name('state_in_0')].shape)
+    # ic(sample_batch['obs'].shape)
+    # ic(sample_batch[get_global_name('obs')].shape)
+    # ic(sample_batch[get_global_name('actions')].shape)
 
     return sample_batch

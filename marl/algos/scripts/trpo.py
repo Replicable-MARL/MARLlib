@@ -41,14 +41,14 @@ def run_trpo(config_dict, common_config, env_dict, stop):
         },
     })
 
-    config.update({
-        'critic_lr': _param('critic_lr'),
-        'lr': _param('lr'),
-        "lr_schedule": [
-            (_param('lr_sh_min'), _param('lr_sh_max')),
-            (_param('lr_sh_step'), _param('lr_min')),
-        ]
-    })
+    # config.update({
+    #     'critic_lr': _param('critic_lr'),
+    #     'lr': _param('lr'),
+    #     "lr_schedule": [
+    #         (_param('lr_sh_min'), _param('lr_sh_max')),
+    #         (_param('lr_sh_step'), _param('lr_min')),
+    #     ]
+    # })
 
     algorithm = config_dict["algorithm"]
     RUNNING_NAME = '_'.join([algorithm, arch, map_name])

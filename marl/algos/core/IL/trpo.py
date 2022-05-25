@@ -30,6 +30,7 @@ from marl.algos.utils.get_hetero_info import (
     contain_global_obs,
     trpo_post_process,
     value_normalizer,
+    STATE,
 )
 
 from marl.algos.utils.trust_regions import update_model_use_trust_region
@@ -85,10 +86,10 @@ def trpo_loss_fn(
         reduce_mean_valid = torch.mean
 
     # vf_saved = model.value_function
-
+    #
     # if contain_global_obs(train_batch):
     #     model.value_function = lambda: policy.model.central_value_function(
-    #         train_batch[SampleBatch.OBS], train_batch[get_global_name(SampleBatch.ACTIONS)]
+    #         train_batch[STATE], train_batch[get_global_name(SampleBatch.ACTIONS)]
     #     )
 
     policy_loss_for_rllib, action_kl = update_model_use_trust_region(
@@ -149,9 +150,9 @@ def trpo_loss_fn(
     return total_loss
 
 
-TRPOTorchPolicy = lambda _config: PPOTorchPolicy.with_updates(
+TRPOTorchPolicy = PPOTorchPolicy.with_updates(
         name="HAPPOTorchPolicy",
-        get_default_config=lambda: _config,
+        get_default_config=lambda: PPO_CONFIG,
         postprocess_fn=trpo_post_process,
         loss_fn=trpo_loss_fn,
         before_init=setup_torch_mixins,
@@ -168,7 +169,7 @@ def get_policy_class_trpo(config_):
         return TRPOTorchPolicy
 
 
-TRPOTrainer = lambda _config: PPOTrainer.with_updates(
+TRPOTrainer = PPOTrainer.with_updates(
     name="#trpo-trainer",
     default_policy=None,
     get_policy_class=get_policy_class_trpo,

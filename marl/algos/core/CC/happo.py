@@ -28,9 +28,8 @@ from marl.algos.utils.get_hetero_info import (
     contain_global_obs,
     STATE,
     GLOBAL_MODEL_LOGITS,
-    # add_all_agents_gae,
+    add_all_agents_gae,
     value_normalizer,
-    original_sy_get_central_critical,
 )
 from ray.rllib.examples.centralized_critic import CentralizedValueMixin
 from icecream import ic
@@ -107,12 +106,9 @@ def happo_surrogate_loss(
         if opp_action_in_cc else None
     )
 
-    value_out = model.value_function()
-
     # if contain_global_obs(train_batch):
-    need_other_agent = False
-    # if contain_global_obs(train_batch):
-    if need_other_agent:
+    # need_other_agent = False
+    if contain_global_obs(train_batch):
         sub_losses = []
 
         m_advantage = train_batch[Postprocessing.ADVANTAGES]
@@ -238,12 +234,9 @@ from marl.algos.core.CC.mappo import central_critic_ppo_loss
 HAPPOTorchPolicy = PPOTorchPolicy.with_updates(
         name="HAPPOTorchPolicy",
         get_default_config=lambda: PPO_CONFIG,
-        # postprocess_fn=original_sy_get_central_critical,
-        postprocess_fn=centralized_critic_postprocessing,
-        # loss_fn=happo_surrogate_loss,
-        loss_fn=central_critic_ppo_loss,
+        postprocess_fn=add_all_agents_gae,
+        loss_fn=happo_surrogate_loss,
         before_init=setup_torch_mixins,
-        # optimizer_fn=make_happo_optimizers,
         extra_grad_process_fn=apply_grad_clipping,
         mixins=[
             LearningRateSchedule, EntropyCoeffSchedule, KLCoeffMixin,
