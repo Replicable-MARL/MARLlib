@@ -126,18 +126,18 @@ Here is a chart describing the characteristics of each algorithm:
 | DDPG  | Mixed | No | Continuous | Independent Learning | Off Policy
 | TRPO  | Mixed | No | Both | Independent Learning | On Policy
 | PPO  | Mixed | No | Both | Independent Learning | On Policy
-| COMA  | Mixed | No | Both | Centralized Critic | On Policy
-| MADDPG  | Mixed | Better | Continuous | Centralized Critic | Off Policy
-| MAA2C  | Mixed | Better | Both | Centralized Critic | On Policy
-| MATRPO  | Mixed | Better | Both | Centralized Critic | On Policy
-| MAPPO  | Mixed | Better | Both | Centralized Critic | On Policy
-| HATRPO  | Mixed | Better | Both | Centralized Critic | On Policy
-| HAPPO  | Cooperative | Better | Both | Centralized Critic | On Policy
+| COMA  | Mixed | Yes | Both | Centralized Critic | On Policy
+| MADDPG  | Mixed | Yes | Continuous | Centralized Critic | Off Policy
+| MAA2C  | Mixed | Yes | Both | Centralized Critic | On Policy
+| MATRPO  | Mixed | Yes | Both | Centralized Critic | On Policy
+| MAPPO  | Mixed | Yes | Both | Centralized Critic | On Policy
+| HATRPO  | Mixed | Yes | Both | Centralized Critic | On Policy
+| HAPPO  | Cooperative | Yes | Both | Centralized Critic | On Policy
 | VDN | Cooperative | No | Discrete | Value Decomposition | Off Policy
-| QMIX  | Cooperative | Better | Discrete | Value Decomposition | Off Policy
-| FACMAC  | Cooperative | Better | Discrete | Value Decomposition | Off Policy
-| VDAC  | Cooperative | Better | Both | Value Decomposition | On Policy
-| VDPPO | Cooperative | Better | Both | Value Decomposition | On Policy
+| QMIX  | Cooperative | Yes | Discrete | Value Decomposition | Off Policy
+| FACMAC  | Cooperative | Yes | Discrete | Value Decomposition | Off Policy
+| VDAC  | Cooperative | Yes | Both | Value Decomposition | On Policy
+| VDPPO | Cooperative | Yes | Both | Value Decomposition | On Policy
 
 **Current Task & Available algorithm mapping**: Y for available, N for not suitable, P for partially available on some scenarios.
 (Note: in our code, independent algorithms may not have **I** as prefix. For instance, PPO = IPPO)
