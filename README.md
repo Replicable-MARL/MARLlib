@@ -5,8 +5,8 @@
 **minquan**
 
 - [x] HAPPO: test in EnvZoo (SMAC and Mamujoco) and then should be incorporated into CC 
-- [ ] TRPO: test in EnvZoo (SMAC and Mamujoco) and then should be incorporated into CC 
-- [ ] HATRPO: test in EnvZoo (SMAC and Mamujoco) and then should be incorporated into CC 
+- [x] TRPO: test in EnvZoo (SMAC and Mamujoco) and then should be incorporated into CC 
+- [x] HATRPO: test in EnvZoo (SMAC and Mamujoco) and then should be incorporated into CC 
 
 **weixun**
 
@@ -28,36 +28,50 @@
 CUDA_VISIBLE_DEVICES=0 python marl/run.py --algo_config=qmix --finetuned --env-config=smac with env_args.map_name=3m
 ```
 
+<div align="center">
+<img src=image/logo.png width=75% />
+</div>
 
+**Multi-Agent RLlib (MA-RLLib)** is a MARL benchmark based on Ray and one of its toolkits RLlib. 
+It provides MARL research community a unified platform for developing and evaluating the new ideas on various multi-agent environments.
+There are four core features of MA-RLLib. 
 
+- it collects most of the existing MARL algorithms that are widely acknowledged by the community and unifies them under one framework. 
+- it gives a solution that enables different multi-agent environments using a same interface to interact with the agents.
+- it guarantees great efficiency on both training and sampling process.
+- it provides trained results including learning curves and pretrained models specific to each task and each algorithm's combination, with finetuned hyper-parameters to guarantee credibility. 
 
-#  White Paper for [MARL in One](https://github.com/Theohhhu/[SMAC](HTTPS://GITHUB.COM/OXWHIRL/SMAC)_Ray) Benchmark
--- multi-agent tasks and baselines under a unified framework
+--------------------------------------------------------------------------------
+The README is organized as follows:
+- [**Overview**](#Part-I.-Overview)
+- [**Environment**](#Part-II.-Environment)
+- [**Algorithm**](#Part-III.-Algorithm)
+- [**Getting started & Examples**](#Part-VI.-Getting-started)
+- [**State of the Art**](#Part-V.-State-of-the-Art)
 
 
 ### Part I. Overview
 
-We collected most of the existing multi-agent environment and multi-agent reinforcement learning algorithms with different model architecture under one framework based on [**Ray**](https://github.com/ray-project/ray)'s [**RLlib**](https://github.com/ray-project/ray/tree/master/rllib) to boost the MARL research. 
+We collected most of the existing multi-agent environment and multi-agent reinforcement learning algorithms and unify them under one framework based on [**Ray**](https://github.com/ray-project/ray)'s [**RLlib**](https://github.com/ray-project/ray/tree/master/rllib) to boost the MARL research. 
 
-The code is simple and easy to understand. The most common MARL baselines include **independence learning (R2D2, A2C, PPO, PG)**, **centralized critic learning (COMA, MADDPG, MAPPO, MAA2C)** and **value decomposition (QMIX, VDN, VDA2C, VDPPO)** are all implemented as simple as possible. The same algorithm under different tasks can be a bit different to satisfy the various settings of multi-agent systems. But once you are familiar with one task, it will be easy to move to another.
+The common MARL baselines include **independence learning (IQL, A2C, DDPG, TRPO, PPO)**, **centralized critic learning (COMA, MADDPG, MAPPO, HATRPO)** and **value decomposition (QMIX, VDN, FACMAC, VDA2C)** are all implemented.
 
-We hope everyone in the MARL research community can be benefited from this benchmark.
+The popular MARL environments like **SMAC, MaMujoco, Google Research Football** are all provides with unified interface.
 
-All codes are built based on RLLIB with some necessary extensions. The tutorial of RLLIB can be found in https://docs.ray.io/en/latest/rllib/index.html.
-Fast examples can be found in https://docs.ray.io/en/latest/rllib-examples.html. 
-These will help you easily dive into RLLIB.
+The algorithm code and environment code are fully separated. Changing environment needs no modification on algorithm side and vice versa.
 
-The following parts are organized as:
-- **Part II.Environment**: available environments with the description
-- **Part III. Baseline Algorithms**: implemented baseline MARL algorithms
-- **Part VI. Getting started**: how to use this repository
-- **Part V. State of the Art**: existing works on the environments we provide, with topic annotation.
+The tutorial of RLlib can be found in https://docs.ray.io/en/releases-1.8.0/rllib/index.html.
+Fast examples can be found in https://docs.ray.io/en/releases-1.8.0/rllib-examples.html. 
+These will help you easily dive into RLlib.
+
+We hope everyone interested in MARL can be benefited from MA-RLlib.
+
 
 ### Part II. Environment
 
 #### Motivation
 
-RL Community has boomed thanks to some great works like [**OpenAI**](https://openai.com/)'s [**Gym**](https://github.com/openai/gym) and [**RLLIB**](https://github.com/ray-project/ray/tree/master/rllib) under [**Anyscale**](https://www.anyscale.com/)'s [**Ray**](https://github.com/ray-project/ray) framework. **Gym** provides a unified style of RL environment interface. **RLLIB** makes the RL training more scalable and efficient.
+RL Community has boomed thanks to some great works like [**OpenAI**](https://openai.com/)'s [**Gym**](https://github.com/openai/gym) and [**RLlib**](https://github.com/ray-project/ray/tree/master/rllib) under [**Anyscale**](https://www.anyscale.com/)'s [**Ray**](https://github.com/ray-project/ray) framework. **Gym** provides a unified style of RL environment interface. **RLlib** makes the RL training more scalable and efficient.
 
 But unlike the single-agent RL tasks, multi-agent RL has its unique challenge. 
 For example, if you look into the task settings of the following multi-agent tasks, you will find so many differences in...
@@ -75,11 +89,11 @@ From this perspective, the way of fairly comparing the performance of different 
 
 #### What we did in this benchmark
 
-In this benchmark, we incorporate the characteristics of both Gym and RLLIB.
+In this benchmark, we incorporate the characteristics of both Gym and RLlib.
 
-All the environments we collected are modified (if necessary) to provide Gym style interface for multi-agent interaction. The unified environments are then registered to RAY and should be RLLIB compatible. Algorithms like Value Decomposition (QMIX, VDN, VDA2C, VDPPO) need a conforming return value for the step function. We have provided them for cooperative/collaborative multi-agent tasks like [Google-Football](https://github.com/google-research/football) and [Pommerman](https://github.com/MultiAgentLearning/playground).
+All the environments we collected are modified (if necessary) to provide Gym style interface for multi-agent interaction. The unified environments are then registered to RAY and should be RLlib compatible. Algorithms like Value Decomposition (QMIX, VDN, VDA2C, VDPPO) need a conforming return value for the step function. We have provided them for cooperative/collaborative multi-agent tasks like [Google-Football](https://github.com/google-research/football) and [Pommerman](https://github.com/MultiAgentLearning/playground).
 
-We make full use of RLLIB to provide a standard but extendable MARL training pipeline. All MARL algorithms (like Centralized Critic strategy) and agent's "brain" (Neural Network like CNN + RNN) can be easily customized under RLLIB's API. 
+We make full use of RLlib to provide a standard but extendable MARL training pipeline. All MARL algorithms (like Centralized Critic strategy) and agent's "brain" (Neural Network like CNN + RNN) can be easily customized under RLlib's API. 
 
 Some multi-agent tasks may cost weeks of training. But thanks to RAY, the training process can be easily paralleled with only slight configure file modification. RAY is good at allocating your computing resources for the best training/sampling efficiency.
 
@@ -93,30 +107,25 @@ Most of the popular environment in MARL research has been incorporated in this b
 | [RWARE](https://github.com/semitable/robotic-warehouse)  | Collaborative | Partial | Discrete | Discrete  |
 | [MPE](https://github.com/openai/multiagent-particle-envs)  | Mixed | Both | Both | Continuous  |
 | [SMAC](https://github.com/oxwhirl/smac)  | Cooperative | Partial | Discrete | Continuous |
-| [Meta-Drive](https://github.com/decisionforce/metadrive)  | Collaborative | Partial | Continuous | Continuous |
+| [MetaDrive](https://github.com/decisionforce/metadrive)  | Collaborative | Partial | Continuous | Continuous |
 |[MAgent](https://www.pettingzoo.ml/magent) | Mixed | Partial | Discrete | Discrete |
 | [Pommerman](https://github.com/MultiAgentLearning/playground)  | Mixed | Both | Discrete | Discrete |
 | [MaMujoco](https://github.com/schroederdewitt/multiagent_mujoco)  | Cooperative | Partial | Continuous | Continuous |
 | [GRF](https://github.com/google-research/football)  | Collaborative | Full | Discrete | Continuous |
 | [Hanabi](https://github.com/deepmind/hanabi-learning-environment) | Cooperative | Partial | Discrete | Discrete |
-| [Neural-MMO](https://github.com/NeuralMMO/environment)  | Competitive | Partial | Multi-Discrete | Continuous |
 
-[comment]: <> (| [Derk's Gym]&#40;https://gym.derkgame.com/&#41;  | Mixed | Partial | Mixed | Continuous |)
+Each environment has a readme file, standing as the instruction for this task, talking about env settings, installation, and some important notes.
 
-Each environment has a top directory. No inter-dependency exists between two environments. If you are interested in one environment, all the related code is there, in one directory. 
-
-Each environment has a readme file, standing as the instruction for this task, talking about env settings, installation, supported algorithms, important notes, bugs shooting, etc.
-
-### Part III. Baseline Algorithms
+### Part III. Algorithm
 
 We provide three types of MARL algorithms as our baselines including:
 
 **Independent Learning:** 
-DQN
-R2D2
+IQL
+DDPG
 PG
 A2C
-DDPG
+TRPO
 PPO
 
 **Centralized Critic:**
@@ -124,11 +133,14 @@ COMA
 MADDPG 
 MAAC 
 MAPPO
+MATRPO
+HATRPO
 HAPPO
 
 **Value Decomposition:**
 VDN
 QMIX
+FACMAC
 VDAC
 VDPPO
 
@@ -152,99 +164,45 @@ Here is a chart describing the characteristics of each algorithm:
 | VDAC  | Cooperative | Better | Both | Value Decomposition | On Policy
 | VDPPO | Cooperative | Better | Both | Value Decomposition | On Policy
 
-**Current Task & Available algorithm map**: Y for available, N for not suitable, P for partially available
+**Current Task & Available algorithm mapping**: Y for available, N for not suitable, P for partially available on some scenarios.
 (Note: in our code, independent algorithms may not have **I** as prefix. For instance, PPO = IPPO)
 
-| Env w Algorithm | R2D2 | PG | A2C | DDPG | PPO | COMA | MADDPG | MAAC | MAPPO | VDN | QMIX | VDAC | VDPPO 
-| ---- | ---- | ---- | ---- | ---- | ---- | ----- | ---- | ---- | ---- | ---- | ---- | ---- | ---- |
-| LBF         | Y | Y | Y | N | Y | Y | N | Y | Y | P | P | P | P |
-| RWARE       | Y | Y | Y | N | Y | Y | N | Y | Y | Y | Y | Y | Y |
-| MPE         | P | Y | Y | P | Y | P | P | Y | Y | Y | Y | Y | Y |
-| SMAC        | Y | Y | Y | N | Y | Y | N | Y | Y | Y | Y | Y | Y |
-| Meta-Drive  | N | Y | Y | Y | Y | N | Y | Y | Y | N | N | N | N |
-| MAgent      | Y | Y | Y | N | Y | Y | N | Y | Y | N | N | N | N |
-| Pommerman   | Y | Y | Y | N | Y | P | N | P | P | P | P | P | P |
-| MaMujoco    | N | Y | Y | Y | Y | N | Y | Y | Y | N | N | Y | Y |
-| GRF         | Y | Y | Y | N | Y | Y | N | Y | Y | Y | Y | Y | Y |
-| Hanabi      | Y | Y | Y | N | Y | Y | N | Y | Y | N | N | N | N |
-| Neural-MMO  | N | Y | Y | N | Y | N | N | N | N | N | N | N | N |
-
- RLLIB built-in DDPG do not support RNN and discrete action. We might implement one in the future. 
-
-**Current Task & Neural Arch map**: Y for support, N for unavailable
-
-| Env w Arch | MLP | GRU | LSTM | CNN | Transformer | 
-| --------- | -------- | -------- | -------- | -------- | -------- |
-| LBF  | N | Y | Y | N | N |
-| RWARE  | N | Y | Y | N | N | 
-| MPE  | Y | Y | Y | N | N | 
-| SMAC  | N | Y | Y | N | Y | 
-| Neural-MMO  | N | Y | Y | Y | Y |
-| Meta-Drive  | N | Y | Y | Y | Y | 
-| MAgent  | N | Y | Y | Y | N |
-| Pommerman  | N | Y | Y | Y | N |
-| MaMujoco  | Y | Y | Y | N | N |
-| GRF  | Y | Y | Y | Y | Y | 
-| Hanabi  | N | Y | Y | N | N |
+| Env w Algorithm | IQL | PG | A2C | DDPG | TRPO | PPO | COMA | MADDPG | MAAC | MATRPO | MAPPO | HATRPO | HAPPO| VDN | QMIX | FACMAC| VDAC | VDPPO 
+| ---- | ---- | ---- | ---- | ---- | ---- | ----- | ---- | ---- | ---- | ---- | ---- | ---- | ---- |  ---- | ---- | ---- | ---- | ---- |
+| LBF         | Y | Y | Y | N | Y | Y | Y | N | Y | Y | Y | Y | Y | P | P | P | P | P |
+| RWARE       | Y | Y | Y | N | Y | Y | Y | N | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
+| MPE         | P | Y | Y | P | Y | Y | P | P | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
+| SMAC        | Y | Y | Y | N | Y | Y | Y | N | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
+| MetaDrive  | N | Y | Y | Y | Y | Y | N | Y | Y | Y | Y | Y | Y | N | N | N | N | N |
+| MAgent      | Y | Y | Y | N | Y | Y | Y | N | Y | Y | Y | Y | Y | N | N | N | N | N |
+| Pommerman   | Y | Y | Y | N | Y | Y | P | N | Y | Y | Y | Y | Y | P | P | P | P | P |
+| MaMujoco    | N | Y | Y | Y | Y | Y | N | Y | Y | Y | Y | Y | Y | N | N | Y | Y | Y |
+| GRF         | Y | Y | Y | N | Y | Y | Y | N | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
+| Hanabi      | Y | Y | Y | N | Y | Y | Y | N | Y | Y | Y | Y | Y | N | N | N | N | N |
 
 ### Part IV. Getting started
 
 Install Ray 
 ```
-pip install -U ray==1.8.0 # version important
+pip install ray==1.8.0 # version important
 ```
 
 
-clone our fork of Ray
+Add patch of MA-RLlib
 ```
-git clone https://github.com/Theohhhu/ray_marl.git
-git checkout marl_in_one
-```
-
-follow https://docs.ray.io/en/latest/ray-contribute/development.html#python-develop
-```
-cd ray_marl
-python python/ray/setup-dev.py
-```
-**Y** to replace source-packages code with local one (replacing **rllib** is enough)
-
-**Attention**: Above is the common installation. Follow the README file under each task's directory to meet the requirement before you run the code.
-
-After everything you need is settled down, you can run the code. A typical run script can be like
-```
-CUDA_VISIBLE_DEVICES=1 python SMAC/run_smac.py --run MAPPO --map 3s5z --share-policy --num-workers 5 --stop-iters 10000000 --stop-timesteps 20000000
+cd patch/rllib
+python add_patch.py
 ```
 
-The basic structure of the repository. Here we take **[SMAC](HTTPS://GITHUB.COM/OXWHIRL/SMAC)** task as an example (name may be slightly different)
+**Y** to replace source-packages code
 
+**Attention**: Above is the common installation. Each environment needs extra dependency. Please read the installation instruction in envs/base_env/install.
+
+Examples
 ```
-/
-└───SMAC
-        └───env     [**env compatible with RLLIB**]
-                └───starcraft2_rllib.py
-                
-        └───model   [**agent architecture**]
-                └───gru.py
-                └───gru_cc.py
-                
-        └───util    [**algorithm module**]
-                └───mappo_tools.py
-                └───vda2c_tools.py
-        
-        └───policy  [**algorithm config**]
-                └───mappo.py
-                └───vda2c.py
-                
-        └───metrics [**logging**]
-                └───callback.py
-                └───reporter.py
-                
-        └───README.md
-        └───run.py
-        └───config.py 
-
+python marl/run.py --algo_config=MAPPO [--finetuned] --env-config=smac with env_args.map_name=3m
 ```
-
+--finetuned is optional, force using the finetuned hyperparameter 
 
 ### Part V. State of the Art
 
