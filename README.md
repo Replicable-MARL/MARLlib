@@ -118,21 +118,24 @@ VDPPO
 
 Here is a chart describing the characteristics of each algorithm:
 
-| Algorithm | Learning Mode | Need Global State | Action | Learning Mode  | Type |
+| Algorithm | Support Task Mode | Need Global State | Action | Learning Mode  | Type |
 | ----------- | ----------- | ----------- | ----------- | ----------- | ----------- |
-| DQN  | Mixed | No | Discrete | Independent Learning | Off Policy
-| R2D2  | Mixed | No | Discrete | Independent Learning | Off Policy
+| IQL  | Mixed | No | Discrete | Independent Learning | Off Policy
 | PG  | Mixed | No | Both | Independent Learning | On Policy
-| AC  | Mixed | No | Both | Independent Learning | On Policy
+| A2C  | Mixed | No | Both | Independent Learning | On Policy
 | DDPG  | Mixed | No | Continuous | Independent Learning | Off Policy
+| TRPO  | Mixed | No | Both | Independent Learning | On Policy
 | PPO  | Mixed | No | Both | Independent Learning | On Policy
 | COMA  | Mixed | No | Both | Centralized Critic | On Policy
 | MADDPG  | Mixed | Better | Continuous | Centralized Critic | Off Policy
-| MAAC  | Mixed | Better | Both | Centralized Critic | On Policy
+| MAA2C  | Mixed | Better | Both | Centralized Critic | On Policy
+| MATRPO  | Mixed | Better | Both | Centralized Critic | On Policy
 | MAPPO  | Mixed | Better | Both | Centralized Critic | On Policy
+| HATRPO  | Mixed | Better | Both | Centralized Critic | On Policy
 | HAPPO  | Cooperative | Better | Both | Centralized Critic | On Policy
 | VDN | Cooperative | No | Discrete | Value Decomposition | Off Policy
-| QMIX  | Cooperative | Yes | Discrete | Value Decomposition | Off Policy
+| QMIX  | Cooperative | Better | Discrete | Value Decomposition | Off Policy
+| FACMAC  | Cooperative | Better | Discrete | Value Decomposition | Off Policy
 | VDAC  | Cooperative | Better | Both | Value Decomposition | On Policy
 | VDPPO | Cooperative | Better | Both | Value Decomposition | On Policy
 
