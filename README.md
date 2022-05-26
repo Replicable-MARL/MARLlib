@@ -4,9 +4,9 @@
 <img src=image/logo.png width=75% />
 </div>
 
-**Multi-Agent RLlib (MA-RLLib)** is a MARL benchmark based on Ray and one of its toolkits RLlib. 
+**Multi-Agent RLlib (MA-RLLib)** is a *MARL benchmark* based on [**Ray**](https://github.com/ray-project/ray) and one of its toolkits [**RLlib**](https://github.com/ray-project/ray/tree/master/rllib). 
 It provides MARL research community a unified platform for developing and evaluating the new ideas on various multi-agent environments.
-There are four core features of MA-RLLib. 
+There are four core features of **MA-RLLib**. 
 
 - it collects most of the existing MARL algorithms that are widely acknowledged by the community and unifies them under one framework. 
 - it gives a solution that enables different multi-agent environments using a same interface to interact with the agents.
