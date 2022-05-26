@@ -75,25 +75,19 @@ def linesearch(model,
                kl_threshold=None
                ):
     fval = loss_f().data # notice, need a a minus to loss function.
-    # print('fval === ', fval)
-    # print("fval before", fval.item())
+
     for (_n_backtracks, stepfrac) in enumerate(.5**np.arange(max_backtracks)):
-        # print(f'linea search... {_n_backtracks}')
-        # stepfrac: 1, 0.5, 0.5 ** 2, 0.5 ** 3, ..
+
         xnew = x + stepfrac * fullstep
         set_flat_actor_params_to(model, xnew)
         newfval = loss_f().data
-        # print('new-fval === ', newfval)
-        # actual_improve = fval - newfval
         actual_improve = newfval - fval
         expected_improve = expected_improve_rate * stepfrac
         ratio = actual_improve / expected_improve
-        # print("a/e/r", actual_improve.item(), expected_improve.item(), ratio.item())
 
         kl = kl_f(mean=True)
 
         if kl < kl_threshold and ratio.item() > accept_ratio and actual_improve.item() > 0:
-            # print("fval after", newfval.item())
             return True, xnew
 
     return False, x
@@ -102,11 +96,6 @@ def linesearch(model,
 def update_model_use_trust_region(model, train_batch, advantages,
                                   actions, action_logp, action_dist_inputs, dist_class, mean_fn):
     # reference: https://github.com/ikostrikov/pytorch-trpo
-
-    # obs = train_batch['obs']
-    # if isinstance(train_batch['obs'], dict):
-    #     obs = obs['obs']
-    # print(f'train OBS.shape is {obs.shape}')
 
     def _get_policy_loss(volatile=False, mean=False):
         if volatile:
@@ -156,11 +145,9 @@ def update_model_use_trust_region(model, train_batch, advantages,
     step_size = 1 / torch.sqrt(shs / max_kl)[0]
     full_step = step_size * stepdir
 
-    # neg_dot_stepdir = (-loss_grad * stepdir).sum(0, keepdim=True)
     excepted_improve = (loss_grad * stepdir).sum(0, keepdim=True)
     excepted_improve = excepted_improve.data.cpu().numpy()
 
-    # prev_params = torch.cat([p.data.view(-1) for p in model.parameters()])
     prev_params = torch.cat([p.data.view(-1) for p in model.actor_parameters()])
 
     _get_mean_and_no_grad_policy_loss = partial(_get_policy_loss, volatile=True, mean=True)

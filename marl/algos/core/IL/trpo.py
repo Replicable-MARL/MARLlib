@@ -5,32 +5,23 @@ __data__: May-15
 """
 
 import logging
-from typing import Dict, List, Type, Union, Tuple
+from typing import List, Type, Union
 from ray.rllib.models.torch.torch_action_dist import TorchDistributionWrapper
 from ray.rllib.policy.policy import Policy
 from ray.rllib.models.modelv2 import ModelV2
-from ray.rllib.utils.torch_ops import apply_grad_clipping, \
-    explained_variance, sequence_mask
-import numpy as np
-from ray.rllib.evaluation.postprocessing import discount_cumsum, Postprocessing
+from ray.rllib.utils.torch_ops import explained_variance, sequence_mask
+from ray.rllib.evaluation.postprocessing import Postprocessing
 from ray.rllib.policy.sample_batch import SampleBatch
-from ray.rllib.utils.framework import try_import_tf, try_import_torch, get_variable
-from torch import nn
-from marl.algos.utils.valuenorm import ValueNorm
-from ray.rllib.utils.typing import TrainerConfigDict, TensorType, \
-    LocalOptimizer
+from ray.rllib.utils.framework import try_import_tf, try_import_torch
+from ray.rllib.utils.typing import TensorType
 from ray.rllib.agents.ppo.ppo import PPOTrainer, DEFAULT_CONFIG as PPO_CONFIG
-from ray.rllib.agents.ppo.ppo_torch_policy import PPOTorchPolicy, ValueNetworkMixin, KLCoeffMixin
+from ray.rllib.agents.ppo.ppo_torch_policy import PPOTorchPolicy, KLCoeffMixin
 from ray.rllib.utils.torch_ops import apply_grad_clipping
 from ray.rllib.policy.torch_policy import LearningRateSchedule, EntropyCoeffSchedule
-from functools import partial
 from marl.algos.utils.setup_utils import setup_torch_mixins
 from marl.algos.utils.get_hetero_info import (
-    get_global_name,
-    contain_global_obs,
     trpo_post_process,
     value_normalizer,
-    STATE,
 )
 
 from marl.algos.utils.trust_regions import update_model_use_trust_region
@@ -58,11 +49,6 @@ def trpo_loss_fn(
         Union[TensorType, List[TensorType]]: A single loss tensor or a list
             of loss tensors.
     """
-
-    # TRPO, HATRPO = 'TRPO', 'HATRPO'
-
-    # CentralizedValueMixin.__init__(policy)
-
     logits, state = model(train_batch)
     curr_action_dist = dist_class(logits, model)
 
@@ -84,13 +70,6 @@ def trpo_loss_fn(
     else:
         mask = None
         reduce_mean_valid = torch.mean
-
-    # vf_saved = model.value_function
-    #
-    # if contain_global_obs(train_batch):
-    #     model.value_function = lambda: policy.model.central_value_function(
-    #         train_batch[STATE], train_batch[get_global_name(SampleBatch.ACTIONS)]
-    #     )
 
     policy_loss_for_rllib, action_kl = update_model_use_trust_region(
             model=model,
@@ -124,9 +103,6 @@ def trpo_loss_fn(
     # Ignore the value function.
     else:
         vf_loss = mean_vf_loss = 0.0
-
-    # model.value_function = vf_saved
-    # recovery the value function.
 
     total_loss = reduce_mean_valid(-policy_loss_for_rllib +
                                    policy.kl_coeff * action_kl +
