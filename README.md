@@ -1,32 +1,4 @@
-### TODO
 
-**basic algorithms** + **env**
-
-**minquan**
-
-- [x] HAPPO: test in EnvZoo (SMAC and Mamujoco) and then should be incorporated into CC 
-- [x] TRPO: test in EnvZoo (SMAC and Mamujoco) and then should be incorporated into CC 
-- [x] HATRPO: test in EnvZoo (SMAC and Mamujoco) and then should be incorporated into CC 
-
-**weixun**
-
-- [x] DDPG: add RNN support, test in Mamujoco/MPE and then should be incorporated into IL 
-- [x] MADDPG: cc version of DDPG with RNN support, test in Mamujoco/MPE and then should be incorporated into CC 
-- [ ] off-policy RNN support investigation
-
-**Siyi**
-- [x] incorporate the rest of the environment into CC,IL and VD.
-- [x] modularize the code, unified the common part in CC,IL and VD.
-- [x] DDPG: add RNN support, test in EnvZoo (Mamujoco is enough) and then should be incorporated into IL 
-- [x] MADDPG: cc version of DDPG with RNN support, test in Mamujoco/MPE and then should be incorporated into CC
-- [x] FACMAC: VD version of DDPG with RNN support, test in Mamujoco/MPE and then should be incorporated into CC
-- [x] config setting reconstruct
-- [x] reconstruct the EnvZoo with modularized code in CC, IL and VD part
-- [ ] off-policy RNN support investigation
-
-```
-CUDA_VISIBLE_DEVICES=0 python marl/run.py --algo_config=qmix --finetuned --env-config=smac with env_args.map_name=3m
-```
 
 <div align="center">
 <img src=image/logo.png width=75% />
@@ -315,6 +287,37 @@ python marl/run.py --algo_config=MAPPO [--finetuned] --env-config=smac with env_
 
 
 **(Note: this is not a comprehensive list. Only representative papers are selected.)**
+
+
+### TODO
+
+**basic algorithms** + **env**
+
+**minquan**
+
+- [x] HAPPO: test in EnvZoo (SMAC and Mamujoco) and then should be incorporated into CC 
+- [x] TRPO: test in EnvZoo (SMAC and Mamujoco) and then should be incorporated into CC 
+- [x] HATRPO: test in EnvZoo (SMAC and Mamujoco) and then should be incorporated into CC 
+
+**weixun**
+
+- [x] DDPG: add RNN support, test in Mamujoco/MPE and then should be incorporated into IL 
+- [x] MADDPG: cc version of DDPG with RNN support, test in Mamujoco/MPE and then should be incorporated into CC 
+- [ ] off-policy RNN support investigation
+
+**Siyi**
+- [x] incorporate the rest of the environment into CC,IL and VD.
+- [x] modularize the code, unified the common part in CC,IL and VD.
+- [x] DDPG: add RNN support, test in EnvZoo (Mamujoco is enough) and then should be incorporated into IL 
+- [x] MADDPG: cc version of DDPG with RNN support, test in Mamujoco/MPE and then should be incorporated into CC
+- [x] FACMAC: VD version of DDPG with RNN support, test in Mamujoco/MPE and then should be incorporated into CC
+- [x] config setting reconstruct
+- [x] reconstruct the EnvZoo with modularized code in CC, IL and VD part
+- [ ] off-policy RNN support investigation
+
+```
+CUDA_VISIBLE_DEVICES=0 python marl/run.py --algo_config=qmix --finetuned --env-config=smac with env_args.map_name=3m
+```
 
 
 [comment]: <> (### **Part V. Extensions**)
