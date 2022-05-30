@@ -1,7 +1,7 @@
 
 
 <div align="center">
-<img src=image/logo.png width=75% />
+<img src=image/logo1.png width=80% />
 </div>
 
 **Multi-Agent RLlib (MA-RLLib)** is a *MARL benchmark* based on [**Ray**](https://github.com/ray-project/ray) and one of its toolkits [**RLlib**](https://github.com/ray-project/ray/tree/master/rllib). 
