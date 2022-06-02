@@ -27,22 +27,25 @@ def run_vd(config_dict):
     env_reg_ls = []
     check_current_used_env_flag = False
     for env_n in ENV_REGISTRY.keys():
-        if not ENV_REGISTRY[env_n]:
-            info = [env_n, "Error", "envs/base_env/config/{}.yaml".format(env_n),
+        if isinstance(ENV_REGISTRY[env_n], str):  # error
+            info = [env_n, "Error", ENV_REGISTRY[env_n], "envs/base_env/config/{}.yaml".format(env_n),
                     "envs/global_reward_env/{}.py".format(env_n)]
             env_reg_ls.append(info)
         else:
-            info = [env_n, "Ready", "envs/base_env/config/{}.yaml".format(env_n),
+            info = [env_n, "Ready", "Null", "envs/base_env/config/{}.yaml".format(env_n),
                     "envs/global_reward_env/{}.py".format(env_n)]
             env_reg_ls.append(info)
             if env_n == config_dict["env"]:
                 check_current_used_env_flag = True
 
-    print(tabulate(env_reg_ls, headers=['Env_Name', 'Check_Status', "Config_File_Location", "Env_File_Location"],
+    print(tabulate(env_reg_ls,
+                   headers=['Env_Name', 'Check_Status', "Error_Log", "Config_File_Location", "Env_File_Location"],
                    tablefmt='grid'))
 
     if not check_current_used_env_flag:
-        raise ValueError("environment \"{}\" not installed properly or not registered yet".format(config_dict["env"]))
+        raise ValueError(
+            "environment \"{}\" not installed properly or not registered yet, please see the Error_Log below".format(
+                config_dict["env"]))
 
     map_name = config_dict["env_args"]["map_name"]
     test_env = ENV_REGISTRY[config_dict["env"]](config_dict["env_args"])
@@ -211,7 +214,6 @@ def run_vd(config_dict):
 
     results = POlICY_REGISTRY[config_dict["algorithm"]](config_dict, common_config, env_info_dict, stop)
 
-    if config_dict.as_test:
-        check_learning_achieved(results, config_dict.stop_reward)
+    check_learning_achieved(results, config_dict.stop_reward)
 
     ray.shutdown()
