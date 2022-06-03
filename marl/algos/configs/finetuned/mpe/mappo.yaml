@@ -1,4 +1,4 @@
-# PPO parameters
+# MAPPO parameters
 
 algo_args:
   batch_episode:  10
@@ -7,4 +7,4 @@ algo_args:
   iteration: 4
   entropy_coeff: 0.01
   clip_param: 0.2
-  vf_clip_param: 20.0
+  vf_clip_param: 200.0
