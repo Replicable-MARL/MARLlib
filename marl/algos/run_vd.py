@@ -214,6 +214,4 @@ def run_vd(config_dict):
 
     results = POlICY_REGISTRY[config_dict["algorithm"]](config_dict, common_config, env_info_dict, stop)
 
-    check_learning_achieved(results, config_dict.stop_reward)
-
     ray.shutdown()
