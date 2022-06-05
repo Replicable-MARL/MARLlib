@@ -2,6 +2,8 @@ from gym.spaces import Box
 from ray.rllib.utils.framework import try_import_tf, try_import_torch
 from marl.models.base.base_rnn import Base_RNN
 import copy
+from ray.rllib.utils.annotations import override
+from functools import reduce
 
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
@@ -80,7 +82,7 @@ class CC_RNN(Base_RNN):
 
         if self.custom_config["algorithm"] in ["coma"]:
             self.q_flag = True
-            self.value_branch = nn.Linear(self.input_dim, num_outputs)
+            self.value_branch = nn.Linear(self.hidden_state_size, num_outputs)
             self.central_vf = nn.Sequential(
                 nn.Linear(input_size, num_outputs),
             )
@@ -115,3 +117,12 @@ class CC_RNN(Base_RNN):
             return torch.reshape(self.central_vf(x), [-1, self.num_outputs])
         else:
             return torch.reshape(self.central_vf(x), [-1])
+
+    @override(Base_RNN)
+    def critic_parameters(self):
+        critics = [
+            self.cc_encoder,
+            self.central_vf,
+        ]
+        return reduce(lambda x, y: x + y, map(lambda p: list(p.parameters()), critics))
+        # return list(self.value_branch.parameters())
