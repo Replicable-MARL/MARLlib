@@ -1,6 +1,7 @@
 from ray import tune
 from ray.tune.utils import merge_dicts
 from ray.tune import CLIReporter
+from marl.algos.utils.log_dir_util import available_local_dir
 
 
 def run_ppo(config_dict, common_config, env_dict, stop):
@@ -44,6 +45,8 @@ def run_ppo(config_dict, common_config, env_dict, stop):
                        name=config_dict["algorithm"] + "_" + config_dict["model_arch_args"]["core_arch"] + "_" +
                             config_dict["env_args"][
                                 "map_name"], stop=stop, config=config,
-                       verbose=1, progress_reporter=CLIReporter())
+                       verbose=1, progress_reporter=CLIReporter(),
+                       local_dir=available_local_dir,
+                       )
 
     return results
