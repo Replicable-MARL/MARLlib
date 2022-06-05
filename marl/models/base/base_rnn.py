@@ -97,6 +97,7 @@ class Base_RNN(TorchRNN, nn.Module):
         self.q_flag = False
 
         self.actors = [self.encoder, self.rnn, self.action_branch]
+        self.actor_initialized_parameters = self.actor_parameters()
 
     @override(ModelV2)
     def get_initial_state(self):
@@ -202,3 +203,18 @@ class Base_RNN(TorchRNN, nn.Module):
         return reduce(lambda x, y: x + y, map(lambda p: list(p.parameters()), self.actors))
         # return self.fc1.variables() + self.gru.variables() + self.action_branch.variables()
         # return self.fc1.parameters() +
+
+    def critic_parameters(self):
+        return list(self.value_branch.parameters())
+
+    def sample(self, obs, training_batch, sample_num):
+        indices = torch.multinomial(torch.arange(len(obs)), sample_num, replacement=True)
+        # _input = torch.multinomial(obs, sample_num, replacement=True)
+        training_batch = training_batch.copy()
+        training_batch['obs']['obs'] = training_batch['obs']['obs'][indices]
+        if 'action_mask' in training_batch['obs']:
+            training_batch['obs']['action_mask'] = training_batch['obs']['action_mask'][indices]
+
+        return self(training_batch)
+        # output, new_state = self.forward_rnn(inputs, state, seq_lens)
+        # output = torch.reshape(output, [-1, self.num_outputs])
