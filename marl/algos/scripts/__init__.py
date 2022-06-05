@@ -12,6 +12,7 @@ from marl.algos.scripts.facmac import run_facmac
 from marl.algos.scripts.happo import run_happo
 from marl.algos.scripts.trpo import run_trpo
 from marl.algos.scripts.hatrpo import run_hatrpo
+from marl.algos.scripts.matrpo import run_matrpo
 
 
 POlICY_REGISTRY = {
@@ -33,6 +34,7 @@ POlICY_REGISTRY = {
     'happo': run_happo,
     'trpo': run_trpo,
     'hatrpo': run_hatrpo,
+    'matrpo': run_matrpo
 }
 
 
