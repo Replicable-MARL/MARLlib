@@ -24,7 +24,7 @@ from marl.algos.utils.get_hetero_info import (
     value_normalizer,
 )
 
-from marl.algos.utils.trust_regions import update_model_use_trust_region
+from marl.algos.utils.trust_regions import TrustRegionUpdator
 
 from ray.rllib.examples.centralized_critic import CentralizedValueMixin
 
@@ -52,6 +52,14 @@ def trpo_loss_fn(
     logits, state = model(train_batch)
     curr_action_dist = dist_class(logits, model)
 
+    advantages = train_batch[Postprocessing.ADVANTAGES]
+    advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
+
+    logp_ratio = torch.exp(
+        curr_action_dist.logp(train_batch[SampleBatch.ACTIONS]) -
+        train_batch[SampleBatch.ACTION_LOGP]
+    )
+
     # RNN case: Mask away 0-padded chunks at end of time axis.
     if state:
         B = len(train_batch[SampleBatch.SEQ_LENS])
@@ -66,27 +74,22 @@ def trpo_loss_fn(
         def reduce_mean_valid(t):
             return torch.sum(t[mask]) / num_valid
 
+        loss = (torch.sum(logp_ratio * advantages, dim=-1, keepdim=True) *
+                mask).sum() / mask.sum()
     # non-RNN case: No masking.
     else:
         mask = None
         reduce_mean_valid = torch.mean
-
-    policy_loss_for_rllib, action_kl = update_model_use_trust_region(
-            model=model,
-            train_batch=train_batch,
-            advantages=train_batch[Postprocessing.ADVANTAGES],
-            actions=train_batch[SampleBatch.ACTIONS],
-            action_logp=train_batch[SampleBatch.ACTION_LOGP],
-            action_dist_inputs=train_batch[SampleBatch.ACTION_DIST_INPUTS],
-            dist_class=dist_class,
-            mean_fn=reduce_mean_valid,
-    )
+        loss = torch.sum(logp_ratio * advantages, dim=-1, keepdim=True).mean()
 
     curr_entropy = curr_action_dist.entropy()
 
     # Compute a value function loss.
-    value_normalizer.update(train_batch[Postprocessing.VALUE_TARGETS])
-    train_batch[Postprocessing.VALUE_TARGETS] = value_normalizer.normalize(train_batch[Postprocessing.VALUE_TARGETS])
+
+    # policy_loss = reduce_mean_valid(logp_ratio * advantages)
+
+    prev_action_dist = dist_class(train_batch[SampleBatch.ACTION_DIST_INPUTS], model)
+    action_kl = prev_action_dist.kl(curr_action_dist)
 
     if policy.config["use_critic"]:
         prev_value_fn_out = train_batch[SampleBatch.VF_PREDS] #
@@ -104,19 +107,34 @@ def trpo_loss_fn(
     else:
         vf_loss = mean_vf_loss = 0.0
 
-    total_loss = reduce_mean_valid(-policy_loss_for_rllib +
-                                   policy.kl_coeff * action_kl +
-                                   policy.config["vf_loss_coeff"] * vf_loss -
-                                   policy.entropy_coeff * curr_entropy)
+    if loss.isnan() or mean_vf_loss.isnan():
+        print('find error!!')
+
+    trust_region_updator = TrustRegionUpdator(
+        model=model,
+        dist_class=dist_class,
+        train_batch=train_batch,
+        adv_targ=advantages,
+        initialize_policy_loss=loss,
+        initialize_critic_loss=mean_vf_loss,
+    )
+
+    policy.trpo_updator = trust_region_updator
+
+    total_loss = loss + reduce_mean_valid(
+        policy.kl_coeff * action_kl +
+        policy.config["vf_loss_coeff"] * vf_loss -
+        policy.entropy_coeff * curr_entropy
+    )
 
     # Store values for stats function in model (tower), such that for
     # multi-GPU, we do not override them during the parallel loss phase.
     mean_kl_loss = reduce_mean_valid(action_kl)
-    mean_policy_loss = reduce_mean_valid(-policy_loss_for_rllib)
+    # mean_policy_loss = reduce_mean_valid(-policy_loss)
     mean_entropy = reduce_mean_valid(curr_entropy)
 
     model.tower_stats["total_loss"] = total_loss
-    model.tower_stats["mean_policy_loss"] = mean_policy_loss
+    model.tower_stats["mean_policy_loss"] = loss
     model.tower_stats["mean_vf_loss"] = mean_vf_loss
     model.tower_stats["vf_explained_var"] = explained_variance(
         train_batch[Postprocessing.VALUE_TARGETS], model.value_function())
@@ -126,18 +144,35 @@ def trpo_loss_fn(
     return total_loss
 
 
+def apply_gradients(policy, gradients) -> None:
+    policy.trpo_updator.update()
+
+
+PPO_CONFIG.update({
+    'critic_lr': 5e-3,
+    # 'actor_lr': 5e-5,
+    'lr': 5e-5,
+    "lr_schedule": [
+        (0, 5e-5),
+        (int(1e7), 1e-8),
+    ]
+})
+
 TRPOTorchPolicy = PPOTorchPolicy.with_updates(
-        name="HAPPOTorchPolicy",
+        name="TRPO-TorchPolicy",
         get_default_config=lambda: PPO_CONFIG,
         postprocess_fn=trpo_post_process,
         loss_fn=trpo_loss_fn,
         before_init=setup_torch_mixins,
         # optimizer_fn=make_happo_optimizers,
-        extra_grad_process_fn=apply_grad_clipping,
+        # extra_grad_process_fn=apply_grad_clipping,
+        apply_gradients_fn=apply_gradients,
         mixins=[
             EntropyCoeffSchedule, KLCoeffMixin,
             CentralizedValueMixin, LearningRateSchedule,
         ])
+
+# TRPOTorchPolicy.apply_gradients = apply_gradients
 
 
 def get_policy_class_trpo(config_):
