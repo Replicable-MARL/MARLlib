@@ -17,14 +17,7 @@ from icecream import ic
 torch, nn = try_import_torch()
 
 
-def update_model(self, model, new_params):
-    index = 0
-    for params in model.parameters():
-        params_length = len(params.view(-1))
-        new_param = new_params[index: index + params_length]
-        new_param = new_param.view(params.size())
-        params.data.copy_(new_param)
-        index += params_length
+DEVICE = 'cpu'
 
 
 class HATRPOUpdator:
@@ -134,6 +127,8 @@ class TrustRegionUpdator:
         self.initialize_policy_loss = initialize_policy_loss
         self.initialize_critic_loss = initialize_critic_loss
         self.stored_actor_parameters = None
+
+        self.device = DEVICE
 
     @property
     def actor_parameters(self):
@@ -258,7 +253,7 @@ class TrustRegionUpdator:
         return kl_hessian_p + 0.1 * p
 
     def conjugate_gradients(self, b, nsteps, residual_tol=1e-10):
-        x = torch.zeros(b.size())
+        x = torch.zeros(b.size()).to(device=self.device)
         r = b.clone()
         p = b.clone()
         rdotr = torch.dot(r, r)
