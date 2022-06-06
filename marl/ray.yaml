@@ -1,6 +1,6 @@
 # ray/rllib config
 
-local_mode: True
+local_mode: False
 algorithm: ""
 env: ""
 env_args: {}
