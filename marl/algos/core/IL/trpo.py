@@ -124,7 +124,7 @@ def trpo_loss_fn(
 
     policy.trpo_updator = trust_region_updator
 
-    total_loss = loss + reduce_mean_valid(
+    total_loss = -loss + reduce_mean_valid(
         policy.kl_coeff * action_kl +
         policy.config["vf_loss_coeff"] * vf_loss -
         policy.entropy_coeff * curr_entropy
@@ -137,7 +137,7 @@ def trpo_loss_fn(
     mean_entropy = reduce_mean_valid(curr_entropy)
 
     model.tower_stats["total_loss"] = total_loss
-    model.tower_stats["mean_policy_loss"] = loss
+    model.tower_stats["mean_policy_loss"] = -loss
     model.tower_stats["mean_vf_loss"] = mean_vf_loss
     model.tower_stats["vf_explained_var"] = explained_variance(
         train_batch[Postprocessing.VALUE_TARGETS], model.value_function())
