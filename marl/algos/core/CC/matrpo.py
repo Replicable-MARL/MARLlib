@@ -104,8 +104,8 @@ def centre_critic_trpo_loss_fn(
     else:
         vf_loss = mean_vf_loss = 0.0
 
-    if loss.isnan() or mean_vf_loss.isnan():
-        print('find error!!')
+    # if loss.isnan() or mean_vf_loss.isnan():
+    #     print('find error!!')
 
     trust_region_updator = TrustRegionUpdator(
         model=model,

@@ -108,10 +108,10 @@ def trpo_loss_fn(
     else:
         vf_loss = mean_vf_loss = 0.0
 
-    if loss.isnan() or mean_vf_loss.isnan():
-        print('loss error, find nan')
-        ic(loss)
-        ic(mean_vf_loss)
+    # if loss.isnan() or mean_vf_loss.isnan():
+    #     print('loss error, find nan')
+    #     ic(loss)
+    #     ic(mean_vf_loss)
 
     trust_region_updator = TrustRegionUpdator(
         model=model,
