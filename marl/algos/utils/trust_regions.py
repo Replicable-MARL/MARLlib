@@ -59,6 +59,9 @@ class HATRPOUpdator:
 
             policy_loss = self.mean_fn(m_advantage * importance_sampling)
 
+            if policy_loss.grad_fn is None:
+                print('find nan loss!')
+
             self.updaters.append(
                 TrustRegionUpdator(
                     current_model, dist_class, agent_train_batch, m_advantage, policy_loss, initialize_critic_loss
@@ -104,6 +107,9 @@ class HATRPOUpdator:
             i += 1
 
         importance_sampling = torch.exp(current_action_dist.logp(actions) - old_action_log_dist)
+
+        if importance_sampling.grad_fn is None:
+            print('find nan loss!')
 
         return train_batch_for_trpo_update, importance_sampling
 
@@ -270,9 +276,10 @@ class TrustRegionUpdator:
         return x
 
     def update(self, update_critic=True):
-        self.update_actor(self.initialize_policy_loss)
-        if update_critic:
-            self.update_critic(self.initialize_critic_loss)
+        with torch.backends.cudnn.flags(enabled=False):
+            self.update_actor(self.initialize_policy_loss)
+            if update_critic:
+                self.update_critic(self.initialize_critic_loss)
 
     def update_critic(self, critic_loss):
         critic_loss_grad = torch.autograd.grad(critic_loss, self.critic_parameters, allow_unused=True)
@@ -289,7 +296,10 @@ class TrustRegionUpdator:
 
     def update_actor(self, policy_loss):
 
-        loss_grad = torch.autograd.grad(policy_loss, self.actor_parameters, allow_unused=True)
+        try:
+            loss_grad = torch.autograd.grad(policy_loss, self.actor_parameters, allow_unused=True)
+        except RuntimeError as e:
+            print('get grad error!')
         pol_grad = self.flat_grad(loss_grad)
 
         # assert not torch.all(pol_grad) == 0
