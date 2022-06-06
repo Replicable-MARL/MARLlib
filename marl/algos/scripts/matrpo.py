@@ -2,6 +2,7 @@ from ray import tune
 from ray.tune.utils import merge_dicts
 from ray.tune import CLIReporter
 from marl.algos.core.CC.matrpo import MATRPOTrainer
+from marl.algos.utils.log_dir_util import available_local_dir
 
 
 def run_matrpo(config_dict, common_config, env_dict, stop):
@@ -46,6 +47,8 @@ def run_matrpo(config_dict, common_config, env_dict, stop):
                        stop=stop,
                        config=config,
                        verbose=1,
-                       progress_reporter=CLIReporter())
+                       progress_reporter=CLIReporter(),
+                       local_dir = available_local_dir
+                       )
 
     return results

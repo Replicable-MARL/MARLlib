@@ -27,6 +27,7 @@ from marl.algos.utils.get_hetero_info import (
 from marl.algos.utils.trust_regions import TrustRegionUpdator
 
 from ray.rllib.examples.centralized_critic import CentralizedValueMixin
+from icecream import ic
 
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
@@ -108,7 +109,9 @@ def trpo_loss_fn(
         vf_loss = mean_vf_loss = 0.0
 
     if loss.isnan() or mean_vf_loss.isnan():
-        print('find error!!')
+        print('loss error, find nan')
+        ic(loss)
+        ic(mean_vf_loss)
 
     trust_region_updator = TrustRegionUpdator(
         model=model,
@@ -144,7 +147,11 @@ def trpo_loss_fn(
     return total_loss
 
 
+# def extra_gradients(policy, gradients) -> None:
+#     policy.trpo_updator.update()
+
 def apply_gradients(policy, gradients) -> None:
+    # print('\nstep into apply updater!')
     policy.trpo_updator.update()
 
 
@@ -167,6 +174,7 @@ TRPOTorchPolicy = PPOTorchPolicy.with_updates(
         # optimizer_fn=make_happo_optimizers,
         # extra_grad_process_fn=apply_grad_clipping,
         apply_gradients_fn=apply_gradients,
+        # extra_grad_process_fn=extra_gradients,
         mixins=[
             EntropyCoeffSchedule, KLCoeffMixin,
             CentralizedValueMixin, LearningRateSchedule,

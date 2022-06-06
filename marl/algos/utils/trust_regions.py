@@ -12,6 +12,7 @@ from marl.algos.utils.get_hetero_info import (
     TRAINING,
 )
 from ray.rllib.evaluation.postprocessing import discount_cumsum, Postprocessing
+from icecream import ic
 
 torch, nn = try_import_torch()
 
@@ -25,42 +26,20 @@ def update_model(self, model, new_params):
         params.data.copy_(new_param)
         index += params_length
 
-# @torch.no_grad()
-# def linesearch(model,
-#                loss_f,
-#                kl_f,
-#                x,
-#                fullstep,
-#                expected_improve_rate,
-#                max_backtracks=10,
-#                accept_ratio=.1,
-#                kl_threshold=None
-#                ):
-#     fval = loss_f().data # notice, need a a minus to loss function.
-#
-#     for (_n_backtracks, stepfrac) in enumerate(.5**np.arange(max_backtracks)):
-#
-#         xnew = x + stepfrac * fullstep
-#         set_flat_actor_params_to(model, xnew)
-#
-#         newfval = loss_f().data
-#         kl = kl_f(mean=True)
-#
-#         actual_improve = newfval - fval
-#         expected_improve = expected_improve_rate * stepfrac
-#         ratio = actual_improve / expected_improve
-#
-#         if kl < kl_threshold and ratio.item() > accept_ratio and actual_improve.item() > 0:
-#             return True, xnew
-#
-#     return False, x
-
 
 class HATRPOUpdator:
-    def __init__(self, main_model, models, dist_class, train_batch, adv_target, initialize_policy_loss, initialize_critic_loss):
+    def __init__(self, model, models, dist_class, train_batch, mean_fn, adv_targ, initialize_policy_loss, initialize_critic_loss):
         self.updaters = []
 
-        assert main_model == models[-1]
+        assert model == models[-1]
+
+        main_model = model
+
+        self.main_model = main_model
+
+        self.dist_class = dist_class
+
+        self.mean_fn = mean_fn
 
         m_advantage = train_batch[Postprocessing.ADVANTAGES]
 
@@ -78,7 +57,7 @@ class HATRPOUpdator:
             else:
                 agent_train_batch, importance_sampling = self.get_sub_train_batch(train_batch, i)
 
-            policy_loss = m_advantage * importance_sampling
+            policy_loss = self.mean_fn(m_advantage * importance_sampling)
 
             self.updaters.append(
                 TrustRegionUpdator(
@@ -88,8 +67,12 @@ class HATRPOUpdator:
 
             m_advantage = importance_sampling * m_advantage
 
+    def update(self):
         for updater in self.updaters:
-            updater.update()
+            if updater.model is self.main_model:
+                updater.update(update_critic=True)
+            else:
+                updater.update(update_critic=False)
 
     def get_sub_train_batch(self, train_batch, agent_id):
         current_action_logits = train_batch[
@@ -128,12 +111,14 @@ class HATRPOUpdator:
         return m is self.main_model
 
 
-
 class TrustRegionUpdator:
 
     kl_threshold = 0.01
-    ls_step = 10
-    accept_ratio = 0.5
+    ls_step = 15
+    accept_ratio = 0.1
+    back_ratio = 0.8
+    atol = 1e-7
+    # delta = 0.01
 
     def __init__(self, model, dist_class, train_batch, adv_targ, initialize_policy_loss, initialize_critic_loss):
         self.model = model
@@ -142,6 +127,7 @@ class TrustRegionUpdator:
         self.adv_targ = adv_targ
         self.initialize_policy_loss = initialize_policy_loss
         self.initialize_critic_loss = initialize_critic_loss
+        self.stored_actor_parameters = None
 
     @property
     def actor_parameters(self):
@@ -239,6 +225,13 @@ class TrustRegionUpdator:
         #     params.data.copy_(new_param)
         #     index += params_length
 
+    def store_current_actor_params(self):
+        self.stored_actor_parameters = self.actor_parameters
+
+    def recovery_actor_params_to_before_linear_search(self):
+        stored_actor_parameters = self.flat_params(self.stored_actor_parameters)
+        self.set_actor_params(stored_actor_parameters)
+
     def reset_actor_params(self):
         initialized_actor_parameters = self.flat_params(self.model.actor_initialized_parameters)
         self.set_actor_params(initialized_actor_parameters)
@@ -249,12 +242,12 @@ class TrustRegionUpdator:
         # en = self.entropy.mean()
 
         kl_grads = torch.autograd.grad(kl, self.actor_parameters, create_graph=True, allow_unused=True)
-        kl_grads = TrustRegionUpdator.flat_grad(kl_grads)
+        kl_grads = self.flat_grad(kl_grads)
 
         kl_grad_p = (kl_grads * p).sum()
         # kl_hessian_p = torch.autograd.grad(kl_grad_p, self.actor_parameters, allow_unused=True, retain_graph=True)
         kl_hessian_p = torch.autograd.grad(kl_grad_p, self.actor_parameters, allow_unused=True)
-        kl_hessian_p = TrustRegionUpdator.flat_hessian(kl_hessian_p)
+        kl_hessian_p = self.flat_hessian(kl_hessian_p)
 
         return kl_hessian_p + 0.1 * p
 
@@ -276,9 +269,10 @@ class TrustRegionUpdator:
                 break
         return x
 
-    def update(self):
+    def update(self, update_critic=True):
         self.update_actor(self.initialize_policy_loss)
-        self.update_critic(self.initialize_critic_loss)
+        if update_critic:
+            self.update_critic(self.initialize_critic_loss)
 
     def update_critic(self, critic_loss):
         critic_loss_grad = torch.autograd.grad(critic_loss, self.critic_parameters, allow_unused=True)
@@ -296,123 +290,72 @@ class TrustRegionUpdator:
     def update_actor(self, policy_loss):
 
         loss_grad = torch.autograd.grad(policy_loss, self.actor_parameters, allow_unused=True)
-        loss_grad = TrustRegionUpdator.flat_grad(loss_grad)
+        pol_grad = self.flat_grad(loss_grad)
 
-        if torch.all(loss_grad) == 0:
-            loss_grad += 1e-5
+        # assert not torch.all(pol_grad) == 0
 
         step_dir = self.conjugate_gradients(
-            b=loss_grad.data,
+            b=pol_grad.data,
             nsteps=10,
         )
 
+        fisher_norm = pol_grad.dot(step_dir)
+
+        scala = 0 if fisher_norm < 0 else torch.sqrt(2 * self.kl_threshold / (fisher_norm + 1e-8))
+
+        full_step = scala * step_dir
+
         loss = policy_loss.data.cpu().numpy()
-        params = TrustRegionUpdator.flat_grad(self.actor_parameters)
+        params = self.flat_grad(self.actor_parameters)
 
-        fvp = self.fisher_vector_product(p=step_dir)
+        # fvp = self.fisher_vector_product(p=step_dir)
 
-        shs = 0.5 * (step_dir * fvp).sum(0, keepdim=True)
-
-        if not (shs > 0):
-            print('error get shs')
+        # shs = 0.5 * (step_dir * fvp).sum(0, keepdim=True)
 
         # assert shs > 0, f'shs = {shs}'
 
-        step_size = 1 / torch.sqrt(shs / TrustRegionUpdator.kl_threshold)[0]
-        full_step = step_size * step_dir
+        # step_size = 1 / torch.sqrt(shs / self.kl_threshold)[0]
+        # full_step = step_size * step_dir
 
-        self.reset_actor_params()
+        # self.reset_actor_params()
+        self.store_current_actor_params()
 
-        expected_improve = (loss_grad * full_step).sum(0, keepdim=True)
-        expected_improve = expected_improve.data.cpu().numpy()
+        expected_improve = pol_grad.dot(full_step).item()
+        # expected_improve = (loss_grad * full_step).sum(0, keepdim=True)
+        # expected_improve = expected_improve.data.cpu().numpy()
+        # ic(expected_improve)
 
-        finish = False
+        linear_search_updated = False
         fraction = 1
 
-        for i in range(TrustRegionUpdator.ls_step):
-            new_params = params + fraction * full_step
-            self.set_actor_params(new_params)
+        # print()
+        if expected_improve >= self.atol:
+            # print('linear search:')
+            for i in range(self.ls_step):
+                # print(f'\t{i}/{TrustRegionUpdator.ls_step}', end='')
+                new_params = params + fraction * full_step
+                self.set_actor_params(new_params)
 
-            new_loss = self.loss.data.cpu().numpy()
+                new_loss = self.loss.data.cpu().numpy()
 
-            loss_improve = new_loss - loss
+                loss_improve = new_loss - loss
 
-            kl = self.kl.mean()
+                kl = self.kl.mean()
 
-            if kl < TrustRegionUpdator.kl_threshold and \
-                    (loss_improve / expected_improve) > TrustRegionUpdator.accept_ratio and \
-                    loss_improve.item() > 0:
-                finish = True
-                break
-            else:
-                expected_improve *= 0.5
-                fraction *= 0.5
+                # ic(kl)
+                # ic(loss_improve / expected_improve)
+                # ic(loss_improve.item())
 
-            if not finish:
-                self.reset_actor_params()
+                if kl < self.kl_threshold and (loss_improve / expected_improve) >= self.accept_ratio and \
+                        loss_improve.item() > 0:
+                    linear_search_updated = True
+                    break
+                else:
+                    expected_improve *= self.back_ratio
+                    fraction *= self.back_ratio
 
+            if not linear_search_updated:
+                self.recovery_actor_params_to_before_linear_search()
+            # if not finish:
+            #     self.reset_actor_params()
 
-# def update_model_use_trust_region(model, policy_loss, kl_loss, train_batch, advantages,
-#                                   actions, action_logp, action_dist_inputs, dist_class, mean_fn):
-#     reference: https://github.com/ikostrikov/pytorch-trpo
-    #
-    # def _get_policy_loss(volatile=False, mean=False):
-    #     if volatile:
-    #         with torch.no_grad():
-    #             _logits, _state = model(train_batch)
-    #     else:
-    #         _logits, _state = model(train_batch)
-    #
-    #     _curr_action_dist = dist_class(_logits, model)
-    #
-    #     _logp_ratio = torch.exp(
-    #         _curr_action_dist.logp(actions) -
-    #         action_logp,
-    #     )
-    #
-    #     _policy_loss = advantages * _logp_ratio
-    #
-    #     return mean_fn(_policy_loss) if mean else _policy_loss
-    #
-    # def _get_kl(mean=False):
-    #     _logits, _state = model(train_batch)
-    #     _curr_action_dist = dist_class(_logits, model)
-    #     _prev_action_dist = dist_class(action_dist_inputs, model)
-    #     kl = _prev_action_dist.kl(_curr_action_dist)
-    #     return mean_fn(kl) if mean else kl
-    #
-    # policy_loss = _get_policy_loss()
-    #
-    # grads = torch.autograd.grad(
-    #     policy_loss, model.actor_parameters(),
-    #     allow_unused=True,
-    #     retain_graph=True,
-    # )
-    #
-    # loss_grad = flat_grad(grads)
-    #
-    # fvp_func = Fvp(model=model, kl_f=kl_loss)
-    #
-    # stepdir = conjugate_gradients(fvp_func, loss_grad.data, nsteps=10)
-    #
-    # shs = 0.5 * (stepdir * fvp_func(stepdir)).sum(0, keepdim=True)
-    #
-    # max_kl = 1e-2
-    # step_size = 1 / torch.sqrt(shs / max_kl)[0]
-    # full_step = step_size * stepdir
-    #
-    # excepted_improve = (loss_grad * stepdir).sum(0, keepdim=True)
-    # excepted_improve = excepted_improve.data.cpu().numpy()
-    #
-    # prev_params = torch.cat([p.data.view(-1) for p in model.actor_parameters()])
-    #
-    # _get_mean_and_no_grad_policy_loss = partial(_get_policy_loss, volatile=True, mean=True)
-    # success, new_params = linesearch(model, loss_f=_get_mean_and_no_grad_policy_loss,
-    #                                  kl_f=_get_kl, x=prev_params, fullstep=full_step,
-    #                                  expected_improve_rate=excepted_improve, kl_threshold=max_kl
-    #                                  )
-    #
-    # if success:
-    #     set_flat_actor_params_to(model, new_params)
-    #
-    # return action_kl, policy_loss_for_rllib
