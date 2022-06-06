@@ -14,6 +14,7 @@ GLOBAL_IS_TRAINING = f'{GLOBAL_PREFIX}is_trainable'
 GLOBAL_TRAIN_BATCH = f'{GLOBAL_PREFIX}train_batch'
 STATE = 'state'
 MODEL = 'model'
+POLICY_ID = 'policy_id'
 TRAINING = 'training'
 
 
@@ -126,12 +127,14 @@ def hatrpo_post_process(policy, sample_batch, other_agent_batches=None, epsisode
 
         cur_model_id = 0
         cur_training = 0
+        cur_loss_grad_fn_id = 0
 
         if other_agent_batches:
             name = exist_in_opponent(opponent_index=i, opponent_batches=other_agent_batches)
             if name:
                 _p, _b = other_agent_batches[name]
                 cur_model_id = id(_p.model)
+                cur_loss_grad_fn_id = id(_p)
                 cur_training = _b.is_training
 
         sample_batch[get_global_name(MODEL, i)] = np.array([
@@ -140,6 +143,10 @@ def hatrpo_post_process(policy, sample_batch, other_agent_batches=None, epsisode
 
         sample_batch[get_global_name(TRAINING, i)] = np.array([
             int(cur_training)
+        ] * len(sample_batch))
+
+        sample_batch[get_global_name(POLICY_ID, i)] = np.array([
+            int(cur_loss_grad_fn_id)
         ] * len(sample_batch))
 
     return sample_batch
