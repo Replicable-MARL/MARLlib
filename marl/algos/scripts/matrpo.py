@@ -25,6 +25,7 @@ def run_matrpo(config_dict, common_config, env_dict, stop):
     entropy_coeff = config_dict["algo_args"]["entropy_coeff"]
 
     config = {
+        "seed": tune.grid_search([1, 123]),
         "batch_mode": batch_mode,
         "train_batch_size": train_batch_size,
         "sgd_minibatch_size": sgd_minibatch_size,
