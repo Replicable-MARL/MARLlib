@@ -35,7 +35,7 @@ from marl.algos.utils.get_hetero_info import (
     state_name,
 )
 
-from marl.algos.utils.trust_regions import TrustRegionUpdator
+from marl.algos.utils.trust_regions import TrustRegionUpdator, HATRPOUpdator
 
 from ray.rllib.examples.centralized_critic import CentralizedValueMixin
 import ctypes
@@ -109,93 +109,51 @@ def hatrpo_loss_fn(
         len(train_batch[get_global_name(MODEL, i)]) > 0 and train_batch[get_global_name(MODEL, i)][0] > 0
         for i in collected_agent_ids
     )
+    advantages = train_batch[Postprocessing.ADVANTAGES]
+    advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
+
+    logp_ratio = torch.exp(
+        curr_action_dist.logp(train_batch[SampleBatch.ACTIONS]) -
+        train_batch[SampleBatch.ACTION_LOGP]
+    )
+
+    policy_loss = reduce_mean_valid(logp_ratio * advantages)
+
+    trpo_updater_config = {
+        'model': model,
+        'adv_targ': advantages,
+        'initialize_policy_loss': policy_loss,
+        'dist_class': dist_class,
+        'train_batch': train_batch,
+    }
 
     if not contain_opponent_info:
-        advantages = train_batch[Postprocessing.ADVANTAGES]
-        advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
-
-        logp_ratio = torch.exp(
-            curr_action_dist.logp(train_batch[SampleBatch.ACTIONS]) -
-            train_batch[SampleBatch.ACTION_LOGP]
-        )
-
-        policy_loss = reduce_mean_valid(logp_ratio * advantages)
-
-        cur_model_trust_region_updator = TrustRegionUpdator(
-            model=model, dist_class=dist_class, train_batch=train_batch, adv_targ=advantages
-        )
-
-        cur_model_trust_region_updator.update_actor(policy_loss=policy_loss)
-
+        updater = TrustRegionUpdator
     else:
-        m_advantage = train_batch[Postprocessing.ADVANTAGES]
+        updater = HATRPOUpdator
 
         agents_num = get_agent_num(policy)
-        random_indices = np.random.permutation(range(agents_num))
-
-        policy_losses = []
-        kl_losses = []
 
         def is_current_agent(i): return i == (agents_num - 1)
         # the opponent indices is 0, 1, 2, 3, .. N - 2
 
-        for agent_id in random_indices:
+        models = []
+
+        for agent_id in range(agents_num):
             if is_current_agent(agent_id):
                 current_model = model
-                logits, state = model(train_batch)
-                current_action_dist = dist_class(logits, model)
-                old_action_log_dist = train_batch[SampleBatch.ACTION_LOGP]
-                actions = train_batch[SampleBatch.ACTIONS]
-                train_batch_for_trpo_update = train_batch
-                action_dist_input = train_batch[SampleBatch.ACTION_DIST_INPUTS]
             else:
                 model_id = int(train_batch[get_global_name(MODEL, agent_id)][0])
 
                 assert model_id > 0, 'model is must > 0, if set to 0 means no model at all'
                 current_model = recovery_obj(model_id)
 
-                current_action_logits = train_batch[
-                    get_global_name(SampleBatch.ACTION_DIST_INPUTS, agent_id)
-                ]
+            models.append(current_model)
 
-                current_action_dist = dist_class(current_action_logits, None)
-
-                old_action_log_dist = train_batch[
-                    get_global_name(SampleBatch.ACTION_LOGP, agent_id)
-                ]
-
-                actions = train_batch[get_global_name(SampleBatch.ACTIONS, agent_id)]
-
-                obs = train_batch[get_global_name(SampleBatch.OBS, agent_id)]
-
-                train_batch_for_trpo_update = SampleBatch(
-                    obs=obs,
-                    seq_lens=train_batch[SampleBatch.SEQ_LENS]
-                )
-
-                train_batch_for_trpo_update.is_training = bool(train_batch[get_global_name(TRAINING, agent_id)][0])
-
-                i = 0
-
-                while state_name(i) in train_batch:
-                    agent_state_name = global_state_name(i, agent_id)
-                    train_batch_for_trpo_update[state_name(i)] = train_batch[agent_state_name]
-                    i += 1
-
-            importance_sampling = torch.exp(current_action_dist.logp(actions) - old_action_log_dist)
-
-            cur_updater = TrustRegionUpdator(
-                model=current_model, dist_class=dist_class, train_batch=train_batch_for_trpo_update, adv_targ=m_advantage
-            )
-
-            loss = reduce_mean_valid(importance_sampling * m_advantage)
-            cur_updater.update_actor(loss)
-
-            policy_losses.append(loss)
-
-            m_advantage = importance_sampling * m_advantage
-
-        policy_loss = torch.mean(torch.stack(policy_losses, axis=1), axis=1)
+        trpo_updater_config.update({
+            'models': models,
+            'mean_fn': reduce_mean_valid
+        })
 
     curr_entropy = curr_action_dist.entropy()
 
@@ -223,6 +181,14 @@ def hatrpo_loss_fn(
     prev_action_dist = dist_class(train_batch[SampleBatch.ACTION_DIST_INPUTS], model)
     action_kl = prev_action_dist.kl(curr_action_dist)
 
+    trpo_updater_config.update({
+        'initialize_critic_loss': mean_vf_loss
+    })
+
+    current_trpo_updater = updater(**trpo_updater_config)
+
+    policy.trpo_updator = current_trpo_updater
+
     model.value_function = vf_saved
     # recovery the value function.
 
@@ -248,13 +214,19 @@ def hatrpo_loss_fn(
     return total_loss
 
 
+def apply_gradients(policy, gradients) -> None:
+    # print('\nstep into apply updater!')
+    policy.trpo_updator.update()
+
+
 HAPTRPOTorchPolicy = PPOTorchPolicy.with_updates(
         name="HAPPOTorchPolicy",
         get_default_config=lambda: PPO_CONFIG,
         postprocess_fn=hatrpo_post_process,
         loss_fn=hatrpo_loss_fn,
         before_init=setup_torch_mixins,
-        extra_grad_process_fn=apply_grad_clipping,
+        # extra_grad_process_fn=apply_grad_clipping,
+        apply_gradients_fn=apply_gradients,
         mixins=[
             EntropyCoeffSchedule, KLCoeffMixin,
             CentralizedValueMixin, LearningRateSchedule,

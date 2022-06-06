@@ -4,7 +4,7 @@ from ray.tune import CLIReporter
 from ray.rllib.agents.ppo.ppo import DEFAULT_CONFIG as PPO_CONFIG
 from marl.algos.core.CC.hatrpo import HATRPOTrainer
 from marl.algos.utils.setup_utils import _algos_var
-from functools import partial
+from marl.algos.utils.log_dir_util import available_local_dir
 
 
 def run_hatrpo(config_dict, common_config, env_dict, stop):
@@ -56,7 +56,8 @@ def run_hatrpo(config_dict, common_config, env_dict, stop):
                        stop=stop,
                        config=config,
                        verbose=1,
-                       progress_reporter=CLIReporter()
+                       progress_reporter=CLIReporter(),
+                       local_dir=available_local_dir,
     )
 
     return results
