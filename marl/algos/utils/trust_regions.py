@@ -10,9 +10,12 @@ from marl.algos.utils.get_hetero_info import (
     state_name,
     global_state_name,
     TRAINING,
+    POLICY_ID,
+    MODEL,
 )
 from ray.rllib.evaluation.postprocessing import discount_cumsum, Postprocessing
 from icecream import ic
+import ctypes
 
 torch, nn = try_import_torch()
 
@@ -21,56 +24,46 @@ DEVICE = 'cpu'
 
 
 class HATRPOUpdator:
-    def __init__(self, model, models, dist_class, train_batch, mean_fn, adv_targ, initialize_policy_loss, initialize_critic_loss):
+    def __init__(self, model_updator, importance_sampling, agents_num, dist_class, train_batch, adv_targ):
         self.updaters = []
-
-        assert model == models[-1]
-
-        main_model = model
-
-        self.main_model = main_model
-
         self.dist_class = dist_class
+        self.agents_num = agents_num
+        self.main_updator = model_updator
 
-        self.mean_fn = mean_fn
+        m_advantage = adv_targ
 
-        m_advantage = train_batch[Postprocessing.ADVANTAGES]
-
-        random_indices = np.random.permutation(len(models))
+        random_indices = np.random.permutation(agents_num)
 
         for i in random_indices:
-            current_model = models[i]
-            if current_model is main_model:
-                logits, state = current_model(train_batch)
-                current_action_dist = dist_class(logits, current_model)
-                old_action_log_dist = train_batch[SampleBatch.ACTION_LOGP]
-                actions = train_batch[SampleBatch.ACTIONS]
-                importance_sampling = torch.exp(current_action_dist.logp(actions) - old_action_log_dist)
-                agent_train_batch = train_batch
+            if i == agents_num - 1:
+                importance_sampling = importance_sampling
+                trpo_updator = model_updator
+                trpo_updator.adv_targ = m_advantage
+                m_advantage = m_advantage * importance_sampling
             else:
-                agent_train_batch, importance_sampling = self.get_sub_train_batch(train_batch, i)
+                trpo_updator, m_advantage = self.get_each_train_batch(train_batch, i, m_advantage)
 
-            policy_loss = self.mean_fn(m_advantage * importance_sampling)
+            self.updaters.append(trpo_updator)
 
-            if policy_loss.grad_fn is None:
-                print('find nan loss!')
-
-            self.updaters.append(
-                TrustRegionUpdator(
-                    current_model, dist_class, agent_train_batch, m_advantage, policy_loss, initialize_critic_loss
-                )
-            )
-
-            m_advantage = importance_sampling * m_advantage
+    @staticmethod
+    def recovery_obj(_id):
+        return ctypes.cast(_id, ctypes.py_object).value
 
     def update(self):
-        for updater in self.updaters:
-            if updater.model is self.main_model:
+        print('\nsub update: ')
+        for i, updater in enumerate(self.updaters):
+            print(f'{i}-{id(updater)}')
+            if updater is self.main_updator:
                 updater.update(update_critic=True)
             else:
                 updater.update(update_critic=False)
 
-    def get_sub_train_batch(self, train_batch, agent_id):
+    def get_each_train_batch(self, train_batch, agent_id, m_advantage):
+
+        model_id = int(train_batch[get_global_name(MODEL, agent_id)][0])
+        assert model_id > 0, 'model is must > 0, if set to 0 means no model at all'
+        current_model = self.recovery_obj(model_id)
+
         current_action_logits = train_batch[
             get_global_name(SampleBatch.ACTION_DIST_INPUTS, agent_id)
         ]
@@ -87,7 +80,10 @@ class HATRPOUpdator:
 
         train_batch_for_trpo_update = SampleBatch(
             obs=obs,
-            seq_lens=train_batch[SampleBatch.SEQ_LENS]
+            seq_lens=train_batch[SampleBatch.SEQ_LENS],
+            actions=actions,
+            action_logp=old_action_log_dist,
+            action_dist_inputs=train_batch[get_global_name(SampleBatch.ACTION_DIST_INPUTS, agent_id)]
         )
 
         train_batch_for_trpo_update.is_training = bool(train_batch[get_global_name(TRAINING, agent_id)][0])
@@ -101,10 +97,23 @@ class HATRPOUpdator:
 
         importance_sampling = torch.exp(current_action_dist.logp(actions) - old_action_log_dist)
 
-        if importance_sampling.grad_fn is None:
-            print('find nan loss!')
+        # if importance_sampling.grad_fn is None:
+        agent_policy_id = int(train_batch[get_global_name(POLICY_ID, agent_id)][0])
+        assert agent_policy_id > 0, 'policy id is must > 0, if set to 0 means no policy at all'
 
-        return train_batch_for_trpo_update, importance_sampling
+        agent_policy = self.recovery_obj(agent_policy_id)
+
+        updator = agent_policy.trpo_updator
+
+        # update updator
+        updator.train_batch = train_batch_for_trpo_update
+        updator.model = current_model
+        updator.adv_targ.data = m_advantage.data
+        updator.initialize_policy_loss = updator.loss
+
+        m_advantage = m_advantage * importance_sampling
+
+        return updator, m_advantage
 
     def is_main_model(self, m):
         return m is self.main_model
@@ -137,7 +146,10 @@ class TrustRegionUpdator:
     @property
     def loss(self):
         logits, state = self.model(self.train_batch)
-        curr_action_dist = self.dist_class(logits, self.model)
+        try:
+            curr_action_dist = self.dist_class(logits, self.model)
+        except ValueError as e:
+            print(e)
 
         logp_ratio = torch.exp(
             curr_action_dist.logp(self.train_batch[SampleBatch.ACTIONS]) -
@@ -291,10 +303,10 @@ class TrustRegionUpdator:
 
     def update_actor(self, policy_loss):
 
-        try:
-            loss_grad = torch.autograd.grad(policy_loss, self.actor_parameters, allow_unused=True)
-        except RuntimeError as e:
-            print('get grad error!')
+        # try:
+        loss_grad = torch.autograd.grad(policy_loss, self.actor_parameters, allow_unused=True, retain_graph=True)
+        # except RuntimeError as e:
+        #     print('get grad error!')
         pol_grad = self.flat_grad(loss_grad)
 
         # assert not torch.all(pol_grad) == 0

@@ -47,10 +47,6 @@ torch, nn = try_import_torch()
 logger = logging.getLogger(__name__)
 
 
-def recovery_obj(_id):
-    return ctypes.cast(_id, ctypes.py_object).value
-
-
 def hatrpo_loss_fn(
         policy: Policy, model: ModelV2,
         dist_class: Type[TorchDistributionWrapper],
@@ -72,6 +68,15 @@ def hatrpo_loss_fn(
     curr_action_dist = dist_class(logits, model)
     # RNN case: Mask away 0-padded chunks at end of time axis.
 
+
+    advantages = train_batch[Postprocessing.ADVANTAGES]
+    advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
+
+    logp_ratio = torch.exp(
+        curr_action_dist.logp(train_batch[SampleBatch.ACTIONS]) -
+        train_batch[SampleBatch.ACTION_LOGP]
+    )
+
     if state:
         B = len(train_batch[SampleBatch.SEQ_LENS])
         max_seq_len = logits.shape[0] // B
@@ -85,10 +90,13 @@ def hatrpo_loss_fn(
         def reduce_mean_valid(t):
             return torch.sum(t[mask]) / num_valid
 
+        loss = (torch.sum(logp_ratio * advantages, dim=-1, keepdim=True) *
+                mask).sum() / mask.sum()
     # non-RNN case: No masking.
     else:
         mask = None
         reduce_mean_valid = torch.mean
+        loss = torch.sum(logp_ratio * advantages, dim=-1, keepdim=True).mean()
 
     vf_saved = model.value_function
 
@@ -100,60 +108,9 @@ def hatrpo_loss_fn(
             if opp_action_in_cc else None
         )
 
-    agent_model_pat = get_global_name(MODEL, '(\d+)')
-    matched_keys = [re.findall(agent_model_pat, key) for key in train_batch]
-
-    collected_agent_ids = [int(m[0]) for m in matched_keys if m]
-
-    contain_opponent_info = all(
-        len(train_batch[get_global_name(MODEL, i)]) > 0 and train_batch[get_global_name(MODEL, i)][0] > 0
-        for i in collected_agent_ids
-    )
-    advantages = train_batch[Postprocessing.ADVANTAGES]
-    advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
-
-    logp_ratio = torch.exp(
-        curr_action_dist.logp(train_batch[SampleBatch.ACTIONS]) -
-        train_batch[SampleBatch.ACTION_LOGP]
-    )
-
-    policy_loss = reduce_mean_valid(logp_ratio * advantages)
-
-    trpo_updater_config = {
-        'model': model,
-        'adv_targ': advantages,
-        'initialize_policy_loss': policy_loss,
-        'dist_class': dist_class,
-        'train_batch': train_batch,
-    }
-
-    if not contain_opponent_info:
-        updater = TrustRegionUpdator
-    else:
-        updater = HATRPOUpdator
-
-        agents_num = get_agent_num(policy)
-
-        def is_current_agent(i): return i == (agents_num - 1)
-        # the opponent indices is 0, 1, 2, 3, .. N - 2
-
-        models = []
-
-        for agent_id in range(agents_num):
-            if is_current_agent(agent_id):
-                current_model = model
-            else:
-                model_id = int(train_batch[get_global_name(MODEL, agent_id)][0])
-
-                assert model_id > 0, 'model is must > 0, if set to 0 means no model at all'
-                current_model = recovery_obj(model_id)
-
-            models.append(current_model)
-
-        trpo_updater_config.update({
-            'models': models,
-            'mean_fn': reduce_mean_valid
-        })
+    # if not contain_opponent_info:
+    #     updater = TrustRegionUpdator
+    # else:
 
     curr_entropy = curr_action_dist.entropy()
 
@@ -181,18 +138,43 @@ def hatrpo_loss_fn(
     prev_action_dist = dist_class(train_batch[SampleBatch.ACTION_DIST_INPUTS], model)
     action_kl = prev_action_dist.kl(curr_action_dist)
 
-    trpo_updater_config.update({
-        'initialize_critic_loss': mean_vf_loss
-    })
+    trust_region_updator = TrustRegionUpdator(
+        model=model,
+        dist_class=dist_class,
+        train_batch=train_batch,
+        adv_targ=advantages,
+        initialize_policy_loss=loss,
+        initialize_critic_loss=mean_vf_loss,
+    )
 
-    current_trpo_updater = updater(**trpo_updater_config)
+    policy.trpo_updator = trust_region_updator
 
-    policy.trpo_updator = current_trpo_updater
+    agent_model_pat = get_global_name(MODEL, '(\d+)')
+    matched_keys = [re.findall(agent_model_pat, key) for key in train_batch]
+
+    collected_agent_ids = [int(m[0]) for m in matched_keys if m]
+
+    contain_opponent_info = all(
+        len(train_batch[get_global_name(MODEL, i)]) > 0 and train_batch[get_global_name(MODEL, i)][0] > 0
+        for i in collected_agent_ids
+    )
+
+    if contain_opponent_info:
+        agents_num = get_agent_num(policy)
+
+        policy.group_trpo_updator = HATRPOUpdator(
+            agents_num=agents_num, dist_class=dist_class,
+            model_updator=trust_region_updator,
+            importance_sampling=logp_ratio,
+            train_batch=train_batch, adv_targ=advantages
+        )
+    else:
+        policy.group_trpo_updator = None
 
     model.value_function = vf_saved
     # recovery the value function.
 
-    total_loss = -policy_loss + reduce_mean_valid(policy.kl_coeff * action_kl +
+    total_loss = -loss + reduce_mean_valid(policy.kl_coeff * action_kl +
                                                   policy.config["vf_loss_coeff"] * vf_loss -
                                                   policy.entropy_coeff * curr_entropy
                                                   )
@@ -200,7 +182,7 @@ def hatrpo_loss_fn(
     # Store values for stats function in model (tower), such that for
     # multi-GPU, we do not override them during the parallel loss phase.
     mean_kl_loss = reduce_mean_valid(action_kl)
-    mean_policy_loss = -policy_loss
+    mean_policy_loss = -loss
     mean_entropy = reduce_mean_valid(curr_entropy)
 
     model.tower_stats["total_loss"] = total_loss
@@ -216,7 +198,10 @@ def hatrpo_loss_fn(
 
 def apply_gradients(policy, gradients) -> None:
     # print('\nstep into apply updater!')
-    policy.trpo_updator.update()
+    if policy.group_trpo_updator is not None:
+        policy.group_trpo_updator.update()
+    else:
+        policy.trpo_updator.update()
 
 
 HAPTRPOTorchPolicy = PPOTorchPolicy.with_updates(
