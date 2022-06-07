@@ -4,7 +4,7 @@ from ray.rllib.evaluation.postprocessing import discount_cumsum, Postprocessing,
 from marl.algos.utils.valuenorm import ValueNorm
 from marl.algos.utils.postprocessing import get_dim, convert_to_torch_tensor
 from marl.algos.utils.setup_utils import get_agent_num
-
+from collections import defaultdict
 
 GLOBAL_NEED_COLLECT = [SampleBatch.ACTION_LOGP, SampleBatch.ACTIONS,
                        SampleBatch.ACTION_DIST_INPUTS, SampleBatch.OBS]
@@ -117,6 +117,23 @@ def trpo_post_process(policy, sample_batch, other_agent_batches=None, episode=No
     return sample_batch
 
 
+class ObjHandler:
+
+    cached_obj = defaultdict(int)
+
+    def __init__(self):
+        pass
+
+    @classmethod
+    def save(cls, obj):
+        cls.cached_obj[int(id(obj))] = obj
+        return int(id(obj))
+
+    @classmethod
+    def retrieve(cls, _id):
+        return cls.cached_obj[_id]
+
+
 def hatrpo_post_process(policy, sample_batch, other_agent_batches=None, epsisode=None):
 
     sample_batch = trpo_post_process(policy, sample_batch, other_agent_batches, epsisode)
@@ -133,8 +150,8 @@ def hatrpo_post_process(policy, sample_batch, other_agent_batches=None, epsisode
             name = exist_in_opponent(opponent_index=i, opponent_batches=other_agent_batches)
             if name:
                 _p, _b = other_agent_batches[name]
-                cur_model_id = id(_p.model)
-                cur_loss_grad_fn_id = id(_p)
+                cur_model_id = ObjHandler.save(_p.model)
+                cur_loss_grad_fn_id = ObjHandler.save(_p)
                 cur_training = _b.is_training
 
         # print(cur_model_id, cur_loss_grad_fn_id, cur_training)

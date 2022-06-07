@@ -12,6 +12,7 @@ from marl.algos.utils.get_hetero_info import (
     TRAINING,
     POLICY_ID,
     MODEL,
+    ObjHandler,
 )
 from ray.rllib.evaluation.postprocessing import discount_cumsum, Postprocessing
 from icecream import ic
@@ -46,11 +47,6 @@ class HATRPOUpdator:
 
             self.updaters.append(trpo_updator)
 
-    @staticmethod
-    def recovery_obj(_id):
-        # return ctypes.cast(_id, ctypes.py_object).value
-        return _ctypes.PyObj_FromPtr(_id)
-
     def update(self):
         print('\nsub update: ')
         for i, updater in enumerate(self.updaters):
@@ -63,9 +59,8 @@ class HATRPOUpdator:
     def get_each_train_batch(self, train_batch, agent_id, m_advantage):
 
         model_id = int(train_batch[get_global_name(MODEL, agent_id)][0])
-        print(model_id)
         assert model_id > 0, 'model is must > 0, if set to 0 means no model at all'
-        current_model = self.recovery_obj(model_id)
+        current_model = ObjHandler.retrieve(model_id)
         print('recovery model success!')
 
         current_action_logits = train_batch[
@@ -105,7 +100,7 @@ class HATRPOUpdator:
         agent_policy_id = int(train_batch[get_global_name(POLICY_ID, agent_id)][0])
         assert agent_policy_id > 0, 'policy id is must > 0, if set to 0 means no policy at all'
 
-        agent_policy = self.recovery_obj(agent_policy_id)
+        agent_policy = ObjHandler.retrieve(agent_policy_id)
         print('recovery policy success!')
 
         updator = agent_policy.trpo_updator
