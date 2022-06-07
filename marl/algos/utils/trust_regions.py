@@ -16,6 +16,7 @@ from marl.algos.utils.get_hetero_info import (
 from ray.rllib.evaluation.postprocessing import discount_cumsum, Postprocessing
 from icecream import ic
 import ctypes
+import _ctypes
 
 torch, nn = try_import_torch()
 
@@ -47,7 +48,8 @@ class HATRPOUpdator:
 
     @staticmethod
     def recovery_obj(_id):
-        return ctypes.cast(_id, ctypes.py_object).value
+        # return ctypes.cast(_id, ctypes.py_object).value
+        return _ctypes.PyObj_FromPtr(_id)
 
     def update(self):
         print('\nsub update: ')
