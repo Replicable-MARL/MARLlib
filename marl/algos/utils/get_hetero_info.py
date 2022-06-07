@@ -137,6 +137,7 @@ def hatrpo_post_process(policy, sample_batch, other_agent_batches=None, epsisode
                 cur_loss_grad_fn_id = id(_p)
                 cur_training = _b.is_training
 
+        print(cur_model_id, cur_loss_grad_fn_id, cur_training)
         sample_batch[get_global_name(MODEL, i)] = np.array([
             int(cur_model_id)
         ] * len(sample_batch))
