@@ -61,6 +61,7 @@ class HATRPOUpdator:
     def get_each_train_batch(self, train_batch, agent_id, m_advantage):
 
         model_id = int(train_batch[get_global_name(MODEL, agent_id)][0])
+        print(model_id)
         assert model_id > 0, 'model is must > 0, if set to 0 means no model at all'
         current_model = self.recovery_obj(model_id)
         print('recovery model success!')
