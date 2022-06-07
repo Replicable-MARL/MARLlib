@@ -1,0 +1,15 @@
+env: pommerman
+
+env_args:
+  map_name: "OneVsOne-v0" # "PommeFFACompetition-v0", "PommeTeamCompetition-v0",
+  agent_position: "01"
+  # choices=["01"] for OneVsOne
+  # choices=["0", "1", "2", "3"] random combination for PommeFFACompetition like "023"
+  # choices=["01", "23", "0123"] for PommeTeamCompetition, in joint Q learning like qmix, only "01" or "23" is valid
+  builtin_ai_type: "random_rule" # random_rule
+
+core_arch: "lstm" # LSTM, Transformer
+mask_flag: False
+global_state_flag: False
+opp_action_in_cc: True
+

@@ -1,0 +1,11 @@
+env: hanabi
+
+env_args:
+  map_name: "Hanabi-Very-Small" #  Hanabi-Full | Hanabi-Full-Minimal | Hanabi-Small
+  num_agents: 3
+  use_obs_instead_of_state: True
+  seed: 123
+
+mask_flag: True
+global_state_flag: True
+opp_action_in_cc: False
