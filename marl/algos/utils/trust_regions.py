@@ -63,6 +63,7 @@ class HATRPOUpdator:
         model_id = int(train_batch[get_global_name(MODEL, agent_id)][0])
         assert model_id > 0, 'model is must > 0, if set to 0 means no model at all'
         current_model = self.recovery_obj(model_id)
+        print('recovery model success!')
 
         current_action_logits = train_batch[
             get_global_name(SampleBatch.ACTION_DIST_INPUTS, agent_id)
@@ -102,6 +103,7 @@ class HATRPOUpdator:
         assert agent_policy_id > 0, 'policy id is must > 0, if set to 0 means no policy at all'
 
         agent_policy = self.recovery_obj(agent_policy_id)
+        print('recovery policy success!')
 
         updator = agent_policy.trpo_updator
 
