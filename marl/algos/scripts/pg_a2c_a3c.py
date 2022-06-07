@@ -9,7 +9,7 @@ def run_pg_a2c_a3c(config_dict, common_config, env_dict, stop):
     episode_limit = env_dict["episode_limit"]
 
     config = {
-        "seed": tune.grid_search([1, 123]),
+        # "seed": tune.grid_search([1, 123]),
         "batch_mode": config_dict["algo_args"]["batch_mode"],
         "train_batch_size": train_batch_size,
         "lr": config_dict["algo_args"]["lr"],

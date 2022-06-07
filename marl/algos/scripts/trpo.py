@@ -26,7 +26,7 @@ def run_trpo(config_dict, common_config, env_dict, stop):
     arch = config_dict["model_arch_args"]["core_arch"]
 
     config.update({
-        "seed": tune.grid_search([1, 123]),
+        # "seed": tune.grid_search([1, 123]),
         "horizon": episode_limit,
         "num_sgd_iter": _param('num_sgd_iter'),
         "train_batch_size": _param('train_batch_size'),
