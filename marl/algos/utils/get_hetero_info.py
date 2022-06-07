@@ -5,6 +5,12 @@ from marl.algos.utils.valuenorm import ValueNorm
 from marl.algos.utils.postprocessing import get_dim, convert_to_torch_tensor
 from marl.algos.utils.setup_utils import get_agent_num
 from collections import defaultdict
+import pickle
+from pathlib import Path
+import os
+import multiprocessing
+mul_manager = multiprocessing.Manager()
+
 
 GLOBAL_NEED_COLLECT = [SampleBatch.ACTION_LOGP, SampleBatch.ACTIONS,
                        SampleBatch.ACTION_DIST_INPUTS, SampleBatch.OBS]
@@ -119,19 +125,32 @@ def trpo_post_process(policy, sample_batch, other_agent_batches=None, episode=No
 
 class ObjHandler:
 
-    cached_obj = defaultdict(int)
+    # base_dir = './tmp/obj'
+
+    # cache_obj = mul_manager.dict()
+    cache_obj = dict()
 
     def __init__(self):
         pass
 
     @classmethod
     def save(cls, obj):
-        cls.cached_obj[int(id(obj))] = obj
+        # Path(cls.base_dir).mkdir(parents=True, exist_ok=True)
+        # with open(os.path.join(cls.base_dir, f'{int(id(obj))}.obj'), 'wb') as f:
+        #     pickle.dump(obj, f)
+        cls.cache_obj[int(id(obj))] = obj
+
         return int(id(obj))
 
     @classmethod
     def retrieve(cls, _id):
-        return cls.cached_obj[_id]
+        # with open(os.path.join(cls.base_dir, f'{_id}.obj'), 'rb') as f:
+        #     obj = pickle.load(f)
+
+        if _id in cls.cache_obj:
+            return cls.cache_obj[_id]
+        else:
+            raise ValueError(f'_id: {_id} of object did not exist in memory')
 
 
 def hatrpo_post_process(policy, sample_batch, other_agent_batches=None, epsisode=None):
