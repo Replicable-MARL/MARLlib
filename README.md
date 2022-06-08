@@ -150,6 +150,32 @@ python marl/main.py --algo_config=MAPPO [--finetuned] --env-config=smac with env
 ```
 --finetuned is optional, force using the finetuned hyperparameter 
 
+We provide an introduction to the code directory to help you get familiar with the codebase:
+
+* top level directory structure
+
+<div align="center">
+<img src=image/code-MARLlib.png width=120% />
+</div>
+
+This picture is in image/code-MARLlib.png
+
+* MARL directory structure
+
+<div align="center">
+<img src=image/code-MARL.png width=70% />
+</div>
+
+This picture is in image/code-MARL.png.png
+
+* ENVS directory structure
+
+<div align="center">
+<img src=image/code-ENVS.png width=70% />
+</div>
+
+This picture is in image/code-ENVS.png.png
+
 
 ### Part IV. Bug Shooting
 
