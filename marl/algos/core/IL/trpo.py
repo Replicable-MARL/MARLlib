@@ -155,16 +155,6 @@ def apply_gradients(policy, gradients) -> None:
     policy.trpo_updator.update()
 
 
-PPO_CONFIG.update({
-    'critic_lr': 5e-3,
-    # 'actor_lr': 5e-5,
-    'lr': 5e-5,
-    "lr_schedule": [
-        (0, 5e-5),
-        (int(1e7), 1e-8),
-    ]
-})
-
 TRPOTorchPolicy = PPOTorchPolicy.with_updates(
         name="TRPO-TorchPolicy",
         get_default_config=lambda: PPO_CONFIG,
