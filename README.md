@@ -181,7 +181,7 @@ This picture is in image/code-MARL.png.png
 This picture is in image/code-ENVS.png.png
 
 
-### Part IV. Bug Shooting
+### Part V. Bug Shooting
 
 - observation/action out of space bug:
     - make sure the observation/action space defined in env init function 
