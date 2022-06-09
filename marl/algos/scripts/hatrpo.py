@@ -23,7 +23,6 @@ def run_hatrpo(config_dict, common_config, env_dict, stop):
     arch = config_dict["model_arch_args"]["core_arch"]
 
     config.update({
-        "seed": tune.grid_search([1, 123]),
         "horizon": episode_limit,
         "num_sgd_iter": _param('num_sgd_iter'),
         "train_batch_size": _param('train_batch_size'),
@@ -38,15 +37,6 @@ def run_hatrpo(config_dict, common_config, env_dict, stop):
             "vf_share_layers": _param('vf_share_layers')
         },
     })
-
-    # config.update({
-    #     'critic_lr': _param('critic_lr'),
-    #     'lr': _param('lr'),
-    #     "lr_schedule": [
-    #         (_param('lr_sh_min'), _param('lr_sh_max')),
-    #         (int(_param('lr_sh_step')), _param('lr_min')),
-    #     ]
-    # })
 
     algorithm = config_dict["algorithm"]
     RUNNING_NAME = '_'.join([algorithm, arch, map_name])

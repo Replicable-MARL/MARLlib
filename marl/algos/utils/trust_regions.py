@@ -12,10 +12,12 @@ from marl.algos.utils.get_hetero_info import (
     TRAINING,
     POLICY_ID,
     MODEL,
+    ObjHandler,
 )
 from ray.rllib.evaluation.postprocessing import discount_cumsum, Postprocessing
 from icecream import ic
 import ctypes
+import _ctypes
 
 torch, nn = try_import_torch()
 
@@ -40,29 +42,30 @@ class HATRPOUpdator:
                 trpo_updator = model_updator
                 trpo_updator.adv_targ = m_advantage
                 m_advantage = m_advantage * importance_sampling
+                self.main_updator.adv_targ = m_advantage
             else:
-                trpo_updator, m_advantage = self.get_each_train_batch(train_batch, i, m_advantage)
+                m_advantage = self.update_advantage(train_batch, i, m_advantage)
 
-            self.updaters.append(trpo_updator)
+        ##TODO combine hatrpo and happo into this part
 
-    @staticmethod
-    def recovery_obj(_id):
-        return ctypes.cast(_id, ctypes.py_object).value
+            # self.updaters.append(trpo_updator)
 
     def update(self):
-        print('\nsub update: ')
-        for i, updater in enumerate(self.updaters):
-            print(f'{i}-{id(updater)}')
-            if updater is self.main_updator:
-                updater.update(update_critic=True)
-            else:
-                updater.update(update_critic=False)
+        # print('\nsub update: ')
+        # for i, updater in enumerate(self.updaters):
+        #     print(f'{i}-{id(updater)}')
+        #     if updater is self.main_updator:
+        #         updater.update(update_critic=True)
+        #     else:
+        #         updater.update(update_critic=False)
+        self.main_updator.update()
 
-    def get_each_train_batch(self, train_batch, agent_id, m_advantage):
+    def update_advantage(self, train_batch, agent_id, m_advantage):
 
-        model_id = int(train_batch[get_global_name(MODEL, agent_id)][0])
-        assert model_id > 0, 'model is must > 0, if set to 0 means no model at all'
-        current_model = self.recovery_obj(model_id)
+        # model_id = int(train_batch[get_global_name(MODEL, agent_id)][0])
+        # assert model_id > 0, 'model is must > 0, if set to 0 means no model at all'
+        # current_model = ObjHandler.retrieve(model_id)
+        # print('recovery model success!')
 
         current_action_logits = train_batch[
             get_global_name(SampleBatch.ACTION_DIST_INPUTS, agent_id)
@@ -78,42 +81,43 @@ class HATRPOUpdator:
 
         obs = train_batch[get_global_name(SampleBatch.OBS, agent_id)]
 
-        train_batch_for_trpo_update = SampleBatch(
-            obs=obs,
-            seq_lens=train_batch[SampleBatch.SEQ_LENS],
-            actions=actions,
-            action_logp=old_action_log_dist,
-            action_dist_inputs=train_batch[get_global_name(SampleBatch.ACTION_DIST_INPUTS, agent_id)]
-        )
+        # train_batch_for_trpo_update = SampleBatch(
+        #     obs=obs,
+        #     seq_lens=train_batch[SampleBatch.SEQ_LENS],
+        #     actions=actions,
+        #     action_logp=old_action_log_dist,
+        #     action_dist_inputs=train_batch[get_global_name(SampleBatch.ACTION_DIST_INPUTS, agent_id)]
+        # )
 
-        train_batch_for_trpo_update.is_training = bool(train_batch[get_global_name(TRAINING, agent_id)][0])
+        # train_batch_for_trpo_update.is_training = bool(train_batch[get_global_name(TRAINING, agent_id)][0])
 
-        i = 0
-
-        while state_name(i) in train_batch:
-            agent_state_name = global_state_name(i, agent_id)
-            train_batch_for_trpo_update[state_name(i)] = train_batch[agent_state_name]
-            i += 1
+        # i = 0
+        #
+        # while state_name(i) in train_batch:
+        #     agent_state_name = global_state_name(i, agent_id)
+        #     train_batch_for_trpo_update[state_name(i)] = train_batch[agent_state_name]
+        #     i += 1
 
         importance_sampling = torch.exp(current_action_dist.logp(actions) - old_action_log_dist)
 
         # if importance_sampling.grad_fn is None:
-        agent_policy_id = int(train_batch[get_global_name(POLICY_ID, agent_id)][0])
-        assert agent_policy_id > 0, 'policy id is must > 0, if set to 0 means no policy at all'
+        # agent_policy_id = int(train_batch[get_global_name(POLICY_ID, agent_id)][0])
+        # assert agent_policy_id > 0, 'policy id is must > 0, if set to 0 means no policy at all'
+        #
+        # agent_policy = ObjHandler.retrieve(agent_policy_id)
+        # print('recovery policy success!')
 
-        agent_policy = self.recovery_obj(agent_policy_id)
-
-        updator = agent_policy.trpo_updator
+        # updator = agent_policy.trpo_updator
 
         # update updator
-        updator.train_batch = train_batch_for_trpo_update
-        updator.model = current_model
-        updator.adv_targ.data = m_advantage.data
-        updator.initialize_policy_loss = updator.loss
+        # updator.train_batch = train_batch_for_trpo_update
+        # updator.model = current_model
+        # updator.adv_targ.data = m_advantage.data
+        # updator.initialize_policy_loss = updator.loss
 
         m_advantage = m_advantage * importance_sampling
 
-        return updator, m_advantage
+        return m_advantage
 
     def is_main_model(self, m):
         return m is self.main_model

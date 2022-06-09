@@ -1,4 +1,4 @@
-# HATRPO parameters
+# TRPO parameters
 
 algo_args:
   batch_episode: 10
@@ -14,9 +14,3 @@ algo_args:
   gamma: 0.99
   normal_value: True
   vf_share_layers: True
-  critic_lr: 0.01
-  lr: 0.00005
-  lr_sh_min: 0
-  lr_sh_max: 0.00005
-  lr_sh_step: 999999
-  lr_min: 0.00000001

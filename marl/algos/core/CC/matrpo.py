@@ -146,15 +146,6 @@ def centre_critic_trpo_loss_fn(
 def apply_gradients(policy, gradients) -> None:
     policy.trpo_updator.update()
 
-PPO_CONFIG.update({
-    'critic_lr': 5e-3,
-    # 'actor_lr': 5e-5,
-    'lr': 5e-5,
-    "lr_schedule": [
-        (0, 5e-5),
-        (int(1e7), 1e-8),
-    ]
-})
 
 MATRPOTorchPolicy = PPOTorchPolicy.with_updates(
     name="MATRPOTorchPolicy",

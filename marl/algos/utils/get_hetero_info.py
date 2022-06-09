@@ -4,6 +4,12 @@ from ray.rllib.evaluation.postprocessing import discount_cumsum, Postprocessing,
 from marl.algos.utils.valuenorm import ValueNorm
 from marl.algos.utils.postprocessing import get_dim, convert_to_torch_tensor
 from marl.algos.utils.setup_utils import get_agent_num
+from collections import defaultdict
+import pickle
+from pathlib import Path
+import os
+import multiprocessing
+mul_manager = multiprocessing.Manager()
 
 
 GLOBAL_NEED_COLLECT = [SampleBatch.ACTION_LOGP, SampleBatch.ACTIONS,
@@ -117,6 +123,36 @@ def trpo_post_process(policy, sample_batch, other_agent_batches=None, episode=No
     return sample_batch
 
 
+class ObjHandler:
+
+    # base_dir = './tmp/obj'
+
+    # cache_obj = mul_manager.dict()
+    cache_obj = dict()
+
+    def __init__(self):
+        pass
+
+    @classmethod
+    def save(cls, obj):
+        # Path(cls.base_dir).mkdir(parents=True, exist_ok=True)
+        # with open(os.path.join(cls.base_dir, f'{int(id(obj))}.obj'), 'wb') as f:
+        #     pickle.dump(obj, f)
+        cls.cache_obj[int(id(obj))] = obj
+
+        return int(id(obj))
+
+    @classmethod
+    def retrieve(cls, _id):
+        # with open(os.path.join(cls.base_dir, f'{_id}.obj'), 'rb') as f:
+        #     obj = pickle.load(f)
+
+        if _id in cls.cache_obj:
+            return cls.cache_obj[_id]
+        else:
+            raise ValueError(f'_id: {_id} of object did not exist in memory')
+
+
 def hatrpo_post_process(policy, sample_batch, other_agent_batches=None, epsisode=None):
 
     sample_batch = trpo_post_process(policy, sample_batch, other_agent_batches, epsisode)
@@ -133,10 +169,11 @@ def hatrpo_post_process(policy, sample_batch, other_agent_batches=None, epsisode
             name = exist_in_opponent(opponent_index=i, opponent_batches=other_agent_batches)
             if name:
                 _p, _b = other_agent_batches[name]
-                cur_model_id = id(_p.model)
-                cur_loss_grad_fn_id = id(_p)
+                cur_model_id = ObjHandler.save(_p.model)
+                cur_loss_grad_fn_id = ObjHandler.save(_p)
                 cur_training = _b.is_training
 
+        # print(cur_model_id, cur_loss_grad_fn_id, cur_training)
         sample_batch[get_global_name(MODEL, i)] = np.array([
             int(cur_model_id)
         ] * len(sample_batch))

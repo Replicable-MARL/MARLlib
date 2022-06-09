@@ -12,7 +12,7 @@ Currently, 10 environments are available for Independent Learning
 - Hanabi
 
 ```
-CUDA_VISIBLE_DEVICES=1 python marl/run.py --algo_config=a2c --env-config=smac with env_args.map_name=3m
+python marl/main.py --algo_config=a2c --env-config=smac with env_args.map_name=3m
 ```
 
 Currently, 7 environments are available for Value Decomposition
@@ -26,7 +26,7 @@ Currently, 7 environments are available for Value Decomposition
 - Pommerman
 
 ```
-CUDA_VISIBLE_DEVICES=1 python marl/run.py --algo_config=qmix --env-config=smac with env_args.map_name=3m
+python marl/main.py --algo_config=qmix --env-config=smac with env_args.map_name=3m
 ```
 
 
@@ -43,6 +43,6 @@ Currently, 9 environments are available for Centralized Critic
 - Hanabi
 
 ```
-CUDA_VISIBLE_DEVICES=1 python marl/run.py --algo_config=mappo --env-config=smac with env_args.map_name=3m
+python marl/main.py --algo_config=mappo --env-config=smac with env_args.map_name=3m
 ```
 
