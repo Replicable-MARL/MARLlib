@@ -5,13 +5,16 @@
 </div>
 
 **Multi-Agent RLlib (MARLlib)** is a *MARL benchmark* based on [**Ray**](https://github.com/ray-project/ray) and one of its toolkits [**RLlib**](https://github.com/ray-project/ray/tree/master/rllib). 
-It provides MARL research community a unified platform for developing and evaluating the new ideas on various multi-agent environments.
+It provides MARL research community a unified platform for developing and evaluating the new ideas in various multi-agent environments.
 There are four core features of **MARLlib**. 
 
 - it collects most of the existing MARL algorithms that are widely acknowledged by the community and unifies them under one framework. 
-- it gives a solution that enables different multi-agent environments using a same interface to interact with the agents.
-- it guarantees great efficiency on both training and sampling process.
+- it gives a solution that enables different multi-agent environments using the same interface to interact with the agents.
+- it guarantees great efficiency in both the training and sampling process.
 - it provides trained results including learning curves and pretrained models specific to each task and each algorithm's combination, with finetuned hyper-parameters to guarantee credibility. 
+
+**Project Website**: https://sites.google.com/view/marllib/home
+
 
 --------------------------------------------------------------------------------
 The README is organized as follows:
@@ -25,17 +28,18 @@ The README is organized as follows:
 
 We collected most of the existing multi-agent environment and multi-agent reinforcement learning algorithms and unify them under one framework based on [**Ray**](https://github.com/ray-project/ray)'s [**RLlib**](https://github.com/ray-project/ray/tree/master/rllib) to boost the MARL research. 
 
-The common MARL baselines include **independence learning (IQL, A2C, DDPG, TRPO, PPO)**, **centralized critic learning (COMA, MADDPG, MAPPO, HATRPO)** and **value decomposition (QMIX, VDN, FACMAC, VDA2C)** are all implemented.
+The common MARL baselines include **independence learning (IQL, A2C, DDPG, TRPO, PPO)**, **centralized critic learning (COMA, MADDPG, MAPPO, HATRPO)**, and **value decomposition (QMIX, VDN, FACMAC, VDA2C)** are all implemented.
 
-The popular MARL environments like **SMAC, MaMujoco, Google Research Football** are all provides with unified interface.
+The popular MARL environments like **SMAC, MaMujoco, Google Research Football** are all provided with a unified interface.
 
-The algorithm code and environment code are fully separated. Changing environment needs no modification on algorithm side and vice versa.
+The algorithm code and environment code are fully separated. Changing the environment needs no modification on the algorithm side and vice versa.
 
-The tutorial of RLlib can be found in https://docs.ray.io/en/releases-1.8.0/rllib/index.html.
-Fast examples can be found in https://docs.ray.io/en/releases-1.8.0/rllib-examples.html. 
+The tutorial of RLlib can be found at https://docs.ray.io/en/releases-1.8.0/rllib/index.html.
+Fast examples can be found at https://docs.ray.io/en/releases-1.8.0/rllib-examples.html. 
 These will help you easily dive into RLlib.
 
 We hope everyone interested in MARL can be benefited from MARLlib.
+
 
 
 ### Part II. Environment
@@ -186,3 +190,6 @@ This picture is in image/code-ENVS.png.png
     - the returned env observation contained the required key (e.g., action_mask/state)
 
 --------------------------------------------------------------------------------
+## License
+
+The MIT License
