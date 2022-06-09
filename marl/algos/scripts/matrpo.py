@@ -18,18 +18,15 @@ def run_matrpo(config_dict, common_config, env_dict, stop):
 
     algorithm = config_dict["algorithm"]
     batch_mode = config_dict["algo_args"]["batch_mode"]
-    lr = config_dict["algo_args"]["lr"]
     iteration = config_dict["algo_args"]["iteration"]
     clip_param = config_dict["algo_args"]["clip_param"]
     vf_clip_param = config_dict["algo_args"]["vf_clip_param"]
     entropy_coeff = config_dict["algo_args"]["entropy_coeff"]
 
     config = {
-        # "seed": tune.grid_search([1, 123]),
         "batch_mode": batch_mode,
         "train_batch_size": train_batch_size,
         "sgd_minibatch_size": sgd_minibatch_size,
-        "lr": lr,
         "entropy_coeff": entropy_coeff,
         "num_sgd_iter": iteration,
         "clip_param": clip_param,

@@ -36,23 +36,16 @@ def run_mappo(config_dict, common_config, env_dict, stop):
     gamma = config_dict['algo_args']['gamma']
 
     config = {
-        "seed": tune.grid_search([1]),
-        # "seed": 123,
-        # "batch_mode": batch_mode,
         "horizon": horizon,
         "num_sgd_iter": iteration,
         "train_batch_size": train_batch_size,
         "sgd_minibatch_size": sgd_minibatch_size,
-        # "lr": _param('lr'),
-        # "entropy_coeff": entropy_coeff,
         "grad_clip": grad_clip,
         "use_critic": use_critic,
         "clip_param": clip_param,
         "gamma": gamma,
-        # "vf_clip_param": vf_clip_param,  # very sensitive, depends on the scale of the rewards
         "model": {
             "custom_model": "Centralized_Critic_Model",
-            # "max_seq_len": episode_limit,
             "custom_model_config": merge_dicts(config_dict, env_dict),
             "vf_share_layers": True,
         },
