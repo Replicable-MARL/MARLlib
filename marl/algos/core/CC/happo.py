@@ -218,8 +218,6 @@ def make_happo_optimizers(policy: Policy,
     return policy._actor_optimizer, policy._critic_optimizer
 
 
-from marl.algos.core.CC.mappo import central_critic_ppo_loss
-
 HAPPOTorchPolicy = PPOTorchPolicy.with_updates(
         name="HAPPOTorchPolicy",
         get_default_config=lambda: PPO_CONFIG,
