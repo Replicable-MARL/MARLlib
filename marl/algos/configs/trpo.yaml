@@ -14,9 +14,9 @@ algo_args:
   gamma: 0.99
   normal_value: True
   vf_share_layers: True
-  critic_lr: 1e-2
-  lr: 5e-5
+  critic_lr: 0.01
+  lr: 0.00005
   lr_sh_min: 0
-  lr_sh_max: 5e-5
-  lr_sh_step: 1e7
-  lr_min: 1e-8
+  lr_sh_max: 0.00005
+  lr_sh_step: 999999
+  lr_min: 0.00000001
