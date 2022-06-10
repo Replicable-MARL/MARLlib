@@ -224,7 +224,7 @@ def get_policy_class_hatrpo(config_):
 
 
 HATRPOTrainer = PPOTrainer.with_updates(
-    name="#hatrpo-trainer",
+    name="HATRPOTrainer",
     default_policy=None,
     get_policy_class=get_policy_class_hatrpo,
 )

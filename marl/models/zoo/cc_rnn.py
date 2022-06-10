@@ -82,7 +82,7 @@ class CC_RNN(Base_RNN):
 
         if self.custom_config["algorithm"] in ["coma"]:
             self.q_flag = True
-            self.value_branch = nn.Linear(self.hidden_state_size, num_outputs)
+            self.value_branch = nn.Linear(self.input_dim, num_outputs)
             self.central_vf = nn.Sequential(
                 nn.Linear(input_size, num_outputs),
             )
