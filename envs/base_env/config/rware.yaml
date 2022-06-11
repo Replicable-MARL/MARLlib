@@ -1,10 +1,10 @@
 env: rware
 
 env_args:
-  n_agents: 4 # 2-20
-  map_size: "small" # "tiny", "small", "medium", "large"
-  difficulty: "easy" # "easy", "medium", "hard"
-  column_height: 8
+  n_agents: 2 # 2-20
+  map_size: "tiny" # "tiny", "small", "medium", "large"
+  difficulty: "medium" # "easy", "medium", "hard"
+  column_height: 1
   max_inactivity_steps: null
   max_steps: 500
   fast_obs: True

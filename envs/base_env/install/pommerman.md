@@ -18,9 +18,9 @@ Pommerman require gym=0.10.11, which is a version too old.
 
 Here we solve this conflict by modifying some source code of Pommerman as follows:
 
-you can find the replace file in *source* directory
+you can find the replace file in *patch/pommerman* directory
 
-Pattern: source package file -> replace file
+Pattern: the original file -> replace file
 
 - **pommerman/graphics.py**  ->  **graphics.py**
 - **pommerman/\_\_init\_\_.py**  ->  **\_\_init\_\_.py** 

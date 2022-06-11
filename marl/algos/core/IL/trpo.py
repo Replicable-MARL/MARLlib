@@ -179,7 +179,7 @@ def get_policy_class_trpo(config_):
 
 
 TRPOTrainer = PPOTrainer.with_updates(
-    name="#trpo-trainer",
+    name="TRPOTrainer",
     default_policy=None,
     get_policy_class=get_policy_class_trpo,
 )
