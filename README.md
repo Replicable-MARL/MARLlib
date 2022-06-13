@@ -18,15 +18,16 @@ There are four core features of **MARLlib**.
 
 --------------------------------------------------------------------------------
 The README is organized as follows:
-- [**Overview**](#Part-I.-Overview)
-- [**Environment**](#Part-II.-Environment)
-- [**Algorithm**](#Part-III.-Algorithm)
-- [**Getting started & Examples**](#Part-VI.-Getting-started)
-- [**Bug Shooting**](#Part-VI.-Getting-started)
+- [**I. Overview**](#Part-I.-Overview)
+- [**II. Environment**](#Part-II.-Environment)
+- [**III. Algorithm**](#Part-III.-Algorithm)
+- [**IV. Getting started & Examples**](#Part-VI.-Getting-started)
+- [**V. Contribute New Environment**]()
+- [**VI. Bug Shooting**](#Part-VI.-Bug-Shooting)
 
 ### Part I. Overview
 
-We collected most of the existing multi-agent environment and multi-agent reinforcement learning algorithms and unify them under one framework based on [**Ray**](https://github.com/ray-project/ray)'s [**RLlib**](https://github.com/ray-project/ray/tree/master/rllib) to boost the MARL research. 
+We collected most of the existing multi-agent environment and multi-agent reinforcement learning algorithms and unify them under one framework based on [**Ray**](https://github.com/ray-project/ray) 's [**RLlib**](https://github.com/ray-project/ray/tree/master/rllib) to boost the MARL research. 
 
 The common MARL baselines include **independence learning (IQL, A2C, DDPG, TRPO, PPO)**, **centralized critic learning (COMA, MADDPG, MAPPO, HATRPO)**, and **value decomposition (QMIX, VDN, FACMAC, VDA2C)** are all implemented.
 
@@ -34,12 +35,28 @@ The popular MARL environments like **SMAC, MaMujoco, Google Research Football** 
 
 The algorithm code and environment code are fully separated. Changing the environment needs no modification on the algorithm side and vice versa.
 
-The tutorial of RLlib can be found at https://docs.ray.io/en/releases-1.8.0/rllib/index.html.
-Fast examples can be found at https://docs.ray.io/en/releases-1.8.0/rllib-examples.html. 
+Here we provide a table for comparison of MARLlib and before benchmarks.
+
+|   Benchmark   | Github Stars | Learning Mode | Available Env | Algorithm Type | Algorithm Number | Continues Control | Asynchronous Interact | Distributed Training |          Framework          | Last Update |
+|:-------------:|:-------------:|:-------------:|:-------------:|:--------------:|:----------------:|:-----------------:|:---------------------:|:--------------------:|:---------------------------:|:---------------------------:
+|     [PyMARL](https://github.com/oxwhirl/pymarl) | [![GitHub stars](https://img.shields.io/github/stars/oxwhirl/pymarl)](https://github.com/oxwhirl/pymarl/stargazers)    |       CP      |       1       |       VD       |         5        |                   |                       |                      |              *              | ![GitHub last commit](https://img.shields.io/github/last-commit/oxwhirl/pymarl?label=last%20update) |
+|    [PyMARL2](https://github.com/hijkzzz/pymarl2) | [![GitHub stars](https://img.shields.io/github/stars/hijkzzz/pymarl2)](https://github.com/hijkzzz/pymarl2/stargazers)    |       CP      |       1       |       VD       |         12        |                   |                       |                      | [PyMARL](https://github.com/oxwhirl/pymarl) | ![GitHub last commit](https://img.shields.io/github/last-commit/hijkzzz/pymarl2?label=last%20update) |
+|   [MARL-Algorithms](https://github.com/starry-sky6688/MARL-Algorithms)| [![GitHub stars](https://img.shields.io/github/stars/starry-sky6688/MARL-Algorithms)](https://github.com/starry-sky6688/MARL-Algorithms/stargazers)  |       CP      |       1       |     VD+Comm    |         9        |                   |                       |                      |              *              | ![GitHub last commit](https://img.shields.io/github/last-commit/starry-sky6688/MARL-Algorithms?label=last%20update) |
+|    [EPyMARL](https://github.com/uoe-agents/epymarl)| [![GitHub stars](https://img.shields.io/github/stars/uoe-agents/epymarl)](https://github.com/hijkzzz/uoe-agents/epymarl)    |       CP      |       4       |    IL+VD+CC    |        10        |                   |                       |                      |            [PyMARL](https://github.com/oxwhirl/pymarl)           | ![GitHub last commit](https://img.shields.io/github/last-commit/uoe-agents/epymarl?label=last%20update) |
+| [Marlbenchmark](https://github.com/marlbenchmark/on-policy)| [![GitHub stars](https://img.shields.io/github/stars/marlbenchmark/on-policy)](https://github.com/marlbenchmark/on-policy/stargazers) |     CP+CL     |       4       |      VD+CC     |         5        |         :heavy_check_mark:         |                       |                      | [pytorch-a2c-ppo-acktr-gail](https://github.com/ikostrikov/pytorch-a2c-ppo-acktr-gail) | ![GitHub last commit](https://img.shields.io/github/last-commit/marlbenchmark/on-policy?label=last%20update) |
+|    [MARLlib](https://github.com/Replicable-MARL/MARLlib)|[![GitHub stars](https://img.shields.io/github/stars/Replicable-MARL/MARLlib)](https://github.com/Replicable-MARL/MARLlib/stargazers) |  CP+CL+CM+MI  |       10      |    IL+VD+CC    |        18        |         :heavy_check_mark:         |           :heavy_check_mark:           |           :heavy_check_mark:         |            [Ray/RLlib](https://docs.ray.io/en/releases-1.8.0/)            | ![GitHub last commit](https://img.shields.io/github/last-commit/Replicable-MARL/MARLlib?label=last%20update) |
+
+CP, CL, CM, and MI represent for cooperative, collaborative, competitive, and mixed task learning mode respectively. 
+IL, VD, and CC represent for independent learning, value decomposition, and centralized critic categorization. 
+Comm represents communication-based learning. 
+Asterisk denotes that the benchmark uses its framework.
+
+
+The tutorial of RLlib can be found at this [link](https://docs.ray.io/en/releases-1.8.0/).
+Fast examples can be found at this [link](https://docs.ray.io/en/releases-1.8.0/rllib-examples.html). 
 These will help you easily dive into RLlib.
 
 We hope everyone interested in MARL can be benefited from MARLlib.
-
 
 
 ### Part II. Environment
@@ -110,7 +127,7 @@ Here is a chart describing the characteristics of each algorithm:
 | HAPPO  | Cooperative | Yes | Both | Centralized Critic | On Policy
 | VDN | Cooperative | No | Discrete | Value Decomposition | Off Policy
 | QMIX  | Cooperative | Yes | Discrete | Value Decomposition | Off Policy
-| FACMAC  | Cooperative | Yes | Discrete | Value Decomposition | Off Policy
+| FACMAC  | Cooperative | Yes | Continuous | Value Decomposition | Off Policy
 | VDAC  | Cooperative | Yes | Both | Value Decomposition | On Policy
 | VDPPO | Cooperative | Yes | Both | Value Decomposition | On Policy
 
@@ -123,7 +140,7 @@ Here is a chart describing the characteristics of each algorithm:
 | RWARE       | Y | Y | Y | N | Y | Y | Y | N | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
 | MPE         | P | Y | Y | P | Y | Y | P | P | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
 | SMAC        | Y | Y | Y | N | Y | Y | Y | N | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
-| MetaDrive  | N | Y | Y | Y | Y | Y | N | Y | Y | Y | Y | Y | Y | N | N | N | N | N |
+| MetaDrive  | N | Y | Y | Y | Y | Y | N | N | N | N | N | N | N | N | N | N | N | N |
 | MAgent      | Y | Y | Y | N | Y | Y | Y | N | Y | Y | Y | Y | Y | N | N | N | N | N |
 | Pommerman   | Y | Y | Y | N | Y | Y | P | N | Y | Y | Y | Y | Y | P | P | P | P | P |
 | MaMujoco    | N | Y | Y | Y | Y | Y | N | Y | Y | Y | Y | Y | Y | N | N | Y | Y | Y |
@@ -180,14 +197,43 @@ This picture is in image/code-MARL.png.png
 
 This picture is in image/code-ENVS.png.png
 
+### Part V. Contribute New Environment
 
-### Part V. Bug Shooting
+MARLlib is designed to be friendly to incorporate new environment. Besides the ten we already implemented, we support nearly all kinds of MARL environments.
+Before the contribution, you need to know:
 
-- observation/action out of space bug:
+
+Things you have to do:
+
+- provide a new environment interface python file, follow the style of [MARLlib/envs/base_env](https://github.com/Replicable-MARL/MARLlib/tree/main/envs/base_env)
+- provide a corresponding config yaml file, follow the style of [MARLlib/envs/base_env/config](https://github.com/Replicable-MARL/MARLlib/tree/main/envs/base_env/config)
+- provide a corresponding instruction readme file, follow the style of [MARLlib/envs/base_env/install](https://github.com/Replicable-MARL/MARLlib/tree/main/envs/base_env/install)
+
+Things you do not have to do:
+
+- modify the MARLlib data processing pipeline
+- provide a unique runner or controller   
+- worry about the data logging 
+
+As the ten environments we already included  have covered such a great diversity in action space,  observation space, agent-env interact style, task mode, additional information like action mask, etc. 
+The best practice to incorporate your own environment is find an existing similar one and provide a same interface.
+
+### Part VI. Bug Shooting
+
+Most RLlib related error on MARL are fixed by our patch file.
+
+Here we only list the common bugs not RLlib related. (Mostly is your mistake)
+
+- *observation/action out of space* bug:
     - make sure the observation/action space defined in env init function 
         - has same data type with env returned data (e.g., float32/64)
         - env returned data range is in the space scope (e.g., box(-2,2))
     - the returned env observation contained the required key (e.g., action_mask/state)
+    
+- *Action NaN is invaild* bug
+    - this is common bug espectially in continues control problem, carefully finetune the algorithm's hyperparameter
+        - smaller learning rate
+        - set some action value bound
 
 --------------------------------------------------------------------------------
 ## License
