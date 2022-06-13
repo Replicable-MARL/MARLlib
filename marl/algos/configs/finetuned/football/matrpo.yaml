@@ -1,7 +1,7 @@
 # MATRPO parameters
 
 algo_args:
-  batch_episode:  10
+  batch_episode:  5
   batch_mode: "complete_episodes"
   iteration: 5
   horizon: 1000
