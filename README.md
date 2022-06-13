@@ -27,7 +27,7 @@ The README is organized as follows:
 
 ### Part I. Overview
 
-We collected most of the existing multi-agent environment and multi-agent reinforcement learning algorithms and unify them under one framework based on [**Ray**](https://github.com/ray-project/ray)'s [**RLlib**](https://github.com/ray-project/ray/tree/master/rllib) to boost the MARL research. 
+We collected most of the existing multi-agent environment and multi-agent reinforcement learning algorithms and unify them under one framework based on [**Ray**](https://github.com/ray-project/ray) 's [**RLlib**](https://github.com/ray-project/ray/tree/master/rllib) to boost the MARL research. 
 
 The common MARL baselines include **independence learning (IQL, A2C, DDPG, TRPO, PPO)**, **centralized critic learning (COMA, MADDPG, MAPPO, HATRPO)**, and **value decomposition (QMIX, VDN, FACMAC, VDA2C)** are all implemented.
 
@@ -37,14 +37,14 @@ The algorithm code and environment code are fully separated. Changing the enviro
 
 Here we provide a table for comparison of MARLlib and before benchmarks.
 
-|   Benchmark   | Learning Mode | Available Env | Algorithm Type | Algorithm Number | Continues Control | Asynchronous Interact | Distributed Training |          Framework          | Last Update |
-|:-------------:|:-------------:|:-------------:|:--------------:|:----------------:|:-----------------:|:---------------------:|:--------------------:|:---------------------------:|:---------------------------:
-|     [PyMARL](https://github.com/oxwhirl/pymarl) [![GitHub stars](https://img.shields.io/github/stars/oxwhirl/pymarl)](https://github.com/oxwhirl/pymarl/stargazers)    |       CP      |       1       |       VD       |         5        |                   |                       |                      |              *              | ![GitHub last commit](https://img.shields.io/github/last-commit/oxwhirl/pymarl?label=last%20update) |
-|    [PyMARL2](https://github.com/hijkzzz/pymarl2) [![GitHub stars](https://img.shields.io/github/stars/hijkzzz/pymarl2)](https://github.com/hijkzzz/pymarl2/stargazers)    |       CP      |       1       |       VD       |         12        |                   |                       |                      | PyMARL | ![GitHub last commit](https://img.shields.io/github/last-commit/hijkzzz/pymarl2?label=last%20update) |
-|   [MARL-Algorithms](https://github.com/starry-sky6688/MARL-Algorithms) [![GitHub stars](https://img.shields.io/github/stars/starry-sky6688/MARL-Algorithms)](https://github.com/starry-sky6688/MARL-Algorithms/stargazers)  |       CP      |       1       |     VD+Comm    |         9        |                   |                       |                      |              *              | ![GitHub last commit](https://img.shields.io/github/last-commit/starry-sky6688/MARL-Algorithms?label=last%20update) |
-|    [EPyMARL](https://github.com/uoe-agents/epymarl) [![GitHub stars](https://img.shields.io/github/stars/uoe-agents/epymarl)](https://github.com/hijkzzz/uoe-agents/epymarl)    |       CP      |       4       |    IL+VD+CC    |        10        |                   |                       |                      |            PyMARL           | ![GitHub last commit](https://img.shields.io/github/last-commit/uoe-agents/epymarl?label=last%20update) |
-| [Marlbenchmark](https://github.com/marlbenchmark/on-policy) [![GitHub stars](https://img.shields.io/github/stars/marlbenchmark/on-policy)](https://github.com/marlbenchmark/on-policy/stargazers) |     CP+CL     |       3       |      VD+CC     |         5        |         :heavy_check_mark:         |                       |                      | pytorch-a2c-ppo -acktr-gail | ![GitHub last commit](https://img.shields.io/github/last-commit/marlbenchmark/on-policy?label=last%20update) |
-|    [MARLlib](https://github.com/Replicable-MARL/MARLlib) |  CP+CL+CM+MI  |       10      |    IL+VD+CC    |        18        |         :heavy_check_mark:         |           :heavy_check_mark:           |           :heavy_check_mark:         |            RLlib            | ![GitHub last commit](https://img.shields.io/github/last-commit/Replicable-MARL/MARLlib?label=last%20update) |
+|   Benchmark   | Github Stars | Learning Mode | Available Env | Algorithm Type | Algorithm Number | Continues Control | Asynchronous Interact | Distributed Training |          Framework          | Last Update |
+|:-------------:|:-------------:|:-------------:|:-------------:|:--------------:|:----------------:|:-----------------:|:---------------------:|:--------------------:|:---------------------------:|:---------------------------:
+|     [PyMARL](https://github.com/oxwhirl/pymarl) | [![GitHub stars](https://img.shields.io/github/stars/oxwhirl/pymarl)](https://github.com/oxwhirl/pymarl/stargazers)    |       CP      |       1       |       VD       |         5        |                   |                       |                      |              *              | ![GitHub last commit](https://img.shields.io/github/last-commit/oxwhirl/pymarl?label=last%20update) |
+|    [PyMARL2](https://github.com/hijkzzz/pymarl2) | [![GitHub stars](https://img.shields.io/github/stars/hijkzzz/pymarl2)](https://github.com/hijkzzz/pymarl2/stargazers)    |       CP      |       1       |       VD       |         12        |                   |                       |                      | [PyMARL](https://github.com/oxwhirl/pymarl) | ![GitHub last commit](https://img.shields.io/github/last-commit/hijkzzz/pymarl2?label=last%20update) |
+|   [MARL-Algorithms](https://github.com/starry-sky6688/MARL-Algorithms)| [![GitHub stars](https://img.shields.io/github/stars/starry-sky6688/MARL-Algorithms)](https://github.com/starry-sky6688/MARL-Algorithms/stargazers)  |       CP      |       1       |     VD+Comm    |         9        |                   |                       |                      |              *              | ![GitHub last commit](https://img.shields.io/github/last-commit/starry-sky6688/MARL-Algorithms?label=last%20update) |
+|    [EPyMARL](https://github.com/uoe-agents/epymarl)| [![GitHub stars](https://img.shields.io/github/stars/uoe-agents/epymarl)](https://github.com/hijkzzz/uoe-agents/epymarl)    |       CP      |       4       |    IL+VD+CC    |        10        |                   |                       |                      |            [PyMARL](https://github.com/oxwhirl/pymarl)           | ![GitHub last commit](https://img.shields.io/github/last-commit/uoe-agents/epymarl?label=last%20update) |
+| [Marlbenchmark](https://github.com/marlbenchmark/on-policy)| [![GitHub stars](https://img.shields.io/github/stars/marlbenchmark/on-policy)](https://github.com/marlbenchmark/on-policy/stargazers) |     CP+CL     |       4       |      VD+CC     |         5        |         :heavy_check_mark:         |                       |                      | [pytorch-a2c-ppo-acktr-gail](https://github.com/ikostrikov/pytorch-a2c-ppo-acktr-gail) | ![GitHub last commit](https://img.shields.io/github/last-commit/marlbenchmark/on-policy?label=last%20update) |
+|    [MARLlib](https://github.com/Replicable-MARL/MARLlib)|[![GitHub stars](https://img.shields.io/github/stars/Replicable-MARL/MARLlib)](https://github.com/Replicable-MARL/MARLlib/stargazers) |  CP+CL+CM+MI  |       10      |    IL+VD+CC    |        18        |         :heavy_check_mark:         |           :heavy_check_mark:           |           :heavy_check_mark:         |            [Ray/RLlib](https://docs.ray.io/en/releases-1.8.0/)            | ![GitHub last commit](https://img.shields.io/github/last-commit/Replicable-MARL/MARLlib?label=last%20update) |
 
 CP, CL, CM, and MI represent for cooperative, collaborative, competitive, and mixed task learning mode respectively. 
 IL, VD, and CC represent for independent learning, value decomposition, and centralized critic categorization. 
@@ -52,8 +52,8 @@ Comm represents communication-based learning.
 Asterisk denotes that the benchmark uses its framework.
 
 
-The tutorial of RLlib can be found at https://docs.ray.io/en/releases-1.8.0/rllib/index.html.
-Fast examples can be found at https://docs.ray.io/en/releases-1.8.0/rllib-examples.html. 
+The tutorial of RLlib can be found at this [link](https://docs.ray.io/en/releases-1.8.0/).
+Fast examples can be found at this [link](https://docs.ray.io/en/releases-1.8.0/rllib-examples.html). 
 These will help you easily dive into RLlib.
 
 We hope everyone interested in MARL can be benefited from MARLlib.
