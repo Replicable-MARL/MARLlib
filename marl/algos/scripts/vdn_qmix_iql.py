@@ -3,6 +3,7 @@ from ray.rllib.agents.qmix.qmix import DEFAULT_CONFIG as JointQ_Config
 from ray.tune.utils import merge_dicts
 from ray.tune import CLIReporter
 from marl.algos.core.VD.iql_vdn_qmix import JointQTrainer
+from marl.algos.utils.setup_utils import AlgVar
 
 """
 This version is based on but different from that rllib built-in qmix_policy
@@ -15,16 +16,19 @@ This version is based on but different from that rllib built-in qmix_policy
 
 
 def run_joint_q(config_dict, common_config, env_dict, stop):
+
+    _param = AlgVar(config_dict)
+
     algorithm = config_dict["algorithm"]
     episode_limit = env_dict["episode_limit"]
-    train_batch_episode = config_dict["algo_args"]["batch_episode"]
-    lr = config_dict["algo_args"]["lr"]
-    buffer_size = config_dict["algo_args"]["buffer_size"]
-    target_network_update_frequency = config_dict["algo_args"]["target_network_update_freq"]
-    final_epsilon = config_dict["algo_args"]["final_epsilon"]
-    epsilon_timesteps = config_dict["algo_args"]["epsilon_timesteps"]
-    reward_standardize = config_dict["algo_args"]["reward_standardize"]
-    optimizer = config_dict["algo_args"]["optimizer"]
+    train_batch_episode = _param["batch_episode"]
+    lr = _param["lr"]
+    buffer_size = _param["buffer_size"]
+    target_network_update_frequency = _param["target_network_update_freq"]
+    final_epsilon = _param["final_epsilon"]
+    epsilon_timesteps = _param["epsilon_timesteps"]
+    reward_standardize = _param["reward_standardize"]
+    optimizer = _param["optimizer"]
 
     mixer_dict = {
         "qmix": "qmix",
@@ -67,9 +71,12 @@ def run_joint_q(config_dict, common_config, env_dict, stop):
         default_config=JointQ_Config
     )
 
+    map_name = config_dict["env_args"]["map_name"]
+    arch = config_dict["model_arch_args"]["core_arch"]
+    RUNNING_NAME = '_'.join([algorithm, arch, map_name])
+
     results = tune.run(Trainer,
-                       name=algorithm + "_" + config_dict["model_arch_args"]["core_arch"] + "_" + config_dict["env_args"][
-                           "map_name"],
+                       name=RUNNING_NAME,
                        stop=stop,
                        config=config,
                        verbose=1,
