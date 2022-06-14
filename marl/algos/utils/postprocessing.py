@@ -344,30 +344,6 @@ def centralized_critic_q(policy: Policy,
                 [opponent_batch[i]["prev_actions"] for i in range(opponent_agents_num)],
                 1)
 
-            # grab the opponent next action manually
-            all_opponent_batch_next_action_ls = []
-            for opp_index in range(opponent_agents_num):
-                opp_policy = opponent_batch_list[opp_index][0]
-                opp_batch = copy.deepcopy(opponent_batch[opp_index])
-                input_dict = {}
-                input_dict["obs"] = {}
-                input_dict["obs"]["obs"] = opp_batch["new_obs"][:,
-                                           action_mask_dim: action_mask_dim + obs_dim]
-                seq_lens = opp_batch["seq_lens"]
-                state_ls = []
-                start_point = 0
-                for seq_len in seq_lens:
-                    state = convert_to_torch_tensor(opp_batch["state_out_0"][start_point], policy.device)
-                    start_point += seq_len
-                    state_ls.append(state)
-                state = [torch.stack(state_ls, 0)]
-                input_dict = convert_to_torch_tensor(input_dict, policy.device)
-                seq_lens = convert_to_torch_tensor(seq_lens, policy.device)
-                opp_next_action, _ = opp_policy.model.policy_model(input_dict, state, seq_lens)
-                opp_next_action = convert_to_numpy(opp_next_action)
-                all_opponent_batch_next_action_ls.append(opp_next_action)
-            sample_batch["next_opponent_actions"] = np.stack(
-                all_opponent_batch_next_action_ls, 1)
 
     else:
         # Policy hasn't been initialized yet, use zeros.
@@ -529,7 +505,8 @@ def q_value_mixing(policy: Policy,
                 state = [torch.stack(state_ls, 0)]
 
                 input_dict = convert_to_torch_tensor(input_dict, policy.device)
-                opp_next_action, _ = opp_policy.target_model.policy_model(input_dict, state, seq_lens)
+                opp_next_action_out, _ = opp_policy.target_model.policy_model(input_dict, state, seq_lens)
+                opp_next_action = opp_policy.model.policy_model.action_out_squashed(opp_next_action_out)
 
                 state_ls = []
                 start_point = 0
