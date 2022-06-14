@@ -3,6 +3,7 @@ from ray.tune.utils import merge_dicts
 from ray.tune import CLIReporter
 from marl.algos.core.CC.matrpo import MATRPOTrainer
 from marl.algos.utils.log_dir_util import available_local_dir
+from marl.algos.utils.setup_utils import AlgVar
 
 
 def run_matrpo(config_dict, common_config, env_dict, stop):
@@ -10,18 +11,20 @@ def run_matrpo(config_dict, common_config, env_dict, stop):
     for bug mentioned https://github.com/ray-project/ray/pull/20743
     make sure sgd_minibatch_size > max_seq_len
     """
-    train_batch_size = config_dict["algo_args"]["batch_episode"] * env_dict["episode_limit"]
+    _param = AlgVar(config_dict)
+
+    train_batch_size = _param["batch_episode"] * env_dict["episode_limit"]
     sgd_minibatch_size = train_batch_size
     episode_limit = env_dict["episode_limit"]
     while sgd_minibatch_size < episode_limit:
         sgd_minibatch_size *= 2
 
     algorithm = config_dict["algorithm"]
-    batch_mode = config_dict["algo_args"]["batch_mode"]
-    iteration = config_dict["algo_args"]["iteration"]
-    clip_param = config_dict["algo_args"]["clip_param"]
-    vf_clip_param = config_dict["algo_args"]["vf_clip_param"]
-    entropy_coeff = config_dict["algo_args"]["entropy_coeff"]
+    batch_mode = _param["batch_mode"]
+    iteration = _param["iteration"]
+    clip_param = _param["clip_param"]
+    vf_clip_param = _param["vf_clip_param"]
+    entropy_coeff = _param["entropy_coeff"]
 
     config = {
         "batch_mode": batch_mode,
@@ -39,14 +42,18 @@ def run_matrpo(config_dict, common_config, env_dict, stop):
     }
     config.update(common_config)
 
-    results = tune.run(MATRPOTrainer, name=algorithm + "_" + config_dict["model_arch_args"]["core_arch"] + "_" +
-                                           config_dict["env_args"][
-                                               "map_name"],
-                       stop=stop,
-                       config=config,
-                       verbose=1,
-                       progress_reporter=CLIReporter(),
-                       local_dir = available_local_dir
-                       )
+    map_name = config_dict["env_args"]["map_name"]
+    arch = config_dict["model_arch_args"]["core_arch"]
+    RUNNING_NAME = '_'.join([algorithm, arch, map_name])
+
+    results = tune.run(
+        MATRPOTrainer,
+        name=RUNNING_NAME,
+        stop=stop,
+        config=config,
+        verbose=1,
+        progress_reporter=CLIReporter(),
+        local_dir=available_local_dir
+    )
 
     return results

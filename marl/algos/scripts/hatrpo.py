@@ -3,15 +3,15 @@ from ray.tune.utils import merge_dicts
 from ray.tune import CLIReporter
 from ray.rllib.agents.ppo.ppo import DEFAULT_CONFIG as PPO_CONFIG
 from marl.algos.core.CC.hatrpo import HATRPOTrainer
-from marl.algos.utils.setup_utils import _algos_var
 from marl.algos.utils.log_dir_util import available_local_dir
+from marl.algos.utils.setup_utils import AlgVar
 
 
 def run_hatrpo(config_dict, common_config, env_dict, stop):
-    _param = _algos_var(config=config_dict)
+    _param = AlgVar(config_dict)
 
-    sgd_minibatch_size = _param('sgd_minibatch_size')
-    episode_limit = _param('horizon')
+    sgd_minibatch_size = _param['sgd_minibatch_size']
+    episode_limit = _param['horizon']
 
     while sgd_minibatch_size < episode_limit:
         sgd_minibatch_size *= 2
@@ -24,17 +24,17 @@ def run_hatrpo(config_dict, common_config, env_dict, stop):
 
     config.update({
         "horizon": episode_limit,
-        "num_sgd_iter": _param('num_sgd_iter'),
-        "train_batch_size": _param('train_batch_size'),
+        "num_sgd_iter": _param['num_sgd_iter'],
+        "train_batch_size": _param['train_batch_size'],
         "sgd_minibatch_size": sgd_minibatch_size,
-        "grad_clip": _param('grad_clip'),
-        "clip_param": _param('clip_param'),
-        "use_critic": _param('use_critic'),
-        "gamma": _param('gamma'),
+        "grad_clip": _param['grad_clip'],
+        "clip_param": _param['clip_param'],
+        "use_critic": _param['use_critic'],
+        "gamma": _param['gamma'],
         "model": {
             "custom_model": "Centralized_Critic_Model",
             "custom_model_config": merge_dicts(config_dict, env_dict),
-            "vf_share_layers": _param('vf_share_layers')
+            "vf_share_layers": _param['vf_share_layers']
         },
     })
 
