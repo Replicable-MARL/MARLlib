@@ -484,46 +484,6 @@ def q_value_mixing(policy: Policy,
             sample_batch["opponent_q"] = np.stack(
                 all_opponent_batch_q_ls, 1)
 
-            # grab the opponent next action & compute next Q use target net
-            all_opponent_batch_next_q_ls = []
-            for opp_index in range(opponent_agents_num):
-                opp_policy = opponent_batch_list[opp_index][0]
-                opp_batch = copy.deepcopy(opponent_batch[opp_index])
-                input_dict = {}
-                input_dict["obs"] = {}
-                input_dict["obs"]["obs"] = opp_batch["new_obs"][:,
-                                           action_mask_dim: action_mask_dim + obs_dim]
-                seq_lens_array = opp_batch["seq_lens"]
-                seq_lens = convert_to_torch_tensor(seq_lens_array, policy.device)
-
-                state_ls = []
-                start_point = 0
-                for seq_len in seq_lens_array:
-                    state = convert_to_torch_tensor(opp_batch["state_out_0"][start_point], policy.device)
-                    start_point += seq_len
-                    state_ls.append(state)
-                state = [torch.stack(state_ls, 0)]
-
-                input_dict = convert_to_torch_tensor(input_dict, policy.device)
-                opp_next_action_out, _ = opp_policy.target_model.policy_model(input_dict, state, seq_lens)
-                opp_next_action = opp_policy.model.policy_model.action_out_squashed(opp_next_action_out)
-
-                state_ls = []
-                start_point = 0
-                for seq_len in seq_lens_array:
-                    state = convert_to_torch_tensor(opp_batch["state_out_1"][start_point], policy.device)
-                    start_point += seq_len
-                    state_ls.append(state)
-                state = [torch.stack(state_ls, 0)]
-
-                input_dict["actions"] = opp_next_action
-                next_opp_q, _ = opp_policy.target_model.q_model(input_dict, state, seq_lens)
-
-                next_opp_q = convert_to_numpy(next_opp_q.squeeze(1))
-                all_opponent_batch_next_q_ls.append(next_opp_q)
-            sample_batch["next_opponent_q"] = np.stack(
-                all_opponent_batch_next_q_ls, 1)
-
     else:
         # Policy hasn't been initialized yet, use zeros.
         o = sample_batch[SampleBatch.CUR_OBS]

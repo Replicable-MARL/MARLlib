@@ -361,9 +361,7 @@ def get_policy_class(config: TrainerConfigDict) -> Optional[Type[Policy]]:
 
 
 def before_learn_on_batch(multi_agent_batch, policies, train_batch_size):
-    samples = {}
 
-    # Modify keys.
     other_agent_next_action_dict = {}
     all_agent_next_action = []
     for pid, policy in policies.items():
