@@ -18,11 +18,16 @@ def setup_torch_mixins(policy, obs_space, action_space, config):
     LearningRateSchedule.__init__(policy, config["lr"], config["lr_schedule"])
 
 
-def _algos_var(config):
-    def _inner(key):
-        expr = config['algo_args'][key]
+class AlgVar(dict):
+    def __init__(self, base_dict: dict, key="algo_args"):
+        key = key or list(base_dict.keys())[0]
+        super().__init__(base_dict[key])
 
-        if not isinstance(expr, str):
+    def __getitem__(self, item):
+        expr = self.get(item, None)
+
+        if expr is None: raise KeyError(f'{item} not exists')
+        elif not isinstance(expr, str):
             return expr
         else:
             float_express = (r'\d*\.\d*', float)
@@ -44,21 +49,17 @@ def _algos_var(config):
 
             return value
 
-    return _inner
-
 
 if __name__ == '__main__':
-    _param = _algos_var({'algo_args': {'test': 'True'}})('test')
-
-    assert _algos_var({'algo_args': {'test': False}})('test') is False
-    assert _algos_var({'algo_args': {'test': 1}})('test') == 1
-    assert _algos_var({'algo_args': {'test': 0.1}})('test') == 0.1
-    assert _algos_var({'algo_args': {'test': '1e5'}})('test') == 100000
-    assert _algos_var({'algo_args': {'test': '1e-5'}})('test') == 0.00001
-    assert _algos_var({'algo_args': {'test': '1e0'}})('test') == 1
-    assert _algos_var({'algo_args': {'test': '2e0'}})('test') == 2
-    assert _algos_var({'algo_args': {'test': '1.01'}})('test') == 1.01
-    assert _algos_var({'algo_args': {'test': '123'}})('test') == 123
+    assert AlgVar({'algo_args': {'test': False}})['test'] is False
+    assert AlgVar({'algo_args': {'test': 1}})['test'] == 1
+    assert AlgVar({'algo_args': {'test': 0.1}})['test'] == 0.1
+    assert AlgVar({'algo_args': {'test': '1e5'}})['test'] == 100000
+    assert AlgVar({'algo_args': {'test': '1e-5'}})['test'] == 0.00001
+    assert AlgVar({'algo_args': {'test': '1e0'}})['test'] == 1
+    assert AlgVar({'algo_args': {'test': '2e0'}})['test'] == 2
+    assert AlgVar({'algo_args': {'test': '1.01'}})['test'] == 1.01
+    assert AlgVar({'algo_args': {'test': '123'}})['test'] == 123
 
     print('test done!')
 
