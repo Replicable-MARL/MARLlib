@@ -18,7 +18,7 @@ There are four core features of **MARLlib**.
 - it provides trained results, including learning curves and pretrained models specific to each task and algorithm's combination, with finetuned hyper-parameters to guarantee credibility. 
 
 <div align="center">
-<img src=image/overview.png width=95% />
+<img src=image/overview.png width=100% />
 </div>
 
 **Project Website**: https://sites.google.com/view/marllib/home
