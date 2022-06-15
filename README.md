@@ -240,9 +240,9 @@ The best practice to incorporate your environment is to find an existing similar
 
 ## Bug Shooting
 
-Most RLlib related error on MARL are fixed by our patch file.
+Our patch files fix most RLlib-related errors on MARL.
 
-Here we only list the common bugs not RLlib related. (Mostly is your mistake)
+Here we only list the common bugs, not RLlib-related. (Mostly is your mistake)
 
 - *observation/action out of space* bug:
     - make sure the observation/action space defined in env init function 
@@ -254,4 +254,5 @@ Here we only list the common bugs not RLlib related. (Mostly is your mistake)
     - this is common bug espectially in continues control problem, carefully finetune the algorithm's hyperparameter
         - smaller learning rate
         - set some action value bound
+
     
