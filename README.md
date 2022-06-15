@@ -238,7 +238,7 @@ Things not essential:
 The ten environments we already contained have covered great diversity in action space,  observation space, agent-env interaction style, task mode, additional information like action mask, etc. 
 The best practice to incorporate your environment is to find an existing similar one and provide the same interface.
 
-### Part VI. Bug Shooting
+## Bug Shooting
 
 Most RLlib related error on MARL are fixed by our patch file.
 
@@ -254,8 +254,4 @@ Here we only list the common bugs not RLlib related. (Mostly is your mistake)
     - this is common bug espectially in continues control problem, carefully finetune the algorithm's hyperparameter
         - smaller learning rate
         - set some action value bound
-
---------------------------------------------------------------------------------
-## License
-
-The MIT License
+    
