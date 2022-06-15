@@ -195,7 +195,8 @@ def happo_surrogate_loss(
     model.tower_stats["mean_policy_loss"] = mean_policy_loss
     model.tower_stats["mean_vf_loss"] = mean_vf_loss
     model.tower_stats["vf_explained_var"] = explained_variance(
-        train_batch[Postprocessing.VALUE_TARGETS], model.value_function())
+        train_batch[Postprocessing.VALUE_TARGETS].to(device=get_device()),
+        model.value_function())
     model.tower_stats["mean_entropy"] = mean_entropy
     model.tower_stats["mean_kl_loss"] = mean_kl_loss
 
