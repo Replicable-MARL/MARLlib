@@ -94,10 +94,12 @@ class MADDPG_RNN_TorchModel(DDPG_RNN_TorchModel):
         else:  # haven't gone trough postprocessing
             o = input_dict["obs"]
             if self.state_flag:
-                model_out["state"] = torch.zeros_like(o["state"], dtype=o["state"].dtype)
+                model_out["state"] = torch.zeros_like(o["state"], dtype=o["state"].dtype).to(
+                    input_dict[SampleBatch.OBS]["obs"].device)
             else:
                 model_out["state"] = torch.zeros((o["obs"].shape[0], self.num_agents, o["obs"].shape[1]),
-                                                 dtype=o["obs"].dtype)
+                                                 dtype=o["obs"].dtype).to(
+                    input_dict[SampleBatch.OBS]["obs"].device)
 
             if "actions" not in input_dict:
                 input_dict["actions"] = input_dict["prev_actions"]
@@ -361,7 +363,6 @@ def get_policy_class(config: TrainerConfigDict) -> Optional[Type[Policy]]:
 
 
 def before_learn_on_batch(multi_agent_batch, policies, train_batch_size):
-
     other_agent_next_action_dict = {}
     all_agent_next_action = []
     for pid, policy in policies.items():
@@ -374,7 +375,7 @@ def before_learn_on_batch(multi_agent_batch, policies, train_batch_size):
                 other_agent_next_action_dict[i] = []
 
         policy_batch = multi_agent_batch.policy_batches[pid]
-        target_policy_model = policy.target_model.policy_model
+        target_policy_model = policy.target_model.policy_model.to(policy.device)
         next_obs = policy_batch["new_obs"]
 
         input_dict = {"obs": {}}

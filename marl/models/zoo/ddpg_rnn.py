@@ -210,7 +210,6 @@ class DDPG_RNN(TorchRNN, nn.Module):
     @override(TorchRNN)
     def forward_rnn(self, obs_inputs, action_inputs, state_inputs, opp_action_inputs, state, seq_lens):
         # Extract the available actions tensor from the observation.
-
         # Compute the unmasked logits.
         if self.custom_config["algorithm"] in ["maddpg"]:
             # currently we do not support CNN in MADDPG
@@ -228,7 +227,6 @@ class DDPG_RNN(TorchRNN, nn.Module):
                         state_x_ls.append(state_x)
                     state_x = torch.cat(state_x_ls, -1)
                     x = torch.cat((state_x, action_inputs, opp_action_inputs.reshape(B, L, -1)), -1)
-
 
             else:
                 x = self.encoder(obs_inputs)

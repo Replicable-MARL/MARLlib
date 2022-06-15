@@ -361,8 +361,8 @@ def before_learn_on_batch(multi_agent_batch, policies, train_batch_size):
                 other_agent_next_target_dict[i] = []
 
         policy_batch = multi_agent_batch.policy_batches[pid]
-        target_policy_model = policy.target_model.policy_model
-        target_q_model = policy.target_model.q_model
+        target_policy_model = policy.target_model.policy_model.to(policy.device)
+        target_q_model = policy.target_model.q_model.to(policy.device)
 
         next_obs = policy_batch["new_obs"]
         input_dict = {"obs": {}}
