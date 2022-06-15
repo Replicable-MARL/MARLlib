@@ -1,7 +1,7 @@
 
 
 <div align="center">
-<img src=image/logo2-1.png width=70% />
+<img src=image/logo1.png width=70% />
 </div>
 
 # MARLlib: A benchmark for multi-agent reinforcement learning
