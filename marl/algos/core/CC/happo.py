@@ -169,7 +169,7 @@ def happo_surrogate_loss(
         prev_value_fn_out = train_batch[SampleBatch.VF_PREDS] #
         value_fn_out = model.value_function()  # same as values
         vf_loss1 = torch.pow(
-            value_fn_out - train_batch[Postprocessing.VALUE_TARGETS], 2.0).to(device=get_device())
+            value_fn_out.to(device=get_device()) - train_batch[Postprocessing.VALUE_TARGETS].to(device=get_device()), 2.0)
         vf_clipped = (prev_value_fn_out + torch.clamp(
             value_fn_out - prev_value_fn_out, -policy.config["vf_clip_param"],
             policy.config["vf_clip_param"])).to(device=get_device())
