@@ -1,28 +1,13 @@
-from ray.rllib.utils.framework import try_import_tf, try_import_torch, get_variable
+from ray.rllib.utils.framework import try_import_torch
 import numpy as np
-from functools import partial
 from ray.rllib.policy.sample_batch import SampleBatch
-from ray.rllib.utils.torch_ops import explained_variance, sequence_mask
+from ray.rllib.utils.torch_ops import sequence_mask
 from torch.nn.utils import parameters_to_vector, vector_to_parameters
-from marl.algos.utils.get_hetero_info import (
-    get_global_name,
-    contain_global_obs,
-    state_name,
-    global_state_name,
-    TRAINING,
-    POLICY_ID,
-    MODEL,
-    ObjHandler,
-)
-from ray.rllib.evaluation.postprocessing import discount_cumsum, Postprocessing
-from icecream import ic
-import ctypes
-import _ctypes
+from marl.algos.utils.get_hetero_info import get_global_name
+from marl.algos.utils.setup_utils import get_device
+
 
 torch, nn = try_import_torch()
-
-
-DEVICE = 'cpu'
 
 
 class HATRPOUpdator:
@@ -62,11 +47,6 @@ class HATRPOUpdator:
 
     def update_advantage(self, train_batch, agent_id, m_advantage):
 
-        # model_id = int(train_batch[get_global_name(MODEL, agent_id)][0])
-        # assert model_id > 0, 'model is must > 0, if set to 0 means no model at all'
-        # current_model = ObjHandler.retrieve(model_id)
-        # print('recovery model success!')
-
         current_action_logits = train_batch[
             get_global_name(SampleBatch.ACTION_DIST_INPUTS, agent_id)
         ]
@@ -81,39 +61,7 @@ class HATRPOUpdator:
 
         obs = train_batch[get_global_name(SampleBatch.OBS, agent_id)]
 
-        # train_batch_for_trpo_update = SampleBatch(
-        #     obs=obs,
-        #     seq_lens=train_batch[SampleBatch.SEQ_LENS],
-        #     actions=actions,
-        #     action_logp=old_action_log_dist,
-        #     action_dist_inputs=train_batch[get_global_name(SampleBatch.ACTION_DIST_INPUTS, agent_id)]
-        # )
-
-        # train_batch_for_trpo_update.is_training = bool(train_batch[get_global_name(TRAINING, agent_id)][0])
-
-        # i = 0
-        #
-        # while state_name(i) in train_batch:
-        #     agent_state_name = global_state_name(i, agent_id)
-        #     train_batch_for_trpo_update[state_name(i)] = train_batch[agent_state_name]
-        #     i += 1
-
         importance_sampling = torch.exp(current_action_dist.logp(actions) - old_action_log_dist)
-
-        # if importance_sampling.grad_fn is None:
-        # agent_policy_id = int(train_batch[get_global_name(POLICY_ID, agent_id)][0])
-        # assert agent_policy_id > 0, 'policy id is must > 0, if set to 0 means no policy at all'
-        #
-        # agent_policy = ObjHandler.retrieve(agent_policy_id)
-        # print('recovery policy success!')
-
-        # updator = agent_policy.trpo_updator
-
-        # update updator
-        # updator.train_batch = train_batch_for_trpo_update
-        # updator.model = current_model
-        # updator.adv_targ.data = m_advantage.data
-        # updator.initialize_policy_loss = updator.loss
 
         m_advantage = m_advantage * importance_sampling
 
@@ -141,7 +89,7 @@ class TrustRegionUpdator:
         self.initialize_critic_loss = initialize_critic_loss
         self.stored_actor_parameters = None
 
-        self.device = DEVICE
+        self.device = get_device()
 
     @property
     def actor_parameters(self):

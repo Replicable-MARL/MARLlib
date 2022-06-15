@@ -1,6 +1,14 @@
 from ray.rllib.agents.ppo.ppo_torch_policy import PPOTorchPolicy, ValueNetworkMixin, KLCoeffMixin
 from ray.rllib.policy.torch_policy import LearningRateSchedule, EntropyCoeffSchedule
 import re
+import torch
+
+
+def get_device():
+    if torch.cuda.is_available():
+        return f'cuda:{torch.cuda.current_device()}'
+    else:
+        return 'cpu'
 
 
 def get_agent_num(policy):
