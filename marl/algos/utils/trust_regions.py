@@ -155,7 +155,8 @@ class TrustRegionUpdator:
         for grad in grads:
             if grad is None:
                 continue
-            grad_flatten.append(grad.view(-1))
+            # grad_flatten.append(grad.view(-1))
+            grad_flatten.append(grad.reshape(-1))
         grad_flatten = torch.cat(grad_flatten)
         return grad_flatten
 
