@@ -1,5 +1,5 @@
 
-### Part V. State of the Art
+## State of the Art
 
 **[B]** Basic
 **[S]** Information Sharing
@@ -232,9 +232,9 @@
 [comment]: <> (      I haven't checked whether future ray version have fixed this issue.)
 
 
-## Acknowledgement
+[comment]: <> (## Acknowledgement)
 
-Task like MAgent and MPE is modified and documented by PettingZoo. 
+[comment]: <> (Task like MAgent and MPE is modified and documented by PettingZoo. )
 
 
 ----------------------------

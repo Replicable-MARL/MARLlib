@@ -130,7 +130,7 @@ Here is a chart describing the characteristics of each algorithm:
 
 | Algorithm | Support Task Mode | Need Global State | Action | Learning Mode  | Type |
 | ----------- | ----------- | ----------- | ----------- | ----------- | ----------- |
-| IQL  | Mixed | No | Discrete | Independent Learning | Off Policy
+| IQL*  | Mixed | No | Discrete | Independent Learning | Off Policy
 | [PG](https://papers.nips.cc/paper/1713-policy-gradient-methods-for-reinforcement-learning-with-function-approximation.pdf)  | Mixed | No | Both | Independent Learning | On Policy
 | [A2C](https://arxiv.org/abs/1602.01783)  | Mixed | No | Both | Independent Learning | On Policy
 | [DDPG](https://arxiv.org/abs/1509.02971)  | Mixed | No | Continuous | Independent Learning | Off Policy
@@ -138,8 +138,8 @@ Here is a chart describing the characteristics of each algorithm:
 | [PPO](https://arxiv.org/abs/1707.06347)  | Mixed | No | Both | Independent Learning | On Policy
 | [COMA](https://ojs.aaai.org/index.php/AAAI/article/download/11794/11653)  | Mixed | Yes | Both | Centralized Critic | On Policy
 | [MADDPG](https://arxiv.org/abs/1706.02275)  | Mixed | Yes | Continuous | Centralized Critic | Off Policy
-| MAA2C  | Mixed | Yes | Both | Centralized Critic | On Policy
-| MATRPO  | Mixed | Yes | Both | Centralized Critic | On Policy
+| MAA2C*  | Mixed | Yes | Both | Centralized Critic | On Policy
+| MATRPO*  | Mixed | Yes | Both | Centralized Critic | On Policy
 | [MAPPO](https://arxiv.org/abs/2103.01955)  | Mixed | Yes | Both | Centralized Critic | On Policy
 | [HATRPO](https://arxiv.org/abs/2109.11251)  | Cooperative | Yes | Both | Centralized Critic | On Policy
 | [HAPPO](https://arxiv.org/abs/2109.11251)  | Cooperative | Yes | Both | Centralized Critic | On Policy
@@ -147,7 +147,11 @@ Here is a chart describing the characteristics of each algorithm:
 | [QMIX](https://arxiv.org/abs/1803.11485)  | Cooperative | Yes | Discrete | Value Decomposition | Off Policy
 | [FACMAC](https://arxiv.org/abs/2003.06709)  | Cooperative | Yes | Continuous | Value Decomposition | Off Policy
 | [VDAC](https://arxiv.org/abs/2007.12306)  | Cooperative | Yes | Both | Value Decomposition | On Policy
-| VDPPO | Cooperative | Yes | Both | Value Decomposition | On Policy
+| VDPPO*| Cooperative | Yes | Both | Value Decomposition | On Policy
+
+*IQL* is the multi-agent version of Q learning.
+*MAA2C* and *MATRPO* are the centralized version of A2C and TRPO.
+*VDPPO* is the value decomposition version of PPO.
 
 **Current Task & Available algorithm mapping**: Y for available, N for not suitable, P for partially available on some scenarios.
 (Note: in our code, independent algorithms may not have **I** as prefix. For instance, PPO = IPPO)
@@ -165,7 +169,7 @@ Here is a chart describing the characteristics of each algorithm:
 | GRF         | Y | Y | Y | N | Y | Y | Y | N | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
 | Hanabi      | Y | Y | Y | N | Y | Y | Y | N | Y | Y | Y | Y | Y | N | N | N | N | N |
 
-You can find a comprehensive list of existing MARL algorithms in different environments  [here](https://github.com/Replicable-MARL/MARLlib/tree/main/envs/base_env).
+You can find a comprehensive list of existing MARL algorithms in different environments  [here](https://github.com/Replicable-MARL/MARLlib/tree/main/envs).
 
 ## Installation
 
