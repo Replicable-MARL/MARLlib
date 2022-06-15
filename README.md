@@ -4,34 +4,49 @@
 <img src=image/logo2-1.png width=70% />
 </div>
 
+# MARLlib: A benchmark for multi-agent reinforcement learning
+
+[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/Replicable-MARL/MARLlib/blob/main/LICENSE)
+
 **Multi-Agent RLlib (MARLlib)** is a *MARL benchmark* based on [**Ray**](https://github.com/ray-project/ray) and one of its toolkits [**RLlib**](https://github.com/ray-project/ray/tree/master/rllib). 
 It provides MARL research community a unified platform for developing and evaluating the new ideas in various multi-agent environments.
 There are four core features of **MARLlib**. 
 
-- it collects most of the existing MARL algorithms that are widely acknowledged by the community and unifies them under one framework. 
+- it collects most of the existing MARL algorithms widely acknowledged by the community and unifies them under one framework. 
 - it gives a solution that enables different multi-agent environments using the same interface to interact with the agents.
-- it guarantees great efficiency in both the training and sampling process.
-- it provides trained results including learning curves and pretrained models specific to each task and each algorithm's combination, with finetuned hyper-parameters to guarantee credibility. 
+- it guarantees excellent efficiency in both the training and sampling process.
+- it provides trained results, including learning curves and pretrained models specific to each task and algorithm's combination, with finetuned hyper-parameters to guarantee credibility. 
+
+<div align="center">
+<img src=image/overview.png width=95% />
+</div>
 
 **Project Website**: https://sites.google.com/view/marllib/home
 
 
---------------------------------------------------------------------------------
-The README is organized as follows:
-- [**I. Overview**](#Part-I.-Overview)
-- [**II. Environment**](#Part-II.-Environment)
-- [**III. Algorithm**](#Part-III.-Algorithm)
-- [**IV. Getting started & Examples**](#Part-VI.-Getting-started)
-- [**V. Contribute New Environment**]()
-- [**VI. Bug Shooting**](#Part-VI.-Bug-Shooting)
+[comment]: <> (--------------------------------------------------------------------------------)
 
-### Part I. Overview
+[comment]: <> (The README is organized as follows:)
 
-We collected most of the existing multi-agent environment and multi-agent reinforcement learning algorithms and unify them under one framework based on [**Ray**](https://github.com/ray-project/ray) 's [**RLlib**](https://github.com/ray-project/ray/tree/master/rllib) to boost the MARL research. 
+[comment]: <> (- [**I. Overview**]&#40;#Part-I.-Overview&#41;)
 
-The common MARL baselines include **independence learning (IQL, A2C, DDPG, TRPO, PPO)**, **centralized critic learning (COMA, MADDPG, MAPPO, HATRPO)**, and **value decomposition (QMIX, VDN, FACMAC, VDA2C)** are all implemented.
+[comment]: <> (- [**II. Environment**]&#40;#Part-II.-Environment&#41;)
 
-The popular MARL environments like **SMAC, MaMujoco, Google Research Football** are all provided with a unified interface.
+[comment]: <> (- [**III. Algorithm**]&#40;#Part-III.-Algorithm&#41;)
+
+[comment]: <> (- [**IV. Getting started & Examples**]&#40;#Part-VI.-Getting-started&#41;)
+
+[comment]: <> (- [**V. Contribute New Environment**]&#40;&#41;)
+
+[comment]: <> (- [**VI. Bug Shooting**]&#40;#Part-VI.-Bug-Shooting&#41;)
+
+## Overview
+
+We collected most of the existing multi-agent environment and multi-agent reinforcement learning algorithms and unified them under one framework based on [**Ray**](https://github.com/ray-project/ray) 's [**RLlib**](https://github.com/ray-project/ray/tree/master/rllib) to boost the MARL research. 
+
+The MARL baselines include **independence learning (IQL, A2C, DDPG, TRPO, PPO)**, **centralized critic learning (COMA, MADDPG, MAPPO, HATRPO)**, and **value decomposition (QMIX, VDN, FACMAC, VDA2C)** are all implemented.
+
+Popular environments like **SMAC, MaMujoco, and Google Research Football** are provided with a unified interface.
 
 The algorithm code and environment code are fully separated. Changing the environment needs no modification on the algorithm side and vice versa.
 
@@ -47,20 +62,22 @@ Here we provide a table for comparison of MARLlib and before benchmarks.
 | [MAlib](https://github.com/sjtu-marl/malib) | [![GitHub stars](https://img.shields.io/github/stars/sjtu-marl/malib)](https://github.com/hijkzzz/sjtu-marl/malib/stargazers) | SP | 8 | SP | 9 | :heavy_check_mark: |  |  | * | ![GitHub last commit](https://img.shields.io/github/last-commit/sjtu-marl/malib?label=last%20update)
 |    [MARLlib](https://github.com/Replicable-MARL/MARLlib)|[![GitHub stars](https://img.shields.io/github/stars/Replicable-MARL/MARLlib)](https://github.com/Replicable-MARL/MARLlib/stargazers) |  CP+CL+CM+MI  |       10      |    IL+VD+CC    |        18        |         :heavy_check_mark:         |           :heavy_check_mark:           |           :heavy_check_mark:         |            [Ray/RLlib](https://docs.ray.io/en/releases-1.8.0/)            | ![GitHub last commit](https://img.shields.io/github/last-commit/Replicable-MARL/MARLlib?label=last%20update) |
 
-CP, CL, CM, and MI represent for cooperative, collaborative, competitive, and mixed task learning mode respectively. 
-IL, VD, and CC represent for independent learning, value decomposition, and centralized critic categorization. SP represents for self-play. 
+CP, CL, CM, and MI represent cooperative, collaborative, competitive, and mixed task learning modes. 
+IL, VD, and CC represent independent learning, value decomposition, and centralized critic categorization. SP represents self-play. 
 Comm represents communication-based learning. 
 Asterisk denotes that the benchmark uses its framework.
 
 
+
 The tutorial of RLlib can be found at this [link](https://docs.ray.io/en/releases-1.8.0/).
 Fast examples can be found at this [link](https://docs.ray.io/en/releases-1.8.0/rllib-examples.html). 
-These will help you easily dive into RLlib.
+These will help you quickly dive into RLlib.
 
-We hope everyone interested in MARL can be benefited from MARLlib.
+We hope MARLlib can benefit everyone interested in RL/MARL.
 
 
-### Part II. Environment
+
+## Environment
 
 #### Supported Multi-agent Environments / Tasks
 
@@ -81,7 +98,7 @@ Most of the popular environment in MARL research has been incorporated in this b
 
 Each environment has a readme file, standing as the instruction for this task, talking about env settings, installation, and some important notes.
 
-### Part III. Algorithm
+## Algorithm
 
 We provide three types of MARL algorithms as our baselines including:
 
@@ -148,7 +165,7 @@ Here is a chart describing the characteristics of each algorithm:
 | GRF         | Y | Y | Y | N | Y | Y | Y | N | Y | Y | Y | Y | Y | Y | Y | Y | Y | Y |
 | Hanabi      | Y | Y | Y | N | Y | Y | Y | N | Y | Y | Y | Y | Y | N | N | N | N | N |
 
-### Part IV. Getting started
+## Installation
 
 Install Ray 
 ```
@@ -166,11 +183,14 @@ python add_patch.py
 
 **Attention**: Above is the common installation. Each environment needs extra dependency. Please read the installation instruction in envs/base_env/install.
 
-Examples
+## Examples
+
 ```
 python marl/main.py --algo_config=MAPPO [--finetuned] --env-config=smac with env_args.map_name=3m
 ```
 --finetuned is optional, force using the finetuned hyperparameter 
+
+## Navigation
 
 We provide an introduction to the code directory to help you get familiar with the codebase:
 
@@ -198,26 +218,25 @@ This picture is in image/code-MARL.png.png
 
 This picture is in image/code-ENVS.png.png
 
-### Part V. Contribute New Environment
+## Contribute
 
-MARLlib is designed to be friendly to incorporate new environment. Besides the ten we already implemented, we support nearly all kinds of MARL environments.
-Before the contribution, you need to know:
+MARLlib is friendly to incorporating a new environment. Besides the ten we already implemented, we support almost all kinds of MARL environments.
+Before contributing new environment, you must know:
 
-
-Things you have to do:
+Things you ought to cover:
 
 - provide a new environment interface python file, follow the style of [MARLlib/envs/base_env](https://github.com/Replicable-MARL/MARLlib/tree/main/envs/base_env)
 - provide a corresponding config yaml file, follow the style of [MARLlib/envs/base_env/config](https://github.com/Replicable-MARL/MARLlib/tree/main/envs/base_env/config)
 - provide a corresponding instruction readme file, follow the style of [MARLlib/envs/base_env/install](https://github.com/Replicable-MARL/MARLlib/tree/main/envs/base_env/install)
 
-Things you do not have to do:
+Things not essential:
 
-- modify the MARLlib data processing pipeline
-- provide a unique runner or controller   
-- worry about the data logging 
+- change the MARLlib data processing pipeline
+- provide a unique runner or controller specific to the environment 
+- concern about the data logging 
 
-As the ten environments we already included  have covered such a great diversity in action space,  observation space, agent-env interact style, task mode, additional information like action mask, etc. 
-The best practice to incorporate your own environment is find an existing similar one and provide a same interface.
+The ten environments we already contained have covered great diversity in action space,  observation space, agent-env interaction style, task mode, additional information like action mask, etc. 
+The best practice to incorporate your environment is to find an existing similar one and provide the same interface.
 
 ### Part VI. Bug Shooting
 
