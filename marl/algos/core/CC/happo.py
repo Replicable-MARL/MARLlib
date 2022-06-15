@@ -28,6 +28,7 @@ from marl.algos.utils.get_hetero_info import (
     value_normalizer,
 )
 from ray.rllib.examples.centralized_critic import CentralizedValueMixin
+from marl.algos.utils.setup_utils import get_device
 
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
@@ -168,14 +169,14 @@ def happo_surrogate_loss(
         prev_value_fn_out = train_batch[SampleBatch.VF_PREDS] #
         value_fn_out = model.value_function()  # same as values
         vf_loss1 = torch.pow(
-            value_fn_out - train_batch[Postprocessing.VALUE_TARGETS], 2.0)
-        vf_clipped = prev_value_fn_out + torch.clamp(
+            value_fn_out.to(device=get_device()) - train_batch[Postprocessing.VALUE_TARGETS].to(device=get_device()), 2.0)
+        vf_clipped = (prev_value_fn_out + torch.clamp(
             value_fn_out - prev_value_fn_out, -policy.config["vf_clip_param"],
-            policy.config["vf_clip_param"])
+            policy.config["vf_clip_param"])).to(device=get_device())
         vf_loss2 = torch.pow(
-            vf_clipped - train_batch[Postprocessing.VALUE_TARGETS], 2.0)
-        vf_loss = torch.max(vf_loss1, vf_loss2)
-        mean_vf_loss = reduce_mean_valid(vf_loss)
+            vf_clipped.to(device=get_device()) - train_batch[Postprocessing.VALUE_TARGETS].to(device=get_device()), 2.0)
+        vf_loss = torch.max(vf_loss1, vf_loss2).to(device=get_device())
+        mean_vf_loss = reduce_mean_valid(vf_loss).to(device=get_device())
     # Ignore the value function.
     else:
         vf_loss = mean_vf_loss = 0.0
@@ -194,7 +195,8 @@ def happo_surrogate_loss(
     model.tower_stats["mean_policy_loss"] = mean_policy_loss
     model.tower_stats["mean_vf_loss"] = mean_vf_loss
     model.tower_stats["vf_explained_var"] = explained_variance(
-        train_batch[Postprocessing.VALUE_TARGETS], model.value_function())
+        train_batch[Postprocessing.VALUE_TARGETS].to(device=get_device()),
+        model.value_function())
     model.tower_stats["mean_entropy"] = mean_entropy
     model.tower_stats["mean_kl_loss"] = mean_kl_loss
 
