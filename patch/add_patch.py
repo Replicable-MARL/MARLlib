@@ -1,15 +1,17 @@
 import argparse
+from ast import arg
+from multiprocessing import pool
 import click
 import os
 import shutil
 import subprocess
 
 import ray
+import pommerman
 
 
-def do_link(file_path, force=False, local_path=None):
-    file_path = os.path.abspath(os.path.join(ray.__file__, f"../{file_path}"))
-
+def do_link(file_path, force=False, local_path=None, packagent=None):
+    file_path = os.path.abspath(os.path.join(packagent.__file__, f"../{file_path}"))
 
     # Infer local_path automatically.
     if local_path is None:
@@ -69,16 +71,26 @@ if __name__ == "__main__":
         "--yes", "-y", action="store_true", help="Don't ask for confirmation.")
     args = parser.parse_args()
 
+    # ray patch
     # execution TODO: modify xxx 
-    do_link("rllib/execution/replay_buffer.py", force=args.yes, local_path="./rllib/execution/replay_buffer.py")
-    do_link("rllib/execution/train_ops.py", force=args.yes, local_path="./rllib/execution/train_ops.py")
-    
+    do_link("rllib/execution/replay_buffer.py", force=args.yes, local_path="./rllib/execution/replay_buffer.py", packagent=ray)
+    do_link("rllib/execution/train_ops.py", force=args.yes, local_path="./rllib/execution/train_ops.py", packagent=ray)
+
     # models TODO: modify xxx 
-    do_link("rllib/models/preprocessors.py", force=args.yes, local_path="./rllib/models/preprocessors.py")
+    do_link("rllib/models/preprocessors.py", force=args.yes, local_path="./rllib/models/preprocessors.py", packagent=ray)
 
     # policy TODO: modify xxx 
-    do_link("rllib/policy/rnn_sequencing.py", force=args.yes, local_path="./rllib/policy/rnn_sequencing.py")
-    do_link("rllib/policy/torch_policy.py", force=args.yes, local_path="./rllib/policy/torch_policy.py")
+    do_link("rllib/policy/rnn_sequencing.py", force=args.yes, local_path="./rllib/policy/rnn_sequencing.py", packagent=ray)
+    do_link("rllib/policy/torch_policy.py", force=args.yes, local_path="./rllib/policy/torch_policy.py", packagent=ray)
+
+    # pommerman
+    do_link('graphics.py', force=args.yes, local_path='./pommerman_patch/graphics.py', packagent=pommerman)
+
+    do_link("__init__.py", force=args.yes, local_path='./pommerman_patch/__init__.py', packagent=pommerman)
+
+    do_link("forward_model.py", force=args.yes, local_path="./pommerman_patch/forward_model.py", packagent=pommerman)
+
+    do_link("envs/v0.py", force=args.yes, local_path="./pommerman_patch/v0.py", packagent=pommerman)
 
 
     print("finish soft link")
