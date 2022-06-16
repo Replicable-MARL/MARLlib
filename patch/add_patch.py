@@ -1,6 +1,4 @@
 import argparse
-from ast import arg
-from multiprocessing import pool
 import click
 import os
 import shutil
