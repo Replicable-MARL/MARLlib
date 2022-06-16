@@ -1,16 +1,20 @@
 from ray import tune
 from ray.tune.utils import merge_dicts
 from ray.tune import CLIReporter
+from marl.algos.utils.setup_utils import AlgVar
 from marl.algos.core.IL.ddpg import DDPGRNNTrainer as DDPGTrainer
 
 
 def run_ddpg(config_dict, common_config, env_dict, stop):
-    train_batch_size = config_dict["algo_args"]["batch_episode"]
-    buffer_size = config_dict["algo_args"]["buffer_size"]
+    _param = AlgVar(config_dict)
+
+    train_batch_size = _param["batch_episode"]
+    buffer_size = _param["buffer_size"]
     episode_limit = env_dict["episode_limit"]
     algorithm = config_dict["algorithm"]
-    batch_mode = config_dict["algo_args"]["batch_mode"]
-    lr = config_dict["algo_args"]["lr"]
+    batch_mode = _param["batch_mode"]
+    lr = _param["lr"]
+
     learning_starts = episode_limit * train_batch_size
 
     config = {
@@ -29,13 +33,17 @@ def run_ddpg(config_dict, common_config, env_dict, stop):
     }
     config.update(common_config)
 
+    map_name = config_dict["env_args"]["map_name"]
+    arch = config_dict["model_arch_args"]["core_arch"]
+    RUNNING_NAME = '_'.join([algorithm, arch, map_name])
 
-    results = tune.run(DDPGTrainer, name=algorithm + "_" + config_dict["model_arch_args"]["core_arch"] + "_" +
-                                         config_dict["env_args"][
-                                             "map_name"],
-                       stop=stop,
-                       config=config,
-                       verbose=1,
-                       progress_reporter=CLIReporter())
+    results = tune.run(
+        DDPGTrainer,
+        name=RUNNING_NAME,
+        stop=stop,
+        config=config,
+        verbose=1,
+        progress_reporter=CLIReporter()
+    )
 
     return results

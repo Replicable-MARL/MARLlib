@@ -7,6 +7,7 @@ from ray.rllib.utils.annotations import override
 from ray.rllib.utils.framework import try_import_tf, try_import_torch, \
     TensorType
 from ray.rllib.policy.rnn_sequencing import add_time_dimension
+from functools import reduce
 
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
@@ -65,7 +66,12 @@ class Base_RNN(TorchRNN, nn.Module):
             raise ValueError()
 
         self.input_dim = input_dim
+
+        # obs encoder
         self.encoder = nn.Sequential(
+            *layers
+        )
+        self.vf_encoder = nn.Sequential(
             *layers
         )
 
@@ -78,9 +84,10 @@ class Base_RNN(TorchRNN, nn.Module):
             self.rnn = nn.LSTM(input_dim, self.hidden_state_size, batch_first=True)
         else:
             raise ValueError()
+
         # action branch and value branch
         self.action_branch = nn.Linear(self.hidden_state_size, num_outputs)
-        self.value_branch = nn.Linear(self.hidden_state_size, 1)
+        self.value_branch = nn.Linear(self.input_dim, 1)
 
         # Holds the current "base" output (before logits layer).
         self._features = None
@@ -89,6 +96,8 @@ class Base_RNN(TorchRNN, nn.Module):
         self.n_agents = self.custom_config["num_agents"]
         self.q_flag = False
 
+        self.actors = [self.encoder, self.rnn, self.action_branch]
+        self.actor_initialized_parameters = self.actor_parameters()
 
     @override(ModelV2)
     def get_initial_state(self):
@@ -109,10 +118,20 @@ class Base_RNN(TorchRNN, nn.Module):
         assert self._features is not None, "must call forward() first"
         B = self._features.shape[0]
         L = self._features.shape[1]
-        if self.q_flag:
-            return torch.reshape(self.value_branch(self._features), [B * L, -1])
+        # Compute the unmasked logits.
+        if "conv_layer" in self.custom_config["model_arch_args"]:
+            x = self.inputs.reshape(-1, self.inputs.shape[2], self.inputs.shape[3], self.inputs.shape[4]).permute(0, 3,
+                                                                                                                  1, 2)
+            x = self.vf_encoder(x)
+            x = torch.mean(x, (2, 3))
+            x = x.reshape(self.inputs.shape[0], self.inputs.shape[1], -1)
         else:
-            return torch.reshape(self.value_branch(self._features), [-1])
+            x = self.vf_encoder(self.inputs)
+
+        if self.q_flag:
+            return torch.reshape(self.value_branch(x), [B * L, -1])
+        else:
+            return torch.reshape(self.value_branch(x), [-1])
 
     @override(ModelV2)
     def forward(self, input_dict: Dict[str, TensorType],
@@ -132,8 +151,6 @@ class Base_RNN(TorchRNN, nn.Module):
 
         if isinstance(seq_lens, np.ndarray):
             seq_lens = torch.Tensor(seq_lens).int()
-        # if seq_lens.shape[0] == 0:
-        #     print(1)
         max_seq_len = flat_inputs.shape[0] // seq_lens.shape[0]
 
         self.time_major = self.model_config.get("_time_major", False)
@@ -153,7 +170,7 @@ class Base_RNN(TorchRNN, nn.Module):
 
     @override(TorchRNN)
     def forward_rnn(self, inputs, state, seq_lens):
-        # Extract the available actions tensor from the observation.
+        self.inputs = inputs
 
         # Compute the unmasked logits.
         if "conv_layer" in self.custom_config["model_arch_args"]:
@@ -180,3 +197,24 @@ class Base_RNN(TorchRNN, nn.Module):
 
         else:
             raise ValueError("rnn core_arch wrong: {}".format(self.custom_config["model_arch_args"]["core_arch"]))
+
+    def actor_parameters(self):
+        # return [list(m.parameters()) for m in [self.fc1, self.gru, self.action_branch]]
+        return reduce(lambda x, y: x + y, map(lambda p: list(p.parameters()), self.actors))
+        # return self.fc1.variables() + self.gru.variables() + self.action_branch.variables()
+        # return self.fc1.parameters() +
+
+    def critic_parameters(self):
+        return list(self.value_branch.parameters())
+
+    def sample(self, obs, training_batch, sample_num):
+        indices = torch.multinomial(torch.arange(len(obs)), sample_num, replacement=True)
+        # _input = torch.multinomial(obs, sample_num, replacement=True)
+        training_batch = training_batch.copy()
+        training_batch['obs']['obs'] = training_batch['obs']['obs'][indices]
+        if 'action_mask' in training_batch['obs']:
+            training_batch['obs']['action_mask'] = training_batch['obs']['action_mask'][indices]
+
+        return self(training_batch)
+        # output, new_state = self.forward_rnn(inputs, state, seq_lens)
+        # output = torch.reshape(output, [-1, self.num_outputs])

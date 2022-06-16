@@ -3,60 +3,60 @@ ENV_REGISTRY = {}
 try:
     from envs.base_env.mpe import RllibMPE
     ENV_REGISTRY["mpe"] = RllibMPE
-except:
-    ENV_REGISTRY["mpe"] = False
+except Exception as e:
+    ENV_REGISTRY["mpe"] = str(e)
 
 try:
     from envs.base_env.mamujoco import RllibMAMujoco
     ENV_REGISTRY["mamujoco"] = RllibMAMujoco
-except:
-    ENV_REGISTRY["mamujoco"] = False
+except Exception as e:
+    ENV_REGISTRY["mamujoco"] = str(e)
 
 try:
     from envs.base_env.smac import RLlibSMAC
     ENV_REGISTRY["smac"] = RLlibSMAC
-except:
-    ENV_REGISTRY["smac"] = False
+except Exception as e:
+    ENV_REGISTRY["smac"] = str(e)
 
 try:
     from envs.base_env.football import RllibGFootball
     ENV_REGISTRY["football"] = RllibGFootball
-except:
-    ENV_REGISTRY["football"] = False
+except Exception as e:
+    ENV_REGISTRY["football"] = str(e)
 
 try:
     from envs.base_env.magent import RllibMAgent
     ENV_REGISTRY["magent"] = RllibMAgent
-except:
-    ENV_REGISTRY["magent"] = False
+except Exception as e:
+    ENV_REGISTRY["magent"] = str(e)
 
 try:
     from envs.base_env.rware import RllibRWARE
     ENV_REGISTRY["rware"] = RllibRWARE
-except:
-    ENV_REGISTRY["rware"] = False
+except Exception as e:
+    ENV_REGISTRY["rware"] = str(e)
 
 try:
     from envs.base_env.lbf import RllibLBF
     ENV_REGISTRY["lbf"] = RllibLBF
-except:
-    ENV_REGISTRY["lbf"] = False
+except Exception as e:
+    ENV_REGISTRY["lbf"] = str(e)
 
 try:
     from envs.base_env.pommerman import RllibPommerman
     ENV_REGISTRY["pommerman"] = RllibPommerman
-except:
-    ENV_REGISTRY["pommerman"] = False
+except Exception as e:
+    ENV_REGISTRY["pommerman"] = str(e)
 
 try:
     from envs.base_env.hanabi import RLlibHanabi
     ENV_REGISTRY["hanabi"] = RLlibHanabi
-except:
-    ENV_REGISTRY["hanabi"] = False
+except Exception as e:
+    ENV_REGISTRY["hanabi"] = str(e)
 
 try:
     from envs.base_env.metadrive import RllibMetaDrive
     ENV_REGISTRY["metadrive"] = RllibMetaDrive
-except:
-    ENV_REGISTRY["metadrive"] = False
+except Exception as e:
+    ENV_REGISTRY["metadrive"] = str(e)
 

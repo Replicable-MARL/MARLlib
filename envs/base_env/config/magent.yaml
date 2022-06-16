@@ -3,7 +3,8 @@ env: magent
 env_args:
   map_name: "adversarial_pursuit" # others can be found in IL/envs/magent_rllib.py
   minimap_mode: True
+  max_cycles: 250
 
 mask_flag: False
 global_state_flag: True
-opp_action_in_cc: False
+opp_action_in_cc: True

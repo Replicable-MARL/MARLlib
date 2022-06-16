@@ -563,7 +563,9 @@ DDPG_RNN_DEFAULT_CONFIG = DDPGTrainer.merge_trainer_configs(
         "burn_in": 0,
         "replay_sequence_length": -1,
         "Q_model": {},
-        "policy_model": {}
+        "policy_model": {},
+        "normalize_actions": False,
+        "clip_actions": False,
     },
     _allow_unknown_configs=True,
 )

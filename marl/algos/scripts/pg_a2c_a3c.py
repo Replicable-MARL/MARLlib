@@ -1,16 +1,21 @@
 from ray import tune
 from ray.tune.utils import merge_dicts
 from ray.tune import CLIReporter
+from marl.algos.utils.log_dir_util import available_local_dir
+from marl.algos.utils.setup_utils import AlgVar
 
 
 def run_pg_a2c_a3c(config_dict, common_config, env_dict, stop):
-    train_batch_size = config_dict["algo_args"]["batch_episode"] * env_dict["episode_limit"]
+    _param = AlgVar(config_dict)
+
+    train_batch_size = _param["batch_episode"] * env_dict["episode_limit"]
     episode_limit = env_dict["episode_limit"]
 
+
     config = {
-        "batch_mode": config_dict["algo_args"]["batch_mode"],
+        "batch_mode": _param["batch_mode"],
         "train_batch_size": train_batch_size,
-        "lr": config_dict["algo_args"]["lr"],
+        "lr": _param["lr"],
         "model": {
             "custom_model": "Base_Model",
             "max_seq_len": episode_limit,
@@ -18,15 +23,23 @@ def run_pg_a2c_a3c(config_dict, common_config, env_dict, stop):
         },
     }
 
-    if "entropy_coeff" in config_dict["algo_args"]:
-        config["entropy_coeff"] = config_dict["algo_args"]["entropy_coeff"]
+    if "entropy_coeff" in _param:
+        config["entropy_coeff"] = _param["entropy_coeff"]
 
     config.update(common_config)
 
-    results = tune.run(config_dict["algorithm"].upper(),
-                       name=config_dict["algorithm"] + "_" + config_dict["model_arch_args"]["core_arch"] + "_" +
-                            config_dict["env_args"][
-                                "map_name"], stop=stop, config=config,
-                       verbose=1, progress_reporter=CLIReporter())
+    algorithm = config_dict["algorithm"]
+    map_name = config_dict["env_args"]["map_name"]
+    arch = config_dict["model_arch_args"]["core_arch"]
+    RUNNING_NAME = '_'.join([algorithm, arch, map_name])
+
+    results = tune.run(
+        algorithm.upper(),
+        name=RUNNING_NAME,
+        stop=stop, config=config,
+        local_dir=available_local_dir,
+        verbose=1,
+        progress_reporter=CLIReporter()
+    )
 
     return results

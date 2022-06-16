@@ -79,7 +79,7 @@ class RllibMAMujoco(MultiAgentEnv):
         self.action_space = self.env.action_space[0]
         self.state_dim = self.env.wrapped_env.observation_space.shape[0]
         self.observation_space = GymDict({
-            "obs": Box(-100.0, 100.0, shape=(self.env.obs_size,), dtype=self.env.observation_space[0].dtype),
+            "obs": Box(-10000.0, 10000.0, shape=(self.env.obs_size,), dtype=self.env.observation_space[0].dtype),
             "state": Box(-100.0, 100.0, shape=(self.state_dim,), dtype=self.env.observation_space[0].dtype),
         })
 

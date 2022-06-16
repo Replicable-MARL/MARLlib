@@ -113,6 +113,7 @@ def pad_batch_to_sequences_of_same_size(
                 isinstance(v, np.ndarray):
             feature_keys_.append(k)
 
+
     feature_sequences, initial_states, seq_lens = \
         chop_into_sequences(
             feature_columns=[batch[k] for k in feature_keys_],
@@ -270,7 +271,7 @@ def chop_into_sequences(*,
         max_seq_len = max(seq_lens) + _extra_padding
 
     feature_sequences = []
-    for f in feature_columns:
+    for i, f in enumerate(feature_columns):
         # Save unnecessary copy.
         if not isinstance(f, np.ndarray):
             f = np.array(f)
