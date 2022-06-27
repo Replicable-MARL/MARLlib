@@ -1,7 +1,7 @@
 env: football
 
 env_args:
-  map_name: "academy_empty_goal" # other available maps can be found in football.py
+  map_name: "academy_pass_and_shoot_with_keeper" # other available maps can be found in football.py
   logdir: ""
   render: False
   dump_frequency: 0
