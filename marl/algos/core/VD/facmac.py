@@ -1,5 +1,5 @@
 from marl.algos.core.IL.ddpg import *
-from marl.algos.utils.postprocessing import q_value_mixing, MixingQValueMixin
+from marl.algos.utils.mixing_Q import q_value_mixing, MixingQValueMixin
 from ray.rllib.agents.ddpg.ddpg_torch_policy import TargetNetworkMixin, ComputeTDErrorMixin
 from ray.rllib.utils.torch_ops import convert_to_torch_tensor
 from ray.rllib.utils.numpy import convert_to_numpy

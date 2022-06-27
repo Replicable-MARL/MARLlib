@@ -1,5 +1,5 @@
 from marl.algos.core.IL.ddpg import *
-from marl.algos.utils.postprocessing import centralized_critic_q, CentralizedQValueMixin
+from marl.algos.utils.centralized_Q import centralized_critic_q, CentralizedQValueMixin
 from ray.rllib.agents.ddpg.ddpg_torch_policy import TargetNetworkMixin, ComputeTDErrorMixin
 from ray.rllib.utils.torch_ops import convert_to_torch_tensor
 from ray.rllib.utils.numpy import convert_to_numpy

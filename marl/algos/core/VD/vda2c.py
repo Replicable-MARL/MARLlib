@@ -12,7 +12,7 @@ from ray.rllib.utils.torch_ops import convert_to_torch_tensor
 from ray.rllib.agents.a3c.a3c_torch_policy import A3CTorchPolicy
 from ray.rllib.agents.a3c.a2c import A2C_DEFAULT_CONFIG as A2C_CONFIG, A2CTrainer
 from ray.rllib.agents.ppo.ppo_torch_policy import PPOTorchPolicy, KLCoeffMixin, ValueNetworkMixin
-from marl.algos.utils.postprocessing import MixingValueMixin, value_mixing_postprocessing
+from marl.algos.utils.mixing_critic import MixingValueMixin, value_mixing_postprocessing
 
 torch, nn = try_import_torch()
 
