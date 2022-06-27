@@ -130,30 +130,16 @@ def hatrpo_post_process(policy, sample_batch, other_agent_batches=None, epsisode
     n_agents = get_agent_num(policy)
 
     for i in range(n_agents - 1):
-
-        cur_model_id = 0
         cur_training = 0
-        cur_loss_grad_fn_id = 0
 
         if other_agent_batches:
             name = exist_in_opponent(opponent_index=i, opponent_batches=other_agent_batches)
             if name:
                 _p, _b = other_agent_batches[name]
-                cur_model_id = ObjHandler.save(_p.model)
-                cur_loss_grad_fn_id = ObjHandler.save(_p)
                 cur_training = _b.is_training
-
-        # print(cur_model_id, cur_loss_grad_fn_id, cur_training)
-        sample_batch[get_global_name(MODEL, i)] = np.array([
-            int(cur_model_id)
-        ] * len(sample_batch))
 
         sample_batch[get_global_name(TRAINING, i)] = np.array([
             int(cur_training)
-        ] * len(sample_batch))
-
-        sample_batch[get_global_name(POLICY_ID, i)] = np.array([
-            int(cur_loss_grad_fn_id)
         ] * len(sample_batch))
 
     return sample_batch
