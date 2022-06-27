@@ -3,7 +3,7 @@ env: magent
 env_args:
   map_name: "adversarial_pursuit" # others can be found in magent.py
   minimap_mode: True
-  max_cycles: 250
+  max_cycles: 200
 
 mask_flag: False
 global_state_flag: True

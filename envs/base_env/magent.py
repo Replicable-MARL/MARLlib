@@ -6,12 +6,12 @@ from pettingzoo.magent import adversarial_pursuit_v3, battle_v3, battlefield_v3,
     tiger_deer_v3
 
 REGISTRY = {}
-REGISTRY["adversarial_pursuit"] = adversarial_pursuit_v3.env
-REGISTRY["battle"] = battle_v3.env
-REGISTRY["battlefield"] = battlefield_v3.env
-REGISTRY["combined_arms"] = combined_arms_v5.env
-REGISTRY["gather"] = gather_v3.env
-REGISTRY["tiger_deer"] = tiger_deer_v3.env
+REGISTRY["adversarial_pursuit"] = adversarial_pursuit_v3.parallel_env
+REGISTRY["battle"] = battle_v3.parallel_env
+REGISTRY["battlefield"] = battlefield_v3.parallel_env
+REGISTRY["combined_arms"] = combined_arms_v5.parallel_env
+REGISTRY["gather"] = gather_v3.parallel_env
+REGISTRY["tiger_deer"] = tiger_deer_v3.parallel_env
 
 mini_channel_dim_dict = {
     "adversarial_pursuit": 4,
@@ -75,7 +75,7 @@ class RllibMAgent(MultiAgentEnv):
         env = ss.pad_observations_v0(env)
         env = ss.pad_action_space_v0(env)
 
-        self.env = PettingZooEnv(env)
+        self.env = ParallelPettingZooEnv(env)
         self.mini_channel_dim = mini_channel_dim_dict[map]
         self.action_space = self.env.action_space
         self.observation_space = GymDict({
