@@ -432,7 +432,7 @@ def validate_config(config: TrainerConfigDict) -> None:
 
 
 FACMACRNNTrainer = DDPGRNNTrainer.with_updates(
-    name="FACMACRNNTrainer",
+    name="FACMACTrainer",
     default_config=DDPG_RNN_DEFAULT_CONFIG,
     default_policy=FACMACRNNTorchPolicy,
     get_policy_class=get_policy_class,
