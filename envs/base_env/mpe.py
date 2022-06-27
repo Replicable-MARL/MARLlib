@@ -118,7 +118,7 @@ class RllibMPE(MultiAgentEnv):
             "space_obs": self.observation_space,
             "space_act": self.action_space,
             "num_agents": self.num_agents,
-            "episode_limit": 200,
+            "episode_limit": 25,
             "policy_mapping_info": policy_mapping_dict
         }
         return env_info
