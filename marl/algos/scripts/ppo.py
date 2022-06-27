@@ -50,6 +50,7 @@ def run_ppo(config_dict, common_config, env_dict, stop):
             "custom_model_config": merge_dicts(config_dict, env_dict),
         },
     }
+
     config.update(common_config)
 
     algorithm = config_dict["algorithm"]
