@@ -1,11 +1,9 @@
-# FACMAC parameters
+# MADDPG parameters
 
 algo_args:
-  batch_episode:  32
+  batch_episode:  8
   lr: 0.0005
   rollout_fragment_length: 1
-  buffer_size: 5000
+  buffer_size: 1000
   target_network_update_freq: 100
   batch_mode: "complete_episodes"
-  mixer: "qmix"
-
