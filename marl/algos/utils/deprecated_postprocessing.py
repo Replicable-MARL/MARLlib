@@ -20,7 +20,9 @@ def get_dim(a):
     return dim
 
 
-################################################################################################
+#########################
+# MAA2C MAPPO MATRPO COMA
+#########################
 class CentralizedValueMixin:
 
     def __init__(self):
@@ -124,11 +126,6 @@ def centralized_critic_postprocessing(policy,
             [np.zeros_like(sample_batch["actions"], dtype=sample_batch["actions"].dtype) for _ in
              range(opponent_agents_num)], axis=1)
 
-        # if algorithm in ["coma"]:
-        #     sample_batch[SampleBatch.VF_PREDS] = np.take(sample_batch[SampleBatch.VF_PREDS],
-        #                                                  np.expand_dims(sample_batch["actions"], axis=1)).squeeze(
-        #         axis=1)
-
     completed = sample_batch["dones"][-1]
     if completed:
         last_r = 0.0
@@ -144,7 +141,9 @@ def centralized_critic_postprocessing(policy,
     return train_batch
 
 
-################################################################################################
+#############
+# VDA2C VDPPO
+#############
 class MixingValueMixin:
 
     def __init__(self):
@@ -269,7 +268,9 @@ def compute_advantages_vf_tot(rollout: SampleBatch,
     return rollout
 
 
-################################################################################################
+##############
+# MADDPG
+##############
 class CentralizedQValueMixin:
 
     def __init__(self):
@@ -393,7 +394,9 @@ def centralized_critic_q(policy: Policy,
     return sample_batch
 
 
-################################################################################################
+##############
+# FACMAC
+##############
 class MixingQValueMixin:
 
     def __init__(self):

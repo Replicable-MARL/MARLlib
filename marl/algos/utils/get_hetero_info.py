@@ -2,7 +2,7 @@ from ray.rllib.policy.sample_batch import SampleBatch
 import numpy as np
 from ray.rllib.evaluation.postprocessing import discount_cumsum, Postprocessing, compute_gae_for_sample_batch
 from marl.algos.utils.valuenorm import ValueNorm
-from marl.algos.utils.postprocessing import get_dim, convert_to_torch_tensor
+from marl.algos.utils.centralized_critic import get_dim, convert_to_torch_tensor
 from marl.algos.utils.setup_utils import get_agent_num
 from collections import defaultdict
 import pickle
