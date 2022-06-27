@@ -592,7 +592,7 @@ def get_policy_class(config: TrainerConfigDict) -> Optional[Type[Policy]]:
         return DDPGRNNTorchPolicy
 
 DDPGRNNTrainer = DDPGTrainer.with_updates(
-    name="RNNDDPGTrainer",
+    name="IDDPGTrainer",
     default_config=DDPG_RNN_DEFAULT_CONFIG,
     default_policy=DDPGRNNTorchPolicy,
     get_policy_class=get_policy_class,

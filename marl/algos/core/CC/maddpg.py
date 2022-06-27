@@ -439,7 +439,7 @@ def validate_config(config: TrainerConfigDict) -> None:
 
 
 MADDPGRNNTrainer = DDPGRNNTrainer.with_updates(
-    name="MADDPGRNNTrainer",
+    name="MADDPGTrainer",
     default_config=DDPG_RNN_DEFAULT_CONFIG,
     default_policy=MADDPGRNNTorchPolicy,
     get_policy_class=get_policy_class,

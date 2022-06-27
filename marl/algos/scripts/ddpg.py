@@ -2,7 +2,7 @@ from ray import tune
 from ray.tune.utils import merge_dicts
 from ray.tune import CLIReporter
 from marl.algos.utils.setup_utils import AlgVar
-from marl.algos.core.IL.ddpg import DDPGRNNTrainer as DDPGTrainer
+from marl.algos.core.IL.ddpg import DDPGRNNTrainer as IDDPGTrainer
 
 
 def run_ddpg(config_dict, common_config, env_dict, stop):
@@ -38,7 +38,7 @@ def run_ddpg(config_dict, common_config, env_dict, stop):
     RUNNING_NAME = '_'.join([algorithm, arch, map_name])
 
     results = tune.run(
-        DDPGTrainer,
+        IDDPGTrainer,
         name=RUNNING_NAME,
         stop=stop,
         config=config,
