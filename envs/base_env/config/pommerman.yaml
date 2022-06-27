@@ -1,7 +1,7 @@
 env: pommerman
 
 env_args:
-  map_name: "OneVsOne-v0" # "PommeFFACompetition-v0", "PommeTeamCompetition-v0",
+  map_name: "OneVsOne-v0" # "PommeFFACompetition-v0", "PommeTeamCompetition-v0","OneVsOne-v0"
   agent_position: "01"
   # choices=["01"] for OneVsOne
   # choices=["0", "1", "2", "3"] random combination for PommeFFACompetition like "023"

@@ -1,8 +1,8 @@
 env: mpe
 
 env_args:
-  map_name: "simple_adversary" # others can be found in IL/envs/mpe_rllib.py
-  continuous_actions: True
+  map_name: "simple_adversary" # others can be found in mpe.py
+  continuous_actions: False
   max_cycles: 25
 
 mask_flag: False
