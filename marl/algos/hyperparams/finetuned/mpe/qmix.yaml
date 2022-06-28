@@ -5,8 +5,8 @@ algo_args:
   lr: 0.0005
   rollout_fragment_length: 1
   buffer_size: 5000
-  target_network_update_freq: 100
+  target_network_update_freq: 200
   final_epsilon: 0.05
   epsilon_timesteps: 50000
-  optimizer: "adam" # "rmsprop", "adam"
+  optimizer: "rmsprop" # "adam"
   reward_standardize: True
