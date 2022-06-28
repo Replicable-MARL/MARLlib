@@ -99,7 +99,7 @@ def chop_into_sequences(*,
             f_pad = [None] * length
         else:
             # Make sure type doesn't change.
-            f_pad = np.zeros((length, ) + np.shape(f)[1:], dtype=f.dtype)
+            f_pad = np.zeros((length,) + np.shape(f)[1:], dtype=f.dtype)
         seq_base = 0
         i = 0
         for len_ in seq_lens:
@@ -183,9 +183,9 @@ def pad_batch_to_sequences_of_same_size(
 
     if batch_divisibility_req > 1:
         meets_divisibility_reqs = (
-            len(batch[SampleBatch.CUR_OBS]) % batch_divisibility_req == 0
-            # not multiagent
-            and max(batch[SampleBatch.AGENT_INDEX]) == 0)
+                len(batch[SampleBatch.CUR_OBS]) % batch_divisibility_req == 0
+                # not multiagent
+                and max(batch[SampleBatch.AGENT_INDEX]) == 0)
     else:
         meets_divisibility_reqs = True
 
@@ -247,7 +247,7 @@ def pad_batch_to_sequences_of_same_size(
         batch[k] = initial_states[i]
     batch[SampleBatch.SEQ_LENS] = np.array(seq_lens)
     if dynamic_max:
-    	batch.max_seq_len = max(seq_lens)
+        batch.max_seq_len = max(seq_lens)
 
     if log_once("rnn_ma_feed_dict"):
         logger.info("Padded input for RNN/Attn.Nets/MA:\n\n{}\n".format(
@@ -257,4 +257,3 @@ def pad_batch_to_sequences_of_same_size(
                 "seq_lens": seq_lens,
                 "max_seq_len": max_seq_len,
             })))
-
