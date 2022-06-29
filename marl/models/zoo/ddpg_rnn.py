@@ -152,8 +152,6 @@ class DDPG_RNN(TorchRNN, nn.Module):
 
         if isinstance(seq_lens, np.ndarray):
             seq_lens = torch.Tensor(seq_lens).int()
-        # if seq_lens.shape[0] == 0:
-        #     print(1)
         max_seq_len = obs_inputs.shape[0] // seq_lens.shape[0]
 
         self.time_major = self.model_config.get("_time_major", False)
