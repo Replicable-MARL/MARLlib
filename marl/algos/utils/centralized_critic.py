@@ -2,23 +2,21 @@ from ray.rllib.evaluation.postprocessing import compute_gae_for_sample_batch, \
     Postprocessing, compute_advantages
 from ray.rllib.utils.framework import try_import_torch
 from ray.rllib.utils.torch_ops import convert_to_torch_tensor
-
 from ray.rllib.policy.sample_batch import SampleBatch
 import numpy as np
+from marl.algos.utils.centralized_Q import get_dim
 
 torch, nn = try_import_torch()
 
+"""
+centralized critic postprocessing for 
+1. MAA2C 
+2. MAPPO 
+3. MATRPO 
+4. COMA
+"""
 
-def get_dim(a):
-    dim = 1
-    for i in a:
-        dim *= i
-    return dim
 
-
-#########################
-# MAA2C MAPPO MATRPO COMA
-#########################
 class CentralizedValueMixin:
 
     def __init__(self):

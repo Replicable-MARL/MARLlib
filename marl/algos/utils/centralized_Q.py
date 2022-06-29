@@ -8,6 +8,10 @@ from ray.rllib.utils.numpy import convert_to_numpy
 
 torch, nn = try_import_torch()
 
+"""
+centralized Q postprocessing for 
+1. MADDPG 
+"""
 
 def get_dim(a):
     dim = 1
@@ -16,9 +20,6 @@ def get_dim(a):
     return dim
 
 
-##############
-# MADDPG
-##############
 class CentralizedQValueMixin:
 
     def __init__(self):

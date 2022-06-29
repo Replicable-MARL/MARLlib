@@ -6,20 +6,17 @@ from copy import deepcopy
 from ray.rllib.policy.sample_batch import SampleBatch
 from ray.rllib.utils.numpy import convert_to_numpy
 import numpy as np
+from marl.algos.utils.centralized_Q import get_dim
 
 torch, nn = try_import_torch()
 
+"""
+mixing critic postprocessing for 
+1. VDA2C 
+2. VDPPO 
+"""
 
-def get_dim(a):
-    dim = 1
-    for i in a:
-        dim *= i
-    return dim
 
-
-#############
-# VDA2C VDPPO
-#############
 class MixingValueMixin:
 
     def __init__(self):
@@ -142,4 +139,3 @@ def compute_advantages_vf_tot(rollout: SampleBatch,
     rollout[SampleBatch.VF_PREDS] = vf_saved
 
     return rollout
-

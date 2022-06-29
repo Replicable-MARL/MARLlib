@@ -4,22 +4,18 @@ from ray.rllib.evaluation.postprocessing import adjust_nstep
 from ray.rllib.policy.policy import Policy
 from ray.rllib.policy.sample_batch import SampleBatch
 from ray.rllib.utils.numpy import convert_to_numpy
+from marl.algos.utils.centralized_Q import get_dim
+
 import numpy as np
-import copy
 
 torch, nn = try_import_torch()
 
-
-def get_dim(a):
-    dim = 1
-    for i in a:
-        dim *= i
-    return dim
+"""
+mixing Q postprocessing for 
+1. FACMAC 
+"""
 
 
-##############
-# FACMAC
-##############
 class MixingQValueMixin:
 
     def __init__(self):
