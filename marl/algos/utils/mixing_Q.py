@@ -16,6 +16,7 @@ def get_dim(a):
         dim *= i
     return dim
 
+
 ##############
 # FACMAC
 ##############
@@ -85,30 +86,6 @@ def q_value_mixing(policy: Policy,
                         opponent_batch[i]["new_obs"][:, action_mask_dim:action_mask_dim + obs_dim] for i in
                         range(opponent_agents_num)], 1)
 
-            # grab the opponent Q
-            all_opponent_batch_q_ls = []
-            for opp_index in range(opponent_agents_num):
-                opp_policy = opponent_batch_list[opp_index][0]
-                opp_batch = copy.deepcopy(opponent_batch[opp_index])
-                input_dict = {}
-                input_dict["obs"] = {}
-                input_dict["obs"]["obs"] = opp_batch["obs"][:,
-                                           action_mask_dim: action_mask_dim + obs_dim]
-                input_dict["actions"] = opp_batch["actions"]
-                seq_lens = opp_batch["seq_lens"]
-                state_ls = []
-                for i, seq_len in enumerate(seq_lens):
-                    state = convert_to_torch_tensor(opp_batch["state_in_1"][i], policy.device)
-                    state_ls.append(state)
-                state = [torch.stack(state_ls, 0)]
-                input_dict = convert_to_torch_tensor(input_dict, policy.device)
-                seq_lens = convert_to_torch_tensor(seq_lens, policy.device)
-                opp_q, _ = opp_policy.model.q_model(input_dict, state, seq_lens)
-                opp_q = convert_to_numpy(opp_q.squeeze(1))
-                all_opponent_batch_q_ls.append(opp_q)
-            sample_batch["opponent_q"] = np.stack(
-                all_opponent_batch_q_ls, 1)
-
     else:
         # Policy hasn't been initialized yet, use zeros.
         o = sample_batch[SampleBatch.CUR_OBS]
@@ -130,7 +107,7 @@ def q_value_mixing(policy: Policy,
             (sample_batch["state"].shape[0], opponent_agents_num),
             dtype=sample_batch["obs"].dtype)
 
-    # N-step Q adjustments.
+    # N-step rewards adjustments.
     if policy.config["n_step"] > 1:
         adjust_nstep(policy.config["n_step"], policy.config["gamma"], sample_batch)
 
@@ -150,3 +127,97 @@ def q_value_mixing(policy: Policy,
         sample_batch["weights"] = new_priorities
 
     return sample_batch
+
+
+# postprocessing sampled batch before learning stage.
+def before_learn_on_batch(multi_agent_batch, policies, train_batch_size):
+    all_agent_q = []
+    all_agent_target_q = []
+    for pid, policy in policies.items():
+
+        policy_batch = multi_agent_batch.policy_batches[pid]
+
+        q_model = policy.model.q_model.to(policy.device)
+        target_policy_model = policy.target_model.policy_model.to(policy.device)
+        target_q_model = policy.target_model.q_model.to(policy.device)
+
+        obs = policy_batch["obs"]
+        next_obs = policy_batch["new_obs"]
+        state_in_p = policy_batch["state_in_0"]
+        state_in_q = policy_batch["state_in_1"]
+        seq_lens = policy_batch["seq_lens"]
+
+        input_dict = {"obs": {}}
+        target_input_dict = {"obs": {}}
+
+        input_dict["obs"]["obs"] = obs
+        target_input_dict["obs"]["obs"] = next_obs
+
+        # get current action & Q value
+        action = policy_batch["actions"]
+        input_dict["actions"] = action
+        seq_lens = convert_to_torch_tensor(seq_lens, policy.device)
+
+        input_dict = convert_to_torch_tensor(input_dict, policy.device)
+        state_in_q = convert_to_torch_tensor(state_in_q, policy.device).unsqueeze(0)
+        q, _ = q_model.forward(input_dict, state_in_q, seq_lens)
+        q = convert_to_numpy(q)
+
+        # get next action & Q value from target model
+        target_input_dict = convert_to_torch_tensor(target_input_dict, policy.device)
+        state_in_p = convert_to_torch_tensor(state_in_p, policy.device).unsqueeze(0)
+        next_action_out, _ = target_policy_model.forward(target_input_dict, state_in_p, seq_lens)
+        next_action = target_policy_model.action_out_squashed(next_action_out)
+        target_input_dict["actions"] = next_action
+
+        next_target_q, _ = target_q_model.forward(target_input_dict, state_in_q, seq_lens)
+        next_target_q = convert_to_numpy(next_target_q)
+
+        agent_id = np.unique(policy_batch["agent_index"])
+        for a_id in agent_id:
+            valid_flag = np.where(policy_batch["agent_index"] == a_id)[0]
+            q_one_agent = q[valid_flag, :]
+            next_target_q_one_agent = next_target_q[valid_flag, :]
+
+            all_agent_q.append(q_one_agent)
+            all_agent_target_q.append(next_target_q_one_agent)
+
+    # construct opponent q for each batch
+    all_agent_q = np.stack(all_agent_q, 1)
+    all_agent_target_q = np.stack(all_agent_target_q, 1)
+
+    for pid, policy in policies.items():
+        policy_batch = multi_agent_batch.policy_batches[pid]
+        agent_id = np.unique(policy_batch["agent_index"])
+        agent_num = len(agent_id)
+        all_agent_q_ls = []
+        all_agent_target_q_ls = []
+
+        for a in range(agent_num):
+            all_agent_q_ls.append(all_agent_q)
+            all_agent_target_q_ls.append(all_agent_target_q)
+
+        q_batch = np.stack(all_agent_q_ls, 1).reshape((policy_batch.count, -1))
+        target_q_batch = np.stack(all_agent_target_q_ls, 1).reshape((policy_batch.count, -1))
+
+        other_q_batch_ls = []
+        other_target_q_batch_ls = []
+
+        for i in range(policy_batch.count):
+            current_agent_id = policy_batch["agent_index"][i]
+            q_ts = q_batch[i]
+            target_q_ts = target_q_batch[i]
+
+            other_q_ts = np.delete(q_ts, current_agent_id, axis=0)
+            other_target_q_ts = np.delete(target_q_ts, current_agent_id, axis=0)
+
+            other_q_batch_ls.append(other_q_ts)
+            other_target_q_batch_ls.append(other_target_q_ts)
+
+        other_q_batch = np.stack(other_q_batch_ls, 0)
+        other_target_q_batch = np.stack(other_target_q_batch_ls, 0)
+
+        multi_agent_batch.policy_batches[pid]["opponent_q"] = other_q_batch
+        multi_agent_batch.policy_batches[pid]["next_opponent_q"] = other_target_q_batch
+
+    return multi_agent_batch

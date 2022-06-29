@@ -2,8 +2,9 @@ from ray.rllib.utils.framework import try_import_torch
 from ray.rllib.evaluation.postprocessing import adjust_nstep
 from ray.rllib.policy.policy import Policy
 from ray.rllib.policy.sample_batch import SampleBatch
-from ray.rllib.utils.numpy import convert_to_numpy
 import numpy as np
+from ray.rllib.utils.torch_ops import convert_to_torch_tensor
+from ray.rllib.utils.numpy import convert_to_numpy
 
 torch, nn = try_import_torch()
 
@@ -119,7 +120,7 @@ def centralized_critic_q(policy: Policy,
             [np.zeros_like(sample_batch["actions"], dtype=sample_batch["actions"].dtype) for _ in
              range(opponent_agents_num)], axis=1)
 
-    # N-step Q adjustments.
+    # N-step reward adjustments.
     if policy.config["n_step"] > 1:
         adjust_nstep(policy.config["n_step"], policy.config["gamma"], sample_batch)
 
@@ -139,3 +140,65 @@ def centralized_critic_q(policy: Policy,
         sample_batch["weights"] = new_priorities
 
     return sample_batch
+
+
+# postprocessing sampled batch before learning stage.
+def before_learn_on_batch(multi_agent_batch, policies, train_batch_size):
+    other_agent_next_action_dict = {}
+    all_agent_next_action = []
+    for pid, policy in policies.items():
+
+        # get agent number:
+        if 0 not in other_agent_next_action_dict:
+            custom_config = policy.config["model"]["custom_model_config"]
+            n_agents = custom_config["num_agents"]
+            for i in range(n_agents):
+                other_agent_next_action_dict[i] = []
+
+        policy_batch = multi_agent_batch.policy_batches[pid]
+        target_policy_model = policy.target_model.policy_model.to(policy.device)
+        next_obs = policy_batch["new_obs"]
+
+        input_dict = {"obs": {}}
+        input_dict["obs"]["obs"] = next_obs
+
+        state_in = policy_batch["state_in_0"]
+        seq_lens = policy_batch["seq_lens"]
+
+        input_dict = convert_to_torch_tensor(input_dict, policy.device)
+        state_in = convert_to_torch_tensor(state_in, policy.device).unsqueeze(0)
+        seq_lens = convert_to_torch_tensor(seq_lens, policy.device)
+
+        next_action_out, _ = target_policy_model.forward(input_dict, state_in, seq_lens)
+        next_action = target_policy_model.action_out_squashed(next_action_out)
+        next_action = convert_to_numpy(next_action)
+
+        agent_id = np.unique(policy_batch["agent_index"])
+        for a_id in agent_id:
+            valid_flag = np.where(policy_batch["agent_index"] == a_id)[0]
+            next_action_one_agent = next_action[valid_flag, :]
+            all_agent_next_action.append(next_action_one_agent)
+            for key in other_agent_next_action_dict.keys():
+                if key != a_id:
+                    other_agent_next_action_dict[a_id].append(next_action_one_agent)
+
+    # construct opponent next action for each batch
+    all_agent_next_action = np.stack(all_agent_next_action, 1)
+    for pid, policy in policies.items():
+        policy_batch = multi_agent_batch.policy_batches[pid]
+        agent_id = np.unique(policy_batch["agent_index"])
+        agent_num = len(agent_id)
+        ls = []
+        for a in range(agent_num):
+            ls.append(all_agent_next_action)
+        next_action_batch = np.stack(ls, 1).reshape((policy_batch.count, n_agents, -1))
+        other_next_action_batch_ls = []
+        for i in range(policy_batch.count):
+            current_agent_id = policy_batch["agent_index"][i]
+            next_action_ts = next_action_batch[i]
+            other_next_action_ts = np.delete(next_action_ts, current_agent_id, axis=0)
+            other_next_action_batch_ls.append(other_next_action_ts)
+        other_next_action_batch = np.stack(other_next_action_batch_ls, 0)
+        multi_agent_batch.policy_batches[pid]["next_opponent_actions"] = other_next_action_batch
+
+    return multi_agent_batch

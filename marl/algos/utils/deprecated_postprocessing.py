@@ -372,7 +372,7 @@ def centralized_critic_q(policy: Policy,
             [np.zeros_like(sample_batch["actions"], dtype=sample_batch["actions"].dtype) for _ in
              range(opponent_agents_num)], axis=1)
 
-    # N-step Q adjustments.
+    # N-step reward adjustments.
     if policy.config["n_step"] > 1:
         adjust_nstep(policy.config["n_step"], policy.config["gamma"], sample_batch)
 
@@ -508,7 +508,7 @@ def q_value_mixing(policy: Policy,
             (sample_batch["state"].shape[0], opponent_agents_num),
             dtype=sample_batch["obs"].dtype)
 
-    # N-step Q adjustments.
+    # N-step reward adjustments.
     if policy.config["n_step"] > 1:
         adjust_nstep(policy.config["n_step"], policy.config["gamma"], sample_batch)
 

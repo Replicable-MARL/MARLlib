@@ -1,5 +1,5 @@
 from marl.algos.core.IL.ddpg import *
-from marl.algos.utils.mixing_Q import q_value_mixing, MixingQValueMixin
+from marl.algos.utils.mixing_Q import q_value_mixing, MixingQValueMixin, before_learn_on_batch
 from ray.rllib.agents.ddpg.ddpg_torch_policy import TargetNetworkMixin, ComputeTDErrorMixin
 from ray.rllib.utils.torch_ops import convert_to_torch_tensor
 from ray.rllib.utils.numpy import convert_to_numpy
@@ -346,74 +346,6 @@ FACMACRNNTorchPolicy = DDPGRNNTorchPolicy.with_updates(
 def get_policy_class(config: TrainerConfigDict) -> Optional[Type[Policy]]:
     if config["framework"] == "torch":
         return FACMACRNNTorchPolicy
-
-def before_learn_on_batch(multi_agent_batch, policies, train_batch_size):
-
-    other_agent_next_target_dict = {}
-    all_agent_target_q = []
-    for pid, policy in policies.items():
-
-        # get agent number:
-        if 0 not in other_agent_next_target_dict:
-            custom_config = policy.config["model"]["custom_model_config"]
-            n_agents = custom_config["num_agents"]
-            for i in range(n_agents):
-                other_agent_next_target_dict[i] = []
-
-        policy_batch = multi_agent_batch.policy_batches[pid]
-        target_policy_model = policy.target_model.policy_model.to(policy.device)
-        target_q_model = policy.target_model.q_model.to(policy.device)
-
-        next_obs = policy_batch["new_obs"]
-        input_dict = {"obs": {}}
-        input_dict["obs"]["obs"] = next_obs
-
-        state_in_p = policy_batch["state_in_0"]
-        state_in_q = policy_batch["state_in_1"]
-        seq_lens = policy_batch["seq_lens"]
-
-        input_dict = convert_to_torch_tensor(input_dict, policy.device)
-        state_in_p = convert_to_torch_tensor(state_in_p, policy.device).unsqueeze(0)
-        seq_lens = convert_to_torch_tensor(seq_lens, policy.device)
-
-        next_action_out, _ = target_policy_model.forward(input_dict, state_in_p, seq_lens)
-        next_action = target_policy_model.action_out_squashed(next_action_out)
-        input_dict["actions"] = next_action
-
-        state_in_q = convert_to_torch_tensor(state_in_q, policy.device).unsqueeze(0)
-        next_target_q, _ = target_q_model.forward(input_dict, state_in_q, seq_lens)
-
-        next_target_q = convert_to_numpy(next_target_q)
-
-        agent_id = np.unique(policy_batch["agent_index"])
-        for a_id in agent_id:
-            valid_flag = np.where(policy_batch["agent_index"] == a_id)[0]
-            next_target_q_one_agent = next_target_q[valid_flag, :]
-            all_agent_target_q.append(next_target_q_one_agent)
-            for key in other_agent_next_target_dict.keys():
-                if key != a_id:
-                    other_agent_next_target_dict[a_id].append(next_target_q_one_agent)
-
-    # construct opponent next action for each batch
-    all_agent_target_q = np.stack(all_agent_target_q, 1)
-    for pid, policy in policies.items():
-        policy_batch = multi_agent_batch.policy_batches[pid]
-        agent_id = np.unique(policy_batch["agent_index"])
-        agent_num = len(agent_id)
-        ls = []
-        for a in range(agent_num):
-            ls.append(all_agent_target_q)
-        target_q_batch = np.stack(ls, 1).reshape((policy_batch.count, -1))
-        other_target_q_batch_ls = []
-        for i in range(policy_batch.count):
-            current_agent_id = policy_batch["agent_index"][i]
-            target_q_ts = target_q_batch[i]
-            other_target_q_ts = np.delete(target_q_ts, current_agent_id, axis=0)
-            other_target_q_batch_ls.append(other_target_q_ts)
-        other_target_q_batch = np.stack(other_target_q_batch_ls, 0)
-        multi_agent_batch.policy_batches[pid]["next_opponent_q"] = other_target_q_batch
-
-    return multi_agent_batch
 
 
 def validate_config(config: TrainerConfigDict) -> None:
