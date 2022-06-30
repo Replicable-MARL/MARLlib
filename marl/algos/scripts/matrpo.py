@@ -4,6 +4,7 @@ from ray.tune import CLIReporter
 from marl.algos.core.CC.matrpo import MATRPOTrainer
 from marl.algos.utils.log_dir_util import available_local_dir
 from marl.algos.utils.setup_utils import AlgVar
+from marl.algos.utils.trust_regions import TrustRegionUpdator
 
 
 def run_matrpo(config_dict, common_config, env_dict, stop):
@@ -12,6 +13,12 @@ def run_matrpo(config_dict, common_config, env_dict, stop):
     make sure sgd_minibatch_size > max_seq_len
     """
     _param = AlgVar(config_dict)
+
+    kl_threshold = _param['kl_threshold']
+    accept_ratio = _param['accept_ratio']
+
+    TrustRegionUpdator.kl_threshold = kl_threshold
+    TrustRegionUpdator.accept_ratio = accept_ratio
 
     train_batch_size = _param["batch_episode"] * env_dict["episode_limit"]
     sgd_minibatch_size = train_batch_size

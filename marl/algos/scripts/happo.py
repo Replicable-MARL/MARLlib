@@ -23,18 +23,22 @@ def run_happo(config_dict, common_config, env_dict, stop):
     clip_param = _param["clip_param"]
     grad_clip = _param["grad_clip"]
     use_gae = _param["use_gae"]
+    critic_lr = _param["critic_lr"]
     gae_lambda = _param["lambda"]
     kl_coeff = _param["kl_coeff"]
     num_sgd_iter = _param["num_sgd_iter"]
     vf_loss_coeff = _param["vf_loss_coeff"]
     entropy_coeff = _param["entropy_coeff"]
     vf_clip_param = _param["vf_clip_param"]
+    gamma = _param["gamma"]
 
     config = {
         "batch_mode": batch_mode,
         "use_gae": use_gae,
         "lambda": gae_lambda,
         "kl_coeff": kl_coeff,
+        "gamma": gamma,
+        "critic_lr": critic_lr,
         "vf_loss_coeff": vf_loss_coeff,
         "vf_clip_param": vf_clip_param,
         "entropy_coeff": entropy_coeff,
