@@ -1,0 +1,14 @@
+# HATRPO parameters
+
+algo_args:
+  batch_episode: 10
+  batch_mode: complete_episodes
+  iteration: 4
+  train_batch_size: 4000
+  sgd_minibatch_size: 128
+  grad_clip: 10
+  clip_param: 0.3  # ppo-clip
+  use_critic: True
+  gamma: 0.99
+  normal_value: True
+  vf_share_layers: True
