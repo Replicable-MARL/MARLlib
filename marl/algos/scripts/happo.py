@@ -3,6 +3,7 @@ from ray.tune.utils import merge_dicts
 from ray.tune import CLIReporter
 from marl.algos.core.CC.happo import HAPPOTrainer
 from marl.algos.utils.setup_utils import AlgVar
+from ray.rllib.agents.ppo.ppo import PPOTrainer, DEFAULT_CONFIG as PPO_CONFIG
 
 
 def run_happo(config_dict, common_config, env_dict, stop):
@@ -32,13 +33,16 @@ def run_happo(config_dict, common_config, env_dict, stop):
     vf_clip_param = _param["vf_clip_param"]
     gamma = _param["gamma"]
 
+    PPO_CONFIG.update({
+        'critic_lr': critic_lr
+    })
+
     config = {
         "batch_mode": batch_mode,
         "use_gae": use_gae,
         "lambda": gae_lambda,
         "kl_coeff": kl_coeff,
         "gamma": gamma,
-        "critic_lr": critic_lr,
         "vf_loss_coeff": vf_loss_coeff,
         "vf_clip_param": vf_clip_param,
         "entropy_coeff": entropy_coeff,
@@ -61,7 +65,7 @@ def run_happo(config_dict, common_config, env_dict, stop):
     arch = config_dict["model_arch_args"]["core_arch"]
     RUNNING_NAME = '_'.join([algorithm, arch, map_name])
 
-    results = tune.run(HAPPOTrainer,
+    results = tune.run(HAPPOTrainer(PPOTrainer),
                        name=RUNNING_NAME,
                        stop=stop,
                        config=config,
