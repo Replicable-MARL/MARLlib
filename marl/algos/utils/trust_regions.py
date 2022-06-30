@@ -3,7 +3,7 @@ import numpy as np
 from ray.rllib.policy.sample_batch import SampleBatch
 from ray.rllib.utils.torch_ops import sequence_mask
 from torch.nn.utils import parameters_to_vector, vector_to_parameters
-from marl.algos.utils.get_hetero_info import get_global_name
+from marl.algos.utils.centralized_critic_hetero import get_global_name
 from marl.algos.utils.setup_utils import get_device
 
 

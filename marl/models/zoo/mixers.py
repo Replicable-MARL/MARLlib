@@ -12,7 +12,6 @@ class VDNMixer(nn.Module):
 
 
 class QMixer(nn.Module):
-    # def __init__(self, n_agents, state_shape, mixing_embed_dim):
     def __init__(self, custom_config, state_dim):
         super(QMixer, self).__init__()
 

@@ -199,22 +199,16 @@ class Base_RNN(TorchRNN, nn.Module):
             raise ValueError("rnn core_arch wrong: {}".format(self.custom_config["model_arch_args"]["core_arch"]))
 
     def actor_parameters(self):
-        # return [list(m.parameters()) for m in [self.fc1, self.gru, self.action_branch]]
         return reduce(lambda x, y: x + y, map(lambda p: list(p.parameters()), self.actors))
-        # return self.fc1.variables() + self.gru.variables() + self.action_branch.variables()
-        # return self.fc1.parameters() +
 
     def critic_parameters(self):
         return list(self.value_branch.parameters())
 
     def sample(self, obs, training_batch, sample_num):
         indices = torch.multinomial(torch.arange(len(obs)), sample_num, replacement=True)
-        # _input = torch.multinomial(obs, sample_num, replacement=True)
         training_batch = training_batch.copy()
         training_batch['obs']['obs'] = training_batch['obs']['obs'][indices]
         if 'action_mask' in training_batch['obs']:
             training_batch['obs']['action_mask'] = training_batch['obs']['action_mask'][indices]
 
         return self(training_batch)
-        # output, new_state = self.forward_rnn(inputs, state, seq_lens)
-        # output = torch.reshape(output, [-1, self.num_outputs])

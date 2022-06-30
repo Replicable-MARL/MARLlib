@@ -1,7 +1,6 @@
-# A3C parameters
+# PG parameters
 
 algo_args:
   batch_episode:  10
   batch_mode: "complete_episodes"
-  lr: 0.0005
-  entropy_coeff: 0.01
+  lr: 0.0004

@@ -8,7 +8,7 @@ torch, nn = try_import_torch()
 
 
 class JointQ_RNN(TorchModelV2, nn.Module):
-    """The default GRU model for QMIX."""
+    """The default GRU model for Joint Q."""
 
     def __init__(self, obs_space, action_space, num_outputs, model_config,
                  name):
@@ -83,8 +83,6 @@ class JointQ_RNN(TorchModelV2, nn.Module):
     @override(ModelV2)
     def forward(self, input_dict, hidden_state, seq_lens):
         inputs = input_dict["obs_flat"].float()
-        # x = nn.functional.relu(self.encoder(input_dict["obs_flat"].float()))
-        # Compute the unmasked logits.
         if "conv_layer" in self.custom_config["model_arch_args"]:
             x = inputs.reshape(-1, self.raw_state_dim[0], self.raw_state_dim[1], self.raw_state_dim[2]).permute(0, 3, 1, 2)
             x = self.encoder(x)

@@ -2,15 +2,18 @@ from ray.rllib.policy.sample_batch import SampleBatch
 import numpy as np
 from ray.rllib.evaluation.postprocessing import discount_cumsum, Postprocessing, compute_gae_for_sample_batch
 from marl.algos.utils.valuenorm import ValueNorm
-from marl.algos.utils.postprocessing import get_dim, convert_to_torch_tensor
+from marl.algos.utils.centralized_critic import convert_to_torch_tensor
 from marl.algos.utils.setup_utils import get_agent_num
-from collections import defaultdict
-import pickle
-from pathlib import Path
-import os
+from marl.algos.utils.centralized_Q import get_dim
 import multiprocessing
-mul_manager = multiprocessing.Manager()
 
+"""
+centralized critic postprocessing for 
+1. HAPPO 
+2. HATRPO 
+"""
+
+mul_manager = multiprocessing.Manager()
 
 GLOBAL_NEED_COLLECT = [SampleBatch.ACTION_LOGP, SampleBatch.ACTIONS,
                        SampleBatch.ACTION_DIST_INPUTS, SampleBatch.OBS]
@@ -22,7 +25,6 @@ STATE = 'state'
 MODEL = 'model'
 POLICY_ID = 'policy_id'
 TRAINING = 'training'
-
 
 value_normalizer = ValueNorm(1)
 
@@ -51,7 +53,6 @@ def extract_other_agents_train_batch(other_agent_batches):
 
 
 def add_all_agents_gae(policy, sample_batch, other_agent_batches=None, episode=None):
-
     sample_batch = add_opponent_information_and_critical_vf(policy, sample_batch, other_agent_batches, episode=episode)
 
     global value_normalizer
@@ -85,7 +86,6 @@ def _get_last_r(policy, sample_batch):
 
 
 def _add_deltas(sample_batch, last_r, gamma):
-
     vpred_t = np.concatenate(
         [sample_batch[SampleBatch.VF_PREDS],
          np.array([last_r])]
@@ -101,8 +101,8 @@ def _add_deltas(sample_batch, last_r, gamma):
 
 def _add_returns(sample_batch, last_r, gamma):
     rewards_plus_v = np.concatenate(
-            [sample_batch[SampleBatch.REWARDS],
-             np.array([last_r])])
+        [sample_batch[SampleBatch.REWARDS],
+         np.array([last_r])])
     discounted_returns = discount_cumsum(rewards_plus_v,
                                          gamma)[:-1].astype(np.float32)
 
@@ -124,7 +124,6 @@ def trpo_post_process(policy, sample_batch, other_agent_batches=None, episode=No
 
 
 def hatrpo_post_process(policy, sample_batch, other_agent_batches=None, epsisode=None):
-
     sample_batch = trpo_post_process(policy, sample_batch, other_agent_batches, epsisode)
 
     n_agents = get_agent_num(policy)
@@ -139,8 +138,8 @@ def hatrpo_post_process(policy, sample_batch, other_agent_batches=None, epsisode
                 cur_training = _b.is_training
 
         sample_batch[get_global_name(TRAINING, i)] = np.array([
-            int(cur_training)
-        ] * len(sample_batch))
+                                                                  int(cur_training)
+                                                              ] * len(sample_batch))
 
     return sample_batch
 
@@ -181,7 +180,7 @@ def add_other_agent_mul_info(sample_batch, other_agent_info, agent_num):
     if SampleBatch.ACTIONS in GLOBAL_NEED_COLLECT:
         sample_batch[get_global_name(SampleBatch.ACTIONS)] = np.stack([
             sample_batch[get_global_name(SampleBatch.ACTIONS, a_i)]
-            for a_i in range(agent_num-1)
+            for a_i in range(agent_num - 1)
         ], axis=1)
 
     return sample_batch
@@ -198,7 +197,7 @@ def get_vf_pred(policy, algorithm, sample_batch, opp_action_in_cc):
             .cpu().detach().numpy()
         sample_batch[SampleBatch.VF_PREDS] = np.take(
             sample_batch[SampleBatch.VF_PREDS],
-            np.expand_dims(sample_batch[SampleBatch.ACTIONS],axis=1)
+            np.expand_dims(sample_batch[SampleBatch.ACTIONS], axis=1)
         ).squeeze(axis=1)
     else:
         sample_batch[SampleBatch.VF_PREDS] = policy.compute_central_vf(
@@ -247,14 +246,15 @@ def exist_in_opponent(opponent_index, opponent_batches: dict):
     possible_1 = f'agent_{opponent_index}'
     possible_2 = f'adversary_{opponent_index}'
 
-    if possible_1 in opponent_batches: return possible_1
-    elif possible_2 in opponent_batches: return possible_2
+    if possible_1 in opponent_batches:
+        return possible_1
+    elif possible_2 in opponent_batches:
+        return possible_2
     else:
         return False
 
 
 def add_state_in_for_opponent(sample_batch, other_agent_batches, agent_num):
-
     state_in_num = 0
 
     while state_name(state_in_num) in sample_batch:
@@ -304,7 +304,8 @@ def add_opponent_information_and_critical_vf(policy,
     n_agents = get_agent_num(policy)
     opponent_agents_num = n_agents - 1
 
-    opponent_info_exists = (pytorch and hasattr(policy, "compute_central_vf")) or (not pytorch and policy.loss_initialized())
+    opponent_info_exists = (pytorch and hasattr(policy, "compute_central_vf")) or (
+                not pytorch and policy.loss_initialized())
 
     if opponent_info_exists:
         if not opp_action_in_cc and global_state_flag:
