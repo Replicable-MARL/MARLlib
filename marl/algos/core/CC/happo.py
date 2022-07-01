@@ -241,7 +241,7 @@ def get_policy_class_happo(ppo_with_critic):
 
 
 HAPPOTrainer = lambda ppo_with_critic: PPOTrainer.with_updates(
-    name="#happo-trainer",
+    name="HAPPOTrainer",
     default_policy=None,
     get_policy_class=get_policy_class_happo(ppo_with_critic),
 )
