@@ -65,7 +65,7 @@ def run_happo(config_dict, common_config, env_dict, stop):
     arch = config_dict["model_arch_args"]["core_arch"]
     RUNNING_NAME = '_'.join([algorithm, arch, map_name])
 
-    results = tune.run(HAPPOTrainer(PPOTrainer),
+    results = tune.run(HAPPOTrainer(PPO_CONFIG),
                        name=RUNNING_NAME,
                        stop=stop,
                        config=config,
