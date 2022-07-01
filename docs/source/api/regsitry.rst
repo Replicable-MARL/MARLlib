@@ -1,0 +1,1 @@
+.. _global-registry:
