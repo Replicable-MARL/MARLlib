@@ -65,6 +65,7 @@ def run_hatrpo(config_dict, common_config, env_dict, stop):
 
     algorithm = config_dict["algorithm"]
     arch = config_dict["model_arch_args"]["core_arch"]
+    map_name = config_dict["env_args"]["map_name"]
     RUNNING_NAME = '_'.join([algorithm, arch, map_name])
 
     results = tune.run(HATRPOTrainer,
