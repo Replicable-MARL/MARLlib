@@ -44,7 +44,7 @@ extensions = [
     "sphinx.ext.coverage",  # make coverage generates documentation coverage reports
     "sphinx.ext.viewcode",  # link to sourcecode from docs
     # "sphinx.ext.grahviz", # graphviz
-    "sphinxcontrib.apidoc",
+    # "sphinxcontrib.apidoc",
 ]
 
 #apidoc_module_dir = os.path.join(__location__, "marl")
