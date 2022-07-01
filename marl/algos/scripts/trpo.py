@@ -32,7 +32,6 @@ def run_trpo(config_dict, common_config, env_dict, stop):
         sgd_minibatch_size *= 2
 
     batch_mode = _param["batch_mode"]
-    lr = _param["lr"]
     clip_param = _param["clip_param"]
     grad_clip = _param["grad_clip"]
     use_gae = _param["use_gae"]
@@ -51,7 +50,6 @@ def run_trpo(config_dict, common_config, env_dict, stop):
         "vf_loss_coeff": vf_loss_coeff,
         "entropy_coeff": entropy_coeff,
         "vf_clip_param": vf_clip_param,
-        "lr": lr,
         "num_sgd_iter": num_sgd_iter,
         "train_batch_size": train_batch_size,
         "sgd_minibatch_size": sgd_minibatch_size,
