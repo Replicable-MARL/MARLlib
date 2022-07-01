@@ -16,9 +16,11 @@ def run_matrpo(config_dict, common_config, env_dict, stop):
 
     kl_threshold = _param['kl_threshold']
     accept_ratio = _param['accept_ratio']
+    critic_lr = _param['critic_lr']
 
     TrustRegionUpdator.kl_threshold = kl_threshold
     TrustRegionUpdator.accept_ratio = accept_ratio
+    TrustRegionUpdator.critic_lr = critic_lr
 
     train_batch_size = _param["batch_episode"] * env_dict["episode_limit"]
     sgd_minibatch_size = train_batch_size

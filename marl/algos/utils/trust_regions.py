@@ -78,6 +78,8 @@ class TrustRegionUpdator:
     accept_ratio = 0.1
     back_ratio = 0.8
     atol = 1e-7
+    critic_lr = 5e-3
+
     # delta = 0.01
 
     def __init__(self, model, dist_class, train_batch, adv_targ, initialize_policy_loss, initialize_critic_loss):
@@ -244,10 +246,9 @@ class TrustRegionUpdator:
     def update_critic(self, critic_loss):
         critic_loss_grad = torch.autograd.grad(critic_loss, self.critic_parameters, allow_unused=True)
 
-        lr = 5e-3
 
         new_params = (
-            parameters_to_vector(self.critic_parameters) - self.flat_grad(critic_loss_grad) * lr
+            parameters_to_vector(self.critic_parameters) - self.flat_grad(critic_loss_grad) * TrustRegionUpdator.critic_lr
         )
 
         vector_to_parameters(new_params, self.critic_parameters)
