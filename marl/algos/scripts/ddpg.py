@@ -10,8 +10,8 @@ def run_ddpg(config_dict, common_config, env_dict, stop):
     _param = AlgVar(config_dict)
 
     episode_limit = env_dict["episode_limit"]
-    train_batch_size = _param["batch_episode"] * episode_limit
-    learning_starts = _param["learning_starts_episode"] * episode_limit
+    train_batch_size = _param["batch_episode"]
+    learning_starts = _param["learning_starts_episode"]
     buffer_size = _param["buffer_size_episode"] * episode_limit
     if "fix_buffer_size" in config_dict:
         train_batch_size = config_dict["fix_buffer_size"]
