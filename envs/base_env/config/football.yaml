@@ -6,6 +6,7 @@ env_args:
   render: False
   dump_frequency: 0
 
+fix_buffer_size: 4000
 mask_flag: False
 global_state_flag: False
 opp_action_in_cc: True
