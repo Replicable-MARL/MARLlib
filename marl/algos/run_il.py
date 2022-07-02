@@ -108,13 +108,22 @@ def run_il(config_dict):
 
     elif config_dict["share_policy"] == "group":
         groups = policy_mapping_info["team_prefix"]
-        policies = {
-            "policy_{}".format(i): (None, env_info_dict["space_obs"], env_info_dict["space_act"], {}) for i in
-            groups
-        }
-        policy_ids = list(policies.keys())
-        policy_mapping_fn = tune.function(
-            lambda agent_id: "policy_{}_".format(agent_id.split("_")[0]))
+
+        if len(groups) == 1:
+            if not policy_mapping_info["all_agents_one_policy"]:
+                raise ValueError(
+                    "in {}, policy can not be shared, change it to 1. group 2. individual".format(map_name))
+            policies = {"shared_policy"}
+            policy_mapping_fn = (
+                lambda agent_id, episode, **kwargs: "shared_policy")
+        else:
+            policies = {
+                "policy_{}".format(i): (None, env_info_dict["space_obs"], env_info_dict["space_act"], {}) for i in
+                groups
+            }
+            policy_ids = list(policies.keys())
+            policy_mapping_fn = tune.function(
+                lambda agent_id: "policy_{}_".format(agent_id.split("_")[0]))
 
     elif config_dict["share_policy"] == "individual":
         if not policy_mapping_info["one_agent_one_policy"]:

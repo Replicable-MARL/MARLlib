@@ -76,24 +76,19 @@ def run_vd(config_dict):
             if not policy_mapping_info["all_agents_one_policy"]:
                 raise ValueError("in {}, policy can not be shared".format(map_name))
             grouping = {"group_all_": agent_name_ls}
+
         elif config_dict["share_policy"] == "group":
-            raise ValueError("joint Q learning does not support group function")
-            # obs_space = Tuple([GymDict(space_obs)] * n_agents)
-            # act_space = Tuple([space_act] * n_agents)
-            # grouping = {}
-            # groups = policy_mapping_info["team_prefix"]
-            # for prefix in groups:
-            #     grouping["group_{}".format(prefix)] = []
-            #     for agent_name in agent_name_ls:
-            #         if prefix in agent_name:
-            #             grouping["group_{}".format(prefix)].append(agent_name)
+            groups = policy_mapping_info["team_prefix"]
+            if len(groups) == 1:
+                obs_space = Tuple([GymDict(space_obs)] * n_agents)
+                act_space = Tuple([space_act] * n_agents)
+                if not policy_mapping_info["all_agents_one_policy"]:
+                    raise ValueError("in {}, policy can not be shared".format(map_name))
+                grouping = {"group_all_": agent_name_ls}
+            else:
+                raise ValueError("joint Q learning does not support group function")
         elif config_dict["share_policy"] == "individual":
             raise ValueError("joint Q learning does not support individual function")
-            # obs_space = Tuple([GymDict(space_obs)])
-            # act_space = Tuple([space_act])
-            # grouping = {}
-            # for agent_name in agent_name_ls:
-            #     grouping["group_{}_".format(agent_name)] = [agent_name]
         else:
             raise ValueError("wrong share_policy {}".format(config_dict["share_policy"]))
 
@@ -145,7 +140,7 @@ def run_vd(config_dict):
     ### policy ###
     ##############
 
-    if config_dict["algorithm"] in ["qmix", "vdn", "iql"]:  # the policy mapping is done in environment part
+    if config_dict["algorithm"] in ["qmix", "vdn", "iql"]:  # the policy mapping is done in script part
         policies = None
         policy_mapping_fn = None
 
