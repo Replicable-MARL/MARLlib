@@ -137,6 +137,19 @@ def run_cc(config_dict):
     else:
         raise ValueError("wrong share_policy {}".format(config_dict["share_policy"]))
 
+    # if happo or hatrpo, force individual
+    if config_dict["algorithm"] in ["happo", "hatrpo"]:
+        if not policy_mapping_info["one_agent_one_policy"]:
+            raise ValueError("in {}, agent number too large, we disable no sharing function".format(map_name))
+
+        policies = {
+            "policy_{}".format(i): (None, env_info_dict["space_obs"], env_info_dict["space_act"], {}) for i in
+            range(env_info_dict["num_agents"])
+        }
+        policy_ids = list(policies.keys())
+        policy_mapping_fn = tune.function(
+            lambda agent_id: policy_ids[agent_name_ls.index(agent_id)])
+
     #####################
     ### common config ###
     #####################
