@@ -4,7 +4,7 @@
 
 algo_args:
   batch_episode:  32
-  learning_starts_episode: 33
+  learning_starts_episode: 32
   twin_q: False
   prioritized_replay: False
   smooth_target_policy: False
