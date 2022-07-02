@@ -2,7 +2,7 @@
 
 model_arch_args:
   conv_layer:  1
-  out_channel_layer_0: 16
+  out_channel_layer_0: 8
   kernel_size_layer_0: 5
   stride_layer_0: 2
   padding_layer_0: 2
