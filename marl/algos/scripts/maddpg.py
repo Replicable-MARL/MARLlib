@@ -9,12 +9,12 @@ def run_maddpg(config_dict, common_config, env_dict, stop):
     _param = AlgVar(config_dict)
 
     episode_limit = env_dict["episode_limit"]
-    train_batch_size = _param["batch_episode"] * episode_limit
+    train_batch_size = _param["batch_episode"]
     learning_starts = _param["learning_starts_episode"] * episode_limit
     buffer_size = _param["buffer_size_episode"] * episode_limit
     if "fix_buffer_size" in config_dict:
         train_batch_size = config_dict["fix_buffer_size"]
-        learning_starts = 2 * train_batch_size
+        learning_starts = train_batch_size * episode_limit
     twin_q = _param["twin_q"]
     prioritized_replay = _param["prioritized_replay"]
     smooth_target_policy = _param["smooth_target_policy"]
