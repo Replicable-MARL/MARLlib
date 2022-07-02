@@ -1,8 +1,5 @@
 from ray.rllib.env.multi_agent_env import MultiAgentEnv
-try:
-    from MaMujoco.src.multiagent_mujoco.mujoco_multi import MujocoMulti
-except ModuleNotFoundError:
-    from MaMujocoEnv.src.multiagent_mujoco.mujoco_multi import MujocoMulti
+from multiagent_mujoco.mujoco_multi import MujocoMulti
 from gym.spaces import Dict as GymDict, Discrete, Box
 import numpy as np
 
