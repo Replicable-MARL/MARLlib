@@ -131,7 +131,6 @@ class MADDPG_RNN_TorchModel(DDPG_RNN_TorchModel):
         # Switch on training mode (when getting Q-values, we are usually in
         # training).
         model_out["is_training"] = True
-
         out, state_out = net(model_out, state_in, seq_lens)
         return out, state_out
 
