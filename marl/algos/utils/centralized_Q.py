@@ -5,6 +5,8 @@ from ray.rllib.policy.sample_batch import SampleBatch
 import numpy as np
 from ray.rllib.utils.torch_ops import convert_to_torch_tensor
 from ray.rllib.utils.numpy import convert_to_numpy
+from ray.rllib.policy.rnn_sequencing import pad_batch_to_sequences_of_same_size
+import copy
 
 torch, nn = try_import_torch()
 
@@ -12,6 +14,7 @@ torch, nn = try_import_torch()
 centralized Q postprocessing for 
 1. MADDPG 
 """
+
 
 def get_dim(a):
     dim = 1
@@ -145,23 +148,31 @@ def centralized_critic_q(policy: Policy,
 
 # postprocessing sampled batch before learning stage.
 def before_learn_on_batch(multi_agent_batch, policies, train_batch_size):
-    other_agent_next_action_dict = {}
     all_agent_next_action = []
     for pid, policy in policies.items():
 
-        # get agent number:
-        if 0 not in other_agent_next_action_dict:
-            custom_config = policy.config["model"]["custom_model_config"]
-            n_agents = custom_config["num_agents"]
-            for i in range(n_agents):
-                other_agent_next_action_dict[i] = []
+        custom_config = policy.config["model"]["custom_model_config"]
+        obs_dim = get_dim(custom_config["space_obs"]["obs"].shape)
+        global_state_flag = custom_config["global_state_flag"]
+        n_agents = custom_config["num_agents"]
 
-        policy_batch = multi_agent_batch.policy_batches[pid]
+        policy_batch = copy.deepcopy(multi_agent_batch.policy_batches[pid])
+        policy_batch["agent_index"] = policy_batch["agent_index"] + 1
+        pad_batch_to_sequences_of_same_size(
+            batch=policy_batch,
+            max_seq_len=policy.max_seq_len,
+            shuffle=False,
+            batch_divisibility_req=policy.batch_divisibility_req,
+            view_requirements=policy.view_requirements,
+        )
         target_policy_model = policy.target_model.policy_model.to(policy.device)
         next_obs = policy_batch["new_obs"]
 
         input_dict = {"obs": {}}
         input_dict["obs"]["obs"] = next_obs
+        if global_state_flag:
+            input_dict["obs"]["obs"] = next_obs[:, :obs_dim]
+            input_dict["state"] = next_obs[:, obs_dim:]
 
         state_in = policy_batch["state_in_0"]
         seq_lens = policy_batch["seq_lens"]
@@ -176,12 +187,11 @@ def before_learn_on_batch(multi_agent_batch, policies, train_batch_size):
 
         agent_id = np.unique(policy_batch["agent_index"])
         for a_id in agent_id:
+            if a_id == 0:  # zero padding
+                continue
             valid_flag = np.where(policy_batch["agent_index"] == a_id)[0]
             next_action_one_agent = next_action[valid_flag, :]
             all_agent_next_action.append(next_action_one_agent)
-            for key in other_agent_next_action_dict.keys():
-                if key != a_id:
-                    other_agent_next_action_dict[a_id].append(next_action_one_agent)
 
     # construct opponent next action for each batch
     all_agent_next_action = np.stack(all_agent_next_action, 1)
