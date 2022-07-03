@@ -11,8 +11,8 @@ def run_vda2c(config_dict, common_config, env_dict, stop):
     _param = AlgVar(config_dict)
 
     train_batch_size = _param["batch_episode"] * env_dict["episode_limit"]
-    if "fix_buffer_size" in config_dict:
-        train_batch_size = config_dict["fix_buffer_size"]
+    if "fixed_batch_timesteps" in config_dict:
+        train_batch_size = config_dict["fixed_batch_timesteps"]
     episode_limit = env_dict["episode_limit"]
 
     batch_mode = _param["batch_mode"]
