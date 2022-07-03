@@ -1,8 +1,5 @@
 from ray.rllib.env.multi_agent_env import MultiAgentEnv
-try:
-    from MaMujoco.src.multiagent_mujoco.mujoco_multi import MujocoMulti
-except ModuleNotFoundError:
-    from MaMujocoEnv.src.multiagent_mujoco.mujoco_multi import MujocoMulti
+from multiagent_mujoco.mujoco_multi import MujocoMulti
 from gym.spaces import Dict as GymDict, Discrete, Box
 import numpy as np
 
@@ -138,7 +135,7 @@ class RllibMAMujoco(MultiAgentEnv):
             "space_obs": self.observation_space,
             "space_act": self.action_space,
             "num_agents": self.num_agents,
-            "episode_limit": 200,
+            "episode_limit": 1000,
             "policy_mapping_info": policy_mapping_dict
         }
         return env_info

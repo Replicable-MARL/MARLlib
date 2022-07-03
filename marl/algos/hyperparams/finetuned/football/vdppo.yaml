@@ -1,0 +1,17 @@
+# VDPPO parameters
+
+# Detailed explanation for each hyper parameter can be found in ray/rllib/agents/ppo/ppo.py
+
+algo_args:
+  use_gae: True
+  lambda: 1.0
+  kl_coeff: 0.2
+  batch_episode: 5
+  num_sgd_iter: 5
+  vf_loss_coeff: 1.0
+  lr: 0.0005
+  entropy_coeff: 0.01
+  clip_param: 0.2
+  vf_clip_param: 10.0
+  batch_mode: "complete_episodes"
+  mixer: "qmix" # qmix or vdn

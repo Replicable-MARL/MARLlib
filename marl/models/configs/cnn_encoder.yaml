@@ -1,14 +1,24 @@
 # CNN encoder
 
 model_arch_args:
-  conv_layer:  2
+  conv_layer:  1
   out_channel_layer_0: 8
   kernel_size_layer_0: 5
   stride_layer_0: 2
   padding_layer_0: 2
   pool_size_layer_0: 3
-  out_channel_layer_1: 16
-  kernel_size_layer_1: 5
-  stride_layer_1: 2
-  padding_layer_1: 2
-  pool_size_layer_1: 2
+
+#model_arch_args:
+#  conv_layer:  2
+#  out_channel_layer_0: 8
+#  kernel_size_layer_0: 5
+#  stride_layer_0: 2
+#  padding_layer_0: 2
+#  pool_size_layer_0: 3
+#  out_channel_layer_1: 16
+#  kernel_size_layer_1: 5
+#  stride_layer_1: 2
+#  padding_layer_1: 2
+#  pool_size_layer_1: 2
+
+

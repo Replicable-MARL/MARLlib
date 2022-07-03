@@ -1,0 +1,17 @@
+# MAPPO parameters
+
+algo_args:
+  batch_episode:  10
+  batch_mode: "complete_episodes"
+  lr: 0.0005
+  grad_clip: 10
+  iteration: 4
+  use_critic: True
+  gamma: 0.99
+  entropy_coeff: 0.01
+  clip_param: 0.2
+  vf_clip_param: 20.0
+  lr_sh_min: 0
+  lr_sh_max: 0.0005
+  lr_sh_step: 999999
+  lr_min: 0.000000001

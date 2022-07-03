@@ -1,0 +1,16 @@
+algo_args:
+  use_gae: True
+  lambda: 1.0
+  gamma: 0.99
+  batch_episode: 10
+  kl_coeff: 0.2
+  num_sgd_iter: 1
+  grad_clip: 10
+  clip_param: 0.3
+  vf_loss_coeff: 1.0
+  entropy_coeff: 0.01
+  vf_clip_param: 10.0
+  batch_mode: "complete_episodes"
+  kl_threshold: 0.06
+  accept_ratio: 0.5
+  critic_lr: 0.00005

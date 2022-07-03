@@ -125,4 +125,3 @@ class CC_RNN(Base_RNN):
             self.central_vf,
         ]
         return reduce(lambda x, y: x + y, map(lambda p: list(p.parameters()), critics))
-        # return list(self.value_branch.parameters())

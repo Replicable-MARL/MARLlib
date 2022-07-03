@@ -145,15 +145,8 @@ class DDPG_RNN(TorchRNN, nn.Module):
 
         obs_inputs = input_dict["obs"]["obs"].float()
 
-        # Convert action_mask into a [0.0 || -inf]-type mask.
-        if self.custom_config["mask_flag"]:
-            action_mask = input_dict["obs"]["action_mask"]
-            inf_mask = torch.clamp(torch.log(action_mask), min=FLOAT_MIN)
-
         if isinstance(seq_lens, np.ndarray):
             seq_lens = torch.Tensor(seq_lens).int()
-        # if seq_lens.shape[0] == 0:
-        #     print(1)
         max_seq_len = obs_inputs.shape[0] // seq_lens.shape[0]
 
         self.time_major = self.model_config.get("_time_major", False)
@@ -202,8 +195,6 @@ class DDPG_RNN(TorchRNN, nn.Module):
                                              seq_lens)
         output = torch.reshape(output, [-1, self.num_outputs])
 
-        if self.custom_config["mask_flag"]:
-            output = output + inf_mask
 
         return output, new_state
 

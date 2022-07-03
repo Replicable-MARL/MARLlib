@@ -21,7 +21,7 @@ from ray.rllib.agents.ppo.ppo_torch_policy import PPOTorchPolicy, ValueNetworkMi
 from ray.rllib.utils.torch_ops import apply_grad_clipping
 from ray.rllib.policy.torch_policy import LearningRateSchedule, EntropyCoeffSchedule
 from marl.algos.utils.setup_utils import setup_torch_mixins, get_agent_num
-from marl.algos.utils.get_hetero_info import (
+from marl.algos.utils.centralized_critic_hetero import (
     get_global_name,
     STATE,
     add_all_agents_gae,
@@ -220,9 +220,9 @@ def make_happo_optimizers(policy: Policy,
     return policy._actor_optimizer, policy._critic_optimizer
 
 
-HAPPOTorchPolicy = PPOTorchPolicy.with_updates(
+HAPPOTorchPolicy = lambda ppo_with_critic: PPOTorchPolicy.with_updates(
         name="HAPPOTorchPolicy",
-        get_default_config=lambda: PPO_CONFIG,
+        get_default_config=lambda: ppo_with_critic,
         postprocess_fn=add_all_agents_gae,
         loss_fn=happo_surrogate_loss,
         before_init=setup_torch_mixins,
@@ -233,13 +233,15 @@ HAPPOTorchPolicy = PPOTorchPolicy.with_updates(
         ])
 
 
-def get_policy_class_happo(config_):
-    if config_["framework"] == "torch":
-        return HAPPOTorchPolicy
+def get_policy_class_happo(ppo_with_critic):
+    def __inner(config_):
+        if config_["framework"] == "torch":
+            return HAPPOTorchPolicy(ppo_with_critic)
+    return __inner
 
 
-HAPPOTrainer = PPOTrainer.with_updates(
-    name="#happo-trainer",
+HAPPOTrainer = lambda ppo_with_critic: PPOTrainer.with_updates(
+    name="HAPPOTrainer",
     default_policy=None,
-    get_policy_class=get_policy_class_happo,
+    get_policy_class=get_policy_class_happo(ppo_with_critic),
 )

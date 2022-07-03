@@ -18,40 +18,45 @@ def run_mappo(config_dict, common_config, env_dict, stop):
     make sure sgd_minibatch_size > max_seq_len
     """
     train_batch_size = _param["batch_episode"] * env_dict["episode_limit"]
+    if "fixed_batch_timesteps" in config_dict:
+        train_batch_size = config_dict["fixed_batch_timesteps"]
     sgd_minibatch_size = train_batch_size
     episode_limit = env_dict["episode_limit"]
     while sgd_minibatch_size < episode_limit:
         sgd_minibatch_size *= 2
 
-    algorithm = config_dict["algorithm"]
     batch_mode = _param["batch_mode"]
-    # lr = _param["lr"]
-    iteration = _param["iteration"]
+    lr = _param["lr"]
     clip_param = _param["clip_param"]
     vf_clip_param = _param["vf_clip_param"]
+    use_gae = _param["use_gae"]
+    gae_lambda = _param["lambda"]
+    kl_coeff = _param["kl_coeff"]
+    num_sgd_iter = _param["num_sgd_iter"]
+    vf_loss_coeff = _param["vf_loss_coeff"]
     entropy_coeff = _param["entropy_coeff"]
-    horizon = config_dict['algo_args']['horizon']
-    grad_clip = config_dict['algo_args']['grad_clip']
-    use_critic = config_dict['algo_args']['use_critic']
-    gamma = config_dict['algo_args']['gamma']
 
     config = {
-        "horizon": horizon,
-        "num_sgd_iter": iteration,
+        "batch_mode": batch_mode,
         "train_batch_size": train_batch_size,
         "sgd_minibatch_size": sgd_minibatch_size,
-        "grad_clip": grad_clip,
-        "use_critic": use_critic,
+        "lr": lr,
+        "entropy_coeff": entropy_coeff,
+        "num_sgd_iter": num_sgd_iter,
         "clip_param": clip_param,
-        "gamma": gamma,
+        "use_gae": use_gae,
+        "lambda": gae_lambda,
+        "vf_loss_coeff": vf_loss_coeff,
+        "kl_coeff": kl_coeff,
+        "vf_clip_param": vf_clip_param,
         "model": {
             "custom_model": "Centralized_Critic_Model",
             "custom_model_config": merge_dicts(config_dict, env_dict),
-            "vf_share_layers": True,
         },
     }
     config.update(common_config)
 
+    algorithm = config_dict["algorithm"]
     map_name = config_dict["env_args"]["map_name"]
     arch = config_dict["model_arch_args"]["core_arch"]
     RUNNING_NAME = '_'.join([algorithm, arch, map_name])

@@ -38,9 +38,9 @@ def _get_config(params, arg_name, info=None):
 
     if "algo" in arg_name:
         if "--finetuned" in params:
-            path = "algos/configs/finetuned/{}".format(info["env"])
+            path = "algos/hyperparams/finetuned/{}".format(info["env"])
         else:
-            path = "algos/configs"
+            path = "algos/hyperparams/common"
 
     elif "env" in arg_name:
         path = "../envs/base_env/config"

@@ -1,8 +1,9 @@
 env: mamujoco
 
 env_args:
-  map_name: "2AgentHalfCheetah" # others can be found in IL/envs/mamujoco_rllib.py
+  map_name: "2AgentHalfCheetah" # others can be found in mamujoco.py
 
 mask_flag: False
 global_state_flag: True
 opp_action_in_cc: True
+fixed_batch_timesteps: 4000 # optional, all scenario will use this batch size, only valid for on-policy algorithms

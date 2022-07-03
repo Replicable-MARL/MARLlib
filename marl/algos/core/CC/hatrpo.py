@@ -23,7 +23,7 @@ from ray.rllib.agents.ppo.ppo_torch_policy import PPOTorchPolicy, ValueNetworkMi
 from ray.rllib.utils.torch_ops import apply_grad_clipping
 from ray.rllib.policy.torch_policy import LearningRateSchedule, EntropyCoeffSchedule
 from marl.algos.utils.setup_utils import setup_torch_mixins, get_agent_num
-from marl.algos.utils.get_hetero_info import (
+from marl.algos.utils.centralized_critic_hetero import (
     get_global_name,
     contain_global_obs,
     hatrpo_post_process,

@@ -1,0 +1,6 @@
+# PG parameters
+
+algo_args:
+  batch_episode:  10
+  batch_mode: "complete_episodes"
+  lr: 0.0004

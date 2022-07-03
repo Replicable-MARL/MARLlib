@@ -1,0 +1,18 @@
+# DDPG parameters
+
+# Detailed explanation for each hyper parameter can be found in ray/rllib/agents/ddpg/ddpg.py
+
+algo_args:
+  batch_episode:  8
+  learning_starts_episode: 8
+  twin_q: False
+  prioritized_replay: False
+  smooth_target_policy: False
+  n_step: 1
+  critic_lr: 0.0005
+  actor_lr: 0.0005
+  buffer_size_episode: 1000
+  target_network_update_freq_episode: 1
+  tau: 0.002
+  batch_mode: "complete_episodes"
+

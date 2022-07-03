@@ -1,0 +1,17 @@
+# HAPPO parameters
+algo_args:
+  use_gae: True
+  lambda: 1.0
+  batch_episode: 5
+  kl_coeff: 0.2
+  num_sgd_iter: 5
+  grad_clip: 10
+  clip_param: 0.3
+  critic_lr: 0.00005
+  vf_loss_coeff: 1.0
+  lr: 0.00005
+  gamma: 0.99
+  entropy_coeff: 0.01
+  vf_clip_param: 10.0
+  batch_mode: "complete_episodes"
+
