@@ -5,7 +5,8 @@ from ray.rllib.policy.policy import Policy
 from ray.rllib.policy.sample_batch import SampleBatch
 from ray.rllib.utils.numpy import convert_to_numpy
 from marl.algos.utils.centralized_Q import get_dim
-
+from ray.rllib.policy.rnn_sequencing import pad_batch_to_sequences_of_same_size
+import copy
 import numpy as np
 
 torch, nn = try_import_torch()
@@ -131,7 +132,20 @@ def before_learn_on_batch(multi_agent_batch, policies, train_batch_size):
     all_agent_target_q = []
     for pid, policy in policies.items():
 
-        policy_batch = multi_agent_batch.policy_batches[pid]
+        custom_config = policy.config["model"]["custom_model_config"]
+        obs_dim = get_dim(custom_config["space_obs"]["obs"].shape)
+        global_state_flag = custom_config["global_state_flag"]
+        n_agents = custom_config["num_agents"]
+
+        policy_batch = copy.deepcopy(multi_agent_batch.policy_batches[pid])
+        policy_batch["agent_index"] = policy_batch["agent_index"] + 1
+        pad_batch_to_sequences_of_same_size(
+            batch=policy_batch,
+            max_seq_len=policy.max_seq_len,
+            shuffle=False,
+            batch_divisibility_req=policy.batch_divisibility_req,
+            view_requirements=policy.view_requirements,
+        )
 
         q_model = policy.model.q_model.to(policy.device)
         target_policy_model = policy.target_model.policy_model.to(policy.device)
@@ -148,6 +162,12 @@ def before_learn_on_batch(multi_agent_batch, policies, train_batch_size):
 
         input_dict["obs"]["obs"] = obs
         target_input_dict["obs"]["obs"] = next_obs
+
+        if global_state_flag:
+            input_dict["obs"]["obs"] = obs[:, :obs_dim]
+            input_dict["state"] = obs[:, obs_dim:]
+            target_input_dict["obs"]["obs"] = next_obs[:, :obs_dim]
+            target_input_dict["state"] = next_obs[:, obs_dim:]
 
         # get current action & Q value
         action = policy_batch["actions"]
@@ -171,6 +191,8 @@ def before_learn_on_batch(multi_agent_batch, policies, train_batch_size):
 
         agent_id = np.unique(policy_batch["agent_index"])
         for a_id in agent_id:
+            if a_id == 0:  # zero padding
+                continue
             valid_flag = np.where(policy_batch["agent_index"] == a_id)[0]
             q_one_agent = q[valid_flag, :]
             next_target_q_one_agent = next_target_q[valid_flag, :]
