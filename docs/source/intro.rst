@@ -1,9 +1,8 @@
 Introduction
 ============
 
-MARLlib is a parallel framework of population-based learning nested with (multi-agent) reinforcement learning (RL) methods, such as Policy Space Response Oracle, Self-Play, and Neural Fictitious Self-Play. MARLlib provides higher-level abstractions of MARL training paradigms, which enables efficient code reuse and flexible deployments on different distributed computing paradigms. The design of MARLlib also strives to promote the research of other multi-agent learning research, including multi-agent imitation learning and model-based RL.
-
-.. figure:: ../imgs/overview.png
+Multi-Agent RLlib (MARLlib) is a MARL benchmark based on Ray and one of its toolkits RLlib. It provides MARL research community a unified platform for developing and evaluating the new ideas in various multi-agent environments
+.. figure:: ../../image/overview.png
     :align: center
 
     Overview of the MARLlib architecture.
@@ -11,12 +10,14 @@ MARLlib is a parallel framework of population-based learning nested with (multi-
 
 The key features of MARLlib include:
 
-* **Pytorch-based algorithm implementation**: All algorithms implemented in MARLlib are based on `PyTorch <https://pytorch.org/>`_.
-* **Popular distributed computing RL framework support**: MARLlib support multiple distributed computing RL frameworks, including asynchronous
-* **Provide comprehensive multi-agent RL training interfaces**: MARLlib implemented abstractions of several popular MARL training paradigms, aims to accelerate the development of algorithms on, and make users focus on the development of core algorithms, not training flow customization.
+* it collects most of the existing MARL algorithms widely acknowledged by the community and unifies them under one framework.
+* it gives a solution that enables different multi-agent environments using the same interface to interact with the agents.
+* it guarantees excellent efficiency in both the training and sampling process.
+* it provides trained results, including learning curves and pretrained models specific to each task and algorithm's combination, with finetuned hyper-parameters to guarantee credibility.
 
-
-Before getting start, please make sure you've installed MARLlib by following the :ref:`installation`. :ref:`quick-start` gives some basic examples. As for the API documentation.
+Before getting start, please make sure you've installed the fundamentally required dependency by following the :ref:`basic-installation`.
+Environment specific description is maintained in :ref:`env-installation`.
+:ref:`quick-start` gives some basic examples.
 
 Citing MARLlib
 ^^^^^^^^^^^^

@@ -7,4 +7,5 @@ MARLlib: Parallel Framework for PB-MARL
 
    intro
    installation
+   env_installation
    quick_start
