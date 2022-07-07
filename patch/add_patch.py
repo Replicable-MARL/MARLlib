@@ -71,21 +71,6 @@ if __name__ == "__main__":
         "pommerman", action="store_true", help="Don't ask for confirmation.")
     args = parser.parse_args()
 
-    # ray patch
-    # execution TODO: modify xxx 
-    do_link("rllib/execution/replay_buffer.py", force=args.yes, local_path="./rllib/execution/replay_buffer.py",
-            packagent=ray)
-    do_link("rllib/execution/train_ops.py", force=args.yes, local_path="./rllib/execution/train_ops.py", packagent=ray)
-
-    # models TODO: modify xxx 
-    do_link("rllib/models/preprocessors.py", force=args.yes, local_path="./rllib/models/preprocessors.py",
-            packagent=ray)
-
-    # policy TODO: modify xxx 
-    do_link("rllib/policy/rnn_sequencing.py", force=args.yes, local_path="./rllib/policy/rnn_sequencing.py",
-            packagent=ray)
-    do_link("rllib/policy/torch_policy.py", force=args.yes, local_path="./rllib/policy/torch_policy.py", packagent=ray)
-
     # pommerman
     if args.pommerman:
 
@@ -97,5 +82,23 @@ if __name__ == "__main__":
                 packagent=pommerman)
 
         do_link("envs/v0.py", force=args.yes, local_path="./pommerman_patch/v0.py", packagent=pommerman)
+
+    else:
+        # ray patch
+        # execution
+        do_link("rllib/execution/replay_buffer.py", force=args.yes, local_path="./rllib/execution/replay_buffer.py",
+                packagent=ray)
+        do_link("rllib/execution/train_ops.py", force=args.yes, local_path="./rllib/execution/train_ops.py", packagent=ray)
+
+        # models
+        do_link("rllib/models/preprocessors.py", force=args.yes, local_path="./rllib/models/preprocessors.py",
+                packagent=ray)
+
+        # policy
+        do_link("rllib/policy/rnn_sequencing.py", force=args.yes, local_path="./rllib/policy/rnn_sequencing.py",
+                packagent=ray)
+        do_link("rllib/policy/torch_policy.py", force=args.yes, local_path="./rllib/policy/torch_policy.py", packagent=ray)
+
+
 
     print("finish soft link")
