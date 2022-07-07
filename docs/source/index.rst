@@ -1,5 +1,5 @@
 MARLlib: Parallel Framework for PB-MARL
-=====================================
+========================================
 
 .. toctree::
    :maxdepth: 2
@@ -8,4 +8,6 @@ MARLlib: Parallel Framework for PB-MARL
    intro
    installation
    env_installation
+   environments
+   algorithms
    quick_start

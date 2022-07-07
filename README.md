@@ -90,7 +90,7 @@ Most of the popular environment in MARL research has been incorporated in this b
 | [MPE](https://github.com/openai/multiagent-particle-envs)  | Mixed | Both | Both | Continuous  |
 | [SMAC](https://github.com/oxwhirl/smac)  | Cooperative | Partial | Discrete | Continuous |
 | [MetaDrive](https://github.com/decisionforce/metadrive)  | Collaborative | Partial | Continuous | Continuous |
-|[MAgent](https://www.pettingzoo.ml/magent) | Mixed | Partial | Discrete | Discrete |
+| [MAgent](https://www.pettingzoo.ml/magent) | Mixed | Partial | Discrete | Discrete |
 | [Pommerman](https://github.com/MultiAgentLearning/playground)  | Mixed | Both | Discrete | Discrete |
 | [MaMujoco](https://github.com/schroederdewitt/multiagent_mujoco)  | Cooperative | Partial | Continuous | Continuous |
 | [GRF](https://github.com/google-research/football)  | Collaborative | Full | Discrete | Continuous |
