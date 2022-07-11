@@ -6,6 +6,20 @@ Env Installation Guides
 
 Note: make sure you have read and complete the :ref:`basic-installation` part.
 
+- :ref:`SMAC_install`
+- :ref:`MaMujoco_install`
+- :ref:`Football_install`
+- :ref:`MPE_install`
+- :ref:`LBF_install`
+- :ref:`MAgent_install`
+- :ref:`RWARE_install`
+- :ref:`Pommerman_install`
+- :ref:`MetaDrive_install`
+- :ref:`Hanabi_install`
+
+.. _SMAC_install:
+
+
 SMAC
 -----------------
 
@@ -27,6 +41,8 @@ SMAC
 Note: the location of the StarcraftII game directory should be pre-defined,
 or you can just follow the error log (when the process can not found the game's location)
 and put it in the right place.
+
+.. _MaMujoco_install:
 
 MaMujoco
 -----------------
@@ -50,6 +66,8 @@ MaMujoco
 
 Note: To access the MuJoCo API, you may have to get a mjkey (which is free now) and put it under /home/YourUserName/.mujoco.
 
+.. _Football_install:
+
 Google Research Football
 -----------------
 
@@ -65,6 +83,8 @@ We provide solutions (may work) for potential bugs
 * `Compiler error on /usr/lib/x86_64-linux-gnu/libGL.so <https://github.com/RobotLocomotion/drake/issues/2087>`_
 * `apt-get, unmet dependencies, ... "but it is not going to be installed" <https://askubuntu.com/questions/564282/apt-get-unmet-dependencies-but-it-is-not-going-to-be-installed>`_
 
+.. _MPE_install:
+
 MPE
 -----------------
 
@@ -74,12 +94,16 @@ We use pettingzoo version of MPE
 
     pip install pettingzoo[mpe]
 
+.. _LBF_install:
+
 LBF
 ---------------------
 
 .. code-block:: shell
 
     pip install lbforaging==1.0.15
+
+.. _RWARE_install:
 
 RWARE
 ------------------------
@@ -88,6 +112,7 @@ RWARE
 
     pip install rware==1.0.1
 
+.. _MAgent_install:
 
 MAgent
 ------------------------
@@ -97,6 +122,8 @@ We use pettingzoo version of MAgent
 .. code-block:: shell
 
     pip install pettingzoo[magent]
+
+.. _Pommerman_install:
 
 Pommerman
 ------------------------
@@ -110,6 +137,7 @@ Pommerman
     python add_patch.py --pommerman
     pip install gym==0.21.0
 
+.. _MetaDrive_install:
 
 MetaDrive
 ------------------------
@@ -117,6 +145,8 @@ MetaDrive
 .. code-block:: shell
 
     pip install metadrive-simulator==0.2.3
+
+.. _Hanabi_install:
 
 Hanabi
 ------------------------
