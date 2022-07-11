@@ -4,11 +4,11 @@
 <img src=image/logo1.png width=70% />
 </div>
 
-# MARLlib: A benchmark for multi-agent reinforcement learning
+<h1 align="center"> MARLlib: The MARL Extension for RLlib </h1>
 
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/Replicable-MARL/MARLlib/blob/main/LICENSE)
 
-**Multi-Agent RLlib (MARLlib)** is a *MARL benchmark* based on [**Ray**](https://github.com/ray-project/ray) and one of its toolkits [**RLlib**](https://github.com/ray-project/ray/tree/master/rllib). 
+**Multi-Agent RLlib (MARLlib)** is a *Multi-Agent Reinforcement Learning benchmark* based on [**Ray**](https://github.com/ray-project/ray) and one of its toolkits [**RLlib**](https://github.com/ray-project/ray/tree/master/rllib). 
 It provides MARL research community a unified platform for developing and evaluating the new ideas in various multi-agent environments.
 There are four core features of **MARLlib**. 
 
@@ -90,7 +90,7 @@ Most of the popular environment in MARL research has been incorporated in this b
 | [MPE](https://github.com/openai/multiagent-particle-envs)  | Mixed | Both | Both | Continuous  |
 | [SMAC](https://github.com/oxwhirl/smac)  | Cooperative | Partial | Discrete | Continuous |
 | [MetaDrive](https://github.com/decisionforce/metadrive)  | Collaborative | Partial | Continuous | Continuous |
-| [MAgent](https://www.pettingzoo.ml/magent) | Mixed | Partial | Discrete | Discrete |
+|[MAgent](https://www.pettingzoo.ml/magent) | Mixed | Partial | Discrete | Discrete |
 | [Pommerman](https://github.com/MultiAgentLearning/playground)  | Mixed | Both | Discrete | Discrete |
 | [MaMujoco](https://github.com/schroederdewitt/multiagent_mujoco)  | Cooperative | Partial | Continuous | Continuous |
 | [GRF](https://github.com/google-research/football)  | Collaborative | Full | Discrete | Continuous |
