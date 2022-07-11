@@ -284,6 +284,10 @@ including Lidar, RGB images, top-down semantic maps, and first-person view image
 
 Official Link: https://github.com/decisionforce/metadrive
 
+.. list-table:: Environment Features
+   :widths: 25 25
+   :header-rows: 0
+
    * - ``Original Learning Mode``
      - Collaborative
    * - ``Supported Learning Mode``
@@ -313,6 +317,10 @@ Players are aware of other players' cards but not their own and attempt to play 
 specific order to set off a simulated fireworks show.
 
 Official Link: https://github.com/deepmind/hanabi-learning-environment
+
+.. list-table:: Environment Features
+   :widths: 25 25
+   :header-rows: 0
 
    * - ``Original Learning Mode``
      - Collaborative
