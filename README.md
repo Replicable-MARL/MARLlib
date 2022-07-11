@@ -4,7 +4,7 @@
 <img src=image/logo1.png width=70% />
 </div>
 
-# MARLlib: The MARL Extension for RLlib
+<h1 align="center"> MARLlib: The MARL Extension for RLlib </h1>
 
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/Replicable-MARL/MARLlib/blob/main/LICENSE)
 
