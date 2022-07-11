@@ -13,16 +13,24 @@ It concentrates on decentralized micromanagement scenarios, where an individual 
 
 Official Link: https://github.com/oxwhirl/smac
 
-+------------------------+--------------+
-| Learning Mode          | Cooperative  |
-+========================+==============+
-| Observability          | Partial      |
-| Action Space           | Discrete     |
-| Observation Space Dim  | 1D           |
-| Action Mask            | Yes          |
-| Global State           | Yes          |
-| Global State Space Dim | 1D           |
-+------------------------+--------------+
+.. list-table:: SMAC Environment Features
+   :widths: 25 25
+   :header-rows: 0
+
+   * - ``Learning Mode``
+     - Cooperative
+   * - ``Observability``
+     - Partial
+   * - ``Action Space``
+     - Discrete
+   * - ``Observation Space Dim``
+     - 1D
+   * - ``Action Mask``
+     - Yes
+   * - ``Global State``
+     - Yes
+   * - ``Global State Space Dim``
+     - 1D
 
 
 
