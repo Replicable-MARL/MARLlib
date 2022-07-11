@@ -5,6 +5,17 @@ Env Description
 
 Brief Description of 10 different environments incorporated in ``MARLLib``.
 
+* :ref:`SMAC`
+* :ref:`MaMujoco`
+* :ref:`Google Research Football`
+* :ref:`MPE`
+* :ref:`LBF`
+* :ref:`MAgent`
+* :ref:`RWARE`
+* :ref:`Pommerman`
+* :ref:`MetaDrive`
+* :ref:`Hanabi`
+
 SMAC
 -----------------
 
