@@ -4,11 +4,11 @@
 <img src=image/logo1.png width=70% />
 </div>
 
-# MARLlib: A benchmark for multi-agent reinforcement learning
+# MARLlib: The MARL Extension for RLlib
 
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/Replicable-MARL/MARLlib/blob/main/LICENSE)
 
-**Multi-Agent RLlib (MARLlib)** is a *MARL benchmark* based on [**Ray**](https://github.com/ray-project/ray) and one of its toolkits [**RLlib**](https://github.com/ray-project/ray/tree/master/rllib). 
+**Multi-Agent RLlib (MARLlib)** is a *Multi-Agent Reinforcement Learning benchmark* based on [**Ray**](https://github.com/ray-project/ray) and one of its toolkits [**RLlib**](https://github.com/ray-project/ray/tree/master/rllib). 
 It provides MARL research community a unified platform for developing and evaluating the new ideas in various multi-agent environments.
 There are four core features of **MARLlib**. 
 
