@@ -3,7 +3,7 @@
 Env Description
 =======================
 
-Brief introduction of 10 different environments in MARLLib.
+Brief Description of 10 different environments incorporated in ``MARLLib``.
 
 SMAC
 -----------------
@@ -13,7 +13,7 @@ It concentrates on decentralized micromanagement scenarios, where an individual 
 
 Official Link: https://github.com/oxwhirl/smac
 
-.. list-table:: Environment Features
+.. list-table::
    :widths: 25 25
    :header-rows: 0
 
@@ -48,7 +48,7 @@ Based on the popular single-agent robotic MuJoCo control suite provides a wide v
 
 Official Link: https://github.com/schroederdewitt/multiagent_mujoco
 
-.. list-table:: Environment Features
+.. list-table::
    :widths: 25 25
    :header-rows: 0
 
@@ -81,7 +81,7 @@ physics-based 3D simulator. It also provides support for multiplayer and multi-a
 
 Official Link: https://github.com/google-research/football
 
-.. list-table:: Environment Features
+.. list-table::
    :widths: 25 25
    :header-rows: 0
 
@@ -116,7 +116,7 @@ Official Link: https://github.com/openai/multiagent-particle-envs
 
 Our version: https://github.com/Farama-Foundation/PettingZoo/tree/master/pettingzoo/mpe
 
-.. list-table:: Environment Features
+.. list-table::
    :widths: 25 25
    :header-rows: 0
 
@@ -149,7 +149,7 @@ Agents navigate a grid world and collect food by cooperating with other agents i
 
 Official Link: https://github.com/semitable/lb-foraging
 
-.. list-table:: Environment Features
+.. list-table::
    :widths: 25 25
    :header-rows: 0
 
@@ -182,7 +182,7 @@ Real-world applications inspire the simulator, in which robots pick up shelves a
 
 Official Link: https://github.com/semitable/robotic-warehouse
 
-.. list-table:: Environment Features
+.. list-table::
    :widths: 25 25
    :header-rows: 0
 
@@ -216,7 +216,7 @@ Official Link: https://www.pettingzoo.ml/magent
 
 Our version: https://github.com/Farama-Foundation/PettingZoo/tree/master/pettingzoo/mpe
 
-.. list-table:: Environment Features
+.. list-table::
    :widths: 25 25
    :header-rows: 0
 
@@ -250,7 +250,7 @@ and Team asks agents to be able to work with others to accomplish a shared but c
 
 Official Link: https://github.com/MultiAgentLearning/playground
 
-.. list-table:: Environment Features
+.. list-table::
    :widths: 25 25
    :header-rows: 0
 
@@ -284,7 +284,7 @@ including Lidar, RGB images, top-down semantic maps, and first-person view image
 
 Official Link: https://github.com/decisionforce/metadrive
 
-.. list-table:: Environment Features
+.. list-table::
    :widths: 25 25
    :header-rows: 0
 
@@ -318,7 +318,7 @@ specific order to set off a simulated fireworks show.
 
 Official Link: https://github.com/deepmind/hanabi-learning-environment
 
-.. list-table:: Environment Features
+.. list-table::
    :widths: 25 25
    :header-rows: 0
 
