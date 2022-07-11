@@ -5,16 +5,19 @@ Env Description
 
 Brief Description of 10 different environments incorporated in ``MARLLib``.
 
-* :ref:`SMAC`
-* :ref:`MaMujoco`
-* :ref:`Google Research Football`
-* :ref:`MPE`
-* :ref:`LBF`
-* :ref:`MAgent`
-* :ref:`RWARE`
-* :ref:`Pommerman`
-* :ref:`MetaDrive`
-* :ref:`Hanabi`
+- :ref:`SMAC`
+- :ref:`MaMujoco`
+- :ref:`Football`
+- :ref:`MPE`
+- :ref:`LBF`
+- :ref:`MAgent`
+- :ref:`RWARE`
+- :ref:`Pommerman`
+- :ref:`MetaDrive`
+- :ref:`Hanabi`
+
+
+.. _SMAC:
 
 SMAC
 -----------------
@@ -50,6 +53,7 @@ Official Link: https://github.com/oxwhirl/smac
      - Simultaneous
 
 
+.. _MaMujoco:
 
 MaMujoco
 -----------------
@@ -84,6 +88,8 @@ Official Link: https://github.com/schroederdewitt/multiagent_mujoco
    * - ``Agent-Env Interact Mode``
      - Simultaneous
 
+.. _Football:
+
 Google Research Football
 -----------------------------
 
@@ -116,6 +122,8 @@ Official Link: https://github.com/google-research/football
      - Sparse
    * - ``Agent-Env Interact Mode``
      - Simultaneous
+
+.. _MPE:
 
 MPE
 -----------------
@@ -152,6 +160,8 @@ Our version: https://github.com/Farama-Foundation/PettingZoo/tree/master/petting
    * - ``Agent-Env Interact Mode``
      - Simultaneous / Asynchronous
 
+.. _LBF:
+
 LBF
 ---------------------
 
@@ -185,6 +195,8 @@ Official Link: https://github.com/semitable/lb-foraging
    * - ``Agent-Env Interact Mode``
      - Simultaneous
 
+.. _RWARE:
+
 RWARE
 ------------------------
 
@@ -217,6 +229,9 @@ Official Link: https://github.com/semitable/robotic-warehouse
      - Sparse
    * - ``Agent-Env Interact Mode``
      - Simultaneous
+
+
+.. _MAgent:
 
 MAgent
 ------------------------
@@ -252,6 +267,8 @@ Our version: https://github.com/Farama-Foundation/PettingZoo/tree/master/petting
    * - ``Agent-Env Interact Mode``
      - Simultaneous / Asynchronous
 
+.. _Pommerman:
+
 Pommerman
 ------------------------
 
@@ -286,6 +303,8 @@ Official Link: https://github.com/MultiAgentLearning/playground
    * - ``Agent-Env Interact Mode``
      - Simultaneous
 
+.. _MetaDrive:
+
 MetaDrive
 ------------------------
 
@@ -319,6 +338,8 @@ Official Link: https://github.com/decisionforce/metadrive
      - Dense
    * - ``Agent-Env Interact Mode``
      - Simultaneous
+
+.. _Hanabi:
 
 Hanabi
 ------------------------

@@ -41,7 +41,7 @@ External environments are integrated in MARLlib, such as `StarCraftII <https://g
 * our simplified guides in :ref:`env-installation`
 * the official guides on their project homepage.
 
-The official links can be found in in :ref:`_environments`.
+The official links can be found in in :ref:`environments`.
 
 
 Development requirements
