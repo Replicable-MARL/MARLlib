@@ -20,6 +20,8 @@ Independent Learning
 
 Features of independent learning
 
+---------
+
 Independent Q Learning (IQL)
 ---------------------------------------------
 
@@ -63,6 +65,8 @@ Implementation
 Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
 
+---------
+
 Independent Policy Gradient (IPG)
 ---------------------------------------------
 
@@ -103,6 +107,8 @@ Implementation
 
 Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
+
+---------
 
 Independent Advanced Actor Critic (IA2C)
 ---------------------------------------------
@@ -146,6 +152,8 @@ Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
 
 
+---------
+
 
 Independent Deep Deterministic Policy Gradient (IDDPG)
 -------------------------------------------------------------
@@ -186,6 +194,8 @@ Implementation
 
 Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
+
+---------
 
 
 Independent Trust Region Policy Optimization (ITRPO)
@@ -228,6 +238,8 @@ Implementation
 
 Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
+
+---------
 
 Independent Proximal Policy Optimization (IPPO)
 -----------------------------------------------------
@@ -278,6 +290,8 @@ Centralized Critic
 
 Features of centralized critic under CTDE framework.
 
+---------
+
 Counterfactual Multi-Agent Policy Gradients (COMA)
 -----------------------------------------------------
 
@@ -319,6 +333,8 @@ Implementation
 Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
 
+---------
+
 
 Multi-agent Advanced Actor Critic (MAA2C)
 ---------------------------------------------
@@ -357,6 +373,8 @@ Implementation
 Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
 
+
+---------
 
 
 Multi-agent Deep Deterministic Policy Gradient (MADDPG)
@@ -399,6 +417,8 @@ Implementation
 Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
 
+---------
+
 
 Multi-agent Trust Region Policy Optimization (MATRPO)
 -------------------------------------------------------------
@@ -436,6 +456,8 @@ Implementation
 
 Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
+
+---------
 
 Multi-agent Proximal Policy Optimization (MAPPO)
 -----------------------------------------------------
@@ -479,6 +501,8 @@ Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
 
 
+---------
+
 Heterogeneous Multi-agent Trust Region Policy Optimization (HATRPO)
 ------------------------------------------------------------------------
 
@@ -518,6 +542,8 @@ Implementation
 Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
 
+---------
+
 Heterogeneous Multi-agent Proximal Policy Optimization (HAPPO)
 ----------------------------------------------------------------
 
@@ -554,6 +580,8 @@ Value Decomposition
 ========================
 
 Features of value decomposition under CTDE framework.
+
+---------
 
 Value Decomposition Networks (VDN)
 ---------------------------------------------
@@ -593,6 +621,8 @@ Implementation
 Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
 
+---------
+
 Monotonic Value Function Factorisation (QMIX)
 ---------------------------------------------
 
@@ -630,6 +660,8 @@ Implementation
 
 Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
+
+---------
 
 Factored Multi-Agent Centralised Policy Gradients (FACMAC)
 -------------------------------------------------------------
@@ -670,6 +702,8 @@ Implementation
 Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
 
+
+---------
 
 Value Decomposition Advanced Actor Critic (VDA2C)
 -------------------------------------------------------
@@ -712,6 +746,8 @@ Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
 
 
+
+---------
 
 Value Decomposition Proximal Policy Optimization (VDPPO)
 -------------------------------------------------------------
