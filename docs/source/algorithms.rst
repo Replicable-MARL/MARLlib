@@ -1,102 +1,532 @@
 .. _algorithms:
 
-Algorithms
-===================
 
-We provide a comprehensive view of algorithms how we collected and implemented MARL algorithms based on RLlib.
+*************************
+Multi-Agent Algorithms
+*************************
 
-An algorithm may not be available for every different environments. You can check it here to get detailed information.
+Algorithm list of MARLlib, including the mathematical formulation and ``MARLlib`` style of implementation.
+
+.. contents:: :depth: 2
+
+
+Etiam turis ante, luctus sed velit tristique, finibus volutpat dui. Nam sagittis vel ante nec malesuada.
+Praesent dignissim mi nec ornare elementum. Nunc eu augue vel sem dignissim cursus sed et nulla.
+Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.
+Pellentesque dictum dui sem, non placerat tortor rhoncus in. Sed placerat nulla at rhoncus iaculis.
 
 Independent Learning
-----------------------
+========================
 
-Extending standard single agent RL algorithm to multi-agent setting is a natural idea, except that the condition of Markov Decision Process (MDP) is not satisfied any more.
-As RLlib has provided a great number of single agent RL algorithms under its highly modularized framework, we directly adopt them in our framework.
+Features of independent learning
 
-The algorithms that are from RLlib implementation:
+Independent Q Learning (IQL)
+---------------------------------------------
 
-* Policy Gradient (PG)
-* Advanced Actor Critic (A2C)
-* Proximal Policy Optimization (PPO)
+.. list-table::
+   :widths: 25 25 25
+   :header-rows: 0
 
-The algorithms that we extended for RLlib:
+   * - ``off policy``
+     - ``discrete action``
+     -
+   * - ``cooperative``
+     - ``collaborative``
+     - ``competitive``
 
-* Deep Deterministic Policy Gradients (DDPG)
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam efficitur in eros et blandit. Nunc maximus,
 
-    * wrap it with RNN support
+Mathmatical Formulation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-* Trust Region Policy Optimization (TRPO)
+Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
+pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
 
-    * adopt from `here <https://github.com/0xangelo/raylab/tree/master/raylab/agents/trpo>`_ with extension
 
-* Independent Q Learning (IQL)
+Implementation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-    * change the execution plan and replay buffer to let it align with `pymarl <https://github.com/oxwhirl/pymarl>`_
+Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
+pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
 
-All other algorithms are built based on these six independent learning algorithms.
+Independent Policy Gradient (IPG)
+---------------------------------------------
+
+.. list-table::
+   :widths: 25 25 25
+   :header-rows: 0
+
+   * - ``on policy``
+     - ``discrete action``
+     - ``continues action``
+   * - ``cooperative``
+     - ``collaborative``
+     - ``competitive``
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam efficitur in eros et blandit. Nunc maximus,
+
+Mathmatical Formulation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
+pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
+
+
+Implementation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
+pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
+
+Independent Advanced Actor Critic (IA2C)
+---------------------------------------------
+
+.. list-table::
+   :widths: 25 25 25
+   :header-rows: 0
+
+   * - ``on policy``
+     - ``discrete action``
+     - ``continues action``
+   * - ``cooperative``
+     - ``collaborative``
+     - ``competitive``
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam efficitur in eros et blandit. Nunc maximus,
+
+Mathmatical Formulation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
+pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
+
+
+Implementation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
+pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
+
+
+
+Independent Deep Deterministic Policy Gradient (IDDPG)
+-------------------------------------------------------------
+
+.. list-table::
+   :widths: 25 25 25
+   :header-rows: 0
+
+   * - ``off policy``
+     - ``continues action``
+     -
+   * - ``cooperative``
+     - ``collaborative``
+     - ``competitive``
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam efficitur in eros et blandit. Nunc maximus,
+
+Mathmatical Formulation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
+pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
+
+
+Implementation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
+pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
+
+
+Independent Trust Region Policy Optimization (ITRPO)
+-------------------------------------------------------------
+
+.. list-table::
+   :widths: 25 25 25
+   :header-rows: 0
+
+   * - ``on policy``
+     - ``discrete action``
+     - ``continues action``
+   * - ``cooperative``
+     - ``collaborative``
+     - ``competitive``
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam efficitur in eros et blandit. Nunc maximus,
+
+Mathmatical Formulation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
+pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
+
+
+Implementation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
+pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
+
+Independent Proximal Policy Optimization (IPPO)
+-----------------------------------------------------
+
+.. list-table::
+   :widths: 25 25 25
+   :header-rows: 0
+
+   * - ``on policy``
+     - ``discrete action``
+     - ``continues action``
+   * - ``cooperative``
+     - ``collaborative``
+     - ``competitive``
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam efficitur in eros et blandit. Nunc maximus,
+
+Mathmatical Formulation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
+pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
+
+
+Implementation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
+pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
+
+
 
 Centralized Critic
-----------------------
+========================
 
-We strongly recommend using `conda <https://docs.conda.io/en/latest/miniconda.html>`_ to manage your dependencies, and avoid version conflicts. Here we show the example of building python 3.7 based conda environment.
-
-.. code-block:: shell
-
-    conda create -n marllib python==3.7 -y
-    conda activate marllib
-
-    # install dependencies
-    cmake --version # must be >=3.12
-    clang++ --version   # must be >=7.0.0
-    sudo apt-get install graphviz cmake clang
-
-    # install marllib
-    pip install -e .
-
-Value Decomposition (Joint Q/Critic Learning)
------------------------------------------------
-
-We strongly recommend using `conda <https://docs.conda.io/en/latest/miniconda.html>`_ to manage your dependencies, and avoid version conflicts. Here we show the example of building python 3.7 based conda environment.
-
-.. code-block:: shell
-
-    conda create -n marllib python==3.7 -y
-    conda activate marllib
-
-    # install dependencies
-    cmake --version # must be >=3.12
-    clang++ --version   # must be >=7.0.0
-    sudo apt-get install graphviz cmake clang
-
-    # install marllib
-    pip install -e .
-
-Google Research Football
------------------
-
-We strongly recommend using `conda <https://docs.conda.io/en/latest/miniconda.html>`_ to manage your dependencies, and avoid version conflicts. Here we show the example of building python 3.7 based conda environment.
-
-.. code-block:: shell
-
-    conda create -n marllib python==3.7 -y
-    conda activate marllib
-
-    # install dependencies
-    cmake --version # must be >=3.12
-    clang++ --version   # must be >=7.0.0
-    sudo apt-get install graphviz cmake clang
-
-    # install marllib
-    pip install -e .
-
-External Environments
----------------------
-
-External environments are integrated in MARLlib, such as `StarCraftII <https://github.com/oxwhirl/smac>`_ and `Mujoco <https://mujoco.org/>`_. You can intall them by following the official guides on their project homepage.
+Features of centralized critic under CTDE framework.
 
 
-Development requirements
-------------------------
+Multi-agent Advanced Actor Critic (MAA2C)
+---------------------------------------------
 
-For users who wanna contribute to our repository, run ``pip install -e .[dev]`` to complete the development dependencies, also refer the contributing guide.
+.. list-table::
+   :widths: 25 25 25
+   :header-rows: 0
+
+   * - ``on policy``
+     - ``discrete action``
+     - ``continues action``
+   * - ``cooperative``
+     - ``collaborative``
+     - ``competitive``
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam efficitur in eros et blandit. Nunc maximus,
+
+Mathmatical Formulation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
+pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
+
+
+Implementation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
+pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
+
+
+
+Multi-agent Deep Deterministic Policy Gradient (MADDPG)
+-------------------------------------------------------------
+
+.. list-table::
+   :widths: 25 25 25
+   :header-rows: 0
+
+   * - ``off policy``
+     - ``continues action``
+     -
+   * - ``cooperative``
+     - ``collaborative``
+     - ``competitive``
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam efficitur in eros et blandit. Nunc maximus,
+
+Mathmatical Formulation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
+pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
+
+
+Implementation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
+pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
+
+
+Multi-agent Trust Region Policy Optimization (MATRPO)
+-------------------------------------------------------------
+
+.. list-table::
+   :widths: 25 25 25
+   :header-rows: 0
+
+   * - ``on policy``
+     - ``discrete action``
+     - ``continues action``
+   * - ``cooperative``
+     - ``collaborative``
+     - ``competitive``
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam efficitur in eros et blandit. Nunc maximus,
+
+Mathmatical Formulation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
+pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
+
+
+Implementation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
+pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
+
+Multi-agent Proximal Policy Optimization (MAPPO)
+-----------------------------------------------------
+
+.. list-table::
+   :widths: 25 25 25
+   :header-rows: 0
+
+   * - ``on policy``
+     - ``discrete action``
+     - ``continues action``
+   * - ``cooperative``
+     - ``collaborative``
+     - ``competitive``
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam efficitur in eros et blandit. Nunc maximus,
+
+Mathmatical Formulation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
+pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
+
+
+Implementation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
+pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
+
+
+Heterogeneous Multi-agent Trust Region Policy Optimization (HATRPO)
+------------------------------------------------------------------------
+
+.. list-table::
+   :widths: 25 25 25
+   :header-rows: 0
+
+   * - ``on policy``
+     - ``discrete action``
+     - ``continues action``
+   * - ``cooperative``
+     -
+     -
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam efficitur in eros et blandit. Nunc maximus,
+
+Mathmatical Formulation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
+pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
+
+
+Implementation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
+pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
+
+Heterogeneous Multi-agent Proximal Policy Optimization (HAPPO)
+----------------------------------------------------------------
+
+.. list-table::
+   :widths: 25 25 25
+   :header-rows: 0
+
+   * - ``on policy``
+     - ``discrete action``
+     - ``continues action``
+   * - ``cooperative``
+     -
+     -
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam efficitur in eros et blandit. Nunc maximus,
+
+Mathmatical Formulation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
+pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
+
+
+Implementation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Value Decomposition
+========================
+
+Features of value decomposition under CTDE framework.
+
+Value Decomposition Network (VDN)
+---------------------------------------------
+
+.. list-table::
+   :widths: 25 25 25
+   :header-rows: 0
+
+   * - ``off policy``
+     - ``discrete action``
+     -
+   * - ``cooperative``
+     -
+     -
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam efficitur in eros et blandit. Nunc maximus,
+
+Mathmatical Formulation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
+pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
+
+
+Implementation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
+pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
+
+Monotonic Value Function Factorisation (QMIX)
+---------------------------------------------
+
+.. list-table::
+   :widths: 25 25 25
+   :header-rows: 0
+
+   * - ``off policy``
+     - ``discrete action``
+     -
+   * - ``cooperative``
+     -
+     -
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam efficitur in eros et blandit. Nunc maximus,
+
+Mathmatical Formulation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
+pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
+
+
+Implementation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
+pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
+
+Factored Multi-Agent Centralised Policy Gradients (FACMAC)
+-------------------------------------------------------------
+
+.. list-table::
+   :widths: 25 25 25
+   :header-rows: 0
+
+   * - ``off policy``
+     - ``continues action``
+     -
+   * - ``cooperative``
+     -
+     -
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam efficitur in eros et blandit. Nunc maximus,
+
+Mathmatical Formulation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
+pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
+
+
+Implementation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
+pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
+
+
+Value Decomposition Advanced Actor Critic (VDA2C)
+-------------------------------------------------------
+
+.. list-table::
+   :widths: 25 25 25
+   :header-rows: 0
+
+   * - ``on policy``
+     - ``discrete action``
+     - ``continues action``
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam efficitur in eros et blandit. Nunc maximus,
+
+Mathmatical Formulation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
+pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
+
+
+Implementation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
+pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
+
+
+
+Value Decomposition Proximal Policy Optimization (VDPPO)
+-------------------------------------------------------------
+
+.. list-table::
+   :widths: 25 25 25
+   :header-rows: 0
+
+   * - ``on policy``
+     - ``discrete action``
+     - ``continues action``
+   * - ``cooperative``
+     -
+     -
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam efficitur in eros et blandit. Nunc maximus,
+
+Mathmatical Formulation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
+pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
+
+
+Implementation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
+pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
 

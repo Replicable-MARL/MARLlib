@@ -33,7 +33,7 @@ Official Link: https://github.com/oxwhirl/smac
 
    * - ``Original Learning Mode``
      - Cooperative
-   * - ``Supported Learning Mode``
+   * - ``MARLlib Learning Mode``
      - Cooperative + Collaborative
    * - ``Observability``
      - Partial
@@ -69,7 +69,7 @@ Official Link: https://github.com/schroederdewitt/multiagent_mujoco
 
    * - ``Original Learning Mode``
      - Cooperative
-   * - ``Supported Learning Mode``
+   * - ``MARLlib Learning Mode``
      - Cooperative + Collaborative
    * - ``Observability``
      - Partial
@@ -104,7 +104,7 @@ Official Link: https://github.com/google-research/football
 
    * - ``Original Learning Mode``
      - Collaborative + Competitive
-   * - ``Supported Learning Mode``
+   * - ``MARLlib Learning Mode``
      - Cooperative + Collaborative
    * - ``Observability``
      - Full
@@ -141,7 +141,7 @@ Our version: https://github.com/Farama-Foundation/PettingZoo/tree/master/petting
 
    * - ``Original Learning Mode``
      - Collaborative + Competitive
-   * - ``Supported Learning Mode``
+   * - ``MARLlib Learning Mode``
      - Cooperative + Collaborative + Competitive
    * - ``Observability``
      - Full
@@ -176,7 +176,7 @@ Official Link: https://github.com/semitable/lb-foraging
 
    * - ``Original Learning Mode``
      - Cooperative + Collaborative
-   * - ``Supported Learning Mode``
+   * - ``MARLlib Learning Mode``
      - Cooperative + Collaborative
    * - ``Observability``
      - Partial
@@ -211,7 +211,7 @@ Official Link: https://github.com/semitable/robotic-warehouse
 
    * - ``Original Learning Mode``
      - Cooperative
-   * - ``Supported Learning Mode``
+   * - ``MARLlib Learning Mode``
      - Cooperative + Collaborative
    * - ``Observability``
      - Partial
@@ -248,7 +248,7 @@ Our version: https://github.com/Farama-Foundation/PettingZoo/tree/master/petting
 
    * - ``Original Learning Mode``
      - Collaborative + Competitive
-   * - ``Supported Learning Mode``
+   * - ``MARLlib Learning Mode``
      - Collaborative + Competitive
    * - ``Observability``
      - Partial
@@ -284,7 +284,7 @@ Official Link: https://github.com/MultiAgentLearning/playground
 
    * - ``Original Learning Mode``
      - Collaborative + Competitive
-   * - ``Supported Learning Mode``
+   * - ``MARLlib Learning Mode``
      - Cooperative + Collaborative + Competitive
    * - ``Observability``
      - Full
@@ -320,7 +320,7 @@ Official Link: https://github.com/decisionforce/metadrive
 
    * - ``Original Learning Mode``
      - Collaborative
-   * - ``Supported Learning Mode``
+   * - ``MARLlib Learning Mode``
      - Collaborative
    * - ``Observability``
      - Partial
@@ -356,7 +356,7 @@ Official Link: https://github.com/deepmind/hanabi-learning-environment
 
    * - ``Original Learning Mode``
      - Collaborative
-   * - ``Supported Learning Mode``
+   * - ``MARLlib Learning Mode``
      - Collaborative
    * - ``Observability``
      - Partial
