@@ -7,7 +7,7 @@ Multi-Agent Algorithms
 
 Algorithm list of MARLlib, including the mathematical formulation and ``MARLlib`` style of implementation.
 
-.. contents:: :depth: 2
+.. contents:: :depth: 3
 
 
 Etiam turis ante, luctus sed velit tristique, finibus volutpat dui. Nam sagittis vel ante nec malesuada.

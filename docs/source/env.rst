@@ -9,7 +9,7 @@ Environment list of MARLlib, including installation and description.
 
 .. contents:: :depth: 2
 
-Env Installation
+Installation
 =========================
 
 
@@ -167,7 +167,7 @@ To install, execute the following:
 
 .. _environments:
 
-Env Description
+Description
 =======================
 
 Brief Description of 10 environments incorporated in ``MARLLib``.
