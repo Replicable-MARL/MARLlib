@@ -150,7 +150,7 @@ MetaDrive
 Hanabi
 ------------------------
 
-From `Compiler error on /usr/lib/x86_64-linux-gnu/libGL.so <https://github.com/marlbenchmark/on-policy>`_
+From `MAPPO official site <https://github.com/marlbenchmark/on-policy>`_
 
 Environment code for Hanabi is developed from the open-source environment code, but has been slightly modified to fit the algorithms used here.
 To install, execute the following:
@@ -170,19 +170,7 @@ To install, execute the following:
 Env Description
 =======================
 
-Brief Description of 10 different environments incorporated in ``MARLLib``.
-
-- :ref:`SMAC`
-- :ref:`MaMujoco`
-- :ref:`Football`
-- :ref:`MPE`
-- :ref:`LBF`
-- :ref:`MAgent`
-- :ref:`RWARE`
-- :ref:`Pommerman`
-- :ref:`MetaDrive`
-- :ref:`Hanabi`
-
+Brief Description of 10 environments incorporated in ``MARLLib``.
 
 .. _SMAC:
 
