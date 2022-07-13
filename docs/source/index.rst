@@ -1,12 +1,21 @@
-MARLlib: Parallel Framework for PB-MARL
+MARLlib: The MARL Extension for RLlib
 ========================================
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents
+   :caption: MARLlib Handbook
 
-   intro
-   installation
-   env
-   algorithms
-   quick_start
+   handbook/intro
+   handbook/installation
+   handbook/env
+   handbook/algorithms
+   handbook/quick_start
+
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Introduction To MARL
+
+   intro_marl/concept
+   intro_marl/taxonomy
+   intro_marl/algorithm

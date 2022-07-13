@@ -47,7 +47,7 @@ extensions = [
     # "sphinxcontrib.apidoc",
 ]
 
-#apidoc_module_dir = os.path.join(__location__, "marl")
+#apidoc_module_dir = os.path.join(__location__, "intro_marl")
 # apidoc_exclude_paths = ["setup.py"]
 #apidoc_module_first = True
 #apidoc_extra_args = [
