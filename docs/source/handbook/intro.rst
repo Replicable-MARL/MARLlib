@@ -3,7 +3,7 @@ Introduction
 
 Multi-Agent RLlib (MARLlib) is a MARL benchmark based on Ray and one of its toolkits RLlib. It provides MARL research community a unified platform for developing and evaluating the new ideas in various multi-agent environments.
 
-.. figure:: ../../image/overview.png
+.. figure:: ../../../image/overview.png
     :align: center
 
     Overview of the MARLlib architecture.

@@ -1,7 +1,7 @@
 .. _algorithm-detail:
 
 *******************************************
-Part 3: Check Your MARL Algorithms
+Part 3: Check Our MARL Algorithms
 *******************************************
 
 Algorithm list of MARLlib, including the mathematical formulation and ``MARLlib`` style of implementation.
