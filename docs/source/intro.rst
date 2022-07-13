@@ -17,7 +17,7 @@ The key features of MARLlib include:
 * it provides trained results, including learning curves and pretrained models specific to each task and algorithm's combination, with finetuned hyper-parameters to guarantee credibility.
 
 Before getting start, please make sure you've installed the fundamentally required dependency by following the :ref:`basic-installation`.
-Environment specific description is maintained in :ref:`env-installation`.
+Environment specific description is maintained in :ref:`env`.
 :ref:`quick-start` gives some basic examples.
 
 Citing MARLlib

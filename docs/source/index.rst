@@ -7,7 +7,6 @@ MARLlib: Parallel Framework for PB-MARL
 
    intro
    installation
-   env_installation
-   environments
+   env
    algorithms
    quick_start
