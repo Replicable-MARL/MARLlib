@@ -6,7 +6,7 @@ Part 2: A Taxonomy of MARL Algorithms
 
 Algorithm list of MARLlib, including the mathematical formulation and ``MARLlib`` style of implementation.
 
-.. contents:: :depth: 2
+.. contents:: :depth: 3
 
 Etiam turis ante, luctus sed velit tristique, finibus volutpat dui. Nam sagittis vel ante nec malesuada.
 Praesent dignissim mi nec ornare elementum. Nunc eu augue vel sem dignissim cursus sed et nulla.
@@ -49,8 +49,11 @@ Other Popular Topics
 Automatic Parameter Sharing
 ------------------------------------------------------
 
-Sequential Modeling as Transformers
+Sequence Modeling
 ------------------------------------------------------
 
-Role-based Multi-agent RL
+Role-based Learning
+------------------------------------------------------
+
+Attention Mechanism
 ------------------------------------------------------

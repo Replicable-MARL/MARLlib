@@ -8,7 +8,7 @@ MARLlib: The MARL Extension for RLlib
    handbook/intro
    handbook/installation
    handbook/env
-   handbook/algorithms
+   handbook/architecture
    handbook/quick_start
 
 

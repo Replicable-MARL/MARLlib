@@ -20,6 +20,8 @@ Features of independent learning
 
 ---------
 
+.. _IQL:
+
 Independent Q Learning (IQL)
 ---------------------------------------------
 
@@ -65,6 +67,9 @@ pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismo
 
 ---------
 
+
+.. _IPG:
+
 Independent Policy Gradient (IPG)
 ---------------------------------------------
 
@@ -107,6 +112,9 @@ Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
 
 ---------
+
+
+.. _IA2C:
 
 Independent Advanced Actor Critic (IA2C)
 ---------------------------------------------
@@ -153,6 +161,9 @@ pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismo
 ---------
 
 
+
+.. _IDDPG:
+
 Independent Deep Deterministic Policy Gradient (IDDPG)
 -------------------------------------------------------------
 
@@ -196,6 +207,9 @@ pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismo
 ---------
 
 
+
+.. _ITRPO:
+
 Independent Trust Region Policy Optimization (ITRPO)
 -------------------------------------------------------------
 
@@ -238,6 +252,9 @@ Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
 
 ---------
+
+
+.. _IPPO:
 
 Independent Proximal Policy Optimization (IPPO)
 -----------------------------------------------------
@@ -290,6 +307,9 @@ Features of centralized critic under CTDE framework.
 
 ---------
 
+
+.. _COMA:
+
 Counterfactual Multi-Agent Policy Gradients (COMA)
 -----------------------------------------------------
 
@@ -334,6 +354,9 @@ pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismo
 ---------
 
 
+
+.. _MAA2C:
+
 Multi-agent Advanced Actor Critic (MAA2C)
 ---------------------------------------------
 
@@ -374,6 +397,9 @@ pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismo
 
 ---------
 
+
+
+.. _MADDPG:
 
 Multi-agent Deep Deterministic Policy Gradient (MADDPG)
 -------------------------------------------------------------
@@ -418,6 +444,9 @@ pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismo
 ---------
 
 
+
+.. _MATRPO:
+
 Multi-agent Trust Region Policy Optimization (MATRPO)
 -------------------------------------------------------------
 
@@ -456,6 +485,9 @@ Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
 
 ---------
+
+
+.. _MAPPO:
 
 Multi-agent Proximal Policy Optimization (MAPPO)
 -----------------------------------------------------
@@ -501,6 +533,9 @@ pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismo
 
 ---------
 
+
+.. _HATRPO:
+
 Heterogeneous Multi-agent Trust Region Policy Optimization (HATRPO)
 ------------------------------------------------------------------------
 
@@ -542,6 +577,9 @@ pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismo
 
 ---------
 
+
+.. _HAPPO:
+
 Heterogeneous Multi-agent Proximal Policy Optimization (HAPPO)
 ----------------------------------------------------------------
 
@@ -580,6 +618,9 @@ Value Decomposition
 Features of value decomposition under CTDE framework.
 
 ---------
+
+
+.. _VDN:
 
 Value Decomposition Networks (VDN)
 ---------------------------------------------
@@ -621,6 +662,9 @@ pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismo
 
 ---------
 
+
+.. _QMIX:
+
 Monotonic Value Function Factorisation (QMIX)
 ---------------------------------------------
 
@@ -660,6 +704,9 @@ Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
 
 ---------
+
+
+.. _FACMAC:
 
 Factored Multi-Agent Centralised Policy Gradients (FACMAC)
 -------------------------------------------------------------
@@ -702,6 +749,9 @@ pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismo
 
 
 ---------
+
+
+.. _VDA2C:
 
 Value Decomposition Advanced Actor Critic (VDA2C)
 -------------------------------------------------------
@@ -746,6 +796,9 @@ pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismo
 
 
 ---------
+
+
+.. _VDPPO:
 
 Value Decomposition Proximal Policy Optimization (VDPPO)
 -------------------------------------------------------------

@@ -7,7 +7,7 @@ The installation of MARLlib has two part: common installation and external envir
 We've tested the installation on Python 3.6 with ubuntu 18.04 or above.
 
 
-Common Installation
+Basic Installation
 --------------------
 
 We strongly recommend using `conda <https://docs.conda.io/en/latest/miniconda.html>`_ to manage your dependencies, and avoid version conflicts.
@@ -33,15 +33,15 @@ Here we show the example of building python 3.6 based conda environment.
     pip install gym==0.21.0
 
 
-External Environments Installation
+External Environments Requirements
 ------------------------------------------
 
 External environments are integrated in MARLlib, such as `StarCraftII <https://github.com/oxwhirl/smac>`_ and `MaMujoco <https://github.com/schroederdewitt/multiagent_mujoco>`_. You can install them by following
 
-* our simplified guides in :ref:`env-installation`
-* the official guides on their project homepage.
+* our simplified guides
+* the official guides on their project homepage
 
-The official links can be found in in :ref:`environments`.
+The related content can be found in in :ref:`env`.
 
 
 Development requirements
