@@ -2,7 +2,7 @@
 
 
 *******************************
-Multi-agent RL with MARLlib
+MARLlib Framework
 *******************************
 
 Etiam turis ante, luctus sed velit tristique, finibus volutpat dui. Nam sagittis vel ante nec malesuada.
@@ -10,11 +10,8 @@ Praesent dignissim mi nec ornare elementum. Nunc eu augue vel sem dignissim curs
 Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.
 Pellentesque dictum dui sem, non placerat tortor rhoncus in. Sed placerat nulla at rhoncus iaculis.
 
-.. contents:: :depth: 4
+.. contents:: :depth: 3
 
-
-Architecture
-========================
 
 Training Pipeline
 ----------------------
@@ -24,6 +21,10 @@ Training Pipeline
 
     Pre-learning Stage
 
+Etiam turis ante, luctus sed velit tristique, finibus volutpat dui. Nam sagittis vel ante nec malesuada.
+Praesent dignissim mi nec ornare elementum. Nunc eu augue vel sem dignissim cursus sed et nulla.
+Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.
+Pellentesque dictum dui sem, non placerat tortor rhoncus in. Sed placerat nulla at rhoncus iaculis.
 
 .. figure:: ../images/rllib_data_flow_right.png
     :align: center
@@ -39,7 +40,7 @@ Pellentesque dictum dui sem, non placerat tortor rhoncus in. Sed placerat nulla 
 Environment Interface
 ----------------------
 
-.. figure:: ../images/marllib_env_right.png
+.. figure:: ../images/marl_env_right.png
     :align: center
 
     Agent-Environment Interface in MARLlib

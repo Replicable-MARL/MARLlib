@@ -2,7 +2,7 @@
 
 
 *********************************************
-Multi-Agent Environment
+Environments
 *********************************************
 
 Environment list of MARLlib, including installation and description.
