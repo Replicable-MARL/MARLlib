@@ -18,6 +18,7 @@ Training Pipeline
 
 .. figure:: ../images/rllib_data_flow_left.png
     :align: center
+    :width: 600
 
     Pre-learning Stage
 
@@ -42,6 +43,7 @@ Environment Interface
 
 .. figure:: ../images/marl_env_right.png
     :align: center
+    :width: 600
 
     Agent-Environment Interface in MARLlib
 
@@ -63,6 +65,7 @@ Independent Learning
 
 .. figure:: ../images/IL.png
     :align: center
+    :width: 400
 
     Learning pipeline of independent learning
 
@@ -78,6 +81,7 @@ Centralized Critic
 
 .. figure:: ../images/CC.png
     :align: center
+    :width: 400
 
     Learning pipeline of centralized critic under CTDE framework
 
@@ -91,6 +95,7 @@ Value Decomposition
 
 .. figure:: ../images/VD.png
     :align: center
+    :width: 400
 
     Learning pipeline of value decomposition under CTDE framework
 
