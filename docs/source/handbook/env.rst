@@ -7,7 +7,9 @@ Environments
 
 Environment list of MARLlib, including installation and description.
 
-.. contents:: :depth: 2
+.. contents::
+    :local:
+    :depth: 2
 
 
 

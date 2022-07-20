@@ -3,7 +3,9 @@
 Quick Start
 ===========
 
-.. contents:: :depth: 3
+.. contents::
+    :local:
+    :depth: 2
 
 If you have not installed MARLlib yet, please refer to :ref:`basic-installation` before running.
 
