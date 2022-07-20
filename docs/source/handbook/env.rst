@@ -9,7 +9,7 @@ Environment list of MARLlib, including installation and description.
 
 .. contents::
     :local:
-    :depth: 2
+    :depth: 1
 
 
 
