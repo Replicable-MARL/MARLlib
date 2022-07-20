@@ -91,20 +91,29 @@ and broadcasts the new model to each worker for next sampling round.
 .. figure:: ../images/rllib_data_flow_right.png
     :align: center
 
-     Sampling & Training Stage
+    Sampling & Training Stage
 
 
-Algorithm  Overview
+Algorithm  Pipeline Overview
 ----------------------------------------
+
+.. image:: ../images/IL.png
+   :width: 30%
+
+   independent learning
+
+.. image:: ../images/CC.png
+   :width: 30%
+
+   centralized critic
+
+.. image:: ../images/VD.png
+   :width: 30%
+
+   value decomposition
 
 Independent Learning
 ^^^^^^^^^^^^^^^^^^^^
-
-.. figure:: ../images/IL.png
-    :align: center
-    :width: 300
-
-    Learning pipeline of independent learning
 
 Independent learning is easy to implement in MARLlib as RLlib provide a great number of algorithms.
 Choose one from them and applied to the multi-agent environment to start training is easy and require no extra work compared to RLlib.
@@ -112,13 +121,6 @@ While no data exchange is needed in independent learning of MARL, the performanc
 
 Centralized Critic
 ^^^^^^^^^^^^^^^^^^^^
-
-
-.. figure:: ../images/CC.png
-    :align: center
-    :width: 300
-
-    Learning pipeline of centralized critic under CTDE framework
 
 Centralized critic learning is one of the two centralized training strategies under CTDE framework.
 Agents are required to share their information after getting the policy output and before the critic value computing.
@@ -131,12 +133,6 @@ additional data like action value provided by other agents is collected before t
 
 Value Decomposition
 ^^^^^^^^^^^^^^^^^^^^
-
-.. figure:: ../images/VD.png
-    :align: center
-    :width: 300
-
-    Learning pipeline of value decomposition under CTDE framework
 
 Value Decomposition is another branch of centralized training strategies. Different to centralized critic, the only information for agent
 to share is predicted Q value or critic value. Additional data is required according to the algorithm. For instance, QMIX need a global state to
@@ -165,7 +161,7 @@ Besides, the postprocessing module is also the place for computing different lea
     Postprocessing Before Data Collection
 
 Postprocessing Before Batch Learning
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Postprocessing is not suitable for every algorithm, exceptions are like off-policy algorithm including MADDPG and FACMAC.
 The problem is, the data stored in replay buffer are from the old model, e.g. Q value, which can not be used for current training interation.
@@ -175,7 +171,7 @@ using the current model just before the sampled batch entering the training loop
 .. figure:: ../images/pp_batch.png
     :align: center
 
-     Postprocessing Before Batch Learning
+    Postprocessing Before Batch Learning
 
 
 Centralized Value function
@@ -205,7 +201,7 @@ Considering the computing consumption, we use the proximal policy optimization t
 .. figure:: ../images/hetero.png
     :align: center
 
-     Heterogeneous Agent Critic Optimization
+    Heterogeneous Agent Critic Optimization
 
 Policy Mapping
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
