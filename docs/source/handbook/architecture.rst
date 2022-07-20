@@ -13,7 +13,9 @@ where building a unified algorithm that can run everywhere is so challenging.
 
 
 
-.. contents:: :depth: 3
+.. contents::
+    :local:
+    :depth: 3
 
 
 MARLlib Architecture
@@ -91,6 +93,7 @@ and broadcasts the new model to each worker for next sampling round.
 
      Sampling & Training Stage
 
+
 Algorithm  Overview
 ----------------------------------------
 
@@ -146,8 +149,8 @@ PyMARL. Only the FACMAC, VDA2C, and VDPPO follow the standard RLlib training pip
 Key Component
 -------------------------
 
-Postprocessing
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Postprocessing Before Data Collection
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 MARL algorithms with centralized training with decentralized execution (CTDE) require agents to share their information with others in the learning stage.
 Algorithms in value decomposition like QMIX, FACMAC, and VDA2C require other agents to provide their Q value or V value estimation to compute Q total or V total. Algorithms in centralized critic like MADDPG, MAPPO, and HAPPO require other agents to provide their observation and actions to help determine a centralized critic value.
@@ -156,13 +159,23 @@ For algorithms belonging to centralized critic, the agent can get extra informat
 For algorithms belonging to value decomposition, the agent needs to provide other agents with their Q or V value predicted.
 Besides, the postprocessing module is also the place for computing different learning targets using GAE or N-step reward adjustment.
 
-Post Batch Learning Processing
+.. figure:: ../images/pp.png
+    :align: center
+
+    Postprocessing Before Data Collection
+
+Postprocessing Before Batch Learning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Postprocessing is not suitable for every algorithm, exceptions are like off-policy algorithm including MADDPG and FACMAC.
 The problem is, the data stored in replay buffer are from the old model, e.g. Q value, which can not be used for current training interation.
 To deal with this, the additional before batch learning function is adopted to calculate the accurate Q or V value
-using the current model just before the sampled batch entering the loss function.
+using the current model just before the sampled batch entering the training loop.
+
+.. figure:: ../images/pp_batch.png
+    :align: center
+
+     Postprocessing Before Batch Learning
 
 
 Centralized Value function
@@ -181,6 +194,18 @@ the model configuration file in **marl/model/configs/mixer**.
 Heterogeneous Optimization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+In heterogeneous optimization, the parameters of each agent will be updated separately.
+Therefore, policy function is not shared across different agents.
+According to the proof of the algorithm , if agents were to set the values of the loss-related summons by sequentially updating their policies,
+any positive update would lead to an increment in summation.
+
+In order to ensure the monotonic increment. We use trust region to get the suitable parameters update (HATRPO).
+Considering the computing consumption, we use the proximal policy optimization to speed up the policy and critic update (HAPPO).
+
+.. figure:: ../images/hetero.png
+    :align: center
+
+     Heterogeneous Agent Critic Optimization
 
 Policy Mapping
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
