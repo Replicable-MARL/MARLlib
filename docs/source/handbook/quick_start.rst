@@ -57,13 +57,13 @@ Observation space varies with different environment, MARLlib automatically const
 However, you can still customize your own model in `model's config <https://github.com/Replicable-MARL/MARLlib/tree/sy_dev/marl/models/configs>`_.
 The supported architecture change includes:
 
-- Encoder
+- Observation/Global State Encoder
     - `CNN <https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/marl/models/configs/cnn_encoder.yaml>`_
     - `FC <https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/marl/models/configs/fc_encoder.yaml>`_
-- `RNN <https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/marl/models/configs/rnn.yaml>`_
+- `Recurrent Neural Network <https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/marl/models/configs/rnn.yaml>`_
     - GRU
     - LSTM
-- `Mixer <https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/marl/models/configs/mixer.yaml>`_
+- `Q/Critic Value Mixer <https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/marl/models/configs/mixer.yaml>`_
     - VDN
     - QMIX
 
@@ -71,13 +71,16 @@ Settings of Ray
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 At the bottom of the MARLlib, Ray provide a powerful multi-processing scheduling framework.
-Together with RLlib, you can simply change the `configuration of ray <https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/marl/ray.yaml>`_ to obtain:
+Together with RLlib, you can simply modify the `file of ray configuration <https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/marl/ray.yaml>`_ to adjust:
 
-- faster sampling speed
-- faster training speed
-- different running mode
-- different parameter sharing strategy
-- different stop condition
+- sampling speed
+- training speed
+
+and to switch
+
+- running mode
+- parameter sharing strategy
+- stop condition (1 in 3)
 
 
 Training

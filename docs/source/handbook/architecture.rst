@@ -107,14 +107,14 @@ Algorithm  Pipeline Overview
 Independent Learning
 ^^^^^^^^^^^^^^^^^^^^
 
-Independent learning is easy to implement in MARLlib as RLlib provide a great number of algorithms.
+Independent learning (left) is easy to implement in MARLlib as RLlib provide a great number of algorithms.
 Choose one from them and applied to the multi-agent environment to start training is easy and require no extra work compared to RLlib.
 While no data exchange is needed in independent learning of MARL, the performance is worse then centralized training strategy in most tasks.
 
 Centralized Critic
 ^^^^^^^^^^^^^^^^^^^^
 
-Centralized critic learning is one of the two centralized training strategies under CTDE framework.
+Centralized critic learning (middle) is one of the two centralized training strategies under CTDE framework.
 Agents are required to share their information after getting the policy output and before the critic value computing.
 Typical information they have to share with other agents including individual observation, actions, and global state (if available).
 
@@ -126,7 +126,7 @@ additional data like action value provided by other agents is collected before t
 Value Decomposition
 ^^^^^^^^^^^^^^^^^^^^
 
-Value Decomposition is another branch of centralized training strategies. Different to centralized critic, the only information for agent
+Value Decomposition (right) is another branch of centralized training strategies. Different to centralized critic, the only information for agent
 to share is predicted Q value or critic value. Additional data is required according to the algorithm. For instance, QMIX need a global state to
 compute the mixing Q value.
 
@@ -205,6 +205,17 @@ The last two keys indicate whether a fully shared or no-sharing policy strategy 
 We use policy mapping to initialize the policies and allocate them to different agents.
 Each policy is optimized only using the data sampled by the agent that belongs to this policy group.
 
+Here is an example of policy mapping which is a mixed mode scenario from MAgent:
+
+
+.. code-block:: ini
+
+    "adversarial_pursuit": {
+        "description": "one team attack, one team survive",
+        "team_prefix": ("predator_", "prey_"),
+        "all_agents_one_policy": False,
+        "one_agent_one_policy": False,
+    },
 
 
 Available Algorithms Checklist
