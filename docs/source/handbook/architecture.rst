@@ -99,18 +99,10 @@ Algorithm  Pipeline Overview
 
 .. image:: ../images/IL.png
    :width: 30%
-
-   independent learning
-
 .. image:: ../images/CC.png
    :width: 30%
-
-   centralized critic
-
 .. image:: ../images/VD.png
    :width: 30%
-
-   value decomposition
 
 Independent Learning
 ^^^^^^^^^^^^^^^^^^^^
