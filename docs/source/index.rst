@@ -17,7 +17,6 @@ MARLlib: The MARL Extension for RLlib
    :caption: Introduction To MARL
 
    intro_marl/concept
-   intro_marl/taxonomy
    intro_marl/algorithm
 
 .. toctree::
