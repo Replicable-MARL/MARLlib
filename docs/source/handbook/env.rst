@@ -13,7 +13,7 @@ Environment list of MARLlib, including installation and description.
 
 
 
-Note: make sure you have read and complete the :ref:`basic-installation` part.
+**Note**: make sure you have read and completed the :ref:`basic-installation` part.
 
 
 .. _SMAC:
@@ -22,7 +22,7 @@ Note: make sure you have read and complete the :ref:`basic-installation` part.
 SMAC
 ==============
 
-StarCraft Multi-Agent Challenge (SMAC) is a multi-agent environment for research in the field of collaborative multi-agent reinforcement learning (MARL) based on Blizzard's StarCraft II RTS game.
+StarCraft Multi-Agent Challenge (SMAC) is a multi-agent environment for collaborative multi-agent reinforcement learning (MARL) research based on Blizzard's StarCraft II RTS game.
 It concentrates on decentralized micromanagement scenarios, where an individual RL agent controls each game unit.
 
 Official Link: https://github.com/oxwhirl/smac
@@ -70,7 +70,7 @@ Installation
     cd smac
     pip install .
 
-Note: the location of the StarcraftII game directory should be pre-defined,
+**Note**: the location of the StarcraftII game directory should be pre-defined,
 or you can just follow the error log (when the process can not found the game's location)
 and put it in the right place.
 
@@ -130,7 +130,7 @@ Installation
     sudo apt-get install libosmesa6-dev # If you meet GCC error with exit status 1
     pip install patchelf-wrapper
 
-Note: To access the MuJoCo API, you may have to get a mjkey (which is free now) and put it under /home/YourUserName/.mujoco.
+**Note**: To access the MuJoCo API, you may get a mjkey (free now) and put it under /home/YourUserName/.mujoco.
 
 
 
@@ -197,7 +197,7 @@ MPE
 ==============
 
 Multi-particle Environments (MPE) are a set of communication-oriented environments where particle agents can (sometimes) move,
-communicate, and see each other, push each other around, and interact with fixed landmarks.
+communicate, see each other, push each other around, and interact with fixed landmarks.
 
 Official Link: https://github.com/openai/multiagent-particle-envs
 
@@ -234,7 +234,7 @@ Our version: https://github.com/Farama-Foundation/PettingZoo/tree/master/petting
 Installation
 -----------------
 
-We use pettingzoo version of MPE
+We use the pettingzoo version of MPE
 
 .. code-block:: shell
 
@@ -245,7 +245,7 @@ We use pettingzoo version of MPE
 LBF
 ==============
 
-Level-based Foraging (LBF) is a mixed cooperative-competitive game that focuses on the coordination of the agents involved.
+Level-based Foraging (LBF) is a mixed cooperative-competitive game that focuses on coordinating the agents involved.
 Agents navigate a grid world and collect food by cooperating with other agents if needed.
 
 Official Link: https://github.com/semitable/lb-foraging
@@ -427,7 +427,7 @@ MetaDrive
 ==============
 
 MetaDrive is a driving simulator that supports generating infinite scenes with various road maps and
-traffic settings for the research of generalizable RL. It provides accurate physics simulation and multiple sensory inputs,
+traffic settings to research generalizable RL. It provides accurate physics simulation and multiple sensory inputs,
 including Lidar, RGB images, top-down semantic maps, and first-person view images.
 
 Official Link: https://github.com/decisionforce/metadrive
@@ -506,7 +506,7 @@ Installation
 
 From `MAPPO official site <https://github.com/marlbenchmark/on-policy>`_
 
-Environment code for Hanabi is developed from the open-source environment code, but has been slightly modified to fit the algorithms used here.
+The environment code for Hanabi is developed from the open-source environment code but has been slightly modified to fit the algorithms used here.
 To install, execute the following:
 
 .. code-block:: shell
