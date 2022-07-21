@@ -1,12 +1,14 @@
 .. _algorithm-detail:
 
 *******************************************
-Part 3: Check Our MARL Algorithms
+Part 3: MARL Baseline Algorithms
 *******************************************
 
 Algorithm list of MARLlib, including the mathematical formulation and ``MARLlib`` style of implementation.
 
-.. contents:: :depth: 3
+.. contents::
+    :local:
+    :depth: 3
 
 Etiam turis ante, luctus sed velit tristique, finibus volutpat dui. Nam sagittis vel ante nec malesuada.
 Praesent dignissim mi nec ornare elementum. Nunc eu augue vel sem dignissim cursus sed et nulla.
@@ -18,7 +20,6 @@ Independent Learning
 
 Features of independent learning
 
----------
 
 .. _IQL:
 
@@ -65,7 +66,6 @@ Implementation
 Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
 
----------
 
 
 .. _IPG:
@@ -110,8 +110,6 @@ Implementation
 
 Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
-
----------
 
 
 .. _IA2C:
@@ -158,7 +156,7 @@ Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
 
 
----------
+
 
 
 
@@ -204,7 +202,6 @@ Implementation
 Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
 
----------
 
 
 
@@ -250,8 +247,6 @@ Implementation
 
 Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
-
----------
 
 
 .. _IPPO:
@@ -305,8 +300,6 @@ Centralized Critic
 
 Features of centralized critic under CTDE framework.
 
----------
-
 
 .. _COMA:
 
@@ -351,10 +344,6 @@ Implementation
 Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
 
----------
-
-
-
 .. _MAA2C:
 
 Multi-agent Advanced Actor Critic (MAA2C)
@@ -393,10 +382,6 @@ Implementation
 
 Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
-
-
----------
-
 
 
 .. _MADDPG:
@@ -441,9 +426,6 @@ Implementation
 Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
 
----------
-
-
 
 .. _MATRPO:
 
@@ -483,8 +465,6 @@ Implementation
 
 Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
-
----------
 
 
 .. _MAPPO:
@@ -531,9 +511,6 @@ Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
 
 
----------
-
-
 .. _HATRPO:
 
 Heterogeneous Multi-agent Trust Region Policy Optimization (HATRPO)
@@ -575,8 +552,6 @@ Implementation
 Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
 
----------
-
 
 .. _HAPPO:
 
@@ -616,9 +591,6 @@ Value Decomposition
 ========================
 
 Features of value decomposition under CTDE framework.
-
----------
-
 
 .. _VDN:
 
@@ -660,9 +632,6 @@ Implementation
 Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
 
----------
-
-
 .. _QMIX:
 
 Monotonic Value Function Factorisation (QMIX)
@@ -702,8 +671,6 @@ Implementation
 
 Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
-
----------
 
 
 .. _FACMAC:
@@ -747,10 +714,6 @@ Implementation
 Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
 
-
----------
-
-
 .. _VDA2C:
 
 Value Decomposition Advanced Actor Critic (VDA2C)
@@ -792,11 +755,6 @@ Implementation
 
 Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
-
-
-
----------
-
 
 .. _VDPPO:
 
