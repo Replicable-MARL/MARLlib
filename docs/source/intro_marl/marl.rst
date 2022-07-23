@@ -1,45 +1,13 @@
 .. _concept:
 
 ***************************************
-Part 1: Standard RL vs Multi-Agent RL
+Part 2. Navigate From RL To MARL
 ***************************************
 
 .. contents::
     :local:
     :depth: 3
 
-Standard Single Agent RL
-===================================
-
-Etiam turis ante, luctus sed velit tristique, finibus volutpat dui. Nam sagittis vel ante nec malesuada.
-Praesent dignissim mi nec ornare elementum. Nunc eu augue vel sem dignissim cursus sed et nulla.
-
-Brief introduction
-----------------------------
-
-Etiam turis ante, luctus sed velit tristique, finibus volutpat dui. Nam sagittis vel ante nec malesuada.
-Praesent dignissim mi nec ornare elementum. Nunc eu augue vel sem dignissim cursus sed et nulla.
-
-Math Formulation
-----------------------------
-
-Etiam turis ante, luctus sed velit tristique, finibus volutpat dui. Nam sagittis vel ante nec malesuada.
-Praesent dignissim mi nec ornare elementum. Nunc eu augue vel sem dignissim cursus sed et nulla.
-
-
-Algorithms
-----------------------------
-
-Etiam turis ante, luctus sed velit tristique, finibus volutpat dui. Nam sagittis vel ante nec malesuada.
-Praesent dignissim mi nec ornare elementum. Nunc eu augue vel sem dignissim cursus sed et nulla.
-
-
-Resources
-----------------------------
-
-
-Etiam turis ante, luctus sed velit tristique, finibus volutpat dui. Nam sagittis vel ante nec malesuada.
-Praesent dignissim mi nec ornare elementum. Nunc eu augue vel sem dignissim cursus sed et nulla.
 
 
 From RL to Multi-agent RL
@@ -65,7 +33,7 @@ Praesent dignissim mi nec ornare elementum. Nunc eu augue vel sem dignissim curs
 
 
 
-Partial Observable Markov Decision Process (POMDP)
+Partially Observable Markov Decision Process (POMDP)
 --------------------------------------------------
 
 Etiam turis ante, luctus sed velit tristique, finibus volutpat dui. Nam sagittis vel ante nec malesuada.
@@ -108,8 +76,8 @@ Gaming and Physical Simulation
 Etiam turis ante, luctus sed velit tristique, finibus volutpat dui. Nam sagittis vel ante nec malesuada.
 Praesent dignissim mi nec ornare elementum. Nunc eu augue vel sem dignissim cursus sed et nulla.
 
-Real-world Application
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Towards Real-world Application
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Etiam turis ante, luctus sed velit tristique, finibus volutpat dui. Nam sagittis vel ante nec malesuada.
 Praesent dignissim mi nec ornare elementum. Nunc eu augue vel sem dignissim cursus sed et nulla.
@@ -158,66 +126,8 @@ Centralized Training or Decentralized Training
 Etiam turis ante, luctus sed velit tristique, finibus volutpat dui. Nam sagittis vel ante nec malesuada.
 Praesent dignissim mi nec ornare elementum. Nunc eu augue vel sem dignissim cursus sed et nulla.
 
-
-
-Communication & Graph-based
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-Etiam turis ante, luctus sed velit tristique, finibus volutpat dui. Nam sagittis vel ante nec malesuada.
-Praesent dignissim mi nec ornare elementum. Nunc eu augue vel sem dignissim cursus sed et nulla.
-
-
-
-Multi-Task Learning & Meta Learning
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-Etiam turis ante, luctus sed velit tristique, finibus volutpat dui. Nam sagittis vel ante nec malesuada.
-Praesent dignissim mi nec ornare elementum. Nunc eu augue vel sem dignissim cursus sed et nulla.
-
-
-
-Population-based Multi-agent RL
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-
-Etiam turis ante, luctus sed velit tristique, finibus volutpat dui. Nam sagittis vel ante nec malesuada.
-Praesent dignissim mi nec ornare elementum. Nunc eu augue vel sem dignissim cursus sed et nulla.
-
-
-Other Popular Sub-topics
+Data Sharing
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Etiam turis ante, luctus sed velit tristique, finibus volutpat dui. Nam sagittis vel ante nec malesuada.
-Praesent dignissim mi nec ornare elementum. Nunc eu augue vel sem dignissim cursus sed et nulla.
-
-
-Automatic Parameter Sharing
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-Etiam turis ante, luctus sed velit tristique, finibus volutpat dui. Nam sagittis vel ante nec malesuada.
-Praesent dignissim mi nec ornare elementum. Nunc eu augue vel sem dignissim cursus sed et nulla.
-
-
-Sequence Modeling
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-Etiam turis ante, luctus sed velit tristique, finibus volutpat dui. Nam sagittis vel ante nec malesuada.
-Praesent dignissim mi nec ornare elementum. Nunc eu augue vel sem dignissim cursus sed et nulla.
-
-
-Role-based Learning
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-Etiam turis ante, luctus sed velit tristique, finibus volutpat dui. Nam sagittis vel ante nec malesuada.
-Praesent dignissim mi nec ornare elementum. Nunc eu augue vel sem dignissim cursus sed et nulla.
-
-
-Attention Mechanism
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-Etiam turis ante, luctus sed velit tristique, finibus volutpat dui. Nam sagittis vel ante nec malesuada.
-Praesent dignissim mi nec ornare elementum. Nunc eu augue vel sem dignissim cursus sed et nulla.
-
 
 Future Direction
 ===================

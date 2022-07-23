@@ -14,9 +14,10 @@ MARLlib: The MARL Extension for RLlib
 
 .. toctree::
    :maxdepth: 3
-   :caption: Introduction To MARL
+   :caption: Navigate From RL To MARL
 
-   intro_marl/concept
+   intro_marl/rl
+   intro_marl/marl
    intro_marl/algorithm
 
 .. toctree::
