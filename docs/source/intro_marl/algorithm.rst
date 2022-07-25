@@ -167,14 +167,17 @@ Read list
 Independent Deep Deterministic Policy Gradient (IDDPG)
 -------------------------------------------------------------
 
+action space
 
-.. list-table:: action space
+.. list-table::
    :widths: 25
    :header-rows: 0
 
    * - ``continues``
 
-.. list-table:: task mode
+task mode
+
+.. list-table::
    :widths: 25 25 25
    :header-rows: 0
 
@@ -182,13 +185,14 @@ Independent Deep Deterministic Policy Gradient (IDDPG)
      - ``collaborative``
      - ``competitive``
 
-.. list-table:: taxonomy
+taxonomy label
+
+.. list-table::
    :widths: 25 25
    :header-rows: 0
 
    * - ``off-policy``
      - ``deterministic``
-
 
 Preliminary
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -196,13 +200,13 @@ Preliminary
 Deep Deterministic Policy Gradient (DDPG) is an algorithm which concurrently learns a Q-function and a policy.
 It uses off-policy data and the Bellman equation to learn the Q-function, and uses the Q-function to learn the policy.
 The motivation of DDPG is to tackling the problem that standard Q-learning can only be used in discrete action space (a finite number of actions).
-To extend Q function to continues control problem, DDPG adopts an extra policy network :math:`\mu(s)` to produce action value.
-Then Q value is calculated as :math:`\max_a Q(s,a) \approx Q(s,\mu(s))`
+To extend Q function to continues control problem, DDPG adopts an extra policy network :math:`\mu(s)` parameterized by :math:`\theta` to produce action value.
+Then Q value is calculated as :math:`Q(s,\mu(s))` and the Q network is parameterized by :math:`\phi`.
 
 Math Formulation
 """""""""""""""""
 
-Q function learning side:
+Q learning:
 
 .. math::
 
@@ -210,7 +214,7 @@ Q function learning side:
         \Bigg( Q_{\phi}(s,a) - \left(r + \gamma (1 - d) Q_{\phi_{\text{targ}}}(s', \mu_{\theta_{\text{targ}}}(s')) \right) \Bigg)^2
         \right],
 
-Policy learning side:
+Policy learning:
 
 .. math::
 
@@ -220,7 +224,10 @@ Policy learning side:
 Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Each agent follows the standard DDPG learning pipeline as described in Preliminary. No information sharing.
+.. figure:: ../images/IDDPG.png
+    :align: center
+
+Each agent follows the standard DDPG learning pipeline as described in Preliminary. No information is shared across agents.
 
 Read list
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
