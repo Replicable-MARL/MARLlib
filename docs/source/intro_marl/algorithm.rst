@@ -8,7 +8,7 @@ Algorithm list of MARLlib, including the mathematical formulation and ``MARLlib`
 
 .. contents::
     :local:
-    :depth: 3
+    :depth: 2
 
 Etiam turis ante, luctus sed velit tristique, finibus volutpat dui. Nam sagittis vel ante nec malesuada.
 Praesent dignissim mi nec ornare elementum. Nunc eu augue vel sem dignissim cursus sed et nulla.
@@ -26,10 +26,6 @@ Features of independent learning
 Independent Q Learning (IQL)
 ---------------------------------------------
 
-Related paper
-
-- `Human-level control through deep reinforcement learning <https://daiwk.github.io/assets/dqn.pdf>`_
-- `Deep Recurrent Q-learning for Partially Observable MDPs <https://www.aaai.org/ocs/index.php/FSS/FSS15/paper/download/11673/11503>`_
 
 
 Supported action space:
@@ -53,18 +49,24 @@ Supported task mode:
 
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam efficitur in eros et blandit. Nunc maximus,
 
-Mathmatical Formulation
+Preliminary
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
 
 
-Implementation
+Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
+
+Read list
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+- `Human-level control through deep reinforcement learning <https://daiwk.github.io/assets/dqn.pdf>`_
+- `Deep Recurrent Q-learning for Partially Observable MDPs <https://www.aaai.org/ocs/index.php/FSS/FSS15/paper/download/11673/11503>`_
 
 
 
@@ -73,9 +75,6 @@ pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismo
 Independent Policy Gradient (IPG)
 ---------------------------------------------
 
-Related paper
-
-- `Policy gradient methods for reinforcement learning with function approximation <https://papers.nips.cc/paper/1713-policy-gradient-methods-for-reinforcement-learning-with-function-approximation.pdf>`_
 
 Supported action space:
 
@@ -98,18 +97,23 @@ Supported task mode:
 
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam efficitur in eros et blandit. Nunc maximus,
 
-Mathmatical Formulation
+Preliminary
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
 
 
-Implementation
+Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
+
+Read list
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+- `Policy gradient methods for reinforcement learning with function approximation <https://papers.nips.cc/paper/1713-policy-gradient-methods-for-reinforcement-learning-with-function-approximation.pdf>`_
 
 
 .. _IA2C:
@@ -117,9 +121,6 @@ pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismo
 Independent Advanced Actor Critic (IA2C)
 ---------------------------------------------
 
-Related paper
-
-- `Asynchronous Methods for Deep Reinforcement Learning <https://arxiv.org/abs/1602.01783>`_
 
 Supported action space:
 
@@ -142,22 +143,23 @@ Supported task mode:
 
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam efficitur in eros et blandit. Nunc maximus,
 
-Mathmatical Formulation
+Preliminary
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
 
 
-Implementation
+Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
 
+Read list
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-
-
+- `Asynchronous Methods for Deep Reinforcement Learning <https://arxiv.org/abs/1602.01783>`_
 
 
 .. _IDDPG:
@@ -165,21 +167,14 @@ pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismo
 Independent Deep Deterministic Policy Gradient (IDDPG)
 -------------------------------------------------------------
 
-Related paper
 
-- `Continuous control with deep reinforcement learning <https://arxiv.org/abs/1509.02971>`_
-
-Supported action space:
-
-.. list-table::
+.. list-table:: action space
    :widths: 25
    :header-rows: 0
 
    * - ``continues``
 
-Supported task mode:
-
-.. list-table::
+.. list-table:: task mode
    :widths: 25 25 25
    :header-rows: 0
 
@@ -187,21 +182,50 @@ Supported task mode:
      - ``collaborative``
      - ``competitive``
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam efficitur in eros et blandit. Nunc maximus,
+.. list-table:: taxonomy
+   :widths: 25 25
+   :header-rows: 0
 
-Mathmatical Formulation
+   * - ``off-policy``
+     - ``deterministic``
+
+
+Preliminary
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
-pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
+Deep Deterministic Policy Gradient (DDPG) is an algorithm which concurrently learns a Q-function and a policy.
+It uses off-policy data and the Bellman equation to learn the Q-function, and uses the Q-function to learn the policy.
+The motivation of DDPG is to tackling the problem that standard Q-learning can only be used in discrete action space (a finite number of actions).
+To extend Q function to continues control problem, DDPG adopts an extra policy network :math:`\mu(s)` to produce action value.
+Then Q value is calculated as :math:`\max_a Q(s,a) \approx Q(s,\mu(s))`
+
+Math Formulation
+"""""""""""""""""
+
+Q function learning side:
+
+.. math::
+
+    L(\phi, {\mathcal D}) = \underset{(s,a,r,s',d) \sim {\mathcal D}}{{\mathrm E}}\left[
+        \Bigg( Q_{\phi}(s,a) - \left(r + \gamma (1 - d) Q_{\phi_{\text{targ}}}(s', \mu_{\theta_{\text{targ}}}(s')) \right) \Bigg)^2
+        \right],
+
+Policy learning side:
+
+.. math::
+
+    \max_{\theta} \underset{s \sim {\mathcal D}}{{\mathrm E}}\left[ Q_{\phi}(s, \mu_{\theta}(s)) \right].
 
 
-Implementation
+Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
-pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
+Each agent follows the standard DDPG learning pipeline as described in Preliminary. No information sharing.
 
+Read list
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+- `Continuous control with deep reinforcement learning <https://arxiv.org/abs/1509.02971>`_
 
 
 
@@ -210,9 +234,6 @@ pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismo
 Independent Trust Region Policy Optimization (ITRPO)
 -------------------------------------------------------------
 
-Related paper
-
-- `Trust Region Policy Optimization <http://proceedings.mlr.press/v37/schulman15.pdf>`_
 
 Supported action space:
 
@@ -235,30 +256,29 @@ Supported task mode:
 
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam efficitur in eros et blandit. Nunc maximus,
 
-Mathmatical Formulation
+Preliminary
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
 
 
-Implementation
+Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
 
+Read list
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+- `Trust Region Policy Optimization <http://proceedings.mlr.press/v37/schulman15.pdf>`_
 
 .. _IPPO:
 
 Independent Proximal Policy Optimization (IPPO)
 -----------------------------------------------------
 
-Related paper
-
-- `Proximal Policy Optimization Algorithms <https://arxiv.org/abs/1707.06347>`_
-- `Is Independent Learning All You Need in the StarCraft Multi-Agent Challenge? <https://arxiv.org/abs/2011.09533>`_
-
 Supported action space:
 
 .. list-table::
@@ -280,18 +300,24 @@ Supported task mode:
 
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam efficitur in eros et blandit. Nunc maximus,
 
-Mathmatical Formulation
+Preliminary
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
 
 
-Implementation
+Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
+
+Read list
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+- `Proximal Policy Optimization Algorithms <https://arxiv.org/abs/1707.06347>`_
+- `Is Independent Learning All You Need in the StarCraft Multi-Agent Challenge? <https://arxiv.org/abs/2011.09533>`_
 
 
 
@@ -306,10 +332,6 @@ Features of centralized critic under CTDE framework.
 Counterfactual Multi-Agent Policy Gradients (COMA)
 -----------------------------------------------------
 
-Related paper
-
-- `Counterfactual Multi-Agent Policy Gradients <https://ojs.aaai.org/index.php/AAAI/article/download/11794/11653>`_
-
 
 Supported action space:
 
@@ -331,18 +353,24 @@ Supported task mode:
 
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam efficitur in eros et blandit. Nunc maximus,
 
-Mathmatical Formulation
+Preliminary
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
 
 
-Implementation
+Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
+
+Read list
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+- `Counterfactual Multi-Agent Policy Gradients <https://ojs.aaai.org/index.php/AAAI/article/download/11794/11653>`_
+
 
 .. _MAA2C:
 
@@ -370,28 +398,27 @@ Supported task mode:
 
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam efficitur in eros et blandit. Nunc maximus,
 
-Mathmatical Formulation
+Preliminary
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
 
 
-Implementation
+Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
+
+Read list
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 .. _MADDPG:
 
 Multi-agent Deep Deterministic Policy Gradient (MADDPG)
 -------------------------------------------------------------
-
-Related paper
-
-- `Multi-Agent Actor-Critic for Mixed Cooperative-Competitive Environments <https://arxiv.org/abs/1706.02275>`_
 
 Supported action space:
 
@@ -413,18 +440,23 @@ Supported task mode:
 
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam efficitur in eros et blandit. Nunc maximus,
 
-Mathmatical Formulation
+Preliminary
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
 
 
-Implementation
+Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
+
+Read list
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+- `Multi-Agent Actor-Critic for Mixed Cooperative-Competitive Environments <https://arxiv.org/abs/1706.02275>`_
 
 
 .. _MATRPO:
@@ -453,18 +485,21 @@ Supported task mode:
 
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam efficitur in eros et blandit. Nunc maximus,
 
-Mathmatical Formulation
+Preliminary
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
 
 
-Implementation
+Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
+
+Read list
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 .. _MAPPO:
@@ -472,9 +507,6 @@ pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismo
 Multi-agent Proximal Policy Optimization (MAPPO)
 -----------------------------------------------------
 
-Related paper
-
-- `The Surprising Effectiveness of PPO in Cooperative, Multi-Agent Games <https://arxiv.org/abs/2103.01955>`_
 
 Supported action space:
 
@@ -497,18 +529,23 @@ Supported task mode:
 
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam efficitur in eros et blandit. Nunc maximus,
 
-Mathmatical Formulation
+Preliminary
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
 
 
-Implementation
+Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
+
+Read list
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+- `The Surprising Effectiveness of PPO in Cooperative, Multi-Agent Games <https://arxiv.org/abs/2103.01955>`_
 
 
 .. _HATRPO:
@@ -516,9 +553,6 @@ pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismo
 Heterogeneous Multi-agent Trust Region Policy Optimization (HATRPO)
 ------------------------------------------------------------------------
 
-Related paper
-
-- `Trust Region Policy Optimisation in Multi-Agent Reinforcement Learning <https://arxiv.org/abs/2109.11251>`_
 
 Supported action space:
 
@@ -539,18 +573,23 @@ Supported task mode:
 
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam efficitur in eros et blandit. Nunc maximus,
 
-Mathmatical Formulation
+Preliminary
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
 
 
-Implementation
+Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
+
+Read list
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+- `Trust Region Policy Optimisation in Multi-Agent Reinforcement Learning <https://arxiv.org/abs/2109.11251>`_
 
 
 .. _HAPPO:
@@ -577,14 +616,20 @@ Supported task mode:
 
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam efficitur in eros et blandit. Nunc maximus,
 
-Mathmatical Formulation
+Preliminary
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
 
 
-Implementation
+Workflow
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
+pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
+
+Read list
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Value Decomposition
@@ -597,9 +642,6 @@ Features of value decomposition under CTDE framework.
 Value Decomposition Networks (VDN)
 ---------------------------------------------
 
-Related paper
-
-- `Value-Decomposition Networks For Cooperative Multi-Agent Learning <https://arxiv.org/abs/1706.05296>`_
 
 Supported action space:
 
@@ -619,27 +661,29 @@ Supported task mode:
 
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam efficitur in eros et blandit. Nunc maximus,
 
-Mathmatical Formulation
+Preliminary
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
 
 
-Implementation
+Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
+
+Read list
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+- `Value-Decomposition Networks For Cooperative Multi-Agent Learning <https://arxiv.org/abs/1706.05296>`_
 
 .. _QMIX:
 
 Monotonic Value Function Factorisation (QMIX)
 ---------------------------------------------
 
-Related paper
-
-- `QMIX: Monotonic Value Function Factorisation for Deep Multi-Agent Reinforcement Learning <https://arxiv.org/abs/1803.11485>`_
 
 Supported action space:
 
@@ -659,18 +703,24 @@ Supported task mode:
 
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam efficitur in eros et blandit. Nunc maximus,
 
-Mathmatical Formulation
+Preliminary
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
 
 
-Implementation
+Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
+
+Read list
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+- `QMIX: Monotonic Value Function Factorisation for Deep Multi-Agent Reinforcement Learning <https://arxiv.org/abs/1803.11485>`_
 
 
 .. _FACMAC:
@@ -678,9 +728,6 @@ pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismo
 Factored Multi-Agent Centralised Policy Gradients (FACMAC)
 -------------------------------------------------------------
 
-Related paper
-
-- `FACMAC: Factored Multi-Agent Centralised Policy Gradients <https://arxiv.org/abs/2003.06709>`_
 
 
 Supported action space:
@@ -701,27 +748,31 @@ Supported task mode:
 
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam efficitur in eros et blandit. Nunc maximus,
 
-Mathmatical Formulation
+Preliminary
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
 
 
-Implementation
+Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
+
+Read list
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+- `FACMAC: Factored Multi-Agent Centralised Policy Gradients <https://arxiv.org/abs/2003.06709>`_
+
+
 
 .. _VDA2C:
 
 Value Decomposition Advanced Actor Critic (VDA2C)
 -------------------------------------------------------
 
-Related paper
-
-- `Value-Decomposition Multi-Agent Actor-Critics <https://arxiv.org/abs/2007.12306>`_
 
 
 Supported action space:
@@ -743,18 +794,23 @@ Supported task mode:
 
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam efficitur in eros et blandit. Nunc maximus,
 
-Mathmatical Formulation
+Preliminary
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
 
 
-Implementation
+Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
+
+Read list
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+- `Value-Decomposition Multi-Agent Actor-Critics <https://arxiv.org/abs/2007.12306>`_
 
 .. _VDPPO:
 
@@ -780,16 +836,18 @@ Supported task mode:
 
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam efficitur in eros et blandit. Nunc maximus,
 
-Mathmatical Formulation
+Preliminary
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
 
 
-Implementation
+Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
 pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
 
+Read list
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
