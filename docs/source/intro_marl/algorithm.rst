@@ -188,11 +188,21 @@ task mode
 taxonomy label
 
 .. list-table::
-   :widths: 25 25
+   :widths: 25 25 25
    :header-rows: 0
 
    * - ``off-policy``
      - ``deterministic``
+     - ``independent learning``
+
+derived algorithm
+
+.. list-table::
+   :widths: 25 25
+   :header-rows: 0
+
+   * - :ref:`MADDPG`
+     - :ref:`FACMAC`
 
 Preliminary
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -242,7 +252,7 @@ Workflow
 Each agent follows the standard DDPG learning pipeline as described in Preliminary. No information is shared across agents.
 
 .. figure:: ../images/IDDPG.png
-    :width: 500
+    :width: 600
     :align: center
 
     Independent Deep Deterministic Policy Gradient (IDDPG)
@@ -311,7 +321,7 @@ Read list
 Independent Proximal Policy Optimization (IPPO)
 -----------------------------------------------------
 
-Supported action space:
+action space
 
 .. list-table::
    :widths: 25 25
@@ -320,7 +330,7 @@ Supported action space:
    * - ``discrete``
      - ``continues``
 
-Supported task mode:
+task mode
 
 .. list-table::
    :widths: 25 25 25
@@ -330,24 +340,95 @@ Supported task mode:
      - ``collaborative``
      - ``competitive``
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam efficitur in eros et blandit. Nunc maximus,
+taxonomy label
+
+.. list-table::
+   :widths: 25 25 25
+   :header-rows: 0
+
+   * - ``on-policy``
+     - ``stochastic``
+     - ``independent learning``
+
+derived algorithm
+
+.. list-table::
+   :widths: 25 25 25
+   :header-rows: 0
+
+   * - :ref:`MAPPO`
+     - :ref:`HAPPO`
+     - :ref:`VDPPO`
 
 Preliminary
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
-pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
+Vanilla Policy Gradient (PG) & Trust Region Policy Optimization (TRPO) & General Advantage Estimation (GAE)
+
+
+Algorithm Description
+^^^^^^^^^^^^^^^^^^^^^^^
+
+PPO is a first-order optimisation that simplifies its implementation. Similar to TRPO objective function, It defines the probability ratio between the new policy and old policy as :math:`\frac{\pi_{\theta}(a|s)}{\pi_{\theta_k}(a|s)}`.
+Instead of adding complicated KL constraint, PPO imposes this policy ratio to stay within a small interval between :math:`1-\epsilon` and :math:`1+\epsilon`.
+The objective function of PPO takes the minimum value between the original value and the clipped value.
+
+There are two primary variants of PPO: PPO-Penalty and PPO-Clip. Here we only give the formulation of PPO-Clip, which is more commonly used in practical.
+
+Math Formulation
+^^^^^^^^^^^^^^^^^^
+
+Critic learning:
+
+.. math::
+
+    \phi_k = \arg \min_{\phi} \underE{s_t, \hat{R}_t \sim \pi_k}{\left( V_{\phi}(s_t) - \hat{R}_t \right)^2}
+
+General Advantage Estimation:
+
+.. math::
+
+    A_t=\sum_{t=0}^{\infty}(\gamma\lambda)^l\delta_{t+l}^V
+
+
+Policy learning:
+
+.. math::
+
+    L(s,a,\theta_k,\theta) = \min\left(
+    \frac{\pi_{\theta}(a|s)}{\pi_{\theta_k}(a|s)}  A^{\pi_{\theta_k}}(s,a), \;\;
+    \text{clip}\left(\frac{\pi_{\theta}(a|s)}{\pi_{\theta_k}(a|s)}, 1 - \epsilon, 1+\epsilon \right) A^{\pi_{\theta_k}}(s,a)
+    \right),
+
+Here
+:math:`{\mathcal D}` is the collected trajectories.
+:math:`R` is the rewards-to-go.
+:math:`\tau` is the trajectory.
+:math:`V_{\phi}` is the critic function.
+:math:`A` is the advantage.
+:math:`\gamma` is discount value.
+:math:`\lambda` is the weight value of GAE.
+:math:`a` is the action.
+:math:`s` is the observation/state.
+:math:`\epsilon` is a hyperparameter controlling how far away the new policy is allowed to go from the old.
+:math:`\pi_{\theta}` is the policy net.
 
 
 Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
-pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
+In IPPO, each agent follows standard PPO sampling/training pipeline. Therefore, IPPO is a general baseline for all kinds of MARL tasks with robust performance.
+
+.. figure:: ../images/IPPO.png
+    :width: 600
+    :align: center
+
+    Independent Proximal Policy Optimization (IPPO)
 
 Read list
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+- `High-Dimensional Continuous Control Using Generalized Advantage Estimation <https://arxiv.org/abs/1506.02438>`_
 - `Proximal Policy Optimization Algorithms <https://arxiv.org/abs/1707.06347>`_
 - `Is Independent Learning All You Need in the StarCraft Multi-Agent Challenge? <https://arxiv.org/abs/2011.09533>`_
 
@@ -390,6 +471,14 @@ taxonomy label
    * - ``off-policy``
      - ``deterministic``
 
+inherited algorithms
+
+.. list-table::
+   :widths: 25
+   :header-rows: 0
+
+   * - IDDPG
+
 Preliminary
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -412,14 +501,14 @@ Q learning:
 
     L(\phi, {\mathcal D}) = \underset{(\mathbf{s},\mathbf{a},r,\mathbf{s'},d) \sim {\mathcal D}}{{\mathrm E}}\left[
         \Bigg( Q_{\phi}(\mathbf{s},\mathbf{a}) - \left(r + \gamma (1 - d) Q_{\phi_{\text{targ}}}(\mathbf{s'}, \mu_{\theta_{\text{targ}}}(\mathbf{s'})) \right) \Bigg)^2
-        \right],
+        \right]
 
 
 Policy learning:
 
 .. math::
 
-    \max_{\theta} \underset{s \sim {\mathcal D}}{{\mathrm E}}\left[ Q_{\phi}(s, \mu_{\theta}(s)) \right].
+    \max_{\theta} \underset{s \sim {\mathcal D}}{{\mathrm E}}\left[ Q_{\phi}(s, \mu_{\theta}(s)) \right]
 
 Here :math:`{\mathcal D}` is the replay buffer, which can be shared across agents.
 :math:`\mathbf{a}` is an action set, including opponents.
@@ -443,7 +532,7 @@ In sampling stage, each agent follows the standard DDPG learning pipeline to inf
 In learning stage, each agent predict its next action use target policy and share with other agents before entering the training loop.
 
 .. figure:: ../images/MADDPG.png
-    :width: 500
+    :width: 600
     :align: center
 
     Multi-agent Deep Deterministic Policy Gradient (MADDPG)
@@ -593,7 +682,7 @@ Multi-agent Proximal Policy Optimization (MAPPO)
 -----------------------------------------------------
 
 
-Supported action space:
+action space
 
 .. list-table::
    :widths: 25 25
@@ -602,7 +691,7 @@ Supported action space:
    * - ``discrete``
      - ``continues``
 
-Supported task mode:
+task mode
 
 .. list-table::
    :widths: 25 25 25
@@ -612,20 +701,88 @@ Supported task mode:
      - ``collaborative``
      - ``competitive``
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam efficitur in eros et blandit. Nunc maximus,
+taxonomy label
+
+.. list-table::
+   :widths: 25 25 25
+   :header-rows: 0
+
+   * - ``on-policy``
+     - ``stochastic``
+     - ``independent learning``
+
+inherited algorithm
+
+.. list-table::
+   :widths: 25
+   :header-rows: 0
+
+   * - :ref:`IPPO`
 
 Preliminary
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
-pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
+Independent Proximal Policy Optimization (IPPO)
+
+
+Algorithm Description
+^^^^^^^^^^^^^^^^^^^^^^^
+
+MAPPO is the centralized version of PPO where the critic function :math:`V` take not only the self observation as input but also other agents' information.
+
+
+Math Formulation
+^^^^^^^^^^^^^^^^^^
+
+Critic learning:
+
+.. math::
+
+    \phi_k = \arg \min_{\phi} \underE{\mathbf{s_t}, \hat{R}_t \sim \pi_k}{\left( V_{\phi}(s_t) - \hat{R}_t \right)^2}
+
+General Advantage Estimation:
+
+.. math::
+
+    A_t=\sum_{t=0}^{\infty}(\gamma\lambda)^l\delta_{t+l}^V
+
+
+Policy learning:
+
+.. math::
+
+    L(s,\mathbf{s}, a,\mathbf{a}^-,\theta_k,\theta) = \min\left(
+    \frac{\pi_{\theta}(a|s)}{\pi_{\theta_k}(a|s)}  A^{\pi_{\theta_k}}(\mathbf{s},\mathbf{a}^-), \;\;
+    \text{clip}\left(\frac{\pi_{\theta}(a|s)}{\pi_{\theta_k}(a|s)}, 1 - \epsilon, 1+\epsilon \right) A^{\pi_{\theta_k}}(\mathbf{s},\mathbf{a}^-)
+    \right),
+
+Here
+:math:`{\mathcal D}` is the collected trajectories.
+:math:`R` is the rewards-to-go.
+:math:`\tau` is the trajectory.
+:math:`A` is the advantage.
+:math:`\gamma` is discount value.
+:math:`\lambda` is the weight value of GAE.
+:math:`a` is the current agent action.
+:math:`\mathbf{a}^-` is the action set of all agents, except the current agent.
+:math:`s` is the current agent observation/state.
+:math:`\mathbf{s}` is the observation/state set of all agents.
+:math:`\epsilon` is a hyperparameter controlling how far away the new policy is allowed to go from the old.
+:math:`V_{\phi}` is the critic value function.
+:math:`\pi_{\theta}` is the policy net.
 
 
 Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
-pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
+In sampling stage, agents share information with others. The information includes others' observation and predicted action. After collecting the necessary information from other agents,
+all agents follow standard PPO training function, except using the centralized critic value function to calculate the GAE and conduct the PPO critic learning procedure.
+
+.. figure:: ../images/MAPPO.png
+    :width: 600
+    :align: center
+
+    Multi-agent Proximal Policy Optimization (MAPPO)
 
 Read list
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
