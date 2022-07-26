@@ -240,9 +240,11 @@ Here :math:`{\mathcal D}` is the replay buffer, which can be shared across agent
 :math:`r` is the reward.
 :math:`s` is the observation/state.
 :math:`s'` is the next observation/state.
-:math:`d` is set to `1`(True) when episode ends else `0`(False).
-:math:`\gamma` is discount value.
+:math:`d` is set to ``1`` (True) when episode ends else ``0`` (False).
+:math:`{\gamma}` is discount value.
+:math:`\mu_{\theta}}` is policy net, which can be shared across agents.
 :math:`\mu_{\theta_{\text{targ}}}` is policy target net, which can be shared across agents.
+:math:`\phi}` is Q net, which can be shared across agents.
 :math:`\phi_{\text{targ}}` is Q target net, which can be shared across agents.
 
 
@@ -382,7 +384,7 @@ Critic learning:
 
 .. math::
 
-    \phi_k = \arg \min_{\phi} \underE{s_t, \hat{R}_t \sim \pi_k}{\left( V_{\phi}(s_t) - \hat{R}_t \right)^2}
+    \phi_{k+1} = \arg \min_{\phi} \frac{1}{|{\mathcal D}_k| T} \sum_{\tau \in {\mathcal D}_k} \sum_{t=0}^T\left( V_{\phi} (s_t) - \hat{R}_t \right)^2
 
 General Advantage Estimation:
 
@@ -515,8 +517,8 @@ Here :math:`{\mathcal D}` is the replay buffer, which can be shared across agent
 :math:`r` is the reward.
 :math:`\mathbf{s}` is the observation/state set, including opponents.
 :math:`\mathbf{s'}` is the next observation/state set, including opponents.
-:math:`d` is set to `1`(True) when episode ends else `0`(False).
-:math:`\gamma` is discount value.
+:math:`d` is set to ``1``(True) when episode ends else ``0``(False).
+:math:`{\gamma}` is discount value.
 :math:`\mu_{\theta_{\text{targ}}}` is policy target net, which can be shared across agents.
 :math:`\phi_{\text{targ}}` is Q target net, which can be shared across agents.
 
@@ -709,7 +711,7 @@ taxonomy label
 
    * - ``on-policy``
      - ``stochastic``
-     - ``independent learning``
+     - ``centralized critic``
 
 inherited algorithm
 
@@ -738,7 +740,7 @@ Critic learning:
 
 .. math::
 
-    \phi_k = \arg \min_{\phi} \underE{\mathbf{s_t}, \hat{R}_t \sim \pi_k}{\left( V_{\phi}(s_t) - \hat{R}_t \right)^2}
+    \phi_{k+1} = \arg \min_{\phi} \frac{1}{|{\mathcal D}_k| T} \sum_{\tau \in {\mathcal D}_k} \sum_{t=0}^T\left( V_{\phi} (s_t) - \hat{R}_t \right)^2
 
 General Advantage Estimation:
 
@@ -776,7 +778,7 @@ Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 In sampling stage, agents share information with others. The information includes others' observation and predicted action. After collecting the necessary information from other agents,
-all agents follow standard PPO training function, except using the centralized critic value function to calculate the GAE and conduct the PPO critic learning procedure.
+all agents follow standard PPO training pipeline, except using the centralized critic value function to calculate the GAE and conduct the PPO critic learning procedure.
 
 .. figure:: ../images/MAPPO.png
     :width: 600
