@@ -3,6 +3,7 @@ from ray.tune.utils import merge_dicts
 from ray.tune import CLIReporter
 from marl.algos.core.CC.happo import HAPPOTrainer
 from marl.algos.utils.setup_utils import AlgVar
+from marl.algos.utils.log_dir_util import available_local_dir
 from ray.rllib.agents.ppo.ppo import PPOTrainer, DEFAULT_CONFIG as PPO_CONFIG
 
 
@@ -72,6 +73,8 @@ def run_happo(config_dict, common_config, env_dict, stop):
                        stop=stop,
                        config=config,
                        verbose=1,
-                       progress_reporter=CLIReporter())
+                       progress_reporter=CLIReporter(),
+                       local_dir=available_local_dir
+                       )
 
     return results
