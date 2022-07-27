@@ -3,6 +3,8 @@
 Multi-agent Proximal Policy Optimization (MAPPO)
 -----------------------------------------------------
 
+Characteristic
+^^^^^^^^^^^^^^^
 
 action space
 
@@ -105,6 +107,41 @@ all agents follow standard PPO training pipeline, except using the centralized c
     :align: center
 
     Multi-agent Proximal Policy Optimization (MAPPO)
+
+Implementation
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+We use vanilla PPO implementation of RLlib in IPPO. The only exception is we rewrite the sgd iteration logic.
+The differences can be found in
+
+    - ``MultiGPUTrainOneStep``
+    - ``learn_on_loaded_batch``
+
+Based on IPPO, we add centralized modules to implement MAPPO.
+The main differences are:
+
+    - ``centralized_critic_postprocessing``
+    - ``central_critic_ppo_loss``
+    - ``CC_RNN``
+
+
+Key hyperparameter location:
+
+- ``marl/algos/hyperparams/common/ppo``
+- ``marl/algos/hyperparams/fintuned/env/ppo``
+
+Usage & Limitation
+^^^^^^^^^^^^^^^^^^^^^^
+
+IPPO is suitable for
+
+- continues control tasks
+- discrete control tasks
+- any task mode
+
+.. code-block:: shell
+
+    python marl/main.py --algo_config=ppo --finetuned --env-config=smac with env_args.map_name=3m
 
 Read list
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

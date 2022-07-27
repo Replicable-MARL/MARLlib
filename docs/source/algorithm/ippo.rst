@@ -3,6 +3,9 @@
 Independent Proximal Policy Optimization (IPPO)
 -----------------------------------------------------
 
+Characteristic
+^^^^^^^^^^^^^^^
+
 action space
 
 .. list-table::
@@ -106,6 +109,34 @@ In IPPO, each agent follows standard PPO sampling/training pipeline. Therefore, 
     :align: center
 
     Independent Proximal Policy Optimization (IPPO)
+
+Implementation
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+We use vanilla PPO implementation of RLlib in IPPO. The only exception is we rewrite the sgd iteration logic.
+The differences can be found in
+
+    - ``MultiGPUTrainOneStep``
+    - ``learn_on_loaded_batch``
+
+
+Key hyperparameter location:
+
+- ``marl/algos/hyperparams/common/ppo``
+- ``marl/algos/hyperparams/fintuned/env/ppo``
+
+Usage & Limitation
+^^^^^^^^^^^^^^^^^^^^^^
+
+IPPO is suitable for
+
+- continues control tasks
+- discrete control tasks
+- any task mode
+
+.. code-block:: shell
+
+    python marl/main.py --algo_config=ppo --finetuned --env-config=smac with env_args.map_name=3m
 
 Read list
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

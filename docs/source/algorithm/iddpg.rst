@@ -3,6 +3,9 @@
 Independent Deep Deterministic Policy Gradient (IDDPG)
 -------------------------------------------------------------
 
+Characteristic
+^^^^^^^^^^^^^^^
+
 action space
 
 .. list-table::
@@ -122,9 +125,10 @@ Key hyperparameter location:
 Usage & Limitation
 ^^^^^^^^^^^^^^^^^^^^^^
 
-IDDPG is only suitable for
+IDDPG is suitable for
 
-- continues control tasks.
+- continues control tasks
+- any task mode
 
 .. code-block:: shell
 

@@ -3,6 +3,9 @@
 Multi-agent Deep Deterministic Policy Gradient (MADDPG)
 -------------------------------------------------------------
 
+Characteristic
+^^^^^^^^^^^^^^^
+
 action space
 
 .. list-table::
@@ -36,7 +39,7 @@ inherited algorithms
    :widths: 25
    :header-rows: 0
 
-   * - IDDPG
+   * - :ref:`IDDPG`
 
 Preliminary
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -120,9 +123,10 @@ Key hyperparameter location:
 Usage & Limitation
 ^^^^^^^^^^^^^^^^^^^^^^
 
-MADDPG is only suitable for
+MADDPG is suitable for
 
-- continues control tasks.
+- continues control tasks
+- any task mode
 
 .. code-block:: shell
 
