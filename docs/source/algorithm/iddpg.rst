@@ -78,9 +78,9 @@ Here :math:`{\mathcal D}` is the replay buffer, which can be shared across agent
 :math:`s'` is the next observation/state.
 :math:`d` is set to ``1`` (True) when episode ends else ``0`` (False).
 :math:`{\gamma}` is discount value.
-:math:`\mu_{\theta}}` is policy net, which can be shared across agents.
+:math:`\mu_{\theta}` is policy net, which can be shared across agents.
 :math:`\mu_{\theta_{\text{targ}}}` is policy target net, which can be shared across agents.
-:math:`\phi}` is Q net, which can be shared across agents.
+:math:`\phi` is Q net, which can be shared across agents.
 :math:`\phi_{\text{targ}}` is Q target net, which can be shared across agents.
 
 
@@ -97,7 +97,40 @@ Each agent follows the standard DDPG learning pipeline as described in Prelimina
 
 .. admonition:: You Should Know
 
-    Some tricks like `gumble_softmax` enables DDPG policy net to output categorical action.
+    Some tricks like `gumble_softmax` enables DDPG policy net to output categorical-like action distribution.
+
+
+Implementation
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+We extend vanilla DDPG of RLlib to be recurrent neural network(RNN) compatiable.
+The main differences are:
+
+- model side: the agent model related modules and functions are rewritten including:
+    - ``build_rnnddpg_models_and_action_dist``
+    - ``DDPG_RNN_TorchModel``
+- algorithm side: the sampling and training pipelines are rewritten including:
+    - ``episode_execution_plan``
+    - ``ddpg_actor_critic_loss``
+
+
+Key hyperparameter location:
+
+- ``marl/algos/hyperparams/common/ddpg``
+- ``marl/algos/hyperparams/fintuned/env/ddpg``
+
+Usage & Limitation
+^^^^^^^^^^^^^^^^^^^^^^
+
+IDDPG is only suitable for
+
+- continues control tasks.
+
+.. code-block:: shell
+
+    python marl/main.py --algo_config=ddpg --finetuned --env-config=mamujoco with env_args.map_name=2AgentAnt
+
+
 
 
 Read list

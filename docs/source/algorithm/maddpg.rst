@@ -67,7 +67,7 @@ Policy learning:
 
 .. math::
 
-    \max_{\theta} \underset{s \sim {\mathcal D}}{{\mathrm E}}\left[ Q_{\phi}(s, \mu_{\theta}(s)) \right]
+    \max_{\theta} \underset{s \sim {\mathcal D}}{{\mathrm E}}\left[ Q_{\phi}(s,\mathbf{a}, \mu_{\theta}(s)) \right]
 
 Here :math:`{\mathcal D}` is the replay buffer, which can be shared across agents.
 :math:`\mathbf{a}` is an action set, including opponents.
@@ -81,13 +81,14 @@ Here :math:`{\mathcal D}` is the replay buffer, which can be shared across agent
 
 .. admonition:: You Should Know
 
-    Policy inference of MADDPG is exactly same as DDPG/IDDPG. While the optimization of policy net is different.
+    Policy inference procedure of MADDPG is kept same with IDDPG. While the learning target of policy net is different.
 
 
 Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-In sampling stage, each agent follows the standard DDPG learning pipeline to inference the action but use a centralized Q function to compute Q value, which needs data sharing.
+In sampling stage, each agent follows the standard DDPG learning pipeline to inference the action but use a centralized Q function to compute Q value, which needs data sharing
+before send all the collected data to the buffer.
 In learning stage, each agent predict its next action use target policy and share with other agents before entering the training loop.
 
 .. figure:: ../images/MADDPG.png
@@ -95,6 +96,39 @@ In learning stage, each agent predict its next action use target policy and shar
     :align: center
 
     Multi-agent Deep Deterministic Policy Gradient (MADDPG)
+
+Implementation
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+We extend vanilla DDPG of RLlib to be recurrent neural network(RNN) compatiable.
+Based on RNN compatiable DDPG, we add the centralized sampling and training module to the original pipeline.
+The main differences between IDDPG and MADDPG are:
+
+- model side: the agent model related modules and functions are built in centralized style:
+    - ``build_maddpg_models_and_action_dist``
+    - ``MADDPG_RNN_TorchModel``
+- algorithm side: the sampling and training pipelines are built in centralized style:
+    - ``centralized_critic_q``
+    - ``central_critic_ddpg_loss``
+
+
+Key hyperparameter location:
+
+- ``marl/algos/hyperparams/common/maddpg``
+- ``marl/algos/hyperparams/fintuned/env/maddpg``
+
+Usage & Limitation
+^^^^^^^^^^^^^^^^^^^^^^
+
+MADDPG is only suitable for
+
+- continues control tasks.
+
+.. code-block:: shell
+
+    python marl/main.py --algo_config=maddpg --finetuned --env-config=mamujoco with env_args.map_name=2AgentAnt
+
+
 
 Read list
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
