@@ -1,0 +1,42 @@
+.. _QMIX:
+
+Monotonic Value Function Factorisation (QMIX)
+---------------------------------------------
+
+
+Supported action space:
+
+.. list-table::
+   :widths: 25
+   :header-rows: 0
+
+   * - ``discrete``
+
+Supported task mode:
+
+.. list-table::
+   :widths: 25
+   :header-rows: 0
+
+   * - ``cooperative``
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam efficitur in eros et blandit. Nunc maximus,
+
+Preliminary
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
+pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
+
+
+Workflow
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Donec non rutrum lorem. Aenean sagittis metus at pharetra fringilla. Nunc sapien dolor, cursus sed nisi at,
+pretium tristique lectus. Sed pellentesque leo lectus, et convallis ipsum euismod a.
+
+Read list
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+- `QMIX: Monotonic Value Function Factorisation for Deep Multi-Agent Reinforcement Learning <https://arxiv.org/abs/1803.11485>`_

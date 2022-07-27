@@ -18,7 +18,30 @@ MARLlib: The MARL Extension for RLlib
 
    intro_marl/rl
    intro_marl/marl
-   intro_marl/algorithm
+
+.. toctree::
+   :maxdepth: 3
+   :caption: Algorithm Documentation
+
+   algorithm/iql
+   algorithm/ipg
+   algorithm/ia2c
+   algorithm/iddpg
+   algorithm/itrpo
+   algorithm/ippo
+   algorithm/coma
+   algorithm/maddpg
+   algorithm/maa2c
+   algorithm/matrpo
+   algorithm/mappo
+   algorithm/hatrpo
+   algorithm/happo
+   algorithm/vdn
+   algorithm/qmix
+   algorithm/facmac
+   algorithm/vda2c
+   algorithm/vdppo
+
 
 .. toctree::
    :maxdepth: 3
