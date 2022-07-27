@@ -3,6 +3,12 @@
 Independent Proximal Policy Optimization (IPPO)
 -----------------------------------------------------
 
+.. admonition:: Quick Facts
+
+    Independent proximal policy optimization is a natural extension of standard single agent proximal policy optimization in multi-agent settings.
+    The sampling/training pipeline is exactly the same when we standing at the view of single agent when comparing PPO and IPPO.
+
+
 Characteristic
 ^^^^^^^^^^^^^^^
 

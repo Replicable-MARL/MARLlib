@@ -3,6 +3,12 @@
 Independent Deep Deterministic Policy Gradient (IDDPG)
 -------------------------------------------------------------
 
+.. admonition:: Quick Facts
+
+    Independent deep deterministic policy gradient is a natural extension of standard single agent deep deterministic policy gradient in multi-agent settings.
+    The sampling/training pipeline is exactly the same when we standing at the view of single agent when comparing DDPG and IDDPG.
+
+
 Characteristic
 ^^^^^^^^^^^^^^^
 

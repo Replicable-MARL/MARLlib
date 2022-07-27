@@ -3,6 +3,14 @@
 Multi-agent Deep Deterministic Policy Gradient (MADDPG)
 -------------------------------------------------------------
 
+.. admonition:: Quick Facts
+
+    - Multi-agent deep deterministic policy gradient is one of the centralized extensions of deep deterministic policy gradient.
+    - Additional data sharing module is needed in both sampling and learning stages.
+    - The agent model is equipped with a centralized Q function.
+    - The maddpg loss is built based on centralized Q loss.
+
+
 Characteristic
 ^^^^^^^^^^^^^^^
 

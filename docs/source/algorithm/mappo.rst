@@ -3,6 +3,14 @@
 Multi-agent Proximal Policy Optimization (MAPPO)
 -----------------------------------------------------
 
+.. admonition:: Quick Facts
+
+    - Multi-agent proximal policy optimization is one of the centralized extensions of independent proximal policy optimization.
+    - Additional data sharing module is needed.
+    - The agent model is equipped with a centralized critic function.
+    - The mappo surrogate loss is built based on new critic loss.
+
+
 Characteristic
 ^^^^^^^^^^^^^^^
 
