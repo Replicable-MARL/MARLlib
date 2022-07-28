@@ -5,10 +5,10 @@ Independent Deep Deterministic Policy Gradient (IDDPG)
 
 .. admonition:: Quick Facts
 
-    - Independent deep deterministic policy gradient is a natural extension of standard deep deterministic policy gradient in multi-agent settings.
-    - The sampling/training pipeline is the same when we stand at the view of a single agent when comparing DDPG and IDDPG.
-    - An IDDPG agent architecture consists of two modules: ``policy`` and ``Q``.
-    - IDDPG applies to cooperative, competitive, and mixed task modes.
+    - Independent deep deterministic policy gradient is a natural extension of standard single agent deep deterministic policy gradient in multi-agent settings.
+    - The sampling/training pipeline is exactly the same when we standing at the view of single agent when comparing DDPG and IDDPG.
+    - An IDDPG agent architecture consists of two modules: policy network and Q network.
+    - IDDPG is applicable to cooperative, competitive, and mixed task modes.
 
 
 Characteristic
@@ -59,11 +59,11 @@ Q-Learning & Deep Q Network(DQN)
 Algorithm Description
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-Deep Deterministic Policy Gradient (DDPG) is an algorithm that concurrently learns a ``Q`` and a ``policy``.
-It uses off-policy data and the Bellman equation to learn the ``Q`` and the ``Q`` to learn the ``policy``.
-The motivation of DDPG is to tackle the problem that standard Q-learning can only be used in discrete action space (a finite number of actions).
-To extend Q-learning to the continues control problem, DDPG adopts an extra ``policy`` network :math:`\mu(s)` parameterized by :math:`\theta` to produce action value.
-Then Q value is calculated as :math:`Q(s,\mu(s))` and the ``Q`` network is parameterized by :math:`\phi`.
+Deep Deterministic Policy Gradient (DDPG) is an algorithm which concurrently learns a Q-function and a policy.
+It uses off-policy data and the Bellman equation to learn the Q-function, and uses the Q-function to learn the policy.
+The motivation of DDPG is to tackling the problem that standard Q-learning can only be used in discrete action space (a finite number of actions).
+To extend Q function to continues control problem, DDPG adopts an extra policy network :math:`\mu(s)` parameterized by :math:`\theta` to produce action value.
+Then Q value is calculated as :math:`Q(s,\mu(s))` and the Q network is parameterized by :math:`\phi`.
 
 Math Formulation
 ^^^^^^^^^^^^^^^^^^
@@ -82,17 +82,17 @@ Policy learning:
 
     \max_{\theta} \underset{s \sim {\mathcal D}}{{\mathrm E}}\left[ Q_{\phi}(s, \mu_{\theta}(s)) \right].
 
-Here :math:`{\mathcal D}` is the ``replay buffer``, which can be shared across agents.
-:math:`a` is the ``action`` taken.
-:math:`r` is the ``reward``.
-:math:`s` is the ``observation``/``state``.
-:math:`s'` is the next ``observation``/``state``.
+Here :math:`{\mathcal D}` is the replay buffer, which can be shared across agents.
+:math:`a` is the action taken.
+:math:`r` is the reward.
+:math:`s` is the observation/state.
+:math:`s'` is the next observation/state.
 :math:`d` is set to ``1`` (True) when episode ends else ``0`` (False).
-:math:`{\gamma}` is ``discount value``.
-:math:`\mu_{\theta}` is ``policy`` net, which can be shared across agents.
-:math:`\mu_{\theta_{\text{targ}}}` is ``target policy`` net, which can be shared across agents.
-:math:`\phi` is ``Q`` net, which can be shared across agents.
-:math:`\phi_{\text{targ}}` is ``target Q`` net, which can be shared across agents.
+:math:`{\gamma}` is discount value.
+:math:`\mu_{\theta}` is policy net, which can be shared across agents.
+:math:`\mu_{\theta_{\text{targ}}}` is policy target net, which can be shared across agents.
+:math:`\phi` is Q net, which can be shared across agents.
+:math:`\phi_{\text{targ}}` is Q target net, which can be shared across agents.
 
 
 Workflow
@@ -108,19 +108,19 @@ Each agent follows the standard DDPG learning pipeline as described in Prelimina
 
 .. admonition:: You Should Know
 
-    Some tricks like `gumble_softmax` enable DDPG to output categorical-like action distribution.
+    Some tricks like `gumble_softmax` enables DDPG policy net to output categorical-like action distribution.
 
 
 Implementation
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-We extend the vanilla DDPG of RLlib to be recurrent neural network(RNN) compatible.
+We extend vanilla DDPG of RLlib to be recurrent neural network(RNN) compatiable.
 The main differences are:
 
-- model side: the agent model-related modules and functions are rewritten, including:
+- model side: the agent model related modules and functions are rewritten including:
     - ``build_rnnddpg_models_and_action_dist``
     - ``DDPG_RNN_TorchModel``
-- algorithm side: the sampling and training pipelines are rewritten, including:
+- algorithm side: the sampling and training pipelines are rewritten including:
     - ``episode_execution_plan``
     - ``ddpg_actor_critic_loss``
 
