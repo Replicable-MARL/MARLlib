@@ -3,7 +3,7 @@
 Multi-agent Deep Deterministic Policy Gradient (MADDPG)
 -------------------------------------------------------------
 
-.. admonition:: Some Interesting Facts
+.. admonition:: Quick Facts
 
     - Multi-agent deep deterministic policy gradient(MADDPG) is one of the centralized extensions of :ref:`IDDPG`.
     - Agent architecture of MADDPG consists of two modules: ``policy`` and ``Q``.
@@ -145,7 +145,7 @@ Key hyperparameter location:
 Usage & Limitation
 ^^^^^^^^^^^^^^^^^^^^^^
 
-MADDPG in MARLlib is suitable for
+MADDPG in *MARLlib* is suitable for
 
 - continues control tasks
 - any task mode

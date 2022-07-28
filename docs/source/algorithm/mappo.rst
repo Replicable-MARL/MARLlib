@@ -155,7 +155,7 @@ Key hyperparameter location:
 Usage & Limitation
 ^^^^^^^^^^^^^^^^^^^^^^
 
-IPPO is suitable for
+IPPO in *MARLlib* is suitable for
 
 - continues control tasks
 - discrete control tasks

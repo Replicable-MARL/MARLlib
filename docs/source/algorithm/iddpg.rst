@@ -98,7 +98,7 @@ Here :math:`{\mathcal D}` is the replay buffer, which can be shared across agent
 Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Each agent follows the standard DDPG learning pipeline as described in Preliminary. No information is shared across agents.
+Each agent follows the standard DDPG learning pipeline. No information is shared across agents.
 
 .. figure:: ../images/IDDPG.png
     :width: 600
@@ -133,7 +133,7 @@ Key hyperparameter location:
 Usage & Limitation
 ^^^^^^^^^^^^^^^^^^^^^^
 
-IDDPG is suitable for
+IDDPG in *MARLlib* is suitable for
 
 - continues control tasks
 - any task mode
