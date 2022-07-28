@@ -69,7 +69,7 @@ While the centralized Q value is calculated as :math:`Q(\mathbf{s},\mu(\mathbf{s
 Note :math:`s` in policy network is the self-observation/state while :math:`\mathbf{s}` in centralized Q is the joint observation/state, which also includes the opponents.
 
 
-.. admonition:: Interesting Facts
+.. admonition:: Some Interesting Facts
 
     - MADDPG is the most famous work that started MARL research under centralized training and decentralized execution(CTDE) these years.
     - Other works find that Q-learning-based algorithms can perform well under similar settings. E.g., :ref:`QMIX`.
