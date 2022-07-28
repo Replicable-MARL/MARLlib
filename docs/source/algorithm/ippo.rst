@@ -5,9 +5,10 @@ Independent Proximal Policy Optimization (IPPO)
 
 .. admonition:: Quick Facts
 
-    Independent proximal policy optimization is a natural extension of standard single agent proximal policy optimization in multi-agent settings.
-    The sampling/training pipeline is exactly the same when we standing at the view of single agent when comparing PPO and IPPO.
-
+    - Independent proximal policy optimization is a natural extension of standard single-agent proximal policy optimization in multi-agent settings.
+    - The sampling/training pipeline is the same when we stand at the view of a single agent when comparing PPO and IPPO.
+    - Agent architecture of IPPO consists of two modules: policy network and critic network.
+    - IPPO applies to cooperative, competitive, and mixed task modes.
 
 Characteristic
 ^^^^^^^^^^^^^^^
@@ -60,11 +61,11 @@ Vanilla Policy Gradient (PG) & Trust Region Policy Optimization (TRPO) & General
 Algorithm Description
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-PPO is a first-order optimisation that simplifies its implementation. Similar to TRPO objective function, It defines the probability ratio between the new policy and old policy as :math:`\frac{\pi_{\theta}(a|s)}{\pi_{\theta_k}(a|s)}`.
-Instead of adding complicated KL constraint, PPO imposes this policy ratio to stay within a small interval between :math:`1-\epsilon` and :math:`1+\epsilon`.
+PPO is a first-order optimization that simplifies its implementation. Similar to TRPO objective function, It defines the probability ratio between the new policy and old policy as :math:`\frac{\pi_{\theta}(a|s)}{\pi_{\theta_k}(a|s)}`.
+Instead of adding complicated KL constraints, PPO imposes this policy ratio to stay within a small interval between :math:`1-\epsilon` and :math:`1+\epsilon`.
 The objective function of PPO takes the minimum value between the original value and the clipped value.
 
-There are two primary variants of PPO: PPO-Penalty and PPO-Clip. Here we only give the formulation of PPO-Clip, which is more commonly used in practical.
+There are two primary variants of PPO: PPO-Penalty and PPO-Clip. Here we only give the formulation of PPO-Clip, which is more commonly used in practice.
 
 Math Formulation
 ^^^^^^^^^^^^^^^^^^
@@ -108,7 +109,7 @@ Here
 Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-In IPPO, each agent follows standard PPO sampling/training pipeline. Therefore, IPPO is a general baseline for all kinds of MARL tasks with robust performance.
+In IPPO, each agent follows a standard PPO sampling/training pipeline. Therefore, IPPO is a general baseline for all MARL tasks with robust performance.
 
 .. figure:: ../images/IPPO.png
     :width: 600
@@ -119,7 +120,7 @@ In IPPO, each agent follows standard PPO sampling/training pipeline. Therefore, 
 Implementation
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-We use vanilla PPO implementation of RLlib in IPPO. The only exception is we rewrite the sgd iteration logic.
+We use vanilla PPO implementation of RLlib in IPPO. The only exception is we rewrite the SGD iteration logic.
 The differences can be found in
 
     - ``MultiGPUTrainOneStep``

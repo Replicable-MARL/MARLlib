@@ -6,8 +6,9 @@ Multi-agent Deep Deterministic Policy Gradient (MADDPG)
 .. admonition:: Quick Facts
 
     - Multi-agent deep deterministic policy gradient(MADDPG) is one of the centralized extensions of :ref:`IDDPG`.
+    - Agent architecture of MADDPG consists of two modules: policy network and Q network.
     - Policies only use local information at execution time.
-    - MADDPG is applicable to cooperative, competitive, and mixed interaction involving both physical and communicative behavior.
+    - MADDPG applies to cooperative, competitive, and mixed task modes.
 
 
 Characteristic
@@ -58,22 +59,21 @@ Algorithm
 
 Traditional reinforcement learning approaches such as Q-Learning or policy gradient are poorly suited to multi-agent environments because:
 
-#. Each agent's policy is changing as training progresses.
-#. Environment becomes non-stationary from the perspective of any individual agent.
-#. Deep Q-learning becomes unstable due to point 1 & 2.
-#. Policy gradient methods suffer from high variance on coordination of agents due to point 1 & 2.
+#. Each agent's policy changes as training progresses.
+#. The environment becomes non-stationary from the perspective of any individual agent.
+#. Deep Q-learning becomes unstable due to points 1 & 2.
+#. Policy gradient methods suffer from high variance in the coordination of agents due to points 1 & 2.
 
-Multi-agent Deep Deterministic Policy Gradient (MADDPG) is an algorithm extends DDPG with a centralied Q function that takes not only observation and action from current agent,
-but also other agents. Similiar to DDPG, MADDPG also has a policy network :math:`\mu(s)` parameterized by :math:`\theta` to produce action value.
+Multi-agent Deep Deterministic Policy Gradient (MADDPG) is an algorithm that extends DDPG with a centralized Q function that takes observation and action from current agents and other agents. Similar to DDPG, MADDPG also has a policy network :math:`\mu(s)` parameterized by :math:`\theta` to produce action value.
 While the centralized Q value is calculated as :math:`Q(\mathbf{s},\mu(\mathbf{s}))` and the Q network is parameterized by :math:`\phi`.
-Note :math:`s` in policy network is the self observation/state while :math:`\mathbf{s}` in centralized Q is the joint observation/state which also includes the opponents.
+Note :math:`s` in policy network is the self-observation/state while :math:`\mathbf{s}` in centralized Q is the joint observation/state, which also includes the opponents.
 
 
 .. warning:: Interesting Facts
 
-    - MADDPG is the most famous work that start these years MARL research under centralized training and decentralized execution(CTDE).
-    - Although other works finds that Q-learning based algorithms can also perform well under similar settings. E.g., :ref:`QMIX`.
-    - Although recent works prove that policy gradient methods can be directly applied to MARL and can still keep good performance. E.g., :ref:`IPPO`
+    - MADDPG is the most famous work that started MARL research under centralized training and decentralized execution(CTDE) these years.
+    - Other works find that Q-learning-based algorithms can perform well under similar settings. E.g., :ref:`QMIX`.
+    - Recent works prove that policy gradient methods can be directly applied to MARL and maintain good performance. E.g., :ref:`IPPO`
     - MADDPG is criticized for its unstable performance in recent MARL research.
 
 Math Formulation
@@ -99,22 +99,22 @@ Here :math:`{\mathcal D}` is the replay buffer, which can be shared across agent
 :math:`r` is the reward.
 :math:`\mathbf{s}` is the observation/state set, including opponents.
 :math:`\mathbf{s'}` is the next observation/state set, including opponents.
-:math:`d` is set to ``1``(True) when episode ends else ``0``(False).
+:math:`d` is set to ``1``(True) when an episode ends else ``0``(False).
 :math:`{\gamma}` is discount value.
 :math:`\mu_{\theta_{\text{targ}}}` is policy target net, which can be shared across agents.
 :math:`\phi_{\text{targ}}` is Q target net, which can be shared across agents.
 
 .. admonition:: You Should Know
 
-    Policy inference procedure of MADDPG is kept same with IDDPG. While the learning target of policy net is different.
+    The policy inference procedure of MADDPG is kept the same as IDDPG. In contrast, the learning target of the policy net is different.
 
 
 Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-In sampling stage, each agent follows the standard DDPG learning pipeline to inference the action but use a centralized Q function to compute Q value, which needs data sharing
-before send all the collected data to the buffer.
-In learning stage, each agent predict its next action use target policy and share with other agents before entering the training loop.
+In the sampling stage, each agent follows the standard DDPG learning pipeline to infer the action but uses a centralized Q function to compute the Q value, which needs data sharing
+before sending all the collected data to the buffer.
+In the learning stage, each agent predicts its next action using the target policy and shares it with other agents before entering the training loop.
 
 .. figure:: ../images/MADDPG.png
     :width: 600
@@ -125,14 +125,14 @@ In learning stage, each agent predict its next action use target policy and shar
 Implementation
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-We extend vanilla DDPG of RLlib to be recurrent neural network(RNN) compatiable.
-Based on RNN compatiable DDPG, we add the centralized sampling and training module to the original pipeline.
+We extend the vanilla DDPG of RLlib to be recurrent neural network(RNN) compatible.
+Based on RNN compatible DDPG, we add the centralized sampling and training module to the original pipeline.
 The main differences between IDDPG and MADDPG are:
 
-- model side: the agent model related modules and functions are built in centralized style:
+- model side: the agent model-related modules and functions are built in a centralized style:
     - ``build_maddpg_models_and_action_dist``
     - ``MADDPG_RNN_TorchModel``
-- algorithm side: the sampling and training pipelines are built in centralized style:
+- algorithm side: the sampling and training pipelines are built in a centralized style:
     - ``centralized_critic_q``
     - ``central_critic_ddpg_loss``
 
