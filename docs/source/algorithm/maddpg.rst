@@ -3,7 +3,7 @@
 Multi-agent Deep Deterministic Policy Gradient (MADDPG)
 -------------------------------------------------------------
 
-.. admonition:: Quick Facts
+.. admonition:: Some Interesting Facts
 
     - Multi-agent deep deterministic policy gradient(MADDPG) is one of the centralized extensions of :ref:`IDDPG`.
     - Agent architecture of MADDPG consists of two modules: policy network and Q network.
