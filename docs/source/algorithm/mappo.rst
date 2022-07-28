@@ -57,7 +57,7 @@ Preliminary
 :ref:`IPPO`
 
 
-Algorithm
+Algorithm Insights
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 On-policy reinforcement learning algorithm is less utilized than off-policy learning algorithms in multi-agent settings.

@@ -56,7 +56,7 @@ Preliminary
 
 Q-Learning & Deep Q Network(DQN)
 
-Algorithm Description
+Algorithm Insights
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 Deep Deterministic Policy Gradient (DDPG) is an algorithm which concurrently learns a Q-function and a policy.

@@ -54,7 +54,7 @@ Preliminary
 
 :ref:`IDDPG`
 
-Algorithm
+Algorithm Insights
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 Traditional reinforcement learning approaches such as Q-Learning or policy gradient are poorly suited to multi-agent environments because:

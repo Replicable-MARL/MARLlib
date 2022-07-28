@@ -58,7 +58,7 @@ Preliminary
 Vanilla Policy Gradient (PG) & Trust Region Policy Optimization (TRPO) & General Advantage Estimation (GAE)
 
 
-Algorithm Description
+Algorithm Insights
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 PPO is a first-order optimization that simplifies its implementation. Similar to TRPO objective function, It defines the probability ratio between the new policy and old policy as :math:`\frac{\pi_{\theta}(a|s)}{\pi_{\theta_k}(a|s)}`.
