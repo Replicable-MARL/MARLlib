@@ -10,6 +10,10 @@ Multi-agent Proximal Policy Optimization (MAPPO)
     - MAPPO outperforms other MARL algorithms in most multi-agent tasks, especially when agents are homogeneous.
     - MAPPO is proposed to solve cooperative tasks but is still applicable to collaborative, competitive, and mixed tasks.
 
+Preliminary
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:ref:`IPPO`
 
 Characteristic
 ^^^^^^^^^^^^^^^
@@ -51,10 +55,7 @@ inherited algorithm
 
    * - :ref:`IPPO`
 
-Preliminary
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-:ref:`IPPO`
 
 
 Algorithm Insights
@@ -62,10 +63,10 @@ Algorithm Insights
 
 On-policy reinforcement learning algorithm is less utilized than off-policy learning algorithms in multi-agent settings.
 This is often due to the belief that on-policy methods are less sample efficient than their off-policy counterparts in multi-agent problems.
-The paper proves that:
+The MAPPO paper proves that:
 
 #. On-policy algorithms can achieve comparable performance to various off-policy methods.
-#. MAPPO is a robust MARL algorithm for diverse cooperative tasks and can somehow outperform SOTA off-policy methods in some more challenging scenarios.
+#. MAPPO is a robust MARL algorithm for diverse cooperative tasks and can outperform SOTA off-policy methods in more challenging scenarios.
 #. Formulating the input to the centralized value function is crucial for the final performance.
 #. Tricks in MAPPO training are essential.
 

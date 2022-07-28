@@ -10,6 +10,10 @@ Multi-agent Deep Deterministic Policy Gradient (MADDPG)
     - Policies only use local information at execution time.
     - MADDPG applies to cooperative, competitive, and mixed task modes.
 
+Preliminary
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:ref:`IDDPG`
 
 Characteristic
 ^^^^^^^^^^^^^^^
@@ -49,10 +53,6 @@ inherited algorithms
 
    * - :ref:`IDDPG`
 
-Preliminary
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-:ref:`IDDPG`
 
 Algorithm Insights
 ^^^^^^^^^^^^^^^^^^^^^^^

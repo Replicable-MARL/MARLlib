@@ -10,6 +10,10 @@ Independent Deep Deterministic Policy Gradient (IDDPG)
     - An IDDPG agent architecture consists of two modules: policy network and Q network.
     - IDDPG is applicable to cooperative, competitive, and mixed task modes.
 
+Preliminary
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Q-Learning & Deep Q Network(DQN)
 
 Characteristic
 ^^^^^^^^^^^^^^^
@@ -50,11 +54,6 @@ derived algorithm
 
    * - :ref:`MADDPG`
      - :ref:`FACMAC`
-
-Preliminary
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Q-Learning & Deep Q Network(DQN)
 
 Algorithm Insights
 ^^^^^^^^^^^^^^^^^^^^^^^

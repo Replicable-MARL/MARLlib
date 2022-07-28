@@ -10,6 +10,12 @@ Independent Proximal Policy Optimization (IPPO)
     - Agent architecture of IPPO consists of two modules: policy network and critic network.
     - IPPO applies to cooperative, competitive, and mixed task modes.
 
+Preliminary
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Vanilla Policy Gradient (PG) & Trust Region Policy Optimization (TRPO) & General Advantage Estimation (GAE)
+
+
 Characteristic
 ^^^^^^^^^^^^^^^
 
@@ -51,11 +57,6 @@ derived algorithm
    * - :ref:`MAPPO`
      - :ref:`HAPPO`
      - :ref:`VDPPO`
-
-Preliminary
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Vanilla Policy Gradient (PG) & Trust Region Policy Optimization (TRPO) & General Advantage Estimation (GAE)
 
 
 Algorithm Insights
