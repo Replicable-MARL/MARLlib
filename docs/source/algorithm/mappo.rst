@@ -5,10 +5,9 @@ Multi-agent Proximal Policy Optimization (MAPPO)
 
 .. admonition:: Quick Facts
 
-    - Multi-agent proximal policy optimization is one of the centralized extensions of independent proximal policy optimization.
-    - Additional data sharing module is needed.
-    - The agent model is equipped with a centralized critic function.
-    - The mappo surrogate loss is built based on new critic loss.
+    - Multi-agent proximal policy optimization (MAPPO) is one of the centralized extensions of :ref:`IPPO`.
+    - MAPPO outperforms other MARL algorithms in most multi-agent tasks, especially when agents are homogeneous.
+    - MAPPO is developed to solve cooperative tasks, but still applicable to collaborative, competitive, and mixed tasks.
 
 
 Characteristic
@@ -54,13 +53,27 @@ inherited algorithm
 Preliminary
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Independent Proximal Policy Optimization (IPPO)
+:ref:`IPPO`
 
 
-Algorithm Description
+Algorithm
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-MAPPO is the centralized version of PPO where the critic function :math:`V` take not only the self observation as input but also other agents' information.
+On-policy reinforcement learning algorithm is less utilized than off-policy learning algorithms in multi-agent settings.
+This is often due the belief that on-policy methods are less sample efficient than their off-policy counterparts in multi-agent problems.
+The paper proves that
+
+#. On-policy algorithms is able to achieves comparable performance as various off-policy methods.
+#. MAPPO is a robust MARL algorithm for diverse cooperative tasks, and can somehow outperform SOTA off-policy methods in some harder scenarios.
+#. The formulation of the input to the centralized value function is super crucial for the final performance.
+#. Tricks in MAPPO training is important.
+
+.. warning:: Interesting Facts
+
+    - MAPPO paper is done in cooperative settings. Nevertheless, it can be directly applied to competitive and mixed task modes. The performance is still good.
+    - MAPPO paper adopts some other tricks like death masking and clipping ratio. But compared to the input formulation, the impact of these tricks are not so significant.
+    - Sampling procedure of on-policy algorithms can be parallel conducted. The actual time consuming for a equal performance between on-policy and off-policy algorithm is almost same when we have enough sampling *workers*.
+    - The parameters are shared across agents. However, not sharing these parameters will not incur any problem. To the opposite, partly sharing these parameters(e.g., only share the critic) can help achieve a better performance.
 
 
 Math Formulation

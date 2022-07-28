@@ -5,10 +5,9 @@ Multi-agent Deep Deterministic Policy Gradient (MADDPG)
 
 .. admonition:: Quick Facts
 
-    - Multi-agent deep deterministic policy gradient is one of the centralized extensions of deep deterministic policy gradient.
-    - Additional data sharing module is needed in both sampling and learning stages.
-    - The agent model is equipped with a centralized Q function.
-    - The maddpg loss is built based on centralized Q loss.
+    - Multi-agent deep deterministic policy gradient(MADDPG) is one of the centralized extensions of :ref:`IDDPG`.
+    - Policies only use local information at execution time.
+    - MADDPG is applicable to cooperative, competitive, and mixed interaction involving both physical and communicative behavior.
 
 
 Characteristic
@@ -52,15 +51,30 @@ inherited algorithms
 Preliminary
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Deep Deterministic Policy Gradient(DDPG).
+:ref:`IDDPG`
 
-Algorithm Description
+Algorithm
 ^^^^^^^^^^^^^^^^^^^^^^^
+
+Traditional reinforcement learning approaches such as Q-Learning or policy gradient are poorly suited to multi-agent environments because:
+
+#. Each agent's policy is changing as training progresses.
+#. Environment becomes non-stationary from the perspective of any individual agent.
+#. Deep Q-learning becomes unstable due to point 1 & 2.
+#. Policy gradient methods suffer from high variance on coordination of agents due to point 1 & 2.
 
 Multi-agent Deep Deterministic Policy Gradient (MADDPG) is an algorithm extends DDPG with a centralied Q function that takes not only observation and action from current agent,
 but also other agents. Similiar to DDPG, MADDPG also has a policy network :math:`\mu(s)` parameterized by :math:`\theta` to produce action value.
 While the centralized Q value is calculated as :math:`Q(\mathbf{s},\mu(\mathbf{s}))` and the Q network is parameterized by :math:`\phi`.
 Note :math:`s` in policy network is the self observation/state while :math:`\mathbf{s}` in centralized Q is the joint observation/state which also includes the opponents.
+
+
+.. warning:: Interesting Facts
+
+    - MADDPG is the most famous work that start these years MARL research under centralized training and decentralized execution(CTDE).
+    - Although other works finds that Q-learning based algorithms can also perform well under similar settings. E.g., :ref:`QMIX`.
+    - Although recent works prove that policy gradient methods can be directly applied to MARL and can still keep good performance. E.g., :ref:`IPPO`
+    - MADDPG is criticized for its unstable performance in recent MARL research.
 
 Math Formulation
 ^^^^^^^^^^^^^^^^^^
@@ -131,7 +145,7 @@ Key hyperparameter location:
 Usage & Limitation
 ^^^^^^^^^^^^^^^^^^^^^^
 
-MADDPG is suitable for
+MADDPG in MARLlib is suitable for
 
 - continues control tasks
 - any task mode
