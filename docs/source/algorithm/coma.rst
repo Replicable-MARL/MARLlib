@@ -7,8 +7,8 @@ Counterfactual Multi-Agent Policy Gradients (COMA)
 
     - Counterfactual Multi-Agent Policy Gradients(COMA) is one of the earliest works on centralized critic MARL.
     - Agent architecture of COMA consists of two modules: policy network and critic network.
-    - COMA adopt a new credit assignment mechanism that use counterfactual baseline to marginalises out a single agent’s action.
-    - COMA is surprisingly good in multi-agent tasks where different actions have significant different impact to the system.
+    - COMA adopt a new credit assignment mechanism that uses a counterfactual baseline to marginalize a single agent’s action's contribution.
+    - COMA is surprisingly good in multi-agent tasks where different actions impact the system significantly differently.
 
 Preliminary
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -60,18 +60,18 @@ inherited algorithm
 Algorithm Insights
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-Efficiently learning decentralised policies is essential demand for modern AI systems. When there is only one reward, how to assign the credit to agent becomes a major challenge.
-COMA provide one solution for this problem:
+Efficiently learning decentralized policies is an essential demand for modern AI systems. However, assigning credit to an agent becomes a significant challenge when only one global reward exists.
+COMA provides one solution for this problem:
 
-#. COMA uses a counterfactual baseline that marginalises out a single agent’s action, while keeping the other agents’ actions fixed.
+#. COMA uses a counterfactual baseline that marginalizes a single agent’s action while keeping the other agents’ actions fixed.
 #. COMA develops a centralized critic that allows the counterfactual baseline to be computed efficiently in a single forward pass.
-#. COMA significantly improves average performance over other multi-agent actor critic methods under decentralised execution and partial observability settings.
+#. COMA significantly improves average performance over other multi-agent actor-critic methods under decentralized execution and partial observability settings.
 
 .. admonition:: Some Interesting Facts
 
-    - Although COMA is based on stochastic policy gradient methods, it is only used in discrete action space. Extending to continues action space require additional tricks on computing critic value (which is not a good news for stochastic methods)
-    - In recent years research, COMA's is proven to relatively worse in solving tasks like :ref:`SMAC` and :ref:`MaMujoco`, even compared to basic independent actor critic methods like :ref:`IA2C`.
-    - Give COMA a chance when your SOTA methods struggling in learning a good policy. *It may surprise you*.
+    - Although COMA is based on stochastic policy gradient methods, it is only evaluated in discrete action space. Extending to continuous action space requires additional tricks on computing critic value (which is not good news for stochastic methods)
+    - In recent years' research, COMA's is proven to be relatively worse in solving tasks like :ref:`SMAC` and :ref:`MaMujoco`, even compared to basic independent actor-critic methods like :ref:`IA2C`.
+    - Give COMA a chance when your SOTA methods struggle in learning a good policy. *It may surprise you*.
 
 Math Formulation
 ^^^^^^^^^^^^^^^^^^
