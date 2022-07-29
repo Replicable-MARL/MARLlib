@@ -116,7 +116,7 @@ In the sampling stage, each agent follows the standard DDPG learning pipeline to
 before sending all the collected data to the buffer.
 In the learning stage, each agent predicts its next action using the target policy and shares it with other agents before entering the training loop.
 
-.. figure:: ../images/MADDPG.png
+.. figure:: ../images/maddpg.png
     :width: 600
     :align: center
 

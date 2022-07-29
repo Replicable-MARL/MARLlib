@@ -112,7 +112,7 @@ Workflow
 
 In IPPO, each agent follows a standard PPO sampling/training pipeline. Therefore, IPPO is a general baseline for all MARL tasks with robust performance.
 
-.. figure:: ../images/IPPO.png
+.. figure:: ../images/ippo.png
     :width: 600
     :align: center
 

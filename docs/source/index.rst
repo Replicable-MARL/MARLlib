@@ -2,7 +2,7 @@ MARLlib: The MARL Extension for RLlib
 ========================================
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 2
    :caption: MARLlib Handbook
 
    handbook/intro
@@ -20,7 +20,7 @@ MARLlib: The MARL Extension for RLlib
    intro_marl/marl
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 2
    :caption: Algorithm Documentation
 
    algorithm/iql

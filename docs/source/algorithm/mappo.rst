@@ -98,9 +98,9 @@ Policy learning:
 
 .. math::
 
-    L(s,\mathbf{s}, a,\mathbf{a}^-,\theta_k,\theta) = \min\left(
-    \frac{\pi_{\theta}(a|s)}{\pi_{\theta_k}(a|s)}  A^{\pi_{\theta_k}}(\mathbf{s},\mathbf{a}^-), \;\;
-    \text{clip}\left(\frac{\pi_{\theta}(a|s)}{\pi_{\theta_k}(a|s)}, 1 - \epsilon, 1+\epsilon \right) A^{\pi_{\theta_k}}(\mathbf{s},\mathbf{a}^-)
+    L(s,\mathbf{s}^-, a,\mathbf{a}^-,\theta_k,\theta) = \min\left(
+    \frac{\pi_{\theta}(a|s)}{\pi_{\theta_k}(a|s)}  A^{\pi_{\theta_k}}(s, \mathbf{s}^-,\mathbf{a}^-), \;\;
+    \text{clip}\left(\frac{\pi_{\theta}(a|s)}{\pi_{\theta_k}(a|s)}, 1 - \epsilon, 1+\epsilon \right) A^{\pi_{\theta_k}}(s, \mathbf{s}^-,\mathbf{a}^-)
     \right),
 
 Here
@@ -113,7 +113,7 @@ Here
 :math:`a` is the current agent action.
 :math:`\mathbf{a}^-` is the action set of all agents, except the current agent.
 :math:`s` is the current agent observation/state.
-:math:`\mathbf{s}` is the observation/state set of all agents.
+:math:`\mathbf{s}^-` is the observation/state set of all agents, except the current agent.
 :math:`\epsilon` is a hyperparameter controlling how far away the new policy is allowed to go from the old.
 :math:`V_{\phi}` is the critic value function.
 :math:`\pi_{\theta}` is the policy net.
@@ -125,7 +125,7 @@ Workflow
 In the sampling stage, agents share information with others. The information includes others' observations and predicted actions. After collecting the necessary information from other agents,
 all agents follow the standard PPO training pipeline, except using the centralized critic value function to calculate the GAE and conduct the PPO critic learning procedure.
 
-.. figure:: ../images/MAPPO.png
+.. figure:: ../images/mappo.png
     :width: 600
     :align: center
 

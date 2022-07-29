@@ -99,7 +99,7 @@ Workflow
 
 Each agent follows the standard DDPG learning pipeline. No information is shared across agents.
 
-.. figure:: ../images/IDDPG.png
+.. figure:: ../images/iddpg.png
     :width: 600
     :align: center
 
