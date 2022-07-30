@@ -45,14 +45,14 @@ taxonomy label
    * - ``off-policy``
      - ``deterministic``
 
-inherited algorithms
+related algorithms
 
 .. list-table::
-   :widths: 25
+   :widths: 25 25
    :header-rows: 0
 
    * - :ref:`IDDPG`
-
+   * - :ref:`FACMAC`
 
 Algorithm Insights
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -99,14 +99,16 @@ Here :math:`{\mathcal D}` is the replay buffer, which can be shared across agent
 :math:`r` is the reward.
 :math:`\mathbf{s}` is the observation/state set, including opponents.
 :math:`\mathbf{s'}` is the next observation/state set, including opponents.
-:math:`d` is set to ``1``(True) when an episode ends else ``0``(False).
+:math:`d` is set to `1`(True) when an episode ends else `0`(False).
 :math:`{\gamma}` is discount value.
-:math:`\mu_{\theta_{\text{targ}}}` is policy target net, which can be shared across agents.
-:math:`\phi_{\text{targ}}` is Q target net, which can be shared across agents.
+:math:`\mu_{\theta}` is policy net, which can be shared across agents.
+:math:`Q_{\phi}` is Q net, which can be shared across agents.
+:math:`\mu_{\theta_{\text{targ}}}` is target policy net, which can be shared across agents.
+:math:`Q_{\phi_{\text{targ}}}` is target Q net, which can be shared across agents.
 
 .. admonition:: You Should Know
 
-    The policy inference procedure of MADDPG is kept the same as IDDPG. In contrast, the learning target of the policy net is different.
+    The policy inference procedure of MADDPG is kept the same as IDDPG.
 
 
 Workflow
@@ -121,6 +123,10 @@ In the learning stage, each agent predicts its next action using the target poli
     :align: center
 
     Multi-agent Deep Deterministic Policy Gradient (MADDPG)
+
+.. admonition:: You Should Know
+
+    Some tricks like `gumble_softmax` enables DDPG policy net to output categorical-like action distribution.
 
 Implementation
 ^^^^^^^^^^^^^^^^^^^^^^^^^

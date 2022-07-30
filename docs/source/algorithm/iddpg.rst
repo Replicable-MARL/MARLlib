@@ -86,12 +86,12 @@ Here :math:`{\mathcal D}` is the replay buffer, which can be shared across agent
 :math:`r` is the reward.
 :math:`s` is the observation/state.
 :math:`s'` is the next observation/state.
-:math:`d` is set to ``1`` (True) when episode ends else ``0`` (False).
+:math:`d` is set to `1` (True) when episode ends else `0` (False).
 :math:`{\gamma}` is discount value.
 :math:`\mu_{\theta}` is policy net, which can be shared across agents.
-:math:`\mu_{\theta_{\text{targ}}}` is policy target net, which can be shared across agents.
-:math:`\phi` is Q net, which can be shared across agents.
-:math:`\phi_{\text{targ}}` is Q target net, which can be shared across agents.
+:math:`Q_{\phi}` is Q net, which can be shared across agents.
+:math:`\mu_{\theta_{\text{targ}}}` is target policy net, which can be shared across agents.
+:math:`Q_{\phi_{\text{targ}}}` is target Q net, which can be shared across agents.
 
 
 Workflow
