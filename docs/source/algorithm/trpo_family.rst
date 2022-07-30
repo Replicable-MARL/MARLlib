@@ -1,4 +1,4 @@
-TRPO Family: ITRPO, MATRPO, VDTRPO, and HATRPO
+Trust Region Policy Optimization Family
 ======================================================================
 
 .. contents::

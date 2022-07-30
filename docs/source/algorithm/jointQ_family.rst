@@ -1,4 +1,4 @@
-JointQ Family: VDN and QMIX
+Joint Q Learning Family
 ======================================================================
 
 .. contents::

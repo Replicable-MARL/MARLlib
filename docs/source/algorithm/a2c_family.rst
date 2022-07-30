@@ -1,4 +1,4 @@
-A2C Family: IA2C, MAA2C, and VDA2C
+Advanced Actor Critic Family
 ======================================================================
 
 .. contents::

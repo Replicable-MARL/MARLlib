@@ -1,4 +1,4 @@
-PPO Family: IPPO, MAPPO, VDPPO, and HAPPO
+Proximal Policy Optimization Family
 ======================================================================
 
 .. contents::

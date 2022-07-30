@@ -1,4 +1,4 @@
-DDPG Family: IDDPG, MADDPG, and FACMAC
+Deep Deterministic Policy Gradient Family
 ======================================================================
 
 .. contents::
