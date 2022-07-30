@@ -74,7 +74,7 @@ Compared to existing methods, FACMAC:
 .. admonition:: Some Interesting Facts
 
     - Recent works prove that stochastic policy gradient methods are more stable and good-performance in tackling MARL. E.g., :ref:`MAA2C`. If you need better performance, try stochastic policy gradient methods.
-    - Applicable scenarios of FACMAC are quite restrained. E.g., cooperative task only, continues task only(with out adding tricks)
+    - Applicable scenarios of FACMAC are quite restrained. E.g., cooperative task only, continues task only(with out adding tricks).
     - Benchmarks on continues control is relatively rare in MARL. If you try to prove that your methods is good on multi-agent continues control problem, consider these benchmarks:
         - :ref:`MPE` (discrete+continues)
         - :ref:`MaMujoco` (continues only)
@@ -139,7 +139,7 @@ Then each agent shares the predicted data with other agents before entering the 
 
 .. admonition:: You Should Know
 
-    Some tricks like `gumble_softmax` enables DDPG policy net to output categorical-like action distribution.
+    Some tricks like `gumble_softmax` enables FACMAC net to output categorical-like action distribution.
 
 Implementation
 ^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -23,25 +23,11 @@ MARLlib: The MARL Extension for RLlib
    :maxdepth: 2
    :caption: Algorithm Documentation
 
-   algorithm/iql
-   algorithm/ipg
-   algorithm/ia2c
-   algorithm/iddpg
-   algorithm/itrpo
-   algorithm/ippo
-   algorithm/coma
-   algorithm/maddpg
-   algorithm/maa2c
-   algorithm/matrpo
-   algorithm/mappo
-   algorithm/hatrpo
-   algorithm/happo
-   algorithm/vdn
-   algorithm/qmix
-   algorithm/facmac
-   algorithm/vda2c
-   algorithm/vdppo
-
+   algorithm/ddpg_family
+   algorithm/a2c_family
+   algorithm/trpo_family
+   algorithm/ppo_family
+   algorithm/jointQ_family
 
 .. toctree::
    :maxdepth: 3

@@ -126,7 +126,7 @@ In the learning stage, each agent predicts its next action using the target poli
 
 .. admonition:: You Should Know
 
-    Some tricks like `gumble_softmax` enables DDPG policy net to output categorical-like action distribution.
+    Some tricks like `gumble_softmax` enables MADDPG to output categorical-like action distribution.
 
 Implementation
 ^^^^^^^^^^^^^^^^^^^^^^^^^
