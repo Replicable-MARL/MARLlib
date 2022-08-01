@@ -1,20 +1,15 @@
 Deep Deterministic Policy Gradient Family
 ======================================================================
 
+
 .. contents::
     :local:
     :depth: 3
 
-Read List
--------------
-
-- `Continuous Control with Deep Reinforcement Learning <https://arxiv.org/abs/1509.02971>`_
-- `Multi-Agent Actor-Critic for Mixed Cooperative-Competitive Environments <https://arxiv.org/abs/1706.02275>`_
-- `FACMAC: Factored Multi-Agent Centralised Policy Gradients <https://arxiv.org/pdf/2003.06709.pdf>`_
 
 .. _DDPG:
 
-A recap of Deep Deterministic Policy Gradient
+DDPG: A Recap
 -----------------------------------------------
 
 Preliminary
@@ -48,22 +43,24 @@ Policy learning:
 
     \max_{\theta} \underset{s \sim {\mathcal D}}{{\mathrm E}}\left[ Q_{\phi}(s, \mu_{\theta}(s)) \right].
 
-Here :math:`{\mathcal D}` is the replay buffer, which can be shared across agents.
+Here :math:`{\mathcal D}` is the replay buffer
 :math:`a` is the action taken.
 :math:`r` is the reward.
 :math:`s` is the observation/state.
 :math:`s'` is the next observation/state.
-:math:`d` is set to `1` (True) when episode ends else `0` (False).
+:math:`d` is set to 1 (True) when episode ends else 0 (False).
 :math:`{\gamma}` is discount value.
-:math:`\mu_{\theta}` is policy net, which can be shared across agents.
-:math:`Q_{\phi}` is Q net, which can be shared across agents.
-:math:`\mu_{\theta_{\text{targ}}}` is target policy net, which can be shared across agents.
-:math:`Q_{\phi_{\text{targ}}}` is target Q net, which can be shared across agents.
+:math:`\mu_{\theta}` is policy net.
+:math:`Q_{\phi}` is Q net.
+:math:`\mu_{\theta_{\text{targ}}}` is target policy net
+:math:`Q_{\phi_{\text{targ}}}` is target Q net.
 
 .. admonition:: You Should Know
 
-    Some tricks like `gumble_softmax` enables DDPG policy net to output categorical-like action distribution.
+    Some tricks like `gumble softmax` enables DDPG policy net to output categorical-like action distribution.
 
+
+.. _IDDPG:
 
 IDDPG: multi-agent version of DDPG
 -------------------------------------
@@ -119,6 +116,8 @@ Independent Deep Deterministic Policy Gradient (IDDPG) is the multi-agent versio
 IDDPG has no need for information sharing including real/sampled data and predicted data.
 While the knowledge sharing across agents is optional in IDDPG.
 
+
+.. _yousn: Information Sharing
 .. admonition:: You Should Know
 
     In multi-agent learning, the concept of information sharing is not well defined and may cause confusion.
@@ -136,6 +135,14 @@ Math Formulation
 ^^^^^^^^^^^^^^^^^^
 
 Standing at the view of a single agent under multi-agent settings, the math formulation of IDDPG is same as DDPG: :ref:`DDPG`.
+
+Note in multi-agent settings, all the agent models and buffer can be shared including:
+
+- :math:`{\mathcal D}` replay buffer.
+- :math:`\mu_{\theta}` policy net.
+- :math:`Q_{\phi}` Q net.
+- :math:`\mu_{\theta_{\text{targ}}}` target policy net.
+- :math:`Q_{\phi_{\text{targ}}}` target Q net.
 
 
 Workflow
@@ -177,10 +184,19 @@ IDDPG in *MARLlib* is suitable for
 - continues control tasks
 - any task mode
 
+.. admonition:: You Should Know
+
+    - There is only few MARL dataset focus on continues control. The popular three are:
+        - :ref:`MPE` (discrete+continues)
+        - :ref:`MaMujoco` (continues only)
+        - :ref:`MetaDrive` (continues only)
+
 .. code-block:: shell
 
     python marl/main.py --algo_config=ddpg --finetuned --env-config=mamujoco with env_args.map_name=2AgentAnt
 
+
+.. _MADDPG:
 
 MADDPG: DDPG agent with a centralized Q
 --------------------------------------------
@@ -189,7 +205,7 @@ MADDPG: DDPG agent with a centralized Q
 
     - Multi-agent deep deterministic policy gradient(MADDPG) is one of the extensions of :ref:`IDDPG`.
     - Agent architecture of MADDPG consists of two modules: ``policy`` and ``Q``.
-    - Policies only use local information at execution time.
+    - MADDPG needs two stages of information sharing on real/sampled data and predicted data.
     - MADDPG applies to cooperative, competitive, and mixed task modes.
 
 Preliminary
@@ -253,6 +269,10 @@ Note :math:`s` in policy network is the self-observation/state while :math:`\mat
 Math Formulation
 ^^^^^^^^^^^^^^^^^^
 
+MADDPG needs information sharing across agents. The Q learning utilize both self-observation and information provided by other agents including
+ observation and actions. Here we bold the symbol (e.g., :math:`s` to :math:`\mathbf{s}`) to indicate more than one agent information is contained.
+
+
 Q learning:
 
 .. math::
@@ -273,7 +293,7 @@ Here :math:`{\mathcal D}` is the replay buffer, which can be shared across agent
 :math:`r` is the reward.
 :math:`\mathbf{s}` is the observation/state set, including opponents.
 :math:`\mathbf{s'}` is the next observation/state set, including opponents.
-:math:`d` is set to `1`(True) when an episode ends else `0`(False).
+:math:`d` is set to 1(True) when an episode ends else 0(False).
 :math:`{\gamma}` is discount value.
 :math:`\mu_{\theta}` is policy net, which can be shared across agents.
 :math:`Q_{\phi}` is Q net, which can be shared across agents.
@@ -300,7 +320,7 @@ In the learning stage, each agent predicts its next action using the target poli
 
 .. admonition:: You Should Know
 
-    Some tricks like `gumble_softmax` enables MADDPG to output categorical-like action distribution.
+    Some tricks like `gumble softmax` enables MADDPG to output categorical-like action distribution.
 
 Implementation
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -345,7 +365,7 @@ FACMAC: mixing a bunch of DDPG agents
 
     - Factored Multi-Agent Centralised Policy Gradients (FACMAC) is one of the extensions of :ref:`IDDPG`.
     - Agent architecture of FACMAC consists of three modules: ``policy``, ``Q``, and ``mixer``.
-    - Policies only use local information at execution time.
+    - FACMAC needs two stages of information sharing on real/sampled data and predicted data.
     - FACMAC applies to cooperative task mode only.
 
 
@@ -408,19 +428,20 @@ Compared to existing methods, FACMAC:
 
     - Recent works prove that stochastic policy gradient methods are more stable and good-performance in tackling MARL. E.g., :ref:`MAA2C`. If you need better performance, try stochastic policy gradient methods.
     - Applicable scenarios of FACMAC are quite restrained. E.g., cooperative task only, continues task only(with out adding tricks).
-    - Benchmarks on continues control is relatively rare in MARL. If you try to prove that your methods is good on multi-agent continues control problem, consider these benchmarks:
-        - :ref:`MPE` (discrete+continues)
-        - :ref:`MaMujoco` (continues only)
-        - :ref:`MetaDrive` (continues only)
+
 
 Math Formulation
 ^^^^^^^^^^^^^^^^^^
+
+MADDPG needs information sharing across agents. The Q mixing utilizes both self-observation and other agents observation.
+Here we bold the symbol (e.g., :math:`s` to :math:`\mathbf{s}`) to indicate more than one agent information is contained.
+
 
 Q mixing:
 
 .. math::
 
-    Q_{tot}(\mathbf{a}, s;\boldsymbol{\phi},\psi) = g_{\psi}\bigl(s, Q_{\phi_1},Q_{\phi_2},..,Q_{\phi_n} \bigr)
+    Q_{tot}(\mathbf{a}, s;\boldsymbol{\phi},\psi) = g_{\psi}\bigl(`\mathbf{s}, Q_{\phi_1},Q_{\phi_2},..,Q_{\phi_n} \bigr)
 
 Q learning:
 
@@ -442,7 +463,7 @@ Here :math:`{\mathcal D}` is the replay buffer, which can be shared across agent
 :math:`r` is the reward.
 :math:`\mathbf{s}` is the observation/state set, including opponents.
 :math:`\mathbf{s'}` is the next observation/state set, including opponents.
-:math:`d` is set to `1`(True) when an episode ends else `0`(False).
+:math:`d` is set to 1(True) when an episode ends else 0(False).
 :math:`{\gamma}` is discount value.
 :math:`\mu_{\theta}` is policy net, which can be shared across agents.
 :math:`Q_{\phi}` is Q net, which can be shared across agents.
@@ -472,7 +493,7 @@ Then each agent shares the predicted data with other agents before entering the 
 
 .. admonition:: You Should Know
 
-    Some tricks like `gumble_softmax` enables FACMAC net to output categorical-like action distribution.
+    Some tricks like `gumble softmax` enables FACMAC net to output categorical-like action distribution.
 
 Implementation
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -507,4 +528,9 @@ FACMAC in *MARLlib* is suitable for
     python marl/main.py --algo_config=facmac --finetuned --env-config=mamujoco with env_args.map_name=2AgentAnt
 
 
+Read List
+-------------
 
+- `Continuous Control with Deep Reinforcement Learning <https://arxiv.org/abs/1509.02971>`_
+- `Multi-Agent Actor-Critic for Mixed Cooperative-Competitive Environments <https://arxiv.org/abs/1706.02275>`_
+- `FACMAC: Factored Multi-Agent Centralised Policy Gradients <https://arxiv.org/pdf/2003.06709.pdf>`_
