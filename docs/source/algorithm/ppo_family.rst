@@ -5,6 +5,7 @@ Proximal Policy Optimization Family
     :local:
     :depth: 3
 
+---------------------
 
 .. _PPO:
 
@@ -66,7 +67,9 @@ Here
 :math:`\epsilon` is a hyperparameter controlling how far away the new policy is allowed to go from the old.
 :math:`\pi_{\theta}` is the policy net.
 
+---------------------
 
+.. _IPPO:
 
 IPPO: multi-agent version of PPO
 -----------------------------------------------------
@@ -173,7 +176,9 @@ IPPO in *MARLlib* is applicable for
 
     python marl/main.py --algo_config=ppo --finetuned --env-config=smac with env_args.map_name=3m
 
+---------------------
 
+.. _MAPPO:
 
 MAPPO: PPO agent with a centralized critic
 -----------------------------------------------------
@@ -338,7 +343,9 @@ IPPO in *MARLlib* is applicable for
 
     python marl/main.py --algo_config=ppo --finetuned --env-config=smac with env_args.map_name=3m
 
+---------------------
 
+.. _VDPPO:
 
 
 VDPPO: mixing the critic of a bunch of PPO agents
@@ -494,6 +501,9 @@ IPPO in *MARLlib* is applicable for
 
     python marl/main.py --algo_config=vdppo --finetuned --env-config=smac with env_args.map_name=3m
 
+---------------------
+
+.. _HAPPO:
 
 HAPPO: Sequentially updating critic of MAPPO agents
 -----------------------------------------------------
@@ -660,6 +670,9 @@ IPPO in *MARLlib* is applicable for
 .. code-block:: shell
 
     python marl/main.py --algo_config=ppo --finetuned --env-config=smac with env_args.map_name=3m
+
+---------------------
+
 
 Read List
 -------------

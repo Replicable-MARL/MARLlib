@@ -6,6 +6,7 @@ Deep Deterministic Policy Gradient Family
     :local:
     :depth: 3
 
+---------------------
 
 .. _DDPG:
 
@@ -529,6 +530,7 @@ FACMAC in *MARLlib* is applicable for
 
     python marl/main.py --algo_config=facmac --finetuned --env-config=mamujoco with env_args.map_name=2AgentAnt
 
+---------------------
 
 Read List
 -------------
