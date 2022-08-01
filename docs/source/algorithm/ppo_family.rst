@@ -25,7 +25,7 @@ PPO is a first-order optimization that simplifies its implementation. Similar to
 Instead of adding complicated KL constraints, PPO imposes this policy ratio to stay within a small interval between :math:`1-\epsilon` and :math:`1+\epsilon`.
 The objective function of PPO takes the minimum value between the original value and the clipped value.
 
-There are two primary variants of PPO: PPO-Penalty and PPO-Clip. Here we only give the formulation of PPO-Clip, which is more commonly used in practice.
+There are two primary variants of PPO: PPO-Penalty and PPO-Clip. Here we only give the formulation of PPO-Clip, which is more common in practice.
 For PPO-penalty, please refer to `Proximal Policy Optimization <https://spinningup.openai.com/en/latest/algorithms/ppo.html>`_.
 
 Math Formulation
@@ -74,17 +74,27 @@ Here
 IPPO: multi-agent version of PPO
 -----------------------------------------------------
 
-.. admonition:: Quick Facts
 
-    - Independent proximal policy optimization is a natural extension of standard single-agent proximal policy optimization in multi-agent settings.
-    - The sampling/training pipeline is the same when we stand at the view of a single agent when comparing PPO and IPPO.
-    - Agent architecture of IPPO consists of two modules: policy network and critic network.
-    - IPPO applies to cooperative, competitive, and mixed task modes.
+- Independent proximal policy optimization is a natural extension of standard single-agent proximal policy optimization in multi-agent settings.
+- The sampling/training pipeline is the same when we stand at the view of a single agent when comparing PPO and IPPO.
+- Agent architecture of IPPO consists of two modules: policy network and critic network.
+- IPPO applies to cooperative, competitive, and mixed task modes.
 
 Preliminary
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 :ref:`PPO`
+
+Workflow
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+In IPPO, each agent follows a standard PPO sampling/training pipeline. Therefore, IPPO is a general baseline for all MARL tasks with robust performance.
+
+.. figure:: ../images/ippo.png
+    :width: 600
+    :align: center
+
+    Independent Proximal Policy Optimization (IPPO)
 
 Characteristic
 ^^^^^^^^^^^^^^^
@@ -123,30 +133,21 @@ Algorithm Insights
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 Independent Proximal Policy Optimization (IPPO) is the multi-agent version of standard PPO. Each agent is now a PPO-based sampler and learner.
-IPPO has no need for information sharing including real/sampled data and predicted data.
-While the knowledge sharing across agents is optional in IPPO.
-Note: There is a discussion of information sharing concept here: :ref:`yousn`
+IPPO does not need information sharing, including real/sampled data and predicted data.
+While knowledge sharing across agents is optional in IPPO.
+Note: There is a discussion of the information sharing concept here: :ref:`yousn`
 
 Math Formulation
 ^^^^^^^^^^^^^^^^^^
 
-Standing at the view of a single agent under multi-agent settings, the math formulation of IPPO is same as :ref:`PPO`.
+Standing at the view of a single agent under multi-agent settings, the mathematical formulation of IPPO is the same as :ref:`PPO`.
 
-Note in multi-agent settings, all the agent models can be shared including:
+Note that in multi-agent settings, all the agent models can be shared, including:
 
 - :math:`V_{\phi}` is the critic net.
 - :math:`\pi_{\theta}` is the policy net.
 
-Workflow
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-In IPPO, each agent follows a standard PPO sampling/training pipeline. Therefore, IPPO is a general baseline for all MARL tasks with robust performance.
-
-.. figure:: ../images/ippo.png
-    :width: 600
-    :align: center
-
-    Independent Proximal Policy Optimization (IPPO)
 
 Implementation
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -183,17 +184,29 @@ IPPO in *MARLlib* is applicable for
 MAPPO: PPO agent with a centralized critic
 -----------------------------------------------------
 
-.. admonition:: Quick Facts
 
-    - Multi-agent proximal policy optimization (MAPPO) is one of the centralized extensions of :ref:`IPPO`.
-    - Agent architecture of MAPPO consists of two modules: policy network and critic network.
-    - MAPPO needs one stage information sharing on real/sampled data.
-    - MAPPO is proposed to solve cooperative tasks but is still applicable to collaborative, competitive, and mixed tasks.
+- Multi-agent proximal policy optimization (MAPPO) is one of the centralized extensions of :ref:`IPPO`.
+- Agent architecture of MAPPO consists of two modules: policy network and critic network.
+- MAPPO needs one stage of information sharing on real/sampled data.
+- MAPPO is proposed to solve cooperative tasks but is still applicable to collaborative, competitive, and mixed tasks.
 
 Preliminary
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 :ref:`IPPO`
+
+Workflow
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+In the sampling stage, agents share information with others. The information includes others' observations and predicted actions. After collecting the necessary information from other agents,
+all agents follow the standard PPO training pipeline, except using the centralized critic value function to calculate the GAE and conduct the PPO critic learning procedure.
+
+.. figure:: ../images/mappo.png
+    :width: 600
+    :align: center
+
+    Multi-agent Proximal Policy Optimization (MAPPO)
+
 
 Characteristic
 ^^^^^^^^^^^^^^^
@@ -250,18 +263,18 @@ The MAPPO paper proves that:
 #. Formulating the input to the centralized value function is crucial for the final performance.
 #. Tricks in MAPPO training are essential.
 
-.. admonition:: Some Interesting Facts
+.. admonition:: You Should Know
 
     - MAPPO paper is done in cooperative settings. Nevertheless, it can be directly applied to competitive and mixed task modes. Moreover, the performance is still good.
-    - MAPPO paper adopts some other tricks like death masking and clipping ratio. But compared to the input formulation, these tricks' impact is not so significant.
+    - MAPPO paper adopts some other tricks like death masking and clipping ratio. But compared to the input formulation, these tricks' impact is insignificant.
     - Sampling procedure of on-policy algorithms can be parallel conducted. Therefore, the actual time consuming for a comparable performance between on-policy and off-policy algorithms is almost the same when we have enough sampling *workers*.
-    - The parameters are shared across agents. However, not sharing these parameters will not incur any problems. On the opposite, partly sharing these parameters(e.g., only sharing the critic) can help achieve better performance in some scenarios.
+    - The parameters are shared across agents. However, not sharing these parameters will not incur any problems. Conversely, partly sharing these parameters(e.g., only sharing the critic) can help achieve better performance in some scenarios.
 
 
 Math Formulation
 ^^^^^^^^^^^^^^^^^^
 
-MAPPO needs information sharing across agents. The critic learning utilize both self-observation and information provided by other agents including
+MAPPO needs information sharing across agents. Critic learning utilizes self-observation and information other agents provide, including
  observation and actions. Here we bold the symbol (e.g., :math:`s` to :math:`\mathbf{s}`) to indicate more than one agent information is contained.
 
 Critic learning:
@@ -287,7 +300,7 @@ Policy learning:
     \right),
 
 Here
-:math:`{\mathcal D}` is the collected trajectories, which can be shared across agents.
+:math:`{\mathcal}` is the collected trajectories that can be shared across agents.
 :math:`R` is the rewards-to-go.
 :math:`\tau` is the trajectory.
 :math:`A` is the advantage.
@@ -300,19 +313,6 @@ Here
 :math:`\epsilon` is a hyperparameter controlling how far away the new policy is allowed to go from the old.
 :math:`V_{\phi}` is the critic value function, which can be shared across agents.
 :math:`\pi_{\theta}` is the policy net, which can be shared across agents.
-
-
-Workflow
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-In the sampling stage, agents share information with others. The information includes others' observations and predicted actions. After collecting the necessary information from other agents,
-all agents follow the standard PPO training pipeline, except using the centralized critic value function to calculate the GAE and conduct the PPO critic learning procedure.
-
-.. figure:: ../images/mappo.png
-    :width: 600
-    :align: center
-
-    Multi-agent Proximal Policy Optimization (MAPPO)
 
 Implementation
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -348,21 +348,33 @@ IPPO in *MARLlib* is applicable for
 .. _VDPPO:
 
 
-VDPPO: mixing the critic of a bunch of PPO agents
+VDPPO: mixing a bunch of PPO agents' critics
 -----------------------------------------------------
 
-.. admonition:: Quick Facts
 
-    - Value decomposition proximal policy optimization (VDPPO) is one of extensions of :ref:`IPPO`.
-    - Agent architecture of VDPPO consists of three modules: policy network, critic network, and the mixer.
-    - VDPPO is the algorithms combined QMIX, VDA2C, and, PPO.
-    - VDPPO needs one stage of information sharing on real/sampled data and predicted data.
-    - VDPPO is proposed to solve cooperative tasks only.
+
+- Value decomposition proximal policy optimization (VDPPO) is one of extensions of :ref:`IPPO`.
+- Agent architecture of VDPPO consists of three modules: policy network, critic network, and the mixer.
+- VDPPO is the algorithms combined QMIX, VDA2C, and, PPO.
+- VDPPO needs one stage of information sharing on real/sampled data and predicted data.
+- VDPPO is proposed to solve cooperative tasks only.
 
 Preliminary
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 :ref:`IPPO`
+
+Workflow
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+In the sampling stage, agents share information with others. The information includes others' observations and predicted critic value. After collecting the necessary information from other agents,
+all agents follow the standard PPO training pipeline, except for using the mixed critic value to calculate the GAE and conduct the PPO critic learning procedure.
+
+.. figure:: ../images/vdppo.png
+    :width: 600
+    :align: center
+
+    Multi-agent Proximal Policy Optimization (MAPPO)
 
 Characteristic
 ^^^^^^^^^^^^^^^
@@ -400,17 +412,17 @@ taxonomy label
 Algorithm Insights
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-Value decomposition PPO focus on learning the credit assignment similar joint Q learning family, and belong to on-policy value decomposition algorithm.
+Value decomposition PPO focuses on learning the credit assignment similar to the joint Q learning family and belongs to the on-policy value decomposition algorithm.
 VDPPO is easy to understand when you are familiar with both :ref:`QMIX` and :ref:`VDA2C`.
 
-#. Like joint Q learning family, VDPPO is only applicable for cooperative multi-agent tasks.
-#. The sample efficiency of VDPPO is worse than algorithms of joint Q learning family.
-#. VDPPO can be applied to both discrete and continues control problem.
+#. Like the joint Q learning family, VDPPO only applies to cooperative multi-agent tasks.
+#. The sampling efficiency of VDPPO is worse than joint Q learning family algorithms.
+#. VDPPO can be applied to both discrete and continuous control problems.
 
 Math Formulation
 ^^^^^^^^^^^^^^^^^^
 
-VDPPO needs information sharing across agents. The critic mixing utilizes both self-observation and other agents observation.
+VDPPO needs information sharing across agents. Therefore, the critic mixing utilizes both self-observation and other agents' observation.
 Here we bold the symbol (e.g., :math:`s` to :math:`\mathbf{s}`) to indicate more than one agent information is contained.
 
 
@@ -460,17 +472,7 @@ Here
 :math:`\pi_{\theta}` is the policy net.
 :math:`g_{\psi}` is mixing network.
 
-Workflow
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-In the sampling stage, agents share information with others. The information includes others' observations and predicted critic value. After collecting the necessary information from other agents,
-all agents follow the standard PPO training pipeline, except using the mixed critic value to calculate the GAE and conduct the PPO critic learning procedure.
-
-.. figure:: ../images/vdppo.png
-    :width: 600
-    :align: center
-
-    Multi-agent Proximal Policy Optimization (MAPPO)
 
 Implementation
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -520,6 +522,18 @@ Preliminary
 
 :ref:`IPPO`
 
+Workflow
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+In the sampling stage, agents share information with others. The information includes others' observations and predicted actions. After collecting the necessary information from other agents,
+all agents follow the standard PPO training pipeline, except using the centralized critic value function to calculate the GAE and conduct the PPO critic learning procedure.
+
+.. figure:: ../images/mappo.png
+    :width: 600
+    :align: center
+
+    Multi-agent Proximal Policy Optimization (MAPPO)
+
 Characteristic
 ^^^^^^^^^^^^^^^
 
@@ -552,13 +566,6 @@ taxonomy label
      - ``stochastic``
      - ``centralized critic``
 
-inherited algorithm
-
-.. list-table::
-   :widths: 25
-   :header-rows: 0
-
-   * - :ref:`IPPO`
 
 
 
@@ -624,17 +631,7 @@ Here
 :math:`\pi_{\theta}` is the policy net.
 
 
-Workflow
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-In the sampling stage, agents share information with others. The information includes others' observations and predicted actions. After collecting the necessary information from other agents,
-all agents follow the standard PPO training pipeline, except using the centralized critic value function to calculate the GAE and conduct the PPO critic learning procedure.
-
-.. figure:: ../images/mappo.png
-    :width: 600
-    :align: center
-
-    Multi-agent Proximal Policy Optimization (MAPPO)
 
 Implementation
 ^^^^^^^^^^^^^^^^^^^^^^^^^
