@@ -10,7 +10,7 @@ Deep Deterministic Policy Gradient Family
 
 .. _DDPG:
 
-DDPG: A Recap
+Deep Deterministic Policy Gradient: A Recap
 -----------------------------------------------
 
 
@@ -24,7 +24,7 @@ The motivation of DDPG is to tackle the problem that standard Q-learning can onl
 To extend the Q function to the continuous control problem, DDPG adopts an extra policy network :math:`\mu(s)` parameterized by :math:`\theta` to produce action value.
 The Q value is estimated as :math:`Q(s,\mu(s))`. The Q function is parameterized by :math:`\phi`.
 
-**Mathematical**
+**Mathematical Form**
 
 Q learning:
 
@@ -138,7 +138,7 @@ While knowledge sharing across agents is optional in IDDPG.
     But recent works find it is essential for good performance. So here, we include knowledge sharing as part of the information sharing.
 
 
-Mathematical
+Mathematical Form
 ^^^^^^^^^^^^^^^^^^
 
 Standing at the view of a single agent, the mathematical formulation of IDDPG is the same as DDPG: :ref:`DDPG`.
@@ -264,7 +264,7 @@ Note :math:`s` in policy network is the self-observation/state while :math:`\mat
     - Recent works prove that policy gradient methods can be directly applied to MARL and maintain good performance. E.g., :ref:`IPPO`
     - MADDPG is criticized for its unstable performance in recent MARL research.
 
-Mathematical
+Mathematical Form
 ^^^^^^^^^^^^^^^^^^
 
 MADDPG needs information sharing across agents. The Q learning utilizes self-observation and information other agents provide, including
@@ -411,7 +411,7 @@ Compared to existing methods, FACMAC:
     - Applicable scenarios of FACMAC are pretty restrained. E.g., the cooperative task only, the continuous task only(without adding tricks).
 
 
-Mathematical
+Mathematical Form
 ^^^^^^^^^^^^^^^^^^
 
 MADDPG needs information sharing across agents. Therefore, the Q mixing utilizes both self-observation and other agents' observation.

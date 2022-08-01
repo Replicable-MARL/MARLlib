@@ -9,11 +9,8 @@ Proximal Policy Optimization Family
 
 .. _PPO:
 
-PPO: A Recap
+Proximal Policy Optimization: A Recap
 -----------------------------------------------
-
-Algorithm
-^^^^^^^^^^^^^^^^^^^^^^^
 
 **Preliminary**:
 
@@ -28,7 +25,7 @@ The objective function of PPO takes the minimum value between the original value
 There are two primary variants of PPO: PPO-Penalty and PPO-Clip. Here we only give the formulation of PPO-Clip, which is more common in practice.
 For PPO-penalty, please refer to `Proximal Policy Optimization <https://spinningup.openai.com/en/latest/algorithms/ppo.html>`_.
 
-**Mathematical**
+**Mathematical Form**
 
 
 Critic learning:
@@ -148,7 +145,7 @@ While knowledge sharing across agents is optional in IPPO.
     Knowledge-level information sharing is usually excluded from information sharing and is only seen as a trick.
     But recent works find it is essential for good performance. So here, we include knowledge sharing as part of the information sharing.
 
-Mathematical 
+Mathematical Form 
 ^^^^^^^^^^^^^^^^^^
 
 Standing at the view of a single agent, the mathematical formulation of IPPO is the same as :ref:`PPO`.
@@ -258,7 +255,7 @@ The MAPPO algorithm overturn this consensus by experimentally proving that:
     - The parameters are shared across agents. However, not sharing these parameters will not incur any problems. Conversely, partly sharing these parameters(e.g., only sharing the critic) can help achieve better performance in some scenarios.
 
 
-Mathematical 
+Mathematical Form 
 ^^^^^^^^^^^^^^^^^^
 
 MAPPO needs information sharing across agents. Critic learning utilizes self-observation and information other agents provide, including
@@ -394,7 +391,7 @@ VDPPO is easy to understand when you have basic idea of :ref:`QMIX` and :ref:`VD
     - The sampling efficiency of VDPPO is worse than joint Q learning family algorithms.
     - VDPPO can be applied to both discrete and continuous control problems, which is a good news compared to discrete-only joint Q learning algorithms
 
-Mathematical 
+Mathematical Form 
 ^^^^^^^^^^^^^^^^^^
 
 VDPPO needs information sharing across agents. Therefore, the critic mixing utilizes both self-observation and other agents' observation.
@@ -553,7 +550,7 @@ The MAPPO paper proves that:
     - The parameters are shared across agents. However, not sharing these parameters will not incur any problems. On the opposite, partly sharing these parameters(e.g., only sharing the critic) can help achieve better performance in some scenarios.
 
 
-Mathematical 
+Mathematical Form 
 ^^^^^^^^^^^^^^^^^^
 
 Critic learning:
