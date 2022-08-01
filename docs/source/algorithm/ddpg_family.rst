@@ -13,8 +13,6 @@ Deep Deterministic Policy Gradient Family
 DDPG: A Recap
 -----------------------------------------------
 
-Algorithm Insights
-^^^^^^^^^^^^^^^^^^^^^^^
 
 **Preliminary**
 
@@ -26,8 +24,7 @@ The motivation of DDPG is to tackle the problem that standard Q-learning can onl
 To extend the Q function to the continuous control problem, DDPG adopts an extra policy network :math:`\mu(s)` parameterized by :math:`\theta` to produce action value.
 The Q value is estimated as :math:`Q(s,\mu(s))`. The Q function is parameterized by :math:`\phi`.
 
-Math Formulation
-^^^^^^^^^^^^^^^^^^
+**Mathematical**
 
 Q learning:
 
@@ -71,6 +68,9 @@ IDDPG: multi-agent version of DDPG
 - An IDDPG agent architecture consists of two models: ``policy`` and ``Q``.
 - IDDPG applies to cooperative, competitive, and mixed task modes.
 
+**Preliminary**
+
+- :ref:`DDPG`
 
 Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -117,12 +117,9 @@ taxonomy label
      - ``independent learning``
 
 
-Algorithm Insights
+Insights
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-**Preliminary**
-
-- :ref:`DDPG`
 
 Independent Deep Deterministic Policy Gradient (IDDPG) is the multi-agent version of standard DDPG. Each agent is now a DDPG-based sampler and learner.
 IDDPG does not need information sharing, including real/sampled data and predicted data.
@@ -141,7 +138,7 @@ While knowledge sharing across agents is optional in IDDPG.
     But recent works find it is essential for good performance. So here, we include knowledge sharing as part of the information sharing.
 
 
-Math Formulation
+Mathematical
 ^^^^^^^^^^^^^^^^^^
 
 Standing at the view of a single agent, the mathematical formulation of IDDPG is the same as DDPG: :ref:`DDPG`.
@@ -195,6 +192,9 @@ MADDPG: DDPG agent with a centralized Q
 - MADDPG needs two stages of information sharing on real/sampled data and predicted data.
 - MADDPG applies to cooperative, competitive, and mixed task modes.
 
+**Preliminary**
+
+-:ref:`IDDPG`
 
 Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -240,12 +240,10 @@ taxonomy label
      - ``deterministic``
 
 
-Algorithm Insights
+Insights
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-**Preliminary**
 
--:ref:`IDDPG`
 
 Traditional reinforcement learning approaches such as Q-Learning or policy gradient are poorly suited to multi-agent environments because:
 
@@ -266,7 +264,7 @@ Note :math:`s` in policy network is the self-observation/state while :math:`\mat
     - Recent works prove that policy gradient methods can be directly applied to MARL and maintain good performance. E.g., :ref:`IPPO`
     - MADDPG is criticized for its unstable performance in recent MARL research.
 
-Math Formulation
+Mathematical
 ^^^^^^^^^^^^^^^^^^
 
 MADDPG needs information sharing across agents. The Q learning utilizes self-observation and information other agents provide, including
@@ -340,6 +338,11 @@ FACMAC: mixing a bunch of DDPG agents
 - FACMAC needs two stages of information sharing on real/sampled data and predicted data.
 - FACMAC applies to cooperative task mode only.
 
+**Preliminary**:
+
+
+- :ref:`IDDPG`
+- :ref:`QMIX`
 
 Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -386,14 +389,8 @@ taxonomy label
 
 
 
-Algorithm Insights
+Insights
 ^^^^^^^^^^^^^^^^^^^^^^^
-
-**Preliminary**:
-
-
-- :ref:`IDDPG`
-- :ref:`QMIX`
 
 FACMAC is a variant of :ref:`IDDPG` in the value decomposition method and a counterpart of :ref:`MADDPG`.
 The main contribution of FACMAC is:
@@ -414,7 +411,7 @@ Compared to existing methods, FACMAC:
     - Applicable scenarios of FACMAC are pretty restrained. E.g., the cooperative task only, the continuous task only(without adding tricks).
 
 
-Math Formulation
+Mathematical
 ^^^^^^^^^^^^^^^^^^
 
 MADDPG needs information sharing across agents. Therefore, the Q mixing utilizes both self-observation and other agents' observation.
