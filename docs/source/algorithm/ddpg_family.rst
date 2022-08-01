@@ -13,13 +13,12 @@ Deep Deterministic Policy Gradient Family
 DDPG: A Recap
 -----------------------------------------------
 
-Preliminary
-^^^^^^^^^^^^^^^
-
-Q-Learning & Deep Q Network(DQN)
-
 Algorithm Insights
 ^^^^^^^^^^^^^^^^^^^^^^^
+
+**Preliminary**
+
+- Q-Learning & Deep Q Network(DQN)
 
 Deep Deterministic Policy Gradient (DDPG) is an algorithm that concurrently learns a Q-function and a policy.
 It uses off-policy data and the Bellman equation to learn the Q-function and the Q-function to learn the policy.
@@ -72,11 +71,6 @@ IDDPG: multi-agent version of DDPG
 - An IDDPG agent architecture consists of two models: ``policy`` and ``Q``.
 - IDDPG applies to cooperative, competitive, and mixed task modes.
 
-Preliminary
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-:ref:`DDPG`
-
 
 Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -125,6 +119,10 @@ taxonomy label
 
 Algorithm Insights
 ^^^^^^^^^^^^^^^^^^^^^^^
+
+**Preliminary**
+
+- :ref:`DDPG`
 
 Independent Deep Deterministic Policy Gradient (IDDPG) is the multi-agent version of standard DDPG. Each agent is now a DDPG-based sampler and learner.
 IDDPG does not need information sharing, including real/sampled data and predicted data.
@@ -192,15 +190,11 @@ MADDPG: DDPG agent with a centralized Q
 --------------------------------------------
 
 
-- Multi-agent deep deterministic policy gradient(MADDPG) is one of the extensions of :ref:`IDDPG`.
+- Multi-agent deep deterministic policy gradient(MADDPG) is one of the extended version of :ref:`IDDPG`.
 - Agent architecture of MADDPG consists of two models: ``policy`` and ``Q``.
 - MADDPG needs two stages of information sharing on real/sampled data and predicted data.
 - MADDPG applies to cooperative, competitive, and mixed task modes.
 
-Preliminary
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-:ref:`IDDPG`
 
 Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -248,6 +242,10 @@ taxonomy label
 
 Algorithm Insights
 ^^^^^^^^^^^^^^^^^^^^^^^
+
+**Preliminary**
+
+-:ref:`IDDPG`
 
 Traditional reinforcement learning approaches such as Q-Learning or policy gradient are poorly suited to multi-agent environments because:
 
@@ -337,18 +335,11 @@ FACMAC: mixing a bunch of DDPG agents
 -------------------------------------------------------------
 
 
-- Factored Multi-Agent Centralised Policy Gradients (FACMAC) is one of the extensions of :ref:`IDDPG`.
+- Factored Multi-Agent Centralised Policy Gradients (FACMAC) is one of the extended version of :ref:`IDDPG`.
 - Agent architecture of FACMAC consists of three models: ``policy``, ``Q``, and ``mixer``.
 - FACMAC needs two stages of information sharing on real/sampled data and predicted data.
 - FACMAC applies to cooperative task mode only.
 
-
-Preliminary
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-- :ref:`IDDPG`
-- :ref:`QMIX`
-- :ref:`VDN`
 
 Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -397,6 +388,12 @@ taxonomy label
 
 Algorithm Insights
 ^^^^^^^^^^^^^^^^^^^^^^^
+
+**Preliminary**:
+
+
+- :ref:`IDDPG`
+- :ref:`QMIX`
 
 FACMAC is a variant of :ref:`IDDPG` in the value decomposition method and a counterpart of :ref:`MADDPG`.
 The main contribution of FACMAC is:

@@ -12,14 +12,14 @@ Proximal Policy Optimization Family
 PPO: A Recap
 -----------------------------------------------
 
-Preliminary
-^^^^^^^^^^^^^^^
-
-Vanilla Policy Gradient (PG) & Trust Region Policy Optimization (TRPO) & General Advantage Estimation (GAE)
-
-
-Algorithm Insights
+Algorithm
 ^^^^^^^^^^^^^^^^^^^^^^^
+
+**Preliminary**:
+
+- Vanilla Policy Gradient (PG)
+- Trust Region Policy Optimization (TRPO)
+- General Advantage Estimation (GAE)
 
 Proximal Policy Optimization (PPO) is a first-order optimization that simplifies its implementation. Similar to TRPO objective function, It defines the probability ratio between the new policy and old policy as :math:`\frac{\pi_{\theta}(a|s)}{\pi_{\theta_k}(a|s)}`.
 Instead of adding complicated KL constraints, PPO imposes this policy ratio to stay within a small interval between :math:`1-\epsilon` and :math:`1+\epsilon`.
@@ -80,11 +80,6 @@ IPPO: multi-agent version of PPO
 - Agent architecture of IPPO consists of two modules: ``policy`` and ``critic``.
 - IPPO applies to cooperative, competitive, and mixed task modes.
 
-Preliminary
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-:ref:`PPO`
-
 
 Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -133,6 +128,11 @@ taxonomy label
 
 Algorithm Insights
 ^^^^^^^^^^^^^^^^^^^^^^^
+
+
+**Preliminary**:
+
+- :ref:`PPO`
 
 IPPO is the simplest multi-agent version of standard PPO. Each agent is now a PPO-based sampler and learner.
 IPPO does not need information sharing, including real/sampled data and predicted data.
@@ -186,15 +186,11 @@ MAPPO: PPO agent with a centralized critic
 -----------------------------------------------------
 
 
-- Multi-agent proximal policy optimization (MAPPO) is one of the centralized extensions of :ref:`IPPO`.
+- Multi-agent proximal policy optimization (MAPPO) is one of the extended version of :ref:`IPPO`.
 - Agent architecture of MAPPO consists of two models: ``policy`` and ``critic``.
 - MAPPO needs one stage of information sharing on real/sampled data.
 - MAPPO is proposed to solve cooperative tasks but is still applicable to collaborative, competitive, and mixed tasks.
 
-Preliminary
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-:ref:`IPPO`
 
 Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -241,19 +237,14 @@ taxonomy label
      - ``stochastic``
      - ``centralized critic``
 
-inherited algorithm
-
-.. list-table::
-   :widths: 25
-   :header-rows: 0
-
-   * - :ref:`IPPO`
-
-
 
 
 Algorithm Insights
 ^^^^^^^^^^^^^^^^^^^^^^^
+
+**Preliminary**:
+
+- :ref:`IPPO`
 
 On-policy reinforcement learning algorithms are less sample efficient than their off-policy counterparts in MARL.
 The MAPPO algorithm overturn this consensus by experimentally proving that:
@@ -338,16 +329,11 @@ Key hyperparameter location:
 VDPPO: mixing a bunch of PPO agents' critics
 -----------------------------------------------------
 
-- Value decomposition proximal policy optimization (VDPPO) is one of extensions of :ref:`IPPO`.
+- Value decomposition proximal policy optimization (VDPPO) is one of the extended version of :ref:`IPPO`.
 - Agent architecture of VDPPO consists of three modules: ``policy``, ``critic``, and ``mixer``.
 - VDPPO is the algorithms combined QMIX, VDA2C, and, PPO.
 - VDPPO needs one stage of information sharing on real/sampled data and predicted data.
 - VDPPO is proposed to solve cooperative tasks only.
-
-Preliminary
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-:ref:`IPPO`
 
 Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -396,6 +382,11 @@ taxonomy label
 
 Algorithm Insights
 ^^^^^^^^^^^^^^^^^^^^^^^
+
+**Preliminary**:
+
+- :ref:`IPPO`
+- :ref:`QMIX`
 
 VDPPO focuses on the credit assignment learning, which is similar to the joint Q learning family.
 VDPPO is easy to understand when you have basic idea of :ref:`QMIX` and :ref:`VDA2C`.
