@@ -163,7 +163,7 @@ Key hyperparameter location:
 Usage & Limitation
 ^^^^^^^^^^^^^^^^^^^^^^
 
-IPPO in *MARLlib* is suitable for
+IPPO in *MARLlib* is applicable for
 
 - continues control tasks
 - discrete control tasks
@@ -328,7 +328,7 @@ Key hyperparameter location:
 Usage & Limitation
 ^^^^^^^^^^^^^^^^^^^^^^
 
-IPPO in *MARLlib* is suitable for
+IPPO in *MARLlib* is applicable for
 
 - continues control tasks
 - discrete control tasks
@@ -484,7 +484,7 @@ Key hyperparameter location:
 Usage & Limitation
 ^^^^^^^^^^^^^^^^^^^^^^
 
-IPPO in *MARLlib* is suitable for
+IPPO in *MARLlib* is applicable for
 
 - continues control tasks
 - discrete control tasks
@@ -651,7 +651,7 @@ Key hyperparameter location:
 Usage & Limitation
 ^^^^^^^^^^^^^^^^^^^^^^
 
-IPPO in *MARLlib* is suitable for
+IPPO in *MARLlib* is applicable for
 
 - continues control tasks
 - discrete control tasks

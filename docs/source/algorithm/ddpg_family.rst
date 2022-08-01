@@ -59,6 +59,7 @@ Here :math:`{\mathcal D}` is the replay buffer
 
     Some tricks like `gumble softmax` enables DDPG policy net to output categorical-like action distribution.
 
+---------------------
 
 .. _IDDPG:
 
@@ -179,10 +180,14 @@ Key hyperparameter location:
 Usage & Limitation
 ^^^^^^^^^^^^^^^^^^^^^^
 
-IDDPG in *MARLlib* is suitable for
+IDDPG in *MARLlib* is applicable for
 
 - continues control tasks
 - any task mode
+
+.. code-block:: shell
+
+    python marl/main.py --algo_config=ddpg --finetuned --env-config=mamujoco with env_args.map_name=2AgentAnt
 
 .. admonition:: You Should Know
 
@@ -191,10 +196,7 @@ IDDPG in *MARLlib* is suitable for
         - :ref:`MaMujoco` (continues only)
         - :ref:`MetaDrive` (continues only)
 
-.. code-block:: shell
-
-    python marl/main.py --algo_config=ddpg --finetuned --env-config=mamujoco with env_args.map_name=2AgentAnt
-
+---------------------
 
 .. _MADDPG:
 
@@ -345,7 +347,7 @@ Key hyperparameter location:
 Usage & Limitation
 ^^^^^^^^^^^^^^^^^^^^^^
 
-MADDPG in *MARLlib* is suitable for
+MADDPG in *MARLlib* is applicable for
 
 - continues control tasks
 - any task mode
@@ -354,7 +356,7 @@ MADDPG in *MARLlib* is suitable for
 
     python marl/main.py --algo_config=maddpg --finetuned --env-config=mamujoco with env_args.map_name=2AgentAnt
 
-
+---------------------
 
 .. _FACMAC:
 
@@ -518,7 +520,7 @@ Key hyperparameter location:
 Usage & Limitation
 ^^^^^^^^^^^^^^^^^^^^^^
 
-FACMAC in *MARLlib* is suitable for
+FACMAC in *MARLlib* is applicable for
 
 - continues control tasks
 - cooperative tasks
