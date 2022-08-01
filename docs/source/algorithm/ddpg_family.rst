@@ -176,18 +176,6 @@ Key hyperparameter location:
 - ``marl/algos/hyperparams/common/ddpg``
 - ``marl/algos/hyperparams/fintuned/env/ddpg``
 
-Usage & Limitation
-^^^^^^^^^^^^^^^^^^^^^^
-
-IDDPG in *MARLlib* is applicable for
-
-- continues control tasks
-- any task mode
-
-.. code-block:: shell
-
-    python marl/main.py --algo_config=ddpg --finetuned --env-config=mamujoco with env_args.map_name=2AgentAnt
-
 .. admonition:: Continues Control Tasks
 
     - There is only a few MARL dataset focusing on continuous control. The popular three are:
@@ -333,18 +321,6 @@ Key hyperparameter location:
 
 - ``marl/algos/hyperparams/common/maddpg``
 - ``marl/algos/hyperparams/fintuned/env/maddpg``
-
-Usage & Limitation
-^^^^^^^^^^^^^^^^^^^^^^
-
-MADDPG in *MARLlib* is applicable for
-
-- continues control tasks
-- any task mode
-
-.. code-block:: shell
-
-    python marl/main.py --algo_config=maddpg --finetuned --env-config=mamujoco with env_args.map_name=2AgentAnt
 
 
 .. admonition:: You Should Know
@@ -504,17 +480,6 @@ Key hyperparameter location:
 - ``marl/algos/hyperparams/common/maddpg``
 - ``marl/algos/hyperparams/fintuned/env/maddpg``
 
-Usage & Limitation
-^^^^^^^^^^^^^^^^^^^^^^
-
-FACMAC in *MARLlib* is applicable for
-
-- continues control tasks
-- cooperative tasks
-
-.. code-block:: shell
-
-    python marl/main.py --algo_config=facmac --finetuned --env-config=mamujoco with env_args.map_name=2AgentAnt
 
 .. admonition:: You Should Know
 

@@ -164,18 +164,6 @@ Key hyperparameter location:
 - ``marl/algos/hyperparams/common/ppo``
 - ``marl/algos/hyperparams/fintuned/env/ppo``
 
-Usage & Limitation
-^^^^^^^^^^^^^^^^^^^^^^
-
-IPPO in *MARLlib* is applicable for
-
-- continues control tasks
-- discrete control tasks
-- any task mode
-
-.. code-block:: shell
-
-    python marl/main.py --algo_config=ppo --finetuned --env-config=smac with env_args.map_name=3m
 
 ---------------------
 
@@ -297,10 +285,10 @@ Policy learning:
     L(s,\mathbf{s}^-, a,\mathbf{a}^-,\theta_k,\theta) = \min\left(
     \frac{\pi_{\theta}(a|s)}{\pi_{\theta_k}(a|s)}  A^{\pi_{\theta_k}}(s, \mathbf{s}^-,\mathbf{a}^-), \;\;
     \text{clip}\left(\frac{\pi_{\theta}(a|s)}{\pi_{\theta_k}(a|s)}, 1 - \epsilon, 1+\epsilon \right) A^{\pi_{\theta_k}}(s, \mathbf{s}^-,\mathbf{a}^-)
-    \right),
+    \right)
 
 Here
-:math:`{\mathcal}` is the collected trajectories that can be shared across agents.
+:math:`\mathcal D` is the collected trajectories that can be shared across agents.
 :math:`R` is the rewards-to-go.
 :math:`\tau` is the trajectory.
 :math:`A` is the advantage.
@@ -330,18 +318,6 @@ Key hyperparameter location:
 - ``marl/algos/hyperparams/common/mappo``
 - ``marl/algos/hyperparams/fintuned/env/mappo``
 
-Usage & Limitation
-^^^^^^^^^^^^^^^^^^^^^^
-
-IPPO in *MARLlib* is applicable for
-
-- continues control tasks
-- discrete control tasks
-- any task mode
-
-.. code-block:: shell
-
-    python marl/main.py --algo_config=ppo --finetuned --env-config=smac with env_args.map_name=3m
 
 ---------------------
 
@@ -490,18 +466,6 @@ Key hyperparameter location:
 - ``marl/algos/hyperparams/common/vdppo``
 - ``marl/algos/hyperparams/fintuned/env/vdppo``
 
-Usage & Limitation
-^^^^^^^^^^^^^^^^^^^^^^
-
-IPPO in *MARLlib* is applicable for
-
-- continues control tasks
-- discrete control tasks
-- any task mode
-
-.. code-block:: shell
-
-    python marl/main.py --algo_config=vdppo --finetuned --env-config=smac with env_args.map_name=3m
 
 ---------------------
 
