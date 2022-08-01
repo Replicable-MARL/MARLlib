@@ -21,7 +21,7 @@ Vanilla Policy Gradient (PG) & Trust Region Policy Optimization (TRPO) & General
 Algorithm Insights
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-PPO is a first-order optimization that simplifies its implementation. Similar to TRPO objective function, It defines the probability ratio between the new policy and old policy as :math:`\frac{\pi_{\theta}(a|s)}{\pi_{\theta_k}(a|s)}`.
+Proximal Policy Optimization (PPO) is a first-order optimization that simplifies its implementation. Similar to TRPO objective function, It defines the probability ratio between the new policy and old policy as :math:`\frac{\pi_{\theta}(a|s)}{\pi_{\theta_k}(a|s)}`.
 Instead of adding complicated KL constraints, PPO imposes this policy ratio to stay within a small interval between :math:`1-\epsilon` and :math:`1+\epsilon`.
 The objective function of PPO takes the minimum value between the original value and the clipped value.
 
@@ -75,9 +75,9 @@ IPPO: multi-agent version of PPO
 -----------------------------------------------------
 
 
-- Independent proximal policy optimization is a natural extension of standard single-agent proximal policy optimization in multi-agent settings.
-- The sampling/training pipeline is the same when we stand at the view of a single agent when comparing PPO and IPPO.
-- Agent architecture of IPPO consists of two modules: policy network and critic network.
+- Independent proximal policy optimization (IPPO) is a natural extension of standard proximal policy optimization (PPO) in multi-agent settings.
+- The sampling/training pipeline of IPPO is the same as PPO when we stand at the view of a single agent.
+- Agent architecture of IPPO consists of two modules: ``policy`` and ``critic``.
 - IPPO applies to cooperative, competitive, and mixed task modes.
 
 Preliminary
@@ -85,10 +85,12 @@ Preliminary
 
 :ref:`PPO`
 
+
 Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 In IPPO, each agent follows a standard PPO sampling/training pipeline. Therefore, IPPO is a general baseline for all MARL tasks with robust performance.
+Note that buffer and agent models can be shared or separately training across agents. And this applies to all algorithms in PPO family.
 
 .. figure:: ../images/ippo.png
     :width: 600
@@ -132,15 +134,26 @@ taxonomy label
 Algorithm Insights
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-Independent Proximal Policy Optimization (IPPO) is the multi-agent version of standard PPO. Each agent is now a PPO-based sampler and learner.
+IPPO is the simplest multi-agent version of standard PPO. Each agent is now a PPO-based sampler and learner.
 IPPO does not need information sharing, including real/sampled data and predicted data.
 While knowledge sharing across agents is optional in IPPO.
-Note: There is a discussion of the information sharing concept here: :ref:`yousn`
+
+.. admonition:: Information Sharing
+
+    In multi-agent learning, the concept of information sharing is not well defined and may confuse.
+    Here we try to clarify this by categorizing the type of information sharing into three.
+
+    - real/sampled data: observation, action, etc.
+    - predicted data: Q/critic value, message for communication, etc.
+    - knowledge: experience replay buffer, model parameters, etc.
+
+    Knowledge-level information sharing is usually excluded from information sharing and is only seen as a trick.
+    But recent works find it is essential for good performance. So here, we include knowledge sharing as part of the information sharing.
 
 Math Formulation
 ^^^^^^^^^^^^^^^^^^
 
-Standing at the view of a single agent under multi-agent settings, the mathematical formulation of IPPO is the same as :ref:`PPO`.
+Standing at the view of a single agent, the mathematical formulation of IPPO is the same as :ref:`PPO`.
 
 Note that in multi-agent settings, all the agent models can be shared, including:
 
@@ -153,7 +166,7 @@ Implementation
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 We use vanilla PPO implementation of RLlib in IPPO. The only exception is we rewrite the SGD iteration logic.
-The differences can be found in
+The details can be found in
 
     - ``MultiGPUTrainOneStep``
     - ``learn_on_loaded_batch``
@@ -174,7 +187,7 @@ MAPPO: PPO agent with a centralized critic
 
 
 - Multi-agent proximal policy optimization (MAPPO) is one of the centralized extensions of :ref:`IPPO`.
-- Agent architecture of MAPPO consists of two modules: policy network and critic network.
+- Agent architecture of MAPPO consists of two models: ``policy`` and ``critic``.
 - MAPPO needs one stage of information sharing on real/sampled data.
 - MAPPO is proposed to solve cooperative tasks but is still applicable to collaborative, competitive, and mixed tasks.
 
@@ -242,14 +255,12 @@ inherited algorithm
 Algorithm Insights
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-On-policy reinforcement learning algorithm is less utilized than off-policy learning algorithms in multi-agent settings.
-This is often due to the belief that on-policy methods are less sample efficient than their off-policy counterparts in multi-agent problems.
-The MAPPO paper proves that:
+On-policy reinforcement learning algorithms are less sample efficient than their off-policy counterparts in MARL.
+The MAPPO algorithm overturn this consensus by experimentally proving that:
 
 #. On-policy algorithms can achieve comparable performance to various off-policy methods.
 #. MAPPO is a robust MARL algorithm for diverse cooperative tasks and can outperform SOTA off-policy methods in more challenging scenarios.
 #. Formulating the input to the centralized value function is crucial for the final performance.
-#. Tricks in MAPPO training are essential.
 
 .. admonition:: You Should Know
 
@@ -306,7 +317,7 @@ Implementation
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Based on IPPO, we add centralized modules to implement MAPPO.
-The main differences are:
+The details can be found in:
 
     - ``centralized_critic_postprocessing``
     - ``central_critic_ppo_loss``
@@ -327,10 +338,8 @@ Key hyperparameter location:
 VDPPO: mixing a bunch of PPO agents' critics
 -----------------------------------------------------
 
-
-
 - Value decomposition proximal policy optimization (VDPPO) is one of extensions of :ref:`IPPO`.
-- Agent architecture of VDPPO consists of three modules: policy network, critic network, and the mixer.
+- Agent architecture of VDPPO consists of three modules: ``policy``, ``critic``, and ``mixer``.
 - VDPPO is the algorithms combined QMIX, VDA2C, and, PPO.
 - VDPPO needs one stage of information sharing on real/sampled data and predicted data.
 - VDPPO is proposed to solve cooperative tasks only.
@@ -350,7 +359,7 @@ all agents follow the standard PPO training pipeline, except for using the mixed
     :width: 600
     :align: center
 
-    Multi-agent Proximal Policy Optimization (MAPPO)
+    Value Decomposition Proximal Policy Optimization (VDPPO)
 
 Characteristic
 ^^^^^^^^^^^^^^^
@@ -388,12 +397,13 @@ taxonomy label
 Algorithm Insights
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-Value decomposition PPO focuses on learning the credit assignment similar to the joint Q learning family and belongs to the on-policy value decomposition algorithm.
-VDPPO is easy to understand when you are familiar with both :ref:`QMIX` and :ref:`VDA2C`.
+VDPPO focuses on the credit assignment learning, which is similar to the joint Q learning family.
+VDPPO is easy to understand when you have basic idea of :ref:`QMIX` and :ref:`VDA2C`.
 
-#. Like the joint Q learning family, VDPPO only applies to cooperative multi-agent tasks.
-#. The sampling efficiency of VDPPO is worse than joint Q learning family algorithms.
-#. VDPPO can be applied to both discrete and continuous control problems.
+.. admonition:: You Should Know
+    - Like the joint Q learning family, VDPPO only applies to cooperative multi-agent tasks.
+    - The sampling efficiency of VDPPO is worse than joint Q learning family algorithms.
+    - VDPPO can be applied to both discrete and continuous control problems, which is a good news compared to discrete-only joint Q learning algorithms
 
 Math Formulation
 ^^^^^^^^^^^^^^^^^^
@@ -454,7 +464,7 @@ Implementation
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Based on IPPO, we add mixing Q modules to implement VDPPO.
-The main differences are:
+The details can be found in:
 
     - ``value_mixing_postprocessing``
     - ``value_mix_ppo_surrogate_loss``

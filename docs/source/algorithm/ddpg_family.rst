@@ -82,6 +82,7 @@ Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Each agent follows the standard DDPG learning pipeline. Models and Buffers can be shared or separated according to agents' group.
+Note that buffer and agent models can be shared or separately training across agents. And this applies to all algorithms in DDPG family.
 
 .. figure:: ../images/iddpg.png
     :width: 600
@@ -145,7 +146,7 @@ While knowledge sharing across agents is optional in IDDPG.
 Math Formulation
 ^^^^^^^^^^^^^^^^^^
 
-Standing at the view of a single agent under multi-agent settings, the mathematical formulation of IDDPG is the same as DDPG: :ref:`DDPG`.
+Standing at the view of a single agent, the mathematical formulation of IDDPG is the same as DDPG: :ref:`DDPG`.
 
 Note in multi-agent settings, all the agent models and buffer can be shared, including:
 
