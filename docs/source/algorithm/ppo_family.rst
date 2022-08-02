@@ -258,8 +258,8 @@ The MAPPO algorithm overturn this consensus by experimentally proving that:
 Mathematical Form 
 ^^^^^^^^^^^^^^^^^^
 
-MAPPO needs information sharing across agents. Critic learning utilizes self-observation and information other agents provide, including
- observation and actions. Here we bold the symbol (e.g., :math:`s` to :math:`\mathbf{s}`) to indicate more than one agent information is contained.
+MAPPO needs information sharing across agents. Critic learning utilizes self-observation and information other agents provide,
+including observation and actions. Here we bold the symbol (e.g., :math:`s` to :math:`\mathbf{s}`) to indicate more than one agent information is contained.
 
 Critic learning:
 
@@ -416,7 +416,7 @@ General Advantage Estimation:
 
 .. math::
 
-    A_t=\sum_{t=0}^{\infty}(\gamma\lambda)^l\delta_{t+l}^V_{tot}
+    A_t=\sum_{t=0}^{\infty}(\gamma\lambda)^l\delta_{t+l}^{V_{tot}}
 
 
 Policy learning:

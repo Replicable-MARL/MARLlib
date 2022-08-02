@@ -194,7 +194,7 @@ MADDPG: DDPG agent with a centralized Q
 
 **Preliminary**
 
--:ref:`IDDPG`
+- :ref:`IDDPG`
 
 Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
