@@ -5,341 +5,484 @@ Joint Q Learning Family
     :local:
     :depth: 3
 
-Read List
--------------
 
-- `High-Dimensional Continuous Control Using Generalized Advantage Estimation <https://arxiv.org/abs/1506.02438>`_
-- `Proximal Policy Optimization Algorithms <https://arxiv.org/abs/1707.06347>`_
-- `Is Independent Learning All You Need in the StarCraft Multi-Agent Challenge? <https://arxiv.org/abs/2011.09533>`_
-- `The Surprising Effectiveness of A2C in Cooperative, Multi-Agent Games <https://arxiv.org/abs/2103.01955>`_
+.. _DQN:
 
-
-A recap of Deep Q Learning
+Deep (Recurrent) Q Learning: A Recap
 -----------------------------------------------
 
-Preliminary
-^^^^^^^^^^^^^^^
+**Vanilla Q Learning**
 
-Algorithm Insights
-^^^^^^^^^^^^^^^^^^^^^^^
+Without deep learning to approximate the state-action pair value, Q learning is restricted in the Q-table, which records all the pairs of :math:`(s,a)` with their corresponding Q values.
+The Q-Learning algorithm aims to learn the Q-Value of each :math:`(s,a)` pair based on interaction with the environment and iteratively update the Q-value record in the Q-table.
 
-Math Formulation
-^^^^^^^^^^^^^^^^^^
+The first step is choosing the action using **Epsilon-Greedy Exploration Strategy**.
+The agent then takes the best-known action or does random exploration, entering the next state with a reward given by the environment.
 
-
-VDN: mixing Q with value decomposition networks
------------------------------------------------------
-
-.. admonition:: Quick Facts
-
-    - Independent proximal policy optimization is a natural extension of standard single-agent proximal policy optimization in multi-agent settings.
-    - The sampling/training pipeline is the same when we stand at the view of a single agent when comparing A2C and IA2C.
-    - Agent architecture of IA2C consists of two modules: policy network and critic network.
-    - IA2C applies to cooperative, competitive, and mixed task modes.
-
-Preliminary
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Vanilla Policy Gradient (PG) & Trust Region Policy Optimization (TRPO) & General Advantage Estimation (GAE)
-
-
-Characteristic
-^^^^^^^^^^^^^^^
-
-action space
-
-.. list-table::
-   :widths: 25 25
-   :header-rows: 0
-
-   * - ``discrete``
-     - ``continues``
-
-task mode
-
-.. list-table::
-   :widths: 25 25 25
-   :header-rows: 0
-
-   * - ``cooperative``
-     - ``collaborative``
-     - ``competitive``
-
-taxonomy label
-
-.. list-table::
-   :widths: 25 25 25
-   :header-rows: 0
-
-   * - ``on-policy``
-     - ``stochastic``
-     - ``independent learning``
-
-derived algorithm
-
-.. list-table::
-   :widths: 25 25 25
-   :header-rows: 0
-
-   * - :ref:`MAA2C`
-     - :ref:`HAA2C`
-     - :ref:`VDA2C`
-
-
-Algorithm Insights
-^^^^^^^^^^^^^^^^^^^^^^^
-
-A2C is a first-order optimization that simplifies its implementation. Similar to TRPO objective function, It defines the probability ratio between the new policy and old policy as :math:`\frac{\pi_{\theta}(a|s)}{\pi_{\theta_k}(a|s)}`.
-Instead of adding complicated KL constraints, A2C imposes this policy ratio to stay within a small interval between :math:`1-\epsilon` and :math:`1+\epsilon`.
-The objective function of A2C takes the minimum value between the original value and the clipped value.
-
-There are two primary variants of A2C: A2C-Penalty and A2C-Clip. Here we only give the formulation of A2C-Clip, which is more commonly used in practice.
-
-Math Formulation
-^^^^^^^^^^^^^^^^^^
-
-Critic learning:
+The second step uses the bellman equation to update the Q-table based on collected data.
 
 .. math::
 
-    \phi_{k+1} = \arg \min_{\phi} \frac{1}{|{\mathcal D}_k| T} \sum_{\tau \in {\mathcal D}_k} \sum_{t=0}^T\left( V_{\phi} (s_t) - \hat{R}_t \right)^2
-
-General Advantage Estimation:
-
-.. math::
-
-    A_t=\sum_{t=0}^{\infty}(\gamma\lambda)^l\delta_{t+l}^V
-
-
-Policy learning:
-
-.. math::
-
-    L(s,a,\theta_k,\theta) = \min\left(
-    \frac{\pi_{\theta}(a|s)}{\pi_{\theta_k}(a|s)}  A^{\pi_{\theta_k}}(s,a), \;\;
-    \text{clip}\left(\frac{\pi_{\theta}(a|s)}{\pi_{\theta_k}(a|s)}, 1 - \epsilon, 1+\epsilon \right) A^{\pi_{\theta_k}}(s,a)
-    \right),
+    Q(s,a)=(1-\alpha)Q(s,a)+\alpha*(r+\lambda*max_a(s^{'},a^{'}))
 
 Here
-:math:`{\mathcal D}` is the collected trajectories.
-:math:`R` is the rewards-to-go.
-:math:`\tau` is the trajectory.
-:math:`V_{\phi}` is the critic function.
-:math:`A` is the advantage.
-:math:`\gamma` is discount value.
-:math:`\lambda` is the weight value of GAE.
+:math:`s` is the state.
 :math:`a` is the action.
-:math:`s` is the observation/state.
-:math:`\epsilon` is a hyperparameter controlling how far away the new policy is allowed to go from the old.
-:math:`\pi_{\theta}` is the policy net.
+:math:`s^{'}` is the next state.
+:math:`a^{'}` is the next action that yields the highest Q value
+:math:`\alpha` is the learning rate.
+:math:`\lambda` is the discount factor.
 
+Keeping iterating these two steps and updating the Q-table can converge the Q value. And the final Q value is the reward expectation of the action you choose based on the current state.
+
+**Deep Q Learning**
+
+Introducing deep learning into Q learning is a giant leap. However, it enables us to approximate the Q value using a neural network.
+There are two networks in deep Q learning:math:`Q` network and math:`Q_{tag}` network, which are the same in architecture.
+
+Q table is now replaced by :math:`Q` network to approximate the Q value.
+This way, the :math:`(s,a)` pairs number can be huge. As we can encode the state to a feature vector and learn the mapping between
+the feature vector and the Q value.
+The design of the Q net is simple, it takes :math:`s` as input and has :math:`a` number of output dimensions.
+The max value of output nodes is chosen to be :math:`max_a(s^{'},a^{'})` in vanilla Q learning.
+Finally, we use the Bellman equation to update the network.
+The optimization target is to minimize the minimum square error (MSE) between the current Q value estimation and the target Q estimation.
+
+.. math::
+
+    \phi_{k+1} = \arg \min_{\phi}(Q_\phi(s,a)-(r+\lambda*max_{a^{'}}Q_{\phi_{tar}}(s^{'},a^{'})))^2
+
+The :math:`Q_{tag}` network is updated every :math:`t` timesteps copying the :math:`Q` network.
+
+**DQN + Recurrent Neural Network(DRQN)**
+
+When we do not have full access to the state information, we need to record the history (trajectory information) to help the action chosen.
+RNN is then introduced to deep Q learning to deal with the partial observable Markov Decision Process(POMDP) by encoding the history into the hidden state.
+The optimization target now becomes:
+
+.. math::
+
+    \phi_{k+1} = \arg \min_{\phi}(Q_\phi(o,h,a)-(r+\lambda*max_{a^{'}}Q_{\phi_{tar}}(o^{'},h^{'},a^{'})))^2
+
+Here
+:math:`o` is the observation as we cannot access the state :math:`s`.
+:math:`o^{'}` is the next observation.
+:math:`h` is the hidden state(s) of the RNN.
+:math:`h^{'}` is the next hidden state(s) of the RNN.
+
+.. admonition:: You Should Know
+
+    Transforming DQN to DRQN, you need to do two things:
+
+    - replacing the Q net's multi-layer perception(MLP) module with a recurrent module, e.g., GRU, LSTM.
+    - storing the data in episode format. (while DQN has no such restriction)
+
+    Other than these two, the whole pipeline is kept unchanged.
+
+---------------------
+
+.. _IQL:
+
+IQL: Independent Q Learning.
+-----------------------------------------------------
+
+
+- Independent Q Learning (IQL) is the natural extension of q learning under multi-agent settings.
+- The sampling/training pipeline is the same when we stand at the view of a single agent when comparing IQL and Q learning.
+- Agent architecture of IQL consists of one module: Q network.
+- IQL applies to cooperative, competitive, and mixed task modes.
 
 Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-In IA2C, each agent follows a standard A2C sampling/training pipeline. Therefore, IA2C is a general baseline for all MARL tasks with robust performance.
+In IQL, each agent follows a standard D(R)QN sampling/training pipeline.
 
-.. figure:: ../images/ippo.png
+.. figure:: ../images/iql.png
     :width: 600
     :align: center
 
-    Independent Proximal Policy Optimization (IA2C)
-
-Implementation
-^^^^^^^^^^^^^^^^^^^^^^^^^
-
-We use vanilla A2C implementation of RLlib in IA2C. The only exception is we rewrite the SGD iteration logic.
-The differences can be found in
-
-    - ``MultiGPUTrainOneStep``
-    - ``learn_on_loaded_batch``
-
-
-Key hyperparameter location:
-
-- ``marl/algos/hyperparams/common/ppo``
-- ``marl/algos/hyperparams/fintuned/env/ppo``
-
-Usage & Limitation
-^^^^^^^^^^^^^^^^^^^^^^
-
-IA2C in *MARLlib* is suitable for
-
-- continues control tasks
-- discrete control tasks
-- any task mode
-
-.. code-block:: shell
-
-    python marl/main.py --algo_config=ppo --finetuned --env-config=smac with env_args.map_name=3m
-
-
-
-QMIX: mixing Q with monotonic value function factorisation
------------------------------------------------------
-
-.. admonition:: Quick Facts
-
-    - Multi-agent proximal policy optimization (MAA2C) is one of the centralized extensions of :ref:`IA2C`.
-    - Agent architecture of MAA2C consists of two modules: policy network and critic network.
-    - MAA2C outperforms other MARL algorithms in most multi-agent tasks, especially when agents are homogeneous.
-    - MAA2C is proposed to solve cooperative tasks but is still applicable to collaborative, competitive, and mixed tasks.
-
-Preliminary
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-:ref:`IA2C`
+    Independent Q Learning (IQL)
 
 Characteristic
 ^^^^^^^^^^^^^^^
 
 action space
-
-.. list-table::
-   :widths: 25 25
-   :header-rows: 0
-
-   * - ``discrete``
-     - ``continues``
-
-task mode
-
-.. list-table::
-   :widths: 25 25 25
-   :header-rows: 0
-
-   * - ``cooperative``
-     - ``collaborative``
-     - ``competitive``
-
-taxonomy label
-
-.. list-table::
-   :widths: 25 25 25
-   :header-rows: 0
-
-   * - ``on-policy``
-     - ``stochastic``
-     - ``centralized critic``
-
-inherited algorithm
 
 .. list-table::
    :widths: 25
    :header-rows: 0
 
-   * - :ref:`IA2C`
+   * - ``discrete``
 
 
+task mode
+
+.. list-table::
+   :widths: 25 25 25
+   :header-rows: 0
+
+   * - ``cooperative``
+     - ``collaborative``
+     - ``competitive``
+
+taxonomy label
+
+.. list-table::
+   :widths: 25 25 25
+   :header-rows: 0
+
+   * - ``off-policy``
+     - ``stochastic``
+     - ``independent learning``
 
 
-Algorithm Insights
+Insights
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-On-policy reinforcement learning algorithm is less utilized than off-policy learning algorithms in multi-agent settings.
-This is often due to the belief that on-policy methods are less sample efficient than their off-policy counterparts in multi-agent problems.
-The MAA2C paper proves that:
+**Preliminary**
 
-#. On-policy algorithms can achieve comparable performance to various off-policy methods.
-#. MAA2C is a robust MARL algorithm for diverse cooperative tasks and can outperform SOTA off-policy methods in more challenging scenarios.
-#. Formulating the input to the centralized value function is crucial for the final performance.
-#. Tricks in MAA2C training are essential.
+- :ref:`DQN`
 
-.. admonition:: Some Interesting Facts
+IQL treats each agent in a multi-agent system as a single agent and uses its own collected data as input to conduct the standard DQN or DRQN learning procedure.
+No information sharing is needed.
+While knowledge sharing across agents is optional in IQL.
 
-    - MAA2C paper is done in cooperative settings. Nevertheless, it can be directly applied to competitive and mixed task modes. Moreover, the performance is still good.
-    - MAA2C paper adopts some other tricks like death masking and clipping ratio. But compared to the input formulation, these tricks' impact is not so significant.
-    - Sampling procedure of on-policy algorithms can be parallel conducted. Therefore, the actual time consuming for a comparable performance between on-policy and off-policy algorithms is almost the same when we have enough sampling *workers*.
-    - The parameters are shared across agents. However, not sharing these parameters will not incur any problems. On the opposite, partly sharing these parameters(e.g., only sharing the critic) can help achieve better performance in some scenarios.
+.. admonition:: Information Sharing
+
+    In multi-agent learning, the concept of information sharing is not well defined and may confuse.
+    Here we try to clarify this by categorizing the type of information sharing into three.
+
+    - real/sampled data: observation, action, etc.
+    - predicted data: Q/critic value, message for communication, etc.
+    - knowledge: experience replay buffer, model parameters, etc.
+
+    Knowledge-level information sharing is usually excluded from information sharing and is only seen as a trick.
+    However, recent works find it is essential for good performance. Here, we include knowledge sharing as part of the information sharing.
 
 
 Math Formulation
 ^^^^^^^^^^^^^^^^^^
 
-Critic learning:
+Standing at the view of a single agent, the mathematical formulation of IQL is the same as :ref:`DQN`.
 
-.. math::
+Note in multi-agent settings, all the agent models and buffer can be shared, including:
 
-    \phi_{k+1} = \arg \min_{\phi} \frac{1}{|{\mathcal D}_k| T} \sum_{\tau \in {\mathcal D}_k} \sum_{t=0}^T\left( V_{\phi} (s_t) - \hat{R}_t \right)^2
-
-General Advantage Estimation:
-
-.. math::
-
-    A_t=\sum_{t=0}^{\infty}(\gamma\lambda)^l\delta_{t+l}^V
+- :math:`{\mathcal D}` replay buffer.
+- :math:`Q_{\phi}` Q net.
+- :math:`Q_{\phi_{\text{targ}}}` target Q net.
 
 
-Policy learning:
-
-.. math::
-
-    L(s,\mathbf{s}^-, a,\mathbf{a}^-,\theta_k,\theta) = \min\left(
-    \frac{\pi_{\theta}(a|s)}{\pi_{\theta_k}(a|s)}  A^{\pi_{\theta_k}}(s, \mathbf{s}^-,\mathbf{a}^-), \;\;
-    \text{clip}\left(\frac{\pi_{\theta}(a|s)}{\pi_{\theta_k}(a|s)}, 1 - \epsilon, 1+\epsilon \right) A^{\pi_{\theta_k}}(s, \mathbf{s}^-,\mathbf{a}^-)
-    \right),
-
-Here
-:math:`{\mathcal D}` is the collected trajectories.
-:math:`R` is the rewards-to-go.
-:math:`\tau` is the trajectory.
-:math:`A` is the advantage.
-:math:`\gamma` is discount value.
-:math:`\lambda` is the weight value of GAE.
-:math:`a` is the current agent action.
-:math:`\mathbf{a}^-` is the action set of all agents, except the current agent.
-:math:`s` is the current agent observation/state.
-:math:`\mathbf{s}^-` is the observation/state set of all agents, except the current agent.
-:math:`\epsilon` is a hyperparameter controlling how far away the new policy is allowed to go from the old.
-:math:`V_{\phi}` is the critic value function.
-:math:`\pi_{\theta}` is the policy net.
-
-
-Workflow
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-In the sampling stage, agents share information with others. The information includes others' observations and predicted actions. After collecting the necessary information from other agents,
-all agents follow the standard A2C training pipeline, except using the centralized critic value function to calculate the GAE and conduct the A2C critic learning procedure.
-
-.. figure:: ../images/mappo.png
-    :width: 600
-    :align: center
-
-    Multi-agent Proximal Policy Optimization (MAA2C)
 
 Implementation
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-We use vanilla A2C implementation of RLlib in IA2C. The only exception is we rewrite the SGD iteration logic.
-The differences can be found in
+We use vanilla IQL implementation of RLlib, but with further improvement to ensure the performance is aligned with the official implementation.
+The differences between ours and vanilla IQL can be found in
 
-    - ``MultiGPUTrainOneStep``
-    - ``learn_on_loaded_batch``
+    - ``episode_execution_plan``
+    - ``EpisodeBasedReplayBuffer``
+    - ``JointQLoss``
+    - ``JointQPolicy``
 
-Based on IA2C, we add centralized modules to implement MAA2C.
-The main differences are:
+Key hyperparameters location:
 
-    - ``centralized_critic_postprocessing``
-    - ``central_critic_ppo_loss``
-    - ``CC_RNN``
+- ``marl/algos/hyperparams/common/iql``
+- ``marl/algos/hyperparams/finetuned/env/iql``
 
+---------------------
 
-Key hyperparameter location:
-
-- ``marl/algos/hyperparams/common/ppo``
-- ``marl/algos/hyperparams/fintuned/env/ppo``
-
-Usage & Limitation
-^^^^^^^^^^^^^^^^^^^^^^
-
-IA2C in *MARLlib* is suitable for
-
-- continues control tasks
-- discrete control tasks
-- any task mode
-
-.. code-block:: shell
-
-    python marl/main.py --algo_config=ppo --finetuned --env-config=smac with env_args.map_name=3m
+.. _VDN:
 
 
+VDN: mixing Q with value decomposition network
+-----------------------------------------------------
 
+- Value Decomposition Network(VDN) is one of the value decomposition versions of IQL.
+- The training pipeline is centralized for the credit assignment.
+- Information sharing is needed on real/sampled data and predicted data.
+- Agent architecture of VDN consists of one module: ``Q`` network.
+- VDN only applies to cooperative task mode.
+
+Workflow
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+In VDN, each agent follows a standard D(R)QN sampling pipeline. And sharing its Q value and target Q value with other agents before entering the training loop.
+In the training loop, the Q value and target Q value of the current agent and other agents are summed to get the :math:`Q_{tot}`.
+
+
+.. figure:: ../images/vdn.png
+    :width: 600
+    :align: center
+
+    Value Decomposition Network (VDN)
+
+
+Characteristic
+^^^^^^^^^^^^^^^
+
+action space
+
+.. list-table::
+   :widths: 25
+   :header-rows: 0
+
+   * - ``discrete``
+
+
+task mode
+
+.. list-table::
+   :widths: 25
+   :header-rows: 0
+
+   * - ``cooperative``
+
+taxonomy label
+
+.. list-table::
+   :widths: 25 25 25
+   :header-rows: 0
+
+   * - ``off-policy``
+     - ``stochastic``
+     - ``value decomposition``
+
+
+Algorithm Insights
+^^^^^^^^^^^^^^^^^^^^^^^
+
+Preliminary
+
+- :ref:`IQL`
+
+Optimizing multiple agents' joint policy with a single team reward can be very challenging as the action and observation space is now too large when combined.
+Value Decomposition Network(VDN) is the first proposed algorithm for this problem. The solution is relatively straightforward:
+
+- Each agent is still a standard Q network, use self-observation as input and output the action logits(Q value).
+- The Q values of all agents are added together for mixed Q value annotated as :math:`Q_{tot}`
+- Using standard DQN to optimize the Q net using :math:`Q_{tot}` with the team reward :math:`r`.
+- The gradient each Q net received depends on the **contribution** of its Q value to the :math:`Q_{tot}`:
+The Q net that outputs a larger Q will be updated more; the smaller will be updated less.
+
+The value decomposition version of IQL is also referred as **joint Q learning**(JointQ).
+These two names emphasize different aspects. Value decomposition focuses on how the team reward is divided to update the Q net, known as credit assignment.
+Joint Q learning shows how the optimization target :math:`Q_{tot}` is got.
+As VDN is developed to address the cooperative multi-agent task, sharing the parameter is the primary option, which brings higher data efficiency and a smaller model size.
+
+.. admonition:: You Should Know:
+
+    VDN is the first value decomposition algorithm for cooperative multi-agent tasks. However, simply summing the Q value can reduce the diversity of
+    the policy and can quickly stuck into local optimum, especially when the Q net is shared across agents.
+
+
+Math Formulation
+^^^^^^^^^^^^^^^^^^
+
+VDN needs information sharing across agents. Here we bold the symbol (e.g., :math:`s` to :math:`\mathbf{s}`) to indicate that more than one agent information is contained.
+
+
+Q sum:
+
+.. math::
+
+    Q_{\phi}^{tot} = \sum_{i=1}^{n} Q_{\phi}^i
+
+Q learning:
+
+.. math::
+
+    L(\phi, {\mathcal D}) = \underset{\tau \sim {\mathcal D}}{{\mathrm E}}\Bigg(Q_{\phi}^{tot} - \left(r + \gamma (1 - d) Q_{\phi_{targ}}^{tot^{'}} \right) \Bigg)^2
+
+
+Here :math:`{\mathcal D}` is the replay buffer, which can be shared across agents.
+:math:`\mathbf{a}` is an action set, including opponents.
+:math:`r` is the reward.
+:math:`d` is set to 1(True) when an episode ends else 0(False).
+:math:`{\gamma}` is discount value.
+:math:`Q_{\phi}` is Q net, which can be shared across agents.
+:math:`Q_{\phi_{\text{targ}}}` is target Q net, which can be shared across agents.
+
+Implementation
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+We use vanilla VDN implementation of RLlib, but with further improvement to ensure the performance is aligned with the official implementation.
+The differences between ours and vanilla VDN can be found in
+
+    - ``episode_execution_plan``
+    - ``EpisodeBasedReplayBuffer``
+    - ``JointQLoss``
+    - ``JointQPolicy``
+
+Key hyperparameters location:
+
+- ``marl/algos/hyperparams/common/vdn``
+- ``marl/algos/hyperparams/finetuned/env/vdn``
+
+
+----------------
+
+.. _QMIX:
+
+QMIX: mixing Q with monotonic factorization
+-----------------------------------------------------------------
+
+
+- Monotonic Value Function Factorisation(QMIX) is one of the value decomposition versions of IQL.
+- The training pipeline is centralized for the credit assignment.
+- Information sharing is needed on real/sampled data and predicted data.
+- Agent architecture of QMIX consists of two modules: ``Q`` network and ``Mixer`` network.
+- QMIX only applies to cooperative task mode.
+
+Workflow
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+In QMIX, each agent follows a standard D(R)QN sampling pipeline. And sharing its Q value and target Q value with other agents before entering the training loop.
+In the training loop, the Q value and target Q value of the current agent and other agents are fed into the ``Mixer`` to get the :math:`Q_{tot}`.
+
+
+.. figure:: ../images/qmix.png
+    :width: 600
+    :align: center
+
+    Monotonic Value Function Factorisation (QMIX)
+
+
+Characteristic
+^^^^^^^^^^^^^^^
+
+action space
+
+.. list-table::
+   :widths: 25
+   :header-rows: 0
+
+   * - ``discrete``
+
+
+task mode
+
+.. list-table::
+   :widths: 25
+   :header-rows: 0
+
+   * - ``cooperative``
+
+taxonomy label
+
+.. list-table::
+   :widths: 25 25 25
+   :header-rows: 0
+
+   * - ``off-policy``
+     - ``stochastic``
+     - ``value decomposition``
+
+
+Algorithm Insights
+^^^^^^^^^^^^^^^^^^^^^^^
+
+Preliminary
+
+- :ref:`IQL`
+- :ref:`VDN`
+
+VDN optimizes multiple agents' joint policy by a straightforward operation: sum all the rewards. However, this operation reduces the
+representation of the strategy because the full factorization is not necessary for extracted decentralized
+policies to be entirely consistent with the centralized counterpart.
+
+Simply speaking, VDN force each agent to find the best action to satisfy the following equation:
+
+.. math::
+
+    \underset{\mathbf{u}}{\operatorname{argmax}}\:Q_{tot}(\boldsymbol{\tau}, \mathbf{u}) =
+    \begin{pmatrix}
+    \underset{u^1}{\operatorname{argmax}}\:Q_1(\tau^1, u^1)   \\
+    \vdots \\
+    \underset{u^n}{\operatorname{argmax}}\:Q_n(\tau^n, u^n) \\
+    \end{pmatrix}.
+
+QMIX claims that a larger family of monotonic functions is sufficient for factorization (value decomposition) but not necessary to satisfy the above equation
+The monotonic constraint can be written as:
+
+.. math::
+    \frac{\partial Q_{tot}}{\partial Q_a}  \geq 0,~ \forall a \in A.
+
+With monotonic constraints, we need to introduce a feed-forward neural network that
+takes the agent network outputs as input and mixes them monotonically.
+To satisfy the monotonic constraint, the weights (but not the biases) of the mixing network are restricted
+to be non-negative.
+
+This neural network is named **Mixer**.
+
+The similarity of QMIX and VDN:
+
+- Each agent is still a standard Q network, use self-observation as input and output the action logits(Q value).
+- Using standard DQN to optimize the Q net using :math:`Q_{tot}` with the team reward :math:`r`.
+
+Difference:
+
+- Additional model **Mixer** is added into QMIX.
+- The Q values of all agents are fed to the **Mixer** for getting :math:`Q_{tot}`.
+- The gradient each Q net received is backpropagated from the **Mixer**.
+
+Similar to VDN, QMIX is only applicable to the cooperative multi-agent task.
+Sharing the parameter is the primary option, which brings higher data efficiency and smaller model size.
+
+.. admonition:: You Should Know:
+
+    Variants of QMIX are proposed, like WQMIX and Q-attention. However, in practice, a finetuned QMIX (RIIT) is all you need.
+
+
+Math Formulation
+^^^^^^^^^^^^^^^^^^
+
+VDN needs information sharing across agents. Here we bold the symbol (e.g., :math:`s` to :math:`\mathbf{s}`) to indicate that more than one agent information is contained.
+
+
+Q sum:
+
+.. math::
+
+    Q_{tot}(\mathbf{a}, s;\boldsymbol{\phi},\psi) = g_{\psi}\bigl(`\mathbf{s}, Q_{\phi_1},Q_{\phi_2},..,Q_{\phi_n} \bigr)
+
+Q learning:
+
+.. math::
+
+    L(\phi, {\mathcal D}) = \underset{\tau \sim {\mathcal D}}{{\mathrm E}}\Bigg(Q_{\phi}^{tot} - \left(r + \gamma (1 - d) Q_{\phi_{targ}}^{tot^{'}} \right) \Bigg)^2
+
+
+Here :math:`{\mathcal D}` is the replay buffer, which can be shared across agents.
+:math:`\mathbf{a}` is an action set, including opponents.
+:math:`r` is the reward.
+:math:`d` is set to 1(True) when an episode ends else 0(False).
+:math:`{\gamma}` is discount value.
+:math:`Q_{\phi}` is Q net, which can be shared across agents.
+:math:`Q_{\phi_{\text{targ}}}` is target Q net, which can be shared across agents.
+:math:`g_{\psi}` is mixing network.
+:math:`g_{\psi_{\text{targ}}}` is target mixing network.
+
+
+Implementation
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+We use vanilla QMIX implementation of RLlib, but with further improvement to ensure the performance is aligned with the official implementation.
+The differences between ours and vanilla QMIX can be found in
+
+    - ``episode_execution_plan``
+    - ``EpisodeBasedReplayBuffer``
+    - ``JointQLoss``
+    - ``JointQPolicy``
+
+Key hyperparameters location:
+
+- ``marl/algos/hyperparams/common/qmix``
+- ``marl/algos/hyperparams/finetuned/env/qmix``
+
+Read List
+-------------
+
+- `Human-level control through deep reinforcement learning <https://daiwk.github.io/assets/dqn.pdf>`_
+- `Deep Recurrent Q-learning for Partially Observable MDPs <https://www.aaai.org/ocs/index.php/FSS/FSS15/paper/download/11673/11503>`_
+- `Value-Decomposition Networks For Cooperative Multi-Agent Learning <https://arxiv.org/abs/1706.05296>`_
+- `QMIX: Monotonic Value Function Factorisation for Deep Multi-Agent Reinforcement Learning <https://arxiv.org/abs/1803.11485>`_
