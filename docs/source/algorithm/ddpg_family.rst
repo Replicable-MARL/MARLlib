@@ -414,8 +414,7 @@ Compared to existing methods, FACMAC:
 Mathematical Form
 ^^^^^^^^^^^^^^^^^^
 
-MADDPG needs information sharing across agents. Therefore, the Q mixing utilizes both self-observation and other agents' observation.
-Here we bold the symbol (e.g., :math:`s` to :math:`\mathbf{s}`) to indicate more than one agent information is contained.
+FAMAC needs information sharing across agents. Here we bold the symbol (e.g., :math:`s` to :math:`\mathbf{s}`) to indicate more than one agent information is contained.
 
 
 Q mixing:
