@@ -571,21 +571,21 @@ Advantage Estimation if m > 1:
 
 .. math::
 
-\mathbf{M}^{i_{1:m}}(s, \mathbf{a}) = \frac{\bar{\pi}^{i_{1:m-1}}(a^{1:m-1} | s)} {\pi^{i_{1:m-1}}(a^{1:m-1} | s)} \mathbf{M}^{i_{1:m-1}}(s, \mathbf{a})
+    \mathbf{M}^{i_{1:m}}(s, \mathbf{a}) = \frac{\bar{\pi}^{i_{1:m-1}}(a^{1:m-1} | s)} {\pi^{i_{1:m-1}}(a^{1:m-1} | s)} \mathbf{M}^{i_{1:m-1}}(s, \mathbf{a})
 
 
 Advantage Estimation for m  = 1:
 
 .. math::
 
-\mathbf{M}^{i_{1}}(s, \mathbf{a}) = \hat{A}_{s, \mathbf{a}}(s, \mathbf{a})
+    \mathbf{M}^{i_{1}}(s, \mathbf{a}) = \hat{A}_{s, \mathbf{a}}(s, \mathbf{a})
 
 
 the argmax of the PPO-Clip objective:
 
 .. math::
 
-\frac{1}{BT}\sum_{b=1}^{B} \sum_{t=0}^{T}\left[ min\left(  \frac{\pi_{\theta^{i_m}}^{i_m}(a^{i_m} | s)} {\pi_{\theta^{i_m}_{k}}^{i_m}(a^{i_m} | s)} M^{i_{1:m}}(s|a), clip\left( \frac{\pi_{\theta^{i_m}}^{i_m}(a^{i_m} | s)} {\pi_{\theta^{i_m}_{k}}^{i_m}(a^{i_m} | s)}, 1 \pm \epsilon \right)\right)M^{i_{1:m}}(s|a)\right]
+    \frac{1}{BT}\sum_{b=1}^{B} \sum_{t=0}^{T}\left[ min\left(  \frac{\pi_{\theta^{i_m}}^{i_m}(a^{i_m} | s)} {\pi_{\theta^{i_m}_{k}}^{i_m}(a^{i_m} | s)} M^{i_{1:m}}(s|a), clip\left( \frac{\pi_{\theta^{i_m}}^{i_m}(a^{i_m} | s)} {\pi_{\theta^{i_m}_{k}}^{i_m}(a^{i_m} | s)}, 1 \pm \epsilon \right)\right)M^{i_{1:m}}(s|a)\right]
 
 
 Here
