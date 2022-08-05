@@ -472,10 +472,10 @@ HAPPO: Sequentially updating critic of MAPPO agents
 
 .. admonition:: Quick Facts
 
-    - Multi-agent proximal policy optimization (MAPPO) is one of the centralized extensions of :ref:`IPPO`.
-    - Agent architecture of MAPPO consists of two modules: policy network and critic network.
-    - MAPPO outperforms other MARL algorithms in most multi-agent tasks, especially when agents are homogeneous.
-    - MAPPO is proposed to solve cooperative tasks but is still applicable to collaborative, competitive, and mixed tasks.
+    - Heterogeneous-Agent Proximal Policy Optimisation (HAPPO) algorithm is one of the centralized extensions of :ref:`IPPO`.
+    - Agent architecture of HAPPO consists of three modules: policy network and critic network, sequential updating.
+    - HAPPO outperforms other MARL algorithms in most multi-agent tasks, especially when agents are heterogeneous.
+    - HAPPO is proposed to solve cooperative, collaborative, competitive, and mixed tasks.
 
 Preliminary
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -485,14 +485,15 @@ Preliminary
 Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-In the sampling stage, agents share information with others. The information includes others' observations and predicted actions. After collecting the necessary information from other agents,
-all agents follow the standard PPO training pipeline, except using the centralized critic value function to calculate the GAE and conduct the PPO critic learning procedure.
+In HAPPO, each agent has an individual policy. Each agent is accessible to its self observation. And there is a global V-Value network using the centralized critic value function to calculate the GAE and conduct the PPO critic learning procedure.
+
+What the different of the HAPPO and MAPPO is that HAPPO would update each policy sequentially. The `advantage value` of each policy updated iteration $M_i$ is computed based on the importance sampling by $M_{i-1}$, excepted the first round, which $M_o$ is assigned by the current agent's `advantage` directly.
 
 .. figure:: ../images/mappo.png
     :width: 600
     :align: center
 
-    Multi-agent Proximal Policy Optimization (MAPPO)
+    Heterogeneous-Agent Proximal Policy Optimization (HAPPO)
 
 Characteristic
 ^^^^^^^^^^^^^^^
@@ -533,21 +534,22 @@ taxonomy label
 Insights
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-On-policy reinforcement learning algorithm is less utilized than off-policy learning algorithms in multi-agent settings.
-This is often due to the belief that on-policy methods are less sample efficient than their off-policy counterparts in multi-agent problems.
-The MAPPO paper proves that:
+The previous methods that hold the sharing parameters for different agents, or lack the essential theoretical property of trust region learning, which is the monotonic improvement guarantee.
+This could lead to several issues when deal with MARL problems. Such as:
 
-#. On-policy algorithms can achieve comparable performance to various off-policy methods.
-#. MAPPO is a robust MARL algorithm for diverse cooperative tasks and can outperform SOTA off-policy methods in more challenging scenarios.
-#. Formulating the input to the centralized value function is crucial for the final performance.
-#. Tricks in MAPPO training are essential.
+#. If share the parameters, the methods could not apply to the occasions that different agents observe different dimension
+#. Parameters share could suffer from an exponentially-worse suboptimal outcome.
+#. although IPPO/MAPPO can be practically applied in a non-parameter sharing way, it still lacks the essential theoretical property of trust region learning, which is the monotonic improvement guarantee.
+
+The HAPPO paper proves that for Heterogeneous-Agent:
+
+#. Theoretically-justified trust region learning framework in MARL.
+#. HAPPO adopts the sequential update scheme, which saves the cost of maintaining a centralised critic for each agent in CTDE( centralised training with decentralised execution).
 
 .. admonition:: Some Interesting Facts
 
-    - MAPPO paper is done in cooperative settings. Nevertheless, it can be directly applied to competitive and mixed task modes. Moreover, the performance is still good.
-    - MAPPO paper adopts some other tricks like death masking and clipping ratio. But compared to the input formulation, these tricks' impact is not so significant.
-    - Sampling procedure of on-policy algorithms can be parallel conducted. Therefore, the actual time consuming for a comparable performance between on-policy and off-policy algorithms is almost the same when we have enough sampling *workers*.
-    - The parameters are shared across agents. However, not sharing these parameters will not incur any problems. On the opposite, partly sharing these parameters(e.g., only sharing the critic) can help achieve better performance in some scenarios.
+    - A similar idea of multi-agent sequential update was also discussed in the context of dynamic programming where artificial “in-between” states have to be considered. On the contrary, HAPPO sequential update sceheme is developed based on paper proposed Lemma 1, which does not require any artificial assumptions and hold for any cooperative games
+    - Bertsekas (2019) requires to maintain a fixed order of updates that is pre-defined for the task, whereas the order in MAPPO is randomised at each iteration, which also offers desirable convergence property
 
 
 Mathematical Form 
@@ -559,21 +561,32 @@ Critic learning:
 
     \phi_{k+1} = \arg \min_{\phi} \frac{1}{|{\mathcal D}_k| T} \sum_{\tau \in {\mathcal D}_k} \sum_{t=0}^T\left( V_{\phi} (s_t) - \hat{R}_t \right)^2
 
-General Advantage Estimation:
+Initial Advantage Estimation:
 
 .. math::
 
     A_t=\sum_{t=0}^{\infty}(\gamma\lambda)^l\delta_{t+l}^V
 
-
-Policy learning:
+Advantage Estimation if m > 1:
 
 .. math::
 
-    L(s,\mathbf{s}^-, a,\mathbf{a}^-,\theta_k,\theta) = \min\left(
-    \frac{\pi_{\theta}(a|s)}{\pi_{\theta_k}(a|s)}  A^{\pi_{\theta_k}}(s, \mathbf{s}^-,\mathbf{a}^-), \;\;
-    \text{clip}\left(\frac{\pi_{\theta}(a|s)}{\pi_{\theta_k}(a|s)}, 1 - \epsilon, 1+\epsilon \right) A^{\pi_{\theta_k}}(s, \mathbf{s}^-,\mathbf{a}^-)
-    \right),
+\mathbf{M}^{i_{1:m}}(s, \mathbf{a}) = \frac{\bar{\pi}^{i_{1:m-1}}(a^{1:m-1} | s)} {\pi^{i_{1:m-1}}(a^{1:m-1} | s)} \mathbf{M}^{i_{1:m-1}}(s, \mathbf{a})
+
+
+Advantage Estimation for m  = 1:
+
+.. math::
+
+\mathbf{M}^{i_{1}}(s, \mathbf{a}) = \hat{A}_{s, \mathbf{a}}(s, \mathbf{a})
+
+
+the argmax of the PPO-Clip objective:
+
+.. math::
+
+\frac{1}{BT}\sum_{b=1}^{B} \sum_{t=0}^{T}\left[ min\left(  \frac{\pi_{\theta^{i_m}}^{i_m}(a^{i_m} | s)} {\pi_{\theta^{i_m}_{k}}^{i_m}(a^{i_m} | s)} M^{i_{1:m}}(s|a), clip\left( \frac{\pi_{\theta^{i_m}}^{i_m}(a^{i_m} | s)} {\pi_{\theta^{i_m}_{k}}^{i_m}(a^{i_m} | s)}, 1 \pm \epsilon \right)\right)M^{i_{1:m}}(s|a)\right]
+
 
 Here
 :math:`{\mathcal D}` is the collected trajectories.
@@ -589,20 +602,19 @@ Here
 :math:`\epsilon` is a hyperparameter controlling how far away the new policy is allowed to go from the old.
 :math:`V_{\phi}` is the critic value function.
 :math:`\pi_{\theta}` is the policy net.
-
-
+:math:`B` is batch size
+:math:`T` is steps per episode
 
 
 Implementation
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-We use vanilla PPO implementation of RLlib in IPPO. The only exception is we rewrite the SGD iteration logic.
-The differences can be found in
+We use vanilla PPO implementation of RLlib in IPPO. And for sequentially updating, we add two components:
 
-    - ``MultiGPUTrainOneStep``
-    - ``learn_on_loaded_batch``
+ - ``add_opponent_information_and_critical_vf``
+ - ``happo_surrogate_loss``
 
-Based on IPPO, we add centralized modules to implement MAPPO.
+Based on IPPO, we add centralized modules to implement HAPPO.
 The main differences are:
 
     - ``centralized_critic_postprocessing``
@@ -612,13 +624,13 @@ The main differences are:
 
 Key hyperparameter location:
 
-- ``marl/algos/hyperparams/common/ppo``
-- ``marl/algos/hyperparams/fintuned/env/ppo``
+- ``marl/algos/hyperparams/common/happo``
+- ``marl/algos/hyperparams/fintuned/env/happo``
 
 Usage & Limitation
 ^^^^^^^^^^^^^^^^^^^^^^
 
-IPPO in *MARLlib* is applicable for
+HAPPO in *MARLlib* is applicable for
 
 - continues control tasks
 - discrete control tasks
@@ -626,7 +638,7 @@ IPPO in *MARLlib* is applicable for
 
 .. code-block:: shell
 
-    python marl/main.py --algo_config=ppo --finetuned --env-config=smac with env_args.map_name=3m
+    python marl/main.py --algo_config=happo --finetuned --env-config=smac with env_args.map_name=3m
 
 ---------------------
 
