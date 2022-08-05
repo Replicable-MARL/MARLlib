@@ -487,7 +487,10 @@ Workflow
 
 In HAPPO, each agent has an individual policy. Each agent is accessible to its self observation. And there is a global V-Value network using the centralized critic value function to calculate the GAE and conduct the PPO critic learning procedure.
 
-What the different of the HAPPO and MAPPO is that HAPPO would update each policy sequentially. The `advantage value` of each policy updated iteration $M_i$ is computed based on the importance sampling by $M_{i-1}$, excepted the first round, which $M_o$ is assigned by the current agent's `advantage` directly.
+What the different of the HAPPO and MAPPO is that HAPPO would update each policy sequentially. The `advantage value` of each policy updated iteration
+
+:math:`M_i` is computed based on the importance sampling by
+:math:`M_{i-1}`, excepted the first round, which $M_o$ is assigned by the current agent's `advantage` directly.
 
 .. figure:: ../images/mappo.png
     :width: 600
