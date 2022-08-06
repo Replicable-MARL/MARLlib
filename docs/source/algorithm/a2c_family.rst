@@ -5,43 +5,87 @@ Advanced Actor Critic Family
     :local:
     :depth: 3
 
-Read List
--------------
+---------------------
 
-- `High-Dimensional Continuous Control Using Generalized Advantage Estimation <https://arxiv.org/abs/1506.02438>`_
-- `Proximal Policy Optimization Algorithms <https://arxiv.org/abs/1707.06347>`_
-- `Is Independent Learning All You Need in the StarCraft Multi-Agent Challenge? <https://arxiv.org/abs/2011.09533>`_
-- `The Surprising Effectiveness of A2C in Cooperative, Multi-Agent Games <https://arxiv.org/abs/2103.01955>`_
+.. _A2C:
 
-
-A recap of Proximal Policy Optimization
+Advanced Actor-Critic: A Recap
 -----------------------------------------------
 
-Preliminary
-^^^^^^^^^^^^^^^
+**Preliminary**:
 
-Algorithm Insights
-^^^^^^^^^^^^^^^^^^^^^^^
+- Vanilla Policy Gradient (PG)
+- Monte Carlo Policy Gradients (REINFORCE)
 
-Math Formulation
-^^^^^^^^^^^^^^^^^^
+Why do we need an advanced actor-critic (A2C)? Before A2C, we already have some policy gradient method variants like REINFORCE. However, these methods are not stable in training. This is due to
+the large variance in the reward signal, which is used to update the policy. A solution to reduce this variance is introducing a baseline for it. A2C adopts a critic value function conditioned on **state**
+as the baseline. And compute the difference between the state value and Q value as the **advantage**.
 
+.. math::
+
+    A(s_t,a_t) = Q(s_t,a_t) - V(s_t)
+
+Now we need two functions :math:`Q` and :math:`V` to estimate :math:`A`. Luckily we can do some transformations for the above equation.
+Recall the bellman optimality equation:
+
+.. math::
+
+    Q(s_t,a_t)  = r_{t+1} + \lambda V(s_{t+1})
+
+:math:`A` can be written as:
+
+    A_t = r_{t+1} + \lambda V(s_{t+1}) - V(s_t)
+
+In this way, only :math:`V` is needed to estimate :math:`A`
+Finally we use policy gradient to update the :math:`V` function by:
+
+.. math::
+
+    \nabla_\theta J(\theta) \sim \sum_{t=0}^{T-1}\nabla_\theta \log\pi_{\theta}(a_t|s_t)A_t
+
+The only thing left is how to update the parameters of the critic function:
+
+.. math::
+
+    \phi_{k+1} = \arg \min_{\phi} \frac{1}{|{\mathcal D}_k| T} \sum_{\tau \in {\mathcal D}_k} \sum_{t=0}^T\left( V_{\phi} (s_t) - \hat{R}_t \right)^2
+
+
+Here
+:math:`V` is the critic function.
+:math:`\phi` is the parameters of the critic function.
+:math:`{\mathcal D}` is the collected trajectories.
+:math:`R` is the rewards-to-go.
+:math:`\tau` is the trajectory.
+
+
+---------------------
+
+.. _IA2C:
 
 IA2C: multi-agent version of A2C
 -----------------------------------------------------
 
-.. admonition:: Quick Facts
 
-    - Independent proximal policy optimization is a natural extension of standard single-agent proximal policy optimization in multi-agent settings.
-    - The sampling/training pipeline is the same when we stand at the view of a single agent when comparing A2C and IA2C.
-    - Agent architecture of IA2C consists of two modules: policy network and critic network.
-    - IA2C applies to cooperative, competitive, and mixed task modes.
+- Independent advanced actor-critic (IA2C) is a natural extension of standard advanced actor-critic (A2C) in multi-agent settings.
+- The sampling/training pipeline of IA2C is the same as A2C when we stand at the view of a single agent.
+- Agent architecture of IA2C consists of two modules: ``policy`` and ``critic``.
+- IA2C applies to cooperative, competitive, and mixed task modes.
 
-Preliminary
+**Preliminary**:
+
+- :ref:`A2C`
+
+Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Vanilla Policy Gradient (PG) & Trust Region Policy Optimization (TRPO) & General Advantage Estimation (GAE)
+In IA2C, each agent follows a standard A2C sampling/training pipeline. Therefore, IA2C is a general baseline for all MARL tasks with robust performance.
+Note that buffer and agent models can be shared or separately trained across agents. And this applies to all algorithms in the A2C family.
 
+.. figure:: ../images/ia2c.png
+    :width: 600
+    :align: center
+
+    Independent Advanced Actor-Critic (IA2C)
 
 Characteristic
 ^^^^^^^^^^^^^^^
@@ -75,120 +119,80 @@ taxonomy label
      - ``stochastic``
      - ``independent learning``
 
-derived algorithm
 
-.. list-table::
-   :widths: 25 25 25
-   :header-rows: 0
-
-   * - :ref:`MAA2C`
-     - :ref:`HAA2C`
-     - :ref:`VDA2C`
-
-
-Algorithm Insights
+Insights
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-A2C is a first-order optimization that simplifies its implementation. Similar to TRPO objective function, It defines the probability ratio between the new policy and old policy as :math:`\frac{\pi_{\theta}(a|s)}{\pi_{\theta_k}(a|s)}`.
-Instead of adding complicated KL constraints, A2C imposes this policy ratio to stay within a small interval between :math:`1-\epsilon` and :math:`1+\epsilon`.
-The objective function of A2C takes the minimum value between the original value and the clipped value.
 
-There are two primary variants of A2C: A2C-Penalty and A2C-Clip. Here we only give the formulation of A2C-Clip, which is more commonly used in practice.
+IA2C is the simplest multi-agent version of standard A2C. Each agent is now an A2C-based sampler and learner.
+IA2C does not need information sharing, including real/sampled data and predicted data.
+While knowledge sharing across agents is optional in IA2C.
 
-Math Formulation
+.. admonition:: Information Sharing
+
+    In multi-agent learning, the concept of information sharing is not well defined and may confuse.
+    Here we try to clarify this by categorizing the type of information sharing into three.
+
+    - real/sampled data: observation, action, etc.
+    - predicted data: Q/critic value, message for communication, etc.
+    - knowledge: experience replay buffer, model parameters, etc.
+
+    Knowledge-level information sharing is usually excluded from information sharing and is only seen as a trick.
+    However, recent works find it is essential for good performance. Here, we include knowledge sharing as part of the information sharing.
+
+Mathematical Form
 ^^^^^^^^^^^^^^^^^^
 
-Critic learning:
+Standing at the view of a single agent, the mathematical formulation of IA2C is the same as :ref:`A2C`.
 
-.. math::
+Note that in multi-agent settings, all the agent models can be shared, including:
 
-    \phi_{k+1} = \arg \min_{\phi} \frac{1}{|{\mathcal D}_k| T} \sum_{\tau \in {\mathcal D}_k} \sum_{t=0}^T\left( V_{\phi} (s_t) - \hat{R}_t \right)^2
-
-General Advantage Estimation:
-
-.. math::
-
-    A_t=\sum_{t=0}^{\infty}(\gamma\lambda)^l\delta_{t+l}^V
+- :math:`V_{\phi}` the critic net.
+- :math:`\pi_{\theta}` the policy net.
 
 
-Policy learning:
-
-.. math::
-
-    L(s,a,\theta_k,\theta) = \min\left(
-    \frac{\pi_{\theta}(a|s)}{\pi_{\theta_k}(a|s)}  A^{\pi_{\theta_k}}(s,a), \;\;
-    \text{clip}\left(\frac{\pi_{\theta}(a|s)}{\pi_{\theta_k}(a|s)}, 1 - \epsilon, 1+\epsilon \right) A^{\pi_{\theta_k}}(s,a)
-    \right),
-
-Here
-:math:`{\mathcal D}` is the collected trajectories.
-:math:`R` is the rewards-to-go.
-:math:`\tau` is the trajectory.
-:math:`V_{\phi}` is the critic function.
-:math:`A` is the advantage.
-:math:`\gamma` is discount value.
-:math:`\lambda` is the weight value of GAE.
-:math:`a` is the action.
-:math:`s` is the observation/state.
-:math:`\epsilon` is a hyperparameter controlling how far away the new policy is allowed to go from the old.
-:math:`\pi_{\theta}` is the policy net.
-
-
-Workflow
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-In IA2C, each agent follows a standard A2C sampling/training pipeline. Therefore, IA2C is a general baseline for all MARL tasks with robust performance.
-
-.. figure:: ../images/ippo.png
-    :width: 600
-    :align: center
-
-    Independent Proximal Policy Optimization (IA2C)
 
 Implementation
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-We use vanilla A2C implementation of RLlib in IA2C. The only exception is we rewrite the SGD iteration logic.
-The differences can be found in
-
-    - ``MultiGPUTrainOneStep``
-    - ``learn_on_loaded_batch``
-
+We use vanilla A2C implementation of RLlib in IA2C.
 
 Key hyperparameter location:
 
-- ``marl/algos/hyperparams/common/ppo``
-- ``marl/algos/hyperparams/fintuned/env/ppo``
-
-Usage & Limitation
-^^^^^^^^^^^^^^^^^^^^^^
-
-IA2C in *MARLlib* is suitable for
-
-- continues control tasks
-- discrete control tasks
-- any task mode
-
-.. code-block:: shell
-
-    python marl/main.py --algo_config=ppo --finetuned --env-config=smac with env_args.map_name=3m
+- ``marl/algos/hyperparams/common/a2c``
+- ``marl/algos/hyperparams/fintuned/env/a2c``
 
 
+
+---------------------
+
+.. _MAA2C:
 
 MAA2C: A2C agent with a centralized critic
 -----------------------------------------------------
 
-.. admonition:: Quick Facts
 
-    - Multi-agent proximal policy optimization (MAA2C) is one of the centralized extensions of :ref:`IA2C`.
-    - Agent architecture of MAA2C consists of two modules: policy network and critic network.
-    - MAA2C outperforms other MARL algorithms in most multi-agent tasks, especially when agents are homogeneous.
-    - MAA2C is proposed to solve cooperative tasks but is still applicable to collaborative, competitive, and mixed tasks.
+- Multi-agent advanced actor-critic (MAA2C) is one of the extended versions of :ref:`IA2C`.
+- Agent architecture of MAA2C consists of two models: ``policy`` and ``critic``.
+- MAA2C needs one stage of information sharing on real/sampled data.
+- MAA2C is applicable to collaborative, competitive, and mixed tasks.
 
-Preliminary
+**Preliminary**:
+
+- :ref:`IA2C`
+
+Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-:ref:`IA2C`
+In the sampling stage, agents share information with others. The information includes others' observations and predicted actions. After collecting the necessary information from other agents,
+all agents follow the standard A2C training pipeline, except using the centralized critic value function to calculate the GAE and conduct the A2C critic learning procedure.
+
+.. figure:: ../images/maa2c.png
+    :width: 600
+    :align: center
+
+    Multi-agent Advanced Actor-Critic (MAA2C)
+
 
 Characteristic
 ^^^^^^^^^^^^^^^
@@ -222,142 +226,104 @@ taxonomy label
      - ``stochastic``
      - ``centralized critic``
 
-inherited algorithm
-
-.. list-table::
-   :widths: 25
-   :header-rows: 0
-
-   * - :ref:`IA2C`
 
 
-
-
-Algorithm Insights
+Insights
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-On-policy reinforcement learning algorithm is less utilized than off-policy learning algorithms in multi-agent settings.
-This is often due to the belief that on-policy methods are less sample efficient than their off-policy counterparts in multi-agent problems.
-The MAA2C paper proves that:
-
-#. On-policy algorithms can achieve comparable performance to various off-policy methods.
-#. MAA2C is a robust MARL algorithm for diverse cooperative tasks and can outperform SOTA off-policy methods in more challenging scenarios.
-#. Formulating the input to the centralized value function is crucial for the final performance.
-#. Tricks in MAA2C training are essential.
-
-.. admonition:: Some Interesting Facts
-
-    - MAA2C paper is done in cooperative settings. Nevertheless, it can be directly applied to competitive and mixed task modes. Moreover, the performance is still good.
-    - MAA2C paper adopts some other tricks like death masking and clipping ratio. But compared to the input formulation, these tricks' impact is not so significant.
-    - Sampling procedure of on-policy algorithms can be parallel conducted. Therefore, the actual time consuming for a comparable performance between on-policy and off-policy algorithms is almost the same when we have enough sampling *workers*.
-    - The parameters are shared across agents. However, not sharing these parameters will not incur any problems. On the opposite, partly sharing these parameters(e.g., only sharing the critic) can help achieve better performance in some scenarios.
+Centralized critic enables MAPPO to gain a strong performance in MARL. The same architecture can also be applied to IA2C.
+In practice, MAA2C can also perform well in most scenarios.
+There is no official MAA2C paper, and we implement MAA2C in the same pipeline as MAPPO but with an advanced actor-critic loss.
 
 
-Math Formulation
+Mathematical Form
 ^^^^^^^^^^^^^^^^^^
+
+MAA2C needs information sharing across agents. Critic learning utilizes self-observation and other agents' information,
+including observation and actions. Here we bold the symbol (e.g., :math:`s` to :math:`\mathbf{s}`) to indicate that more than one agent information is contained.
 
 Critic learning:
 
 .. math::
 
-    \phi_{k+1} = \arg \min_{\phi} \frac{1}{|{\mathcal D}_k| T} \sum_{\tau \in {\mathcal D}_k} \sum_{t=0}^T\left( V_{\phi} (s_t) - \hat{R}_t \right)^2
+    \phi_{k+1} = \arg \min_{\phi} \frac{1}{|{\mathcal D}_k| T} \sum_{\tau \in {\mathcal D}_k} \sum_{t=0}^T\left( V_{\phi} (o_t,s_t,\mathbf{a_t^-}) - \hat{R}_t \right)^2
 
-General Advantage Estimation:
+Advantage Estimation:
 
 .. math::
 
-    A_t=\sum_{t=0}^{\infty}(\gamma\lambda)^l\delta_{t+l}^V
-
+    A_t = r_{t+1} + \lambda V_{\phi} (o_{t+1},s_{t+1},\mathbf{a_{t+1}^-}) - V_{\phi} (o_t,s_t,\mathbf{a_t^-})
 
 Policy learning:
 
 .. math::
 
-    L(s,\mathbf{s}^-, a,\mathbf{a}^-,\theta_k,\theta) = \min\left(
-    \frac{\pi_{\theta}(a|s)}{\pi_{\theta_k}(a|s)}  A^{\pi_{\theta_k}}(s, \mathbf{s}^-,\mathbf{a}^-), \;\;
-    \text{clip}\left(\frac{\pi_{\theta}(a|s)}{\pi_{\theta_k}(a|s)}, 1 - \epsilon, 1+\epsilon \right) A^{\pi_{\theta_k}}(s, \mathbf{s}^-,\mathbf{a}^-)
-    \right),
+    \nabla_\theta J(\theta) \sim \sum_{t=0}^{T-1}\nabla_\theta \log\pi_{\theta}(a_t|s_t)A_t
 
 Here
-:math:`{\mathcal D}` is the collected trajectories.
+:math:`\mathcal D` is the collected trajectories that can be shared across agents.
 :math:`R` is the rewards-to-go.
 :math:`\tau` is the trajectory.
 :math:`A` is the advantage.
 :math:`\gamma` is discount value.
 :math:`\lambda` is the weight value of GAE.
+:math:`o` is the current agent observation.
 :math:`a` is the current agent action.
 :math:`\mathbf{a}^-` is the action set of all agents, except the current agent.
 :math:`s` is the current agent observation/state.
 :math:`\mathbf{s}^-` is the observation/state set of all agents, except the current agent.
 :math:`\epsilon` is a hyperparameter controlling how far away the new policy is allowed to go from the old.
-:math:`V_{\phi}` is the critic value function.
-:math:`\pi_{\theta}` is the policy net.
-
-
-Workflow
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-In the sampling stage, agents share information with others. The information includes others' observations and predicted actions. After collecting the necessary information from other agents,
-all agents follow the standard A2C training pipeline, except using the centralized critic value function to calculate the GAE and conduct the A2C critic learning procedure.
-
-.. figure:: ../images/mappo.png
-    :width: 600
-    :align: center
-
-    Multi-agent Proximal Policy Optimization (MAA2C)
+:math:`V_{\phi}` is the critic value function, which can be shared across agents.
+:math:`\pi_{\theta}` is the policy net, which can be shared across agents.
 
 Implementation
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-We use vanilla A2C implementation of RLlib in IA2C. The only exception is we rewrite the SGD iteration logic.
-The differences can be found in
-
-    - ``MultiGPUTrainOneStep``
-    - ``learn_on_loaded_batch``
-
 Based on IA2C, we add centralized modules to implement MAA2C.
-The main differences are:
+The details can be found in:
 
     - ``centralized_critic_postprocessing``
-    - ``central_critic_ppo_loss``
+    - ``central_critic_a2c_loss``
     - ``CC_RNN``
 
 
 Key hyperparameter location:
 
-- ``marl/algos/hyperparams/common/ppo``
-- ``marl/algos/hyperparams/fintuned/env/ppo``
+- ``marl/algos/hyperparams/common/maa2c``
+- ``marl/algos/hyperparams/fintuned/env/maa2c``
 
-Usage & Limitation
-^^^^^^^^^^^^^^^^^^^^^^
+---------------------
 
-IA2C in *MARLlib* is suitable for
+.. _COMA:
 
-- continues control tasks
-- discrete control tasks
-- any task mode
-
-.. code-block:: shell
-
-    python marl/main.py --algo_config=ppo --finetuned --env-config=smac with env_args.map_name=3m
-
-
-
-
-VDA2C: mixing the critic of a bunch of A2C agents
+COMA: MAA2C with Counterfactual Multi-Agent Policy Gradients
 -----------------------------------------------------
 
-.. admonition:: Quick Facts
 
-    - Multi-agent proximal policy optimization (MAA2C) is one of the centralized extensions of :ref:`IA2C`.
-    - Agent architecture of MAA2C consists of two modules: policy network and critic network.
-    - MAA2C outperforms other MARL algorithms in most multi-agent tasks, especially when agents are homogeneous.
-    - MAA2C is proposed to solve cooperative tasks but is still applicable to collaborative, competitive, and mixed tasks.
+- Counterfactual multi-agent policy gradients (COMA) is based on MAA2C.
+- Agent architecture of COMA consists of two models: ``policy`` and ``critic``.
+- COMA adopts a new credit assignment mechanism that uses a counterfactual baseline to marginalize a single agent’s action's contribution.
+- COMA has a centralized ``critic``, which is the same as MAA2C.
+- COMA needs one stage of information sharing on real/sampled data.
+- COMA is applicable to collaborative, competitive, and mixed tasks.
 
-Preliminary
+**Preliminary**:
+
+- :ref:`IA2C`
+- :ref:`MAA2C`
+
+Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-:ref:`IA2C`
+In the sampling stage, agents share information with others. The information includes others' observations and predicted actions. After collecting the necessary information from other agents,
+all agents follow the A2C training pipeline but use COMA loss to update the policy. The value function (critic) is centralized the same as MAA2C.
+
+.. figure:: ../images/coma.png
+    :width: 600
+    :align: center
+
+    Counterfactual Multi-Agent Policy Gradients (COMA)
+
 
 Characteristic
 ^^^^^^^^^^^^^^^
@@ -365,11 +331,10 @@ Characteristic
 action space
 
 .. list-table::
-   :widths: 25 25
+   :widths: 25
    :header-rows: 0
 
    * - ``discrete``
-     - ``continues``
 
 task mode
 
@@ -391,61 +356,178 @@ taxonomy label
      - ``stochastic``
      - ``centralized critic``
 
-inherited algorithm
-
-.. list-table::
-   :widths: 25
-   :header-rows: 0
-
-   * - :ref:`IA2C`
 
 
-
-
-Algorithm Insights
+Insights
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-On-policy reinforcement learning algorithm is less utilized than off-policy learning algorithms in multi-agent settings.
-This is often due to the belief that on-policy methods are less sample efficient than their off-policy counterparts in multi-agent problems.
-The MAA2C paper proves that:
+Efficiently learning decentralized policies is an essential demand for modern AI systems. However, assigning credit to an agent becomes a significant challenge when only one global reward exists.
+COMA provides one solution for this problem:
 
-#. On-policy algorithms can achieve comparable performance to various off-policy methods.
-#. MAA2C is a robust MARL algorithm for diverse cooperative tasks and can outperform SOTA off-policy methods in more challenging scenarios.
-#. Formulating the input to the centralized value function is crucial for the final performance.
-#. Tricks in MAA2C training are essential.
+#. COMA uses a counterfactual baseline that marginalizes a single agent’s action while keeping the other agents’ actions fixed.
+#. COMA develops a centralized critic that allows the counterfactual baseline to be computed efficiently in a single forward pass.
+#. COMA significantly improves average performance over other multi-agent actor-critic methods under decentralized execution and partial observability settings.
 
 .. admonition:: Some Interesting Facts
 
-    - MAA2C paper is done in cooperative settings. Nevertheless, it can be directly applied to competitive and mixed task modes. Moreover, the performance is still good.
-    - MAA2C paper adopts some other tricks like death masking and clipping ratio. But compared to the input formulation, these tricks' impact is not so significant.
-    - Sampling procedure of on-policy algorithms can be parallel conducted. Therefore, the actual time consuming for a comparable performance between on-policy and off-policy algorithms is almost the same when we have enough sampling *workers*.
-    - The parameters are shared across agents. However, not sharing these parameters will not incur any problems. On the opposite, partly sharing these parameters(e.g., only sharing the critic) can help achieve better performance in some scenarios.
+    - Although COMA is based on stochastic policy gradient methods, it is only evaluated in discrete action space. Extending to continuous action space requires additional tricks on computing critic value (which is not good news for stochastic methods)
+    - In recent years' research, COMA's has been proven to be relatively worse in solving tasks like :ref:`SMAC` and :ref:`MPE` than other on-policy methods, even basic independent actor-critic methods like :ref:`IA2C`.
 
-
-Math Formulation
+Mathematical Form
 ^^^^^^^^^^^^^^^^^^
+
+COMA needs information sharing across agents. Critic learning utilizes self-observation and other agents' information,
+including observation and actions. Here we bold the symbol (e.g., :math:`s` to :math:`\mathbf{s}`) to indicate that more than one agent information is contained.
 
 Critic learning:
 
 .. math::
 
-    \phi_{k+1} = \arg \min_{\phi} \frac{1}{|{\mathcal D}_k| T} \sum_{\tau \in {\mathcal D}_k} \sum_{t=0}^T\left( V_{\phi} (s_t) - \hat{R}_t \right)^2
+    \phi_{k+1} = \arg \min_{\phi} \frac{1}{|{\mathcal D}_k| T} \sum_{\tau \in {\mathcal D}_k} \sum_{t=0}^T\left( Q_{\phi} (s_t, a_t) - \hat{R}_t \right)^2
 
-General Advantage Estimation:
+Marginalized Advantage Estimation:
 
 .. math::
 
-    A_t=\sum_{t=0}^{\infty}(\gamma\lambda)^l\delta_{t+l}^V
+    A(s, \mathbf{s}^-, a, \mathbf{a}^-) = Q(s, \mathbf{s}^-, a, \mathbf{a}^-) - \sum_{a'} \pi(a' \vert \tau) Q(s,(\mathbf{a}^{-},a'))
 
 
 Policy learning:
 
 .. math::
 
-    L(s,\mathbf{s}^-, a,\mathbf{a}^-,\theta_k,\theta) = \min\left(
-    \frac{\pi_{\theta}(a|s)}{\pi_{\theta_k}(a|s)}  A^{\pi_{\theta_k}}(s, \mathbf{s}^-,\mathbf{a}^-), \;\;
-    \text{clip}\left(\frac{\pi_{\theta}(a|s)}{\pi_{\theta_k}(a|s)}, 1 - \epsilon, 1+\epsilon \right) A^{\pi_{\theta_k}}(s, \mathbf{s}^-,\mathbf{a}^-)
-    \right),
+    L(s,\mathbf{s}^-,a, \mathbf{a}^-, \theta)=\log\pi_\theta(a|s)A(s, \mathbf{s}^-, a, \mathbf{a}^-)
+
+Here
+:math:`{\mathcal D}` is the collected trajectories.
+:math:`R` is the rewards-to-go.
+:math:`\tau` is the trajectory.
+:math:`A` is the advantage.
+:math:`a` is the current agent action.
+:math:`\mathbf{a}^-` is the action set of all agents, except the current agent.
+:math:`s` is the current agent observation/state.
+:math:`\mathbf{s}^-` is the observation/state set of all agents, except the current agent.
+:math:`\epsilon` is a hyperparameter controlling how far away the new policy is allowed to go from the old.
+:math:`Q_{\phi}` is the Q value function.
+:math:`\pi_{\theta}` is the policy net.
+
+Implementation
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Based on MAA2C, we add the COMA loss function.
+The details can be found in:
+
+    - ``centralized_critic_postprocessing``
+    - ``central_critic_coma_loss``
+    - ``CC_RNN``
+
+
+Key hyperparameter location:
+
+- ``marl/algos/hyperparams/common/coma``
+- ``marl/algos/hyperparams/fintuned/env/coma``
+
+---------------------
+
+.. _VDA2C:
+
+
+VDA2C: mixing a bunch of A2C agents' critics
+-----------------------------------------------------
+
+- Value decomposition advanced actor-critic (VDA2C) is one of the extensions of :ref:`IA2C`.
+- Agent architecture of VDA2C consists of three modules: ``policy``, ``critic``, and ``mixer``.
+- VDA2C is the algorithm that combines QMIX and IA2C.
+- VDA2C needs one stage of information sharing on real/sampled data and predicted data.
+- VDA2C is proposed to solve cooperative tasks only.
+
+**Preliminary**:
+
+- :ref:`IA2C`
+- :ref:`QMIX`
+
+Workflow
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+In the sampling stage, agents share information with others. The information includes others' observations and predicted critic value. After collecting the necessary information from other agents,
+all agents follow the standard A2C training pipeline, except for using the mixed critic value to calculate the GAE and conduct the A2C critic learning procedure.
+
+.. figure:: ../images/vda2c.png
+    :width: 600
+    :align: center
+
+    Value Decomposition Advanced Actor-Critic (VDA2C)
+
+Characteristic
+^^^^^^^^^^^^^^^
+
+action space
+
+.. list-table::
+   :widths: 25 25
+   :header-rows: 0
+
+   * - ``discrete``
+     - ``continues``
+
+task mode
+
+.. list-table::
+   :widths: 25
+   :header-rows: 0
+
+   * - ``cooperative``
+
+
+taxonomy label
+
+.. list-table::
+   :widths: 25 25 25
+   :header-rows: 0
+
+   * - ``on-policy``
+     - ``stochastic``
+     - ``value decomposition``
+
+
+
+Insights
+^^^^^^^^^^^^^^^^^^^^^^^
+
+VDA2C focuses on credit assignment learning, similar to the joint Q learning family. However, compared to the joint Q learning family, VDA2C adopts on-policy learning and mixes the V function instead of the Q function.
+The sampling efficiency of VDA2C is worse than joint Q learning algorithms. VDA2C is applicable for both discrete and continuous control problems.
+
+Mathematical Form
+^^^^^^^^^^^^^^^^^^
+
+VDA2C needs information sharing across agents. Therefore, the critic mixing utilizes both self-observation and other agents' observation.
+Here we bold the symbol (e.g., :math:`o` to :math:`\mathbf{o}`) to indicate that more than one agent information is contained.
+
+
+Critic mixing:
+
+.. math::
+
+    V_{tot}(\mathbf{a}, s;\boldsymbol{\phi},\psi) = g_{\psi}\bigl(s, V_{\phi_1},V_{\phi_2},..,V_{\phi_n} \bigr)
+
+
+Mixed Critic learning:
+
+.. math::
+
+    \phi_{k+1} = \arg \min_{\phi} \frac{1}{|{\mathcal D}_k| T} \sum_{\tau \in {\mathcal D}_k} \sum_{t=0}^T\left( V_{tot} - \hat{R}_t \right)^2
+
+Advantage Estimation:
+
+.. math::
+
+    A_t = r_{t+1} + \lambda V_{tot}^{t+1} - V_{tot}^{t}
+
+Policy learning:
+
+.. math::
+
+    \nabla_\theta J(\theta) \sim \sum_{t=0}^{T-1}\nabla_\theta \log\pi_{\theta}(a_t|s_t)A_t
 
 Here
 :math:`{\mathcal D}` is the collected trajectories.
@@ -453,60 +535,39 @@ Here
 :math:`\tau` is the trajectory.
 :math:`A` is the advantage.
 :math:`\gamma` is discount value.
-:math:`\lambda` is the weight value of GAE.
 :math:`a` is the current agent action.
 :math:`\mathbf{a}^-` is the action set of all agents, except the current agent.
-:math:`s` is the current agent observation/state.
-:math:`\mathbf{s}^-` is the observation/state set of all agents, except the current agent.
-:math:`\epsilon` is a hyperparameter controlling how far away the new policy is allowed to go from the old.
+:math:`s` is the current state.
 :math:`V_{\phi}` is the critic value function.
 :math:`\pi_{\theta}` is the policy net.
+:math:`g_{\psi}` is a mixing network.
 
 
-Workflow
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-In the sampling stage, agents share information with others. The information includes others' observations and predicted actions. After collecting the necessary information from other agents,
-all agents follow the standard A2C training pipeline, except using the centralized critic value function to calculate the GAE and conduct the A2C critic learning procedure.
-
-.. figure:: ../images/mappo.png
-    :width: 600
-    :align: center
-
-    Multi-agent Proximal Policy Optimization (MAA2C)
 
 Implementation
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-We use vanilla A2C implementation of RLlib in IA2C. The only exception is we rewrite the SGD iteration logic.
-The differences can be found in
+Based on IA2C, we add mixing Q modules to implement VDA2C.
+The details can be found in:
 
-    - ``MultiGPUTrainOneStep``
-    - ``learn_on_loaded_batch``
-
-Based on IA2C, we add centralized modules to implement MAA2C.
-The main differences are:
-
-    - ``centralized_critic_postprocessing``
-    - ``central_critic_ppo_loss``
-    - ``CC_RNN``
+    - ``value_mixing_postprocessing``
+    - ``value_mix_actor_critic_loss``
+    - ``VD_RNN``
 
 
 Key hyperparameter location:
 
-- ``marl/algos/hyperparams/common/ppo``
-- ``marl/algos/hyperparams/fintuned/env/ppo``
+- ``marl/algos/hyperparams/common/vda2c``
+- ``marl/algos/hyperparams/fintuned/env/vda2c``
 
-Usage & Limitation
-^^^^^^^^^^^^^^^^^^^^^^
 
-IA2C in *MARLlib* is suitable for
+---------------------
 
-- continues control tasks
-- discrete control tasks
-- any task mode
 
-.. code-block:: shell
+Read List
+-------------
 
-    python marl/main.py --algo_config=ppo --finetuned --env-config=smac with env_args.map_name=3m
-
+- `Advanced Actor-Critic Algorithms <https://arxiv.org/abs/1707.06347>`_
+- `The Surprising Effectiveness of PPO in Cooperative, Multi-Agent Games <https://arxiv.org/abs/2103.01955>`_
+- `Counterfactual Multi-Agent Policy Gradients <https://ojs.aaai.org/index.php/AAAI/article/download/11794/11653>`_
+- `Value-Decomposition Multi-Agent Actor-Critics <https://arxiv.org/abs/2007.12306>`_

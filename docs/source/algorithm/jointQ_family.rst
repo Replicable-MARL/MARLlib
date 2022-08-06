@@ -5,6 +5,7 @@ Joint Q Learning Family
     :local:
     :depth: 3
 
+---------------------
 
 .. _DQN:
 
