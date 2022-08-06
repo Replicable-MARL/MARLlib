@@ -472,10 +472,12 @@ HAPPO: Sequentially updating critic of MAPPO agents
 
 .. admonition:: Quick Facts
 
-    - Heterogeneous-Agent Proximal Policy Optimisation (HAPPO) algorithm is one of the centralized extensions of :ref:`IPPO`.
-    - Agent architecture of HAPPO consists of three modules: policy network and critic network, sequential updating.
-    - HAPPO outperforms other MARL algorithms in most multi-agent tasks, especially when agents are heterogeneous.
-    - HAPPO is proposed to solve cooperative, collaborative, competitive, and mixed tasks.
+    - Heterogeneous-Agent Proximal Policy Optimisation (HAPPO) algorithm is based on :ref:`MAPPO`.
+    - Agent architecture of HAPPO consists of three modules: ``policy``, ``critic``, and ``sequential updating``.
+    - In HAPPO, agents have non-shared ``policy`` and shared ``critic``.
+    - HAPPO is proposed to solve cooperative tasks.
+    - HAPPO outperforms other cooperative MARL algorithms in most multi-agent tasks, especially when agents are heterogeneous.
+
 
 Preliminary
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -485,15 +487,13 @@ Preliminary
 Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-In HAPPO, each agent has an individual policy. Each agent is accessible to its self observation. And there is a global V-Value network using the centralized critic value function to calculate the GAE and conduct the PPO critic learning procedure.
-
-What the different of the HAPPO and MAPPO is that HAPPO would update each policy sequentially. The `advantage value` of each policy updated iteration
-
-:math:`M_i` is computed based on the importance sampling by
+In the sampling stage, agents share information with others. The information includes others' observations and predicted actions. After collecting the necessary information from other agents,
+all agents follow the standard PPO training pipeline, except HAPPO would update each policy sequentially. The `advantage value` of each policy updated iteration
+:math:`M_i` is computed based on the importance of sampling by
 :math:`M_{i-1}`, excepted the first round, which
-:math:`M_o` is assigned by the current agent's `advantage` directly.
+:math:`M_o` is directly assigned by the current agent's `advantage`.
 
-.. figure:: ../images/mappo.png
+.. figure:: ../images/happo.png
     :width: 600
     :align: center
 
@@ -538,25 +538,25 @@ taxonomy label
 Insights
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-The previous methods that hold the sharing parameters for different agents, or lack the essential theoretical property of trust region learning, which is the monotonic improvement guarantee.
-This could lead to several issues when deal with MARL problems. Such as:
+The previous methods either hold the sharing parameters for different agents or lack the essential theoretical property of trust region learning, which is the monotonic improvement guarantee.
+This could lead to several issues when dealing with MARL problems. Such as:
 
-#. If share the parameters, the methods could not apply to the occasions that different agents observe different dimension
-#. Parameters share could suffer from an exponentially-worse suboptimal outcome.
+#. If the parameters have to be shared, the methods could not apply to the occasions that different agents observe different dimensions.
+#. Sharing parameters could suffer from an exponentially-worse suboptimal outcome.
 #. although IPPO/MAPPO can be practically applied in a non-parameter sharing way, it still lacks the essential theoretical property of trust region learning, which is the monotonic improvement guarantee.
 
 The HAPPO paper proves that for Heterogeneous-Agent:
 
 #. Theoretically-justified trust region learning framework in MARL.
-#. HAPPO adopts the sequential update scheme, which saves the cost of maintaining a centralised critic for each agent in CTDE( centralised training with decentralised execution).
+#. HAPPO adopts the sequential update scheme, which saves the cost of maintaining a centralized critic for each agent in CTDE(centralized training with decentralized execution).
 
 .. admonition:: Some Interesting Facts
 
-    - A similar idea of multi-agent sequential update was also discussed in the context of dynamic programming where artificial “in-between” states have to be considered. On the contrary, HAPPO sequential update sceheme is developed based on paper proposed Lemma 1, which does not require any artificial assumptions and hold for any cooperative games
-    - Bertsekas (2019) requires to maintain a fixed order of updates that is pre-defined for the task, whereas the order in MAPPO is randomised at each iteration, which also offers desirable convergence property
+    - A similar idea of the multi-agent sequential update was also discussed in dynamic programming, where artificial “in-between” states must be considered. On the contrary, HAPPO sequential update scheme is developed based on the paper proposed Lemma 1, which does not require any artificial assumptions and holds for any cooperative games
+    - Bertsekas (2019) requires maintaining a fixed order of updates that is pre-defined for the task, whereas the order in MAPPO is randomised at each iteration, which also offers desirable convergence property
 
 
-Mathematical Form 
+Mathematical Form
 ^^^^^^^^^^^^^^^^^^
 
 Critic learning:
@@ -585,7 +585,7 @@ Advantage Estimation for m  = 1:
     \mathbf{M}^{i_{1}}(s, \mathbf{a}) = \hat{A}_{s, \mathbf{a}}(s, \mathbf{a})
 
 
-the argmax of the PPO-Clip objective:
+The argmax of the PPO-Clip objective:
 
 .. math::
 
@@ -613,17 +613,12 @@ Here
 Implementation
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-We use vanilla PPO implementation of RLlib in IPPO. And for sequentially updating, we add two components:
+Based on MAPPO, we add three components to implement HAPPO.
+The details can be found in:
 
- - ``add_opponent_information_and_critical_vf``
- - ``happo_surrogate_loss``
-
-Based on IPPO, we add centralized modules to implement HAPPO.
-The main differences are:
-
-    - ``centralized_critic_postprocessing``
-    - ``central_critic_ppo_loss``
-    - ``CC_RNN``
+- ``add_opponent_information_and_critical_vf``
+- ``happo_surrogate_loss``
+- ``add_all_agents_gae``
 
 
 Key hyperparameter location:
