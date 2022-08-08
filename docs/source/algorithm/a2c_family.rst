@@ -67,11 +67,11 @@ Here
 IA2C: multi-agent version of A2C
 -----------------------------------------------------
 
+.. admonition:: Quick Facts
 
-- Independent advanced actor-critic (IA2C) is a natural extension of standard advanced actor-critic (A2C) in multi-agent settings.
-- The sampling/training pipeline of IA2C is the same as A2C when we stand at the view of a single agent.
-- Agent architecture of IA2C consists of two modules: ``policy`` and ``critic``.
-- IA2C applies to cooperative, competitive, and mixed task modes.
+    - Independent advanced actor-critic (IA2C) is a natural extension of standard advanced actor-critic (A2C) in multi-agent settings.
+    - Agent architecture of IA2C consists of two modules: ``policy`` and ``critic``.
+    - IA2C applies to cooperative, competitive, and mixed task modes.
 
 **Preliminary**:
 
@@ -171,9 +171,8 @@ Policy learning: computing the policy gradient using estimated advantage to upda
 
 Note that in multi-agent settings, all the agent models can be shared, including:
 
-- :math:`V_{\phi}` the critic net.
-- :math:`\pi_{\theta}` the policy net.
-- :math:`o` the local observation.
+- value function :math:`V_{\phi}`.
+- policy function :math:`\pi_{\theta}`.
 
 
 Implementation
@@ -195,11 +194,11 @@ Key hyperparameter location:
 MAA2C: A2C agent with a centralized critic
 -----------------------------------------------------
 
+.. admonition:: Quick Facts
 
-- Multi-agent advanced actor-critic (MAA2C) is one of the extended versions of :ref:`IA2C`.
-- Agent architecture of MAA2C consists of two models: ``policy`` and ``critic``.
-- MAA2C needs one stage of information sharing on real/sampled data.
-- MAA2C is applicable to collaborative, competitive, and mixed tasks.
+    - Multi-agent advanced actor-critic (MAA2C) is one of the extended versions of :ref:`IA2C`.
+    - Agent architecture of MAA2C consists of two models: ``policy`` and ``critic``.
+    - MAA2C is applicable to collaborative, competitive, and mixed tasks.
 
 **Preliminary**:
 
@@ -321,13 +320,12 @@ Key hyperparameter location:
 COMA: MAA2C with Counterfactual Multi-Agent Policy Gradients
 -----------------------------------------------------
 
+.. admonition:: Quick Facts
 
-- Counterfactual multi-agent policy gradients (COMA) is based on MAA2C.
-- Agent architecture of COMA consists of two models: ``policy`` and ``Q``.
-- COMA adopts a new credit assignment mechanism that uses a counterfactual baseline to marginalize a single agent’s action's contribution.
-- COMA has a centralized ``Q``, which is similar to :ref:`MAA2C`.
-- COMA needs one stage of information sharing on real/sampled data.
-- COMA is applicable to collaborative, competitive, and mixed tasks.
+    - Counterfactual multi-agent policy gradients (COMA) is based on MAA2C.
+    - Agent architecture of COMA consists of two models: ``policy`` and ``Q``.
+    - COMA adopts a counterfactual baseline to marginalize a single agent’s action's contribution.
+    - COMA is applicable to collaborative, competitive, and mixed tasks.
 
 **Preliminary**:
 
@@ -390,7 +388,7 @@ COMA provides one solution for this problem:
 #. COMA develops a centralized Q that allows the counterfactual baseline to be computed efficiently in a single forward pass.
 #. COMA significantly improves average performance over other multi-agent actor-critic methods under decentralized execution and partial observability settings.
 
-.. admonition:: Some Interesting Facts
+.. admonition:: You Should Know
 
     - Although COMA is based on stochastic policy gradient methods, it is only evaluated in discrete action space. Extending to continuous action space requires additional tricks on computing critic value (which is not good news for stochastic methods)
     - In recent years' research, COMA's has been proven to be relatively worse in solving tasks like :ref:`SMAC` and :ref:`MPE` than other on-policy methods, even basic independent methods like :ref:`IA2C`.
@@ -456,11 +454,11 @@ Key hyperparameter location:
 VDA2C: mixing a bunch of A2C agents' critics
 -----------------------------------------------------
 
-- Value decomposition advanced actor-critic (VDA2C) is one of the extensions of :ref:`IA2C`.
-- Agent architecture of VDA2C consists of three modules: ``policy``, ``critic``, and ``mixer``.
-- VDA2C is the algorithm that combines QMIX and IA2C.
-- VDA2C needs one stage of information sharing on real/sampled data and predicted data.
-- VDA2C is proposed to solve cooperative tasks only.
+.. admonition:: Quick Facts
+
+    - Value decomposition advanced actor-critic (VDA2C) is one of the extensions of :ref:`IA2C`.
+    - Agent architecture of VDA2C consists of three modules: ``policy``, ``critic``, and ``mixer``.
+    - VDA2C is proposed to solve cooperative tasks only.
 
 **Preliminary**:
 

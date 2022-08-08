@@ -70,11 +70,11 @@ Here
 IPPO: multi-agent version of PPO
 -----------------------------------------------------
 
+.. admonition:: Quick Facts
 
-- Independent proximal policy optimization (IPPO) is a natural extension of standard proximal policy optimization (PPO) in multi-agent settings.
-- The sampling/training pipeline of IPPO is the same as PPO when we stand at the view of a single agent.
-- Agent architecture of IPPO consists of two modules: ``policy`` and ``critic``.
-- IPPO applies to cooperative, competitive, and mixed task modes.
+    - Independent proximal policy optimization (IPPO) is a natural extension of standard proximal policy optimization (PPO) in multi-agent settings.
+    - Agent architecture of IPPO consists of two modules: ``policy`` and ``critic``.
+    - IPPO applies to cooperative, competitive, and mixed task modes.
 
 **Preliminary**:
 
@@ -189,8 +189,8 @@ Policy learning: computing the policy gradient using estimated advantage to upda
 
 Note that in multi-agent settings, all the agent models can be shared, including:
 
-- :math:`V_{\phi}` the critic function.
-- :math:`\pi_{\theta}` the policy function.
+- critic function :math:`V_{\phi}`.
+- policy function :math:`\pi_{\theta}`.
 
 
 
@@ -217,11 +217,11 @@ Key hyperparameter location:
 MAPPO: PPO agent with a centralized critic
 -----------------------------------------------------
 
+.. admonition:: Quick Facts
 
-- Multi-agent proximal policy optimization (MAPPO) is one of the extended version of :ref:`IPPO`.
-- Agent architecture of MAPPO consists of two models: ``policy`` and ``critic``.
-- MAPPO needs one stage of information sharing on real/sampled data.
-- MAPPO is proposed to solve cooperative tasks but is still applicable to collaborative, competitive, and mixed tasks.
+    - Multi-agent proximal policy optimization (MAPPO) is one of the extended version of :ref:`IPPO`.
+    - Agent architecture of MAPPO consists of two models: ``policy`` and ``critic``.
+    - MAPPO is proposed to solve cooperative tasks but is still applicable to collaborative, competitive, and mixed tasks.
 
 **Preliminary**:
 
@@ -287,9 +287,8 @@ The MAPPO algorithm overturn this consensus by experimentally proving that:
 .. admonition:: You Should Know
 
     - MAPPO paper is done in cooperative settings. Nevertheless, it can be directly applied to competitive and mixed task modes. Moreover, the performance is still good.
-    - MAPPO paper adopts some other tricks like death masking and clipping ratio. But compared to the input formulation, these tricks' impact is insignificant.
-    - Sampling procedure of on-policy algorithms can be parallel conducted. Therefore, the actual time consuming for a comparable performance between on-policy and off-policy algorithms is almost the same when we have enough sampling *workers*.
-    - The parameters are shared across agents. However, not sharing these parameters will not incur any problems. Conversely, partly sharing these parameters(e.g., only sharing the critic) can help achieve better performance in some scenarios.
+    - Sampling procedure of on-policy algorithms can be parallel conducted. Therefore, the actual time consuming for a comparable performance between MAPPO and off-policy algorithms is almost the same when we have enough sampling *workers*.
+    - Parameters are shared across agents. Not sharing these parameters will not incur any problems. Conversely, partly sharing these parameters(e.g., only sharing the critic) can help achieve better performance in some scenarios.
 
 
 Mathematical Form 
@@ -360,11 +359,11 @@ Key hyperparameter location:
 VDPPO: mixing a bunch of PPO agents' critics
 -----------------------------------------------------
 
-- Value decomposition proximal policy optimization (VDPPO) is one of the extended version of :ref:`IPPO`.
-- Agent architecture of VDPPO consists of three modules: ``policy``, ``critic``, and ``mixer``.
-- VDPPO is the algorithms combined QMIX, VDA2C, and, PPO.
-- VDPPO needs one stage of information sharing on real/sampled data and predicted data.
-- VDPPO is proposed to solve cooperative tasks only.
+.. admonition:: Quick Facts
+
+    - Value decomposition proximal policy optimization (VDPPO) is one of the extended version of :ref:`IPPO`.
+    - Agent architecture of VDPPO consists of three modules: ``policy``, ``critic``, and ``mixer``.
+    - VDPPO is proposed to solve cooperative tasks only.
 
 **Preliminary**:
 
@@ -508,11 +507,12 @@ Key hyperparameter location:
 HAPPO: Sequentially updating critic of MAPPO agents
 -----------------------------------------------------
 
-- Heterogeneous-Agent Proximal Policy Optimisation (HAPPO) algorithm is based on :ref:`MAPPO`.
-- Agent architecture of HAPPO consists of three modules: ``policy``, ``critic``, and ``sequential updating``.
-- In HAPPO, agents have non-shared ``policy`` and shared ``critic``.
-- HAPPO is proposed to solve cooperative tasks.
-- HAPPO outperforms other cooperative MARL algorithms in most multi-agent tasks, especially when agents are heterogeneous.
+.. admonition:: Quick Facts
+
+    - Heterogeneous-Agent Proximal Policy Optimisation (HAPPO) algorithm is based on :ref:`MAPPO`.
+    - Agent architecture of HAPPO consists of three modules: ``policy``, ``critic``, and ``sequential updating``.
+    - In HAPPO, agents have non-shared ``policy`` and shared ``critic``.
+    - HAPPO is proposed to solve cooperative tasks.
 
 
 Preliminary
@@ -662,18 +662,6 @@ Key hyperparameter location:
 - ``marl/algos/hyperparams/common/happo``
 - ``marl/algos/hyperparams/fintuned/env/happo``
 
-Usage & Limitation
-^^^^^^^^^^^^^^^^^^^^^^
-
-HAPPO in *MARLlib* is applicable for
-
-- continues control tasks
-- discrete control tasks
-- any task mode
-
-.. code-block:: shell
-
-    python marl/main.py --algo_config=happo --finetuned --env-config=smac with env_args.map_name=3m
 
 ---------------------
 

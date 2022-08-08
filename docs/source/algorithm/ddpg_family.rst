@@ -63,10 +63,11 @@ Here :math:`{\mathcal D}` is the replay buffer
 IDDPG: multi-agent version of DDPG
 -------------------------------------
 
-- Independent deep deterministic policy gradient (IDDPG) is a natural extension of standard deep deterministic policy gradient (DDPG) under multi-agent settings.
-- The sampling/training pipeline is the same when we stand at the view of a single agent when comparing DDPG and IDDPG.
-- An IDDPG agent architecture consists of two models: ``policy`` and ``Q``.
-- IDDPG applies to cooperative, competitive, and mixed task modes.
+.. admonition:: Quick Facts
+
+    - Independent deep deterministic policy gradient (IDDPG) is a natural extension of DDPG under multi-agent settings.
+    - An IDDPG agent architecture consists of two models: ``policy`` and ``Q``.
+    - IDDPG applies to cooperative, competitive, and mixed task modes.
 
 **Preliminary**
 
@@ -175,11 +176,11 @@ Here :math:`{\mathcal D}` is the replay buffer
 
 Note in multi-agent settings, all the agent models and buffer can be shared, including:
 
-- :math:`{\mathcal D}` replay buffer.
-- :math:`\mu_{\theta}` policy function.
-- :math:`Q_{\phi}` Q function.
-- :math:`\mu_{\theta_{\text{targ}}}` target policy function.
-- :math:`Q_{\phi_{\text{targ}}}` target Q function.
+- replay buffer :math:`{\mathcal D}`.
+- policy function :math:`\mu_{\theta}`.
+- Q function :math:`Q_{\phi}`.
+- target policy function :math:`\mu_{\theta_{\text{targ}}}`.
+- target Q function :math:`Q_{\phi_{\text{targ}}}`.
 
 
 
@@ -216,11 +217,11 @@ Key hyperparameter location:
 MADDPG: DDPG agent with a centralized Q
 --------------------------------------------
 
+.. admonition:: Quick Facts
 
-- Multi-agent deep deterministic policy gradient(MADDPG) is one of the extended version of :ref:`IDDPG`.
-- Agent architecture of MADDPG consists of two models: ``policy`` and ``Q``.
-- MADDPG needs two stages of information sharing on real/sampled data and predicted data.
-- MADDPG applies to cooperative, competitive, and mixed task modes.
+    - Multi-agent deep deterministic policy gradient(MADDPG) is one of the extended version of :ref:`IDDPG`.
+    - Agent architecture of MADDPG consists of two models: ``policy`` and ``Q``.
+    - MADDPG applies to cooperative, competitive, and mixed task modes.
 
 **Preliminary**
 
@@ -304,7 +305,7 @@ Q learning: get a better centralized Q function
 
 .. math::
 
-    L(\phi, {\mathcal D}) = \underset{(o,s,\mathbf{u},r,o',s',d)} \sim {\mathcal D}}{{\mathrm E}}\left[
+    L(\phi, {\mathcal D}) = \underset{(o,s,\mathbf{u},r,o',s',d)} \sim {\mathcal D}{{\mathrm E}}\left[
         \Bigg( Q_{\phi}(o,s,\mathbf{u},r,o',s',d) - \left(r + \gamma (1 - d) Q_{\phi_{\text{targ}}}(o', s', \mu_{\theta_{\text{targ}}}(\mathbf{o'})) \right) \Bigg)^2
         \right]
 
@@ -361,11 +362,11 @@ Key hyperparameter location:
 FACMAC: mixing a bunch of DDPG agents
 -------------------------------------------------------------
 
+.. admonition:: Quick Facts
 
-- Factored Multi-Agent Centralised Policy Gradients (FACMAC) is one of the extended version of :ref:`IDDPG`.
-- Agent architecture of FACMAC consists of three models: ``policy``, ``Q``, and ``mixer``.
-- FACMAC needs two stages of information sharing on real/sampled data and predicted data.
-- FACMAC applies to cooperative task mode only.
+    - Factored Multi-Agent Centralised Policy Gradients (FACMAC) is one of the extended version of :ref:`IDDPG`.
+    - Agent architecture of FACMAC consists of three models: ``policy``, ``Q``, and ``mixer``.
+    - FACMAC applies to cooperative task mode only.
 
 **Preliminary**:
 
@@ -456,7 +457,7 @@ Q learning: get a better Q function and mixer function
 
 .. math::
 
-    L(\phi,\psi, {\mathcal D}) = \underset{(o, s,\mathbf{u},r,o' s',d)} \sim {\mathcal D}}{{\mathrm E}}\left[
+    L(\phi,\psi, {\mathcal D}) = \underset{(o, s,\mathbf{u},r,o' s',d)} \sim {\mathcal D}{{\mathrm E}}\left[
         \Bigg(Q_{tot}(\mathbf{u},o,s;\boldsymbol{\phi},\psi) - \left(r + \gamma (1 - d) Q_{tot}(\mathbf{u'},o', s';\boldsymbol{\phi_{\text{targ}}},\psi_{\text{targ}}) \right) \Bigg)^2
         \right]
 

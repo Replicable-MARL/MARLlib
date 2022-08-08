@@ -77,8 +77,7 @@ Here
 
     - replace the deep Q net's multi-layer perception(MLP) module with a recurrent module, e.g., GRU, LSTM.
     - store the data in episode format. (while DQN has no such restriction)
-
-    Other than these two, the whole pipeline is kept unchanged.
+    - Other than above two, the whole pipeline is kept unchanged.
 
 ---------------------
 
@@ -87,11 +86,11 @@ Here
 IQL: Independent Q Learning.
 -----------------------------------------------------
 
+.. admonition:: Quick Facts
 
-- Independent Q Learning (IQL) is the natural extension of q learning under multi-agent settings.
-- The sampling/training pipeline is the same when we stand at the view of a single agent when comparing IQL and Q learning.
-- Agent architecture of IQL consists of one module: ``Q``.
-- IQL applies to cooperative, competitive, and mixed task modes.
+    - Independent Q Learning (IQL) is the natural extension of q learning under multi-agent settings.
+    - Agent architecture of IQL consists of one module: ``Q``.
+    - IQL applies to cooperative, competitive, and mixed task modes.
 
 Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -168,9 +167,9 @@ Standing at the view of a single agent, the mathematical formulation of IQL is t
 
 Note in multi-agent settings, all the agent models and buffer can be shared, including:
 
-- :math:`{\mathcal D}` replay buffer.
-- :math:`Q_{\phi}` Q net.
-- :math:`Q_{\phi_{\text{targ}}}` target Q net.
+- replay buffer :math:`{\mathcal D}`.
+- Q function :math:`Q_{\phi}`.
+- target Q function :math:`Q_{\phi_{\text{targ}}}`.
 
 
 
@@ -198,11 +197,11 @@ Key hyperparameters location:
 VDN: mixing Q with value decomposition network
 -----------------------------------------------------
 
-- Value Decomposition Network(VDN) is one of the value decomposition versions of IQL.
-- The training pipeline is centralized for the credit assignment.
-- Information sharing is needed on real/sampled data and predicted data.
-- Agent architecture of VDN consists of one module: ``Q`` network.
-- VDN only applies to cooperative task mode.
+.. admonition:: Quick Facts
+
+    - Value Decomposition Network(VDN) is one of the value decomposition versions of IQL.
+    - Agent architecture of VDN consists of one module: ``Q`` network.
+    - VDN only applies to cooperative task mode.
 
 Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -282,13 +281,13 @@ Math Formulation
 VDN needs information sharing across agents. Here we bold the symbol (e.g., :math:`o` to :math:`\mathbf{o}`) to indicate that more than one agent information is contained.
 
 
-Q sum:
+Q sum: add all the Q values to get the total Q value
 
 .. math::
 
     Q_{\phi}^{tot} = \sum_{i=1}^{n} Q_{\phi}^i
 
-Q learning:
+Q learning: every iteration get a better total Q value estimation, passing gradient to each Q function to update it.
 
 .. math::
 
@@ -308,10 +307,10 @@ Implementation
 We use vanilla VDN implementation of RLlib, but with further improvement to ensure the performance is aligned with the official implementation.
 The differences between ours and vanilla VDN can be found in
 
-    - ``episode_execution_plan``
-    - ``EpisodeBasedReplayBuffer``
-    - ``JointQLoss``
-    - ``JointQPolicy``
+- ``episode_execution_plan``
+- ``EpisodeBasedReplayBuffer``
+- ``JointQLoss``
+- ``JointQPolicy``
 
 Key hyperparameters location:
 
@@ -327,11 +326,11 @@ QMIX: mixing Q with monotonic factorization
 -----------------------------------------------------------------
 
 
-- Monotonic Value Function Factorisation(QMIX) is one of the value decomposition versions of IQL.
-- The training pipeline is centralized for the credit assignment.
-- Information sharing is needed on real/sampled data and predicted data.
-- Agent architecture of QMIX consists of two modules: ``Q`` and ``Mixer``.
-- QMIX only applies to cooperative task mode.
+.. admonition:: Quick Facts
+
+    - Monotonic Value Function Factorisation(QMIX) is one of the value decomposition versions of IQL.
+    - Agent architecture of QMIX consists of two modules: ``Q`` and ``Mixer``.
+    - QMIX only applies to cooperative task mode.
 
 Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -399,13 +398,13 @@ Simply speaking, VDN force each agent to find the best action to satisfy the fol
     \underset{u^1}{\operatorname{argmax}}\:Q_1(\tau^1, u^1)   \\
     \vdots \\
     \underset{u^n}{\operatorname{argmax}}\:Q_n(\tau^n, u^n) \\
-    \end{pmatrix}.
+    \end{pmatrix}
 
 QMIX claims that a larger family of monotonic functions is sufficient for factorization (value decomposition) but not necessary to satisfy the above equation
 The monotonic constraint can be written as:
 
 .. math::
-    \frac{\partial Q_{tot}}{\partial Q_a}  \geq 0,~ \forall a \in A.
+    \frac{\partial Q_{tot}}{\partial Q_a}  \geq 0,~ \forall a \in A
 
 With monotonic constraints, we need to introduce a feed-forward neural network that
 takes the agent network outputs as input and mixes them monotonically.
@@ -436,16 +435,15 @@ Sharing the parameter is the primary option, which brings higher data efficiency
 Math Formulation
 ^^^^^^^^^^^^^^^^^^
 
-VDN needs information sharing across agents. Here we bold the symbol (e.g., :math:`s` to :math:`\mathbf{s}`) to indicate that more than one agent information is contained.
+QMIX needs information sharing across agents. Here we bold the symbol (e.g., :math:`s` to :math:`\mathbf{s}`) to indicate that more than one agent information is contained.
 
-
-Q sum:
+Q mixing: a learnable mixer computing the global Q value by mixing all the Q values.
 
 .. math::
 
     Q_{tot}(\mathbf{a}, s;\boldsymbol{\phi},\psi) = g_{\psi}\bigl(`\mathbf{s}, Q_{\phi_1},Q_{\phi_2},..,Q_{\phi_n} \bigr)
 
-Q learning:
+Q learning: every iteration get a better total global Q value estimation, passing gradient to both mixer and each Q function to update them.
 
 .. math::
 
@@ -468,10 +466,10 @@ Implementation
 We use vanilla QMIX implementation of RLlib, but with further improvement to ensure the performance is aligned with the official implementation.
 The differences between ours and vanilla QMIX can be found in
 
-    - ``episode_execution_plan``
-    - ``EpisodeBasedReplayBuffer``
-    - ``JointQLoss``
-    - ``JointQPolicy``
+- ``episode_execution_plan``
+- ``EpisodeBasedReplayBuffer``
+- ``JointQLoss``
+- ``JointQPolicy``
 
 Key hyperparameters location:
 
