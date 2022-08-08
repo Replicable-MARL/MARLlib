@@ -44,7 +44,7 @@ There are two networks in deep Q learning:math:`Q` network and math:`Q_{tag}` ne
 Q table is now replaced by :math:`Q` network to approximate the Q value.
 This way, the :math:`(s,a)` pairs number can be huge. As we can encode the state to a feature vector and learn the mapping between
 the feature vector and the Q value.
-The design of the Q net is simple, it takes :math:`s` as input and has :math:`a` number of output dimensions.
+The design of the Q function is simple, it takes :math:`s` as input and has :math:`a` number of output dimensions.
 The max value of output nodes is chosen to be :math:`max_a(s^{'},a^{'})` in vanilla Q learning.
 Finally, we use the Bellman equation to update the network.
 The optimization target is to minimize the minimum square error (MSE) between the current Q value estimation and the target Q estimation.
@@ -73,10 +73,10 @@ Here
 
 .. admonition:: You Should Know
 
-    Transforming DQN to DRQN, you need to do two things:
+    Navigating from DQN to DRQN, you need to:
 
-    - replacing the Q net's multi-layer perception(MLP) module with a recurrent module, e.g., GRU, LSTM.
-    - storing the data in episode format. (while DQN has no such restriction)
+    - replace the deep Q net's multi-layer perception(MLP) module with a recurrent module, e.g., GRU, LSTM.
+    - store the data in episode format. (while DQN has no such restriction)
 
     Other than these two, the whole pipeline is kept unchanged.
 
@@ -90,7 +90,7 @@ IQL: Independent Q Learning.
 
 - Independent Q Learning (IQL) is the natural extension of q learning under multi-agent settings.
 - The sampling/training pipeline is the same when we stand at the view of a single agent when comparing IQL and Q learning.
-- Agent architecture of IQL consists of one module: Q network.
+- Agent architecture of IQL consists of one module: ``Q``.
 - IQL applies to cooperative, competitive, and mixed task modes.
 
 Workflow
@@ -180,10 +180,10 @@ Implementation
 We use vanilla IQL implementation of RLlib, but with further improvement to ensure the performance is aligned with the official implementation.
 The differences between ours and vanilla IQL can be found in
 
-    - ``episode_execution_plan``
-    - ``EpisodeBasedReplayBuffer``
-    - ``JointQLoss``
-    - ``JointQPolicy``
+- ``episode_execution_plan``
+- ``EpisodeBasedReplayBuffer``
+- ``JointQLoss``
+- ``JointQPolicy``
 
 Key hyperparameters location:
 
@@ -259,7 +259,7 @@ Preliminary
 Optimizing multiple agents' joint policy with a single team reward can be very challenging as the action and observation space is now too large when combined.
 Value Decomposition Network(VDN) is the first proposed algorithm for this problem. The solution is relatively straightforward:
 
-- Each agent is still a standard Q network, use self-observation as input and output the action logits(Q value).
+- Each agent is still a standard ``Q``, use self-observation as input and output the action logits(Q value).
 - The Q values of all agents are added together for mixed Q value annotated as :math:`Q_{tot}`
 - Using standard DQN to optimize the Q net using :math:`Q_{tot}` with the team reward :math:`r`.
 - The gradient each Q net received depends on the **contribution** of its Q value to the :math:`Q_{tot}`:
@@ -279,7 +279,7 @@ As VDN is developed to address the cooperative multi-agent task, sharing the par
 Math Formulation
 ^^^^^^^^^^^^^^^^^^
 
-VDN needs information sharing across agents. Here we bold the symbol (e.g., :math:`s` to :math:`\mathbf{s}`) to indicate that more than one agent information is contained.
+VDN needs information sharing across agents. Here we bold the symbol (e.g., :math:`o` to :math:`\mathbf{o}`) to indicate that more than one agent information is contained.
 
 
 Q sum:
@@ -296,7 +296,6 @@ Q learning:
 
 
 Here :math:`{\mathcal D}` is the replay buffer, which can be shared across agents.
-:math:`\mathbf{a}` is an action set, including opponents.
 :math:`r` is the reward.
 :math:`d` is set to 1(True) when an episode ends else 0(False).
 :math:`{\gamma}` is discount value.
@@ -331,7 +330,7 @@ QMIX: mixing Q with monotonic factorization
 - Monotonic Value Function Factorisation(QMIX) is one of the value decomposition versions of IQL.
 - The training pipeline is centralized for the credit assignment.
 - Information sharing is needed on real/sampled data and predicted data.
-- Agent architecture of QMIX consists of two modules: ``Q`` network and ``Mixer`` network.
+- Agent architecture of QMIX consists of two modules: ``Q`` and ``Mixer``.
 - QMIX only applies to cooperative task mode.
 
 Workflow
@@ -417,14 +416,14 @@ This neural network is named **Mixer**.
 
 The similarity of QMIX and VDN:
 
-- Each agent is still a standard Q network, use self-observation as input and output the action logits(Q value).
-- Using standard DQN to optimize the Q net using :math:`Q_{tot}` with the team reward :math:`r`.
+- Each agent is still a standard Q function, use self-observation as input and output the action logits(Q value).
+- Using standard DQN to optimize the Q function using :math:`Q_{tot}` with the team reward :math:`r`.
 
 Difference:
 
 - Additional model **Mixer** is added into QMIX.
 - The Q values of all agents are fed to the **Mixer** for getting :math:`Q_{tot}`.
-- The gradient each Q net received is backpropagated from the **Mixer**.
+- The gradient each Q function received is backpropagated from the **Mixer**.
 
 Similar to VDN, QMIX is only applicable to the cooperative multi-agent task.
 Sharing the parameter is the primary option, which brings higher data efficiency and smaller model size.
@@ -454,12 +453,11 @@ Q learning:
 
 
 Here :math:`{\mathcal D}` is the replay buffer, which can be shared across agents.
-:math:`\mathbf{a}` is an action set, including opponents.
 :math:`r` is the reward.
 :math:`d` is set to 1(True) when an episode ends else 0(False).
 :math:`{\gamma}` is discount value.
-:math:`Q_{\phi}` is Q net, which can be shared across agents.
-:math:`Q_{\phi_{\text{targ}}}` is target Q net, which can be shared across agents.
+:math:`Q_{\phi}` is Q function, which can be shared across agents.
+:math:`Q_{\phi_{\text{targ}}}` is target Q function, which can be shared across agents.
 :math:`g_{\psi}` is mixing network.
 :math:`g_{\psi_{\text{targ}}}` is target mixing network.
 
