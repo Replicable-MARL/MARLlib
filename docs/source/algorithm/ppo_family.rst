@@ -173,7 +173,7 @@ Policy learning: computing the policy gradient using estimated advantage to upda
     L(o,u,\theta_k,\theta) = \min\left(
     \frac{\pi_{\theta}(u|o)}{\pi_{\theta_k}(u|o)}  A^{\pi_{\theta_k}}(o,u), \;\;
     \text{clip}\left(\frac{\pi_{\theta}(u|o)}{\pi_{\theta_k}(u|o)}, 1 - \epsilon, 1+\epsilon \right) A^{\pi_{\theta_k}}(o,u)
-    \right),
+    \right)
 
 :math:`{\mathcal D}` is the collected trajectories.
 :math:`R` is the rewards-to-go.
@@ -463,7 +463,7 @@ Policy learning: computing the policy gradient using estimated advantage to upda
     L(s,o, u,\mathbf{u}^-,\theta_k,\theta) = \min\left(
     \frac{\pi_{\theta}(u|o)}{\pi_{\theta_k}(u|o)}  A^{\pi_{\theta_k}}(s, o,\mathbf{u}^-), \;\;
     \text{clip}\left(\frac{\pi_{\theta}(u|o)}{\pi_{\theta_k}(u|o)}, 1 - \epsilon, 1+\epsilon \right) A^{\pi_{\theta_k}}(s, o,\mathbf{u}^-)
-    \right),
+    \right)
 
 Here
 :math:`{\mathcal D}` is the collected trajectories.
@@ -514,11 +514,6 @@ HAPPO: Sequentially updating critic of MAPPO agents
     - In HAPPO, agents have non-shared ``policy`` and shared ``critic``.
     - HAPPO is proposed to solve cooperative tasks.
 
-
-Preliminary
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-:ref:`IPPO`
 
 Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -573,6 +568,11 @@ taxonomy label
 
 Insights
 ^^^^^^^^^^^^^^^^^^^^^^^
+
+**Preliminary**
+
+
+- :ref:`IPPO`
 
 The previous methods either hold the sharing parameters for different agents or lack the essential theoretical property of trust region learning, which is the monotonic improvement guarantee.
 This could lead to several issues when dealing with MARL problems. Such as:
