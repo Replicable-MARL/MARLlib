@@ -304,9 +304,9 @@ Implementation
 Based on IA2C, we add centralized modules to implement MAA2C.
 The details can be found in:
 
-    - ``centralized_critic_postprocessing``
-    - ``central_critic_a2c_loss``
-    - ``CC_RNN``
+- ``centralized_critic_postprocessing``
+- ``central_critic_a2c_loss``
+- ``CC_RNN``
 
 
 Key hyperparameter location:
@@ -438,9 +438,9 @@ Implementation
 Based on IA2C, we add the COMA loss function.
 The details can be found in:
 
-    - ``centralized_critic_postprocessing``
-    - ``central_critic_coma_loss``
-    - ``CC_RNN``
+- ``centralized_critic_postprocessing``
+- ``central_critic_coma_loss``
+- ``CC_RNN``
 
 
 Key hyperparameter location:
@@ -574,9 +574,9 @@ Implementation
 Based on IA2C, we add mixing Q modules to implement VDA2C.
 The details can be found in:
 
-    - ``value_mixing_postprocessing``
-    - ``value_mix_actor_critic_loss``
-    - ``VD_RNN``
+- ``value_mixing_postprocessing``
+- ``value_mix_actor_critic_loss``
+- ``VD_RNN``
 
 
 Key hyperparameter location:

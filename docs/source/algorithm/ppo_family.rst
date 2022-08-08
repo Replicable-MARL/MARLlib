@@ -28,20 +28,20 @@ For PPO-penalty, please refer to `Proximal Policy Optimization <https://spinning
 **Mathematical Form**
 
 
-Critic learning:
+Critic learning: every iteration gives a better value function.
 
 .. math::
 
     \phi_{k+1} = \arg \min_{\phi} \frac{1}{|{\mathcal D}_k| T} \sum_{\tau \in {\mathcal D}_k} \sum_{t=0}^T\left( V_{\phi} (s_t) - \hat{R}_t \right)^2
 
-General Advantage Estimation:
+General Advantage Estimation: how good are current action regarding to the baseline critic value.
 
 .. math::
 
     A_t=\sum_{t=0}^{\infty}(\gamma\lambda)^l\delta_{t+l}^V
 
 
-Policy learning:
+Policy learning: computing the policy gradient using estimated advantage to update the policy function.
 
 .. math::
 
@@ -61,7 +61,7 @@ Here
 :math:`a` is the action.
 :math:`s` is the observation/state.
 :math:`\epsilon` is a hyperparameter controlling how far away the new policy is allowed to go from the old.
-:math:`\pi_{\theta}` is the policy net.
+:math:`\pi_{\theta}` is the policy function.
 
 ---------------------
 
@@ -130,7 +130,7 @@ Insights
 
 
 IPPO is the simplest multi-agent version of standard PPO. Each agent is now a PPO-based sampler and learner.
-IPPO does not need information sharing, including real/sampled data and predicted data.
+IPPO does not need information sharing
 While knowledge sharing across agents is optional in IPPO.
 
 .. admonition:: Information Sharing
@@ -148,12 +148,49 @@ While knowledge sharing across agents is optional in IPPO.
 Mathematical Form 
 ^^^^^^^^^^^^^^^^^^
 
-Standing at the view of a single agent, the mathematical formulation of IPPO is the same as :ref:`PPO`.
+Standing at the view of a single agent, the mathematical formulation of IPPO is similiar as :ref:`PPO`, except that in MARL,
+agent usually has no access to the global state typically under partial observable setting. Therefore, we use :math:`o` for
+local observation and :math:`s`for the global state. We then rewrite the mathematical formulation of PPO as:
+
+
+Critic learning: every iteration gives a better value function.
+
+.. math::
+
+    \phi_{k+1} = \arg \min_{\phi} \frac{1}{|{\mathcal D}_k| T} \sum_{\tau \in {\mathcal D}_k} \sum_{t=0}^T\left( V_{\phi} (o_t) - \hat{R}_t \right)^2
+
+General Advantage Estimation: how good are current action regarding to the baseline critic value.
+
+.. math::
+
+    A_t=\sum_{t=0}^{\infty}(\gamma\lambda)^l\delta_{t+l}^V
+
+
+Policy learning: computing the policy gradient using estimated advantage to update the policy function.
+
+.. math::
+
+    L(o,u,\theta_k,\theta) = \min\left(
+    \frac{\pi_{\theta}(u|o)}{\pi_{\theta_k}(u|o)}  A^{\pi_{\theta_k}}(o,u), \;\;
+    \text{clip}\left(\frac{\pi_{\theta}(u|o)}{\pi_{\theta_k}(u|o)}, 1 - \epsilon, 1+\epsilon \right) A^{\pi_{\theta_k}}(o,u)
+    \right),
+
+:math:`{\mathcal D}` is the collected trajectories.
+:math:`R` is the rewards-to-go.
+:math:`\tau` is the trajectory.
+:math:`V_{\phi}` is the critic function.
+:math:`A` is the advantage.
+:math:`\gamma` is discount value.
+:math:`\lambda` is the weight value of GAE.
+:math:`u` is the action.
+:math:`o` is the local observation.
+:math:`\epsilon` is a hyperparameter controlling how far away the new policy is allowed to go from the old.
+:math:`\pi_{\theta}` is the policy function.
 
 Note that in multi-agent settings, all the agent models can be shared, including:
 
-- :math:`V_{\phi}` the critic net.
-- :math:`\pi_{\theta}` the policy net.
+- :math:`V_{\phi}` the critic function.
+- :math:`\pi_{\theta}` the policy function.
 
 
 
@@ -163,8 +200,8 @@ Implementation
 We use vanilla PPO implementation of RLlib in IPPO. The only exception is we rewrite the SGD iteration logic.
 The details can be found in
 
-    - ``MultiGPUTrainOneStep``
-    - ``learn_on_loaded_batch``
+- ``MultiGPUTrainOneStep``
+- ``learn_on_loaded_batch``
 
 
 Key hyperparameter location:
@@ -194,7 +231,7 @@ Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 In the sampling stage, agents share information with others. The information includes others' observations and predicted actions. After collecting the necessary information from other agents,
-all agents follow the standard PPO training pipeline, except using the centralized critic value function to calculate the GAE and conduct the PPO critic learning procedure.
+all agents follow the standard PPO training pipeline, except using the centralized value function to calculate the GAE and conduct the PPO critic learning procedure.
 
 .. figure:: ../images/mappo.png
     :width: 600
@@ -259,28 +296,28 @@ Mathematical Form
 ^^^^^^^^^^^^^^^^^^
 
 MAPPO needs information sharing across agents. Critic learning utilizes self-observation and information other agents provide,
-including observation and actions. Here we bold the symbol (e.g., :math:`s` to :math:`\mathbf{s}`) to indicate more than one agent information is contained.
+including observation and actions. Here we bold the symbol (e.g., :math:`u` to :math:`\mathbf{u}`) to indicate more than one agent information is contained.
 
-Critic learning:
+Critic learning: every iteration gives a better centralized value function.
 
 .. math::
 
-    \phi_{k+1} = \arg \min_{\phi} \frac{1}{|{\mathcal D}_k| T} \sum_{\tau \in {\mathcal D}_k} \sum_{t=0}^T\left( V_{\phi} (s_t) - \hat{R}_t \right)^2
+    \phi_{k+1} = \arg \min_{\phi} \frac{1}{|{\mathcal D}_k| T} \sum_{\tau \in {\mathcal D}_k} \sum_{t=0}^T\left( V_{\phi} (o_t) - \hat{R}_t \right)^2
 
-General Advantage Estimation:
+General Advantage Estimation: how good are current action regarding to the baseline critic value.
 
 .. math::
 
     A_t=\sum_{t=0}^{\infty}(\gamma\lambda)^l\delta_{t+l}^V
 
 
-Policy learning:
+Policy learning: computing the policy gradient using estimated advantage to update the policy function.
 
 .. math::
 
-    L(s,\mathbf{s}^-, a,\mathbf{a}^-,\theta_k,\theta) = \min\left(
-    \frac{\pi_{\theta}(a|s)}{\pi_{\theta_k}(a|s)}  A^{\pi_{\theta_k}}(s, \mathbf{s}^-,\mathbf{a}^-), \;\;
-    \text{clip}\left(\frac{\pi_{\theta}(a|s)}{\pi_{\theta_k}(a|s)}, 1 - \epsilon, 1+\epsilon \right) A^{\pi_{\theta_k}}(s, \mathbf{s}^-,\mathbf{a}^-)
+    L(o,s, u,\mathbf{u}^-,\theta_k,\theta) = \min\left(
+    \frac{\pi_{\theta}(u|o)}{\pi_{\theta_k}(u|o)}  A^{\pi_{\theta_k}}(o,s,\mathbf{u}^-), \;\;
+    \text{clip}\left(\frac{\pi_{\theta}(u|o)}{\pi_{\theta_k}(u|o)}, 1 - \epsilon, 1+\epsilon \right) A^{\pi_{\theta_k}}(o,s,\mathbf{u}^-)
     \right)
 
 Here
@@ -290,13 +327,13 @@ Here
 :math:`A` is the advantage.
 :math:`\gamma` is discount value.
 :math:`\lambda` is the weight value of GAE.
-:math:`a` is the current agent action.
-:math:`\mathbf{a}^-` is the action set of all agents, except the current agent.
-:math:`s` is the current agent observation/state.
-:math:`\mathbf{s}^-` is the observation/state set of all agents, except the current agent.
+:math:`u` is the current agent action.
+:math:`\mathbf{u}^-` is the action set of all agents, except the current agent.
+:math:`s` is the global state.
+:math:`o` is the local observation
 :math:`\epsilon` is a hyperparameter controlling how far away the new policy is allowed to go from the old.
-:math:`V_{\phi}` is the critic value function, which can be shared across agents.
-:math:`\pi_{\theta}` is the policy net, which can be shared across agents.
+:math:`V_{\phi}` is the value function, which can be shared across agents.
+:math:`\pi_{\theta}` is the policy function, which can be shared across agents.
 
 Implementation
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -304,9 +341,9 @@ Implementation
 Based on IPPO, we add centralized modules to implement MAPPO.
 The details can be found in:
 
-    - ``centralized_critic_postprocessing``
-    - ``central_critic_ppo_loss``
-    - ``CC_RNN``
+- ``centralized_critic_postprocessing``
+- ``central_critic_ppo_loss``
+- ``CC_RNN``
 
 
 Key hyperparameter location:
@@ -395,10 +432,10 @@ Mathematical Form
 ^^^^^^^^^^^^^^^^^^
 
 VDPPO needs information sharing across agents. Therefore, the critic mixing utilizes both self-observation and other agents' observation.
-Here we bold the symbol (e.g., :math:`s` to :math:`\mathbf{s}`) to indicate more than one agent information is contained.
+Here we bold the symbol (e.g., :math:`u` to :math:`\mathbf{u}`) to indicate more than one agent information is contained.
 
 
-Critic mixing:
+Critic mixing: a learnable mixer for computing the global value function.
 
 .. math::
 
@@ -406,26 +443,27 @@ Critic mixing:
 
 
 
-Critic learning:
+Critic learning: every iteration gives a better  global value function.
 
 .. math::
 
     \phi_{k+1} = \arg \min_{\phi} \frac{1}{|{\mathcal D}_k| T} \sum_{\tau \in {\mathcal D}_k} \sum_{t=0}^T\left( V_{tot}(\mathbf{a}, s;\boldsymbol{\phi},\psi) - \hat{R}_t \right)^2
 
-General Advantage Estimation:
+General Advantage Estimation: how good are current joint action set regarding to the baseline critic value.
+
 
 .. math::
 
     A_t=\sum_{t=0}^{\infty}(\gamma\lambda)^l\delta_{t+l}^{V_{tot}}
 
 
-Policy learning:
+Policy learning: computing the policy gradient using estimated advantage to update the policy function.
 
 .. math::
 
-    L(s,\mathbf{s}^-, a,\mathbf{a}^-,\theta_k,\theta) = \min\left(
-    \frac{\pi_{\theta}(a|s)}{\pi_{\theta_k}(a|s)}  A^{\pi_{\theta_k}}(s, \mathbf{s}^-,\mathbf{a}^-), \;\;
-    \text{clip}\left(\frac{\pi_{\theta}(a|s)}{\pi_{\theta_k}(a|s)}, 1 - \epsilon, 1+\epsilon \right) A^{\pi_{\theta_k}}(s, \mathbf{s}^-,\mathbf{a}^-)
+    L(s,o, u,\mathbf{u}^-,\theta_k,\theta) = \min\left(
+    \frac{\pi_{\theta}(u|o)}{\pi_{\theta_k}(u|o)}  A^{\pi_{\theta_k}}(s, o,\mathbf{u}^-), \;\;
+    \text{clip}\left(\frac{\pi_{\theta}(u|o)}{\pi_{\theta_k}(u|o)}, 1 - \epsilon, 1+\epsilon \right) A^{\pi_{\theta_k}}(s, o,\mathbf{u}^-)
     \right),
 
 Here
@@ -435,26 +473,26 @@ Here
 :math:`A` is the advantage.
 :math:`\gamma` is discount value.
 :math:`\lambda` is the weight value of GAE.
-:math:`a` is the current agent action.
-:math:`\mathbf{a}^-` is the action set of all agents, except the current agent.
-:math:`s` is the current agent observation/state.
-:math:`\mathbf{s}^-` is the observation/state set of all agents, except the current agent.
+:math:`u` is the current agent action.
+:math:`\mathbf{u}^-` is the action set of all agents, except the current agent.
+:math:`s` is the global state.
+:math:`o` is the local observation.
 :math:`\epsilon` is a hyperparameter controlling how far away the new policy is allowed to go from the old.
-:math:`V_{\phi}` is the critic value function.
-:math:`\pi_{\theta}` is the policy net.
-:math:`g_{\psi}` is mixing network.
+:math:`V_{\phi}` is the value function.
+:math:`\pi_{\theta}` is the policy function.
+:math:`g_{\psi}` is the mixer.
 
 
 
 Implementation
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Based on IPPO, we add mixing Q modules to implement VDPPO.
+Based on IPPO, we add the mixing Q module to implement VDPPO.
 The details can be found in:
 
-    - ``value_mixing_postprocessing``
-    - ``value_mix_ppo_surrogate_loss``
-    - ``VD_RNN``
+- ``value_mixing_postprocessing``
+- ``value_mix_ppo_surrogate_loss``
+- ``VD_RNN``
 
 
 Key hyperparameter location:
@@ -470,13 +508,11 @@ Key hyperparameter location:
 HAPPO: Sequentially updating critic of MAPPO agents
 -----------------------------------------------------
 
-.. admonition:: Quick Facts
-
-    - Heterogeneous-Agent Proximal Policy Optimisation (HAPPO) algorithm is based on :ref:`MAPPO`.
-    - Agent architecture of HAPPO consists of three modules: ``policy``, ``critic``, and ``sequential updating``.
-    - In HAPPO, agents have non-shared ``policy`` and shared ``critic``.
-    - HAPPO is proposed to solve cooperative tasks.
-    - HAPPO outperforms other cooperative MARL algorithms in most multi-agent tasks, especially when agents are heterogeneous.
+- Heterogeneous-Agent Proximal Policy Optimisation (HAPPO) algorithm is based on :ref:`MAPPO`.
+- Agent architecture of HAPPO consists of three modules: ``policy``, ``critic``, and ``sequential updating``.
+- In HAPPO, agents have non-shared ``policy`` and shared ``critic``.
+- HAPPO is proposed to solve cooperative tasks.
+- HAPPO outperforms other cooperative MARL algorithms in most multi-agent tasks, especially when agents are heterogeneous.
 
 
 Preliminary
@@ -559,37 +595,37 @@ The HAPPO paper proves that for Heterogeneous-Agent:
 Mathematical Form
 ^^^^^^^^^^^^^^^^^^
 
-Critic learning:
+Critic learning: every iteration gives a better value function.
 
 .. math::
 
     \phi_{k+1} = \arg \min_{\phi} \frac{1}{|{\mathcal D}_k| T} \sum_{\tau \in {\mathcal D}_k} \sum_{t=0}^T\left( V_{\phi} (s_t) - \hat{R}_t \right)^2
 
-Initial Advantage Estimation:
+Initial Advantage Estimation: how good are current action regarding to the baseline critic value.
 
 .. math::
 
     A_t=\sum_{t=0}^{\infty}(\gamma\lambda)^l\delta_{t+l}^V
 
-Advantage Estimation if m > 1:
+Advantage Estimation for m  = 1: how good are current action regarding to the baseline critic value of the first chosen agent.
+
 
 .. math::
 
-    \mathbf{M}^{i_{1:m}}(s, \mathbf{a}) = \frac{\bar{\pi}^{i_{1:m-1}}(a^{1:m-1} | s)} {\pi^{i_{1:m-1}}(a^{1:m-1} | s)} \mathbf{M}^{i_{1:m-1}}(s, \mathbf{a})
+    \mathbf{M}^{i_{1}}(s, \mathbf{u}) = \hat{A}_{s, \mathbf{u}}(s, \mathbf{u})
 
-
-Advantage Estimation for m  = 1:
-
-.. math::
-
-    \mathbf{M}^{i_{1}}(s, \mathbf{a}) = \hat{A}_{s, \mathbf{a}}(s, \mathbf{a})
-
-
-The argmax of the PPO-Clip objective:
+Advantage Estimation if m > 1: how good are current action regarding to the baseline critic value of the chosen agent except the first one.
 
 .. math::
 
-    \frac{1}{BT}\sum_{b=1}^{B} \sum_{t=0}^{T}\left[ min\left(  \frac{\pi_{\theta^{i_m}}^{i_m}(a^{i_m} | s)} {\pi_{\theta^{i_m}_{k}}^{i_m}(a^{i_m} | s)} M^{i_{1:m}}(s|a), clip\left( \frac{\pi_{\theta^{i_m}}^{i_m}(a^{i_m} | s)} {\pi_{\theta^{i_m}_{k}}^{i_m}(a^{i_m} | s)}, 1 \pm \epsilon \right)\right)M^{i_{1:m}}(s|a)\right]
+    \mathbf{M}^{i_{1:m}}(s, \mathbf{u}) = \frac{\bar{\pi}^{i_{1:m-1}}(u^{1:m-1} | o)} {\pi^{i_{1:m-1}}(u^{1:m-1} | o)} \mathbf{M}^{i_{1:m-1}}(s, \mathbf{u})
+
+
+Policy learning: computing the policy gradient using estimated advantage to update the policy function.
+
+.. math::
+
+    \frac{1}{BT}\sum_{b=1}^{B} \sum_{t=0}^{T}\left[ min\left(  \frac{\pi_{\theta^{i_m}}^{i_m}(u^{i_m} |o)} {\pi_{\theta^{i_m}_{k}}^{i_m}(u^{i_m} | o)} M^{i_{1:m}}(s|u), clip\left( \frac{\pi_{\theta^{i_m}}^{i_m}(u^{i_m} | o)} {\pi_{\theta^{i_m}_{k}}^{i_m}(u^{i_m} | o)}, 1 \pm \epsilon \right)\right)M^{i_{1:m}}(s|u)\right]
 
 
 Here
@@ -599,13 +635,13 @@ Here
 :math:`A` is the advantage.
 :math:`\gamma` is discount value.
 :math:`\lambda` is the weight value of GAE.
-:math:`a` is the current agent action.
-:math:`\mathbf{a}^-` is the action set of all agents, except the current agent.
-:math:`s` is the current agent observation/state.
-:math:`\mathbf{s}^-` is the observation/state set of all agents, except the current agent.
+:math:`u` is the current agent action.
+:math:`\mathbf{u}^-` is the action set of all agents, except the current agent.
+:math:`s` is the global state.
+:math:`o` is the local information.
 :math:`\epsilon` is a hyperparameter controlling how far away the new policy is allowed to go from the old.
-:math:`V_{\phi}` is the critic value function.
-:math:`\pi_{\theta}` is the policy net.
+:math:`V_{\phi}` is the value function.
+:math:`\pi_{\theta}` is the policy function.
 :math:`B` is batch size
 :math:`T` is steps per episode
 
