@@ -19,7 +19,7 @@ Advanced Actor-Critic: A Recap
 
 Why do we need an advanced actor-critic (A2C)? Before A2C, we already have some policy gradient method variants like REINFORCE. However, these methods are not stable in training. This is due to
 the large variance in the reward signal, which is used to update the policy. A solution to reduce this variance is introducing a baseline for it. A2C adopts a critic value function conditioned on **state**
-as the baseline. And compute the difference between the state value and Q value as the **advantage**.
+as the baseline and compute the difference between the state value and Q value as the **advantage**.
 
 .. math::
 
@@ -33,6 +33,8 @@ Recall the bellman optimality equation:
     Q(s_t,a_t)  = r_{t+1} + \lambda V(s_{t+1})
 
 :math:`A` can be written as:
+
+.. math::
 
     A_t = r_{t+1} + \lambda V(s_{t+1}) - V(s_t)
 
@@ -125,7 +127,7 @@ Insights
 
 
 IA2C is the simplest multi-agent version of standard A2C. Each agent is now an A2C-based sampler and learner.
-IA2C does not need information sharing, including real/sampled data and predicted data.
+IA2C does not need information sharing.
 While knowledge sharing across agents is optional in IA2C.
 
 .. admonition:: Information Sharing
@@ -143,13 +145,35 @@ While knowledge sharing across agents is optional in IA2C.
 Mathematical Form
 ^^^^^^^^^^^^^^^^^^
 
-Standing at the view of a single agent, the mathematical formulation of IA2C is the same as :ref:`A2C`.
+Standing at the view of a single agent, the mathematical formulation of IA2C is similiar as :ref:`A2C`, except that in MARL,
+agent usually has no access to the global state typically under partial observable setting. Therefore, we use :math:`o` for
+local observation and :math:`s`for the global state. We then rewrite the mathematical formulation of A2C as:
+
+Critic learning: every iteration gives a better value function.
+
+.. math::
+
+    \phi_{k+1} = \arg \min_{\phi} \frac{1}{|{\mathcal D}_k| T} \sum_{\tau \in {\mathcal D}_k} \sum_{t=0}^T\left( V_{\phi} (o_t) - \hat{R}_t \right)^2
+
+Advantage Estimation: how good are current action regarding to the baseline critic value.
+
+.. math::
+
+    A_t = r_{t+1} + \lambda V_{\phi} (o_{t+1}) - V_{\phi} (o_t)
+
+Policy learning: computing the policy gradient using estimated advantage to update the policy function.
+
+.. math::
+
+    \nabla_\theta J(\theta) \sim \sum_{t=0}^{T-1}\nabla_\theta \log\pi_{\theta}(a_t|o_t)A_t
+
+
 
 Note that in multi-agent settings, all the agent models can be shared, including:
 
 - :math:`V_{\phi}` the critic net.
 - :math:`\pi_{\theta}` the policy net.
-
+- :math:`o` the local observation.
 
 
 Implementation
@@ -239,26 +263,26 @@ There is no official MAA2C paper, and we implement MAA2C in the same pipeline as
 Mathematical Form
 ^^^^^^^^^^^^^^^^^^
 
-MAA2C needs information sharing across agents. Critic learning utilizes self-observation and other agents' information,
-including observation and actions. Here we bold the symbol (e.g., :math:`s` to :math:`\mathbf{s}`) to indicate that more than one agent information is contained.
+MAA2C needs information sharing across agents. Critic learning utilizes self-observation and global information,
+including state and actions. Here we bold the symbol (e.g., :math:`a` to :math:`\mathbf{a}`) to indicate that more than one agent information is contained.
 
-Critic learning:
+Critic learning: every iteration gives a better value function.
 
 .. math::
 
     \phi_{k+1} = \arg \min_{\phi} \frac{1}{|{\mathcal D}_k| T} \sum_{\tau \in {\mathcal D}_k} \sum_{t=0}^T\left( V_{\phi} (o_t,s_t,\mathbf{a_t^-}) - \hat{R}_t \right)^2
 
-Advantage Estimation:
+Advantage Estimation: how good are current action regarding to the baseline critic value.
 
 .. math::
 
     A_t = r_{t+1} + \lambda V_{\phi} (o_{t+1},s_{t+1},\mathbf{a_{t+1}^-}) - V_{\phi} (o_t,s_t,\mathbf{a_t^-})
 
-Policy learning:
+Policy learning: computing the policy gradient using estimated advantage to update the policy function.
 
 .. math::
 
-    \nabla_\theta J(\theta) \sim \sum_{t=0}^{T-1}\nabla_\theta \log\pi_{\theta}(a_t|s_t)A_t
+    \nabla_\theta J(\theta) \sim \sum_{t=0}^{T-1}\nabla_\theta \log\pi_{\theta}(a_t|o_t)A_t
 
 Here
 :math:`\mathcal D` is the collected trajectories that can be shared across agents.
@@ -267,14 +291,12 @@ Here
 :math:`A` is the advantage.
 :math:`\gamma` is discount value.
 :math:`\lambda` is the weight value of GAE.
-:math:`o` is the current agent observation.
+:math:`o` is the current agent local observation.
 :math:`a` is the current agent action.
 :math:`\mathbf{a}^-` is the action set of all agents, except the current agent.
-:math:`s` is the current agent observation/state.
-:math:`\mathbf{s}^-` is the observation/state set of all agents, except the current agent.
-:math:`\epsilon` is a hyperparameter controlling how far away the new policy is allowed to go from the old.
+:math:`s` is the current agent global state.
 :math:`V_{\phi}` is the critic value function, which can be shared across agents.
-:math:`\pi_{\theta}` is the policy net, which can be shared across agents.
+:math:`\pi_{\theta}` is the policy function, which can be shared across agents.
 
 Implementation
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -301,9 +323,9 @@ COMA: MAA2C with Counterfactual Multi-Agent Policy Gradients
 
 
 - Counterfactual multi-agent policy gradients (COMA) is based on MAA2C.
-- Agent architecture of COMA consists of two models: ``policy`` and ``critic``.
+- Agent architecture of COMA consists of two models: ``policy`` and ``Q``.
 - COMA adopts a new credit assignment mechanism that uses a counterfactual baseline to marginalize a single agent’s action's contribution.
-- COMA has a centralized ``critic``, which is the same as MAA2C.
+- COMA has a centralized ``Q``, which is similar to :ref:`MAA2C`.
 - COMA needs one stage of information sharing on real/sampled data.
 - COMA is applicable to collaborative, competitive, and mixed tasks.
 
@@ -365,56 +387,56 @@ Efficiently learning decentralized policies is an essential demand for modern AI
 COMA provides one solution for this problem:
 
 #. COMA uses a counterfactual baseline that marginalizes a single agent’s action while keeping the other agents’ actions fixed.
-#. COMA develops a centralized critic that allows the counterfactual baseline to be computed efficiently in a single forward pass.
+#. COMA develops a centralized Q that allows the counterfactual baseline to be computed efficiently in a single forward pass.
 #. COMA significantly improves average performance over other multi-agent actor-critic methods under decentralized execution and partial observability settings.
 
 .. admonition:: Some Interesting Facts
 
     - Although COMA is based on stochastic policy gradient methods, it is only evaluated in discrete action space. Extending to continuous action space requires additional tricks on computing critic value (which is not good news for stochastic methods)
-    - In recent years' research, COMA's has been proven to be relatively worse in solving tasks like :ref:`SMAC` and :ref:`MPE` than other on-policy methods, even basic independent actor-critic methods like :ref:`IA2C`.
+    - In recent years' research, COMA's has been proven to be relatively worse in solving tasks like :ref:`SMAC` and :ref:`MPE` than other on-policy methods, even basic independent methods like :ref:`IA2C`.
 
 Mathematical Form
 ^^^^^^^^^^^^^^^^^^
 
-COMA needs information sharing across agents. Critic learning utilizes self-observation and other agents' information,
-including observation and actions. Here we bold the symbol (e.g., :math:`s` to :math:`\mathbf{s}`) to indicate that more than one agent information is contained.
+COMA needs information sharing across agents. Q learning utilizes self-observation and global information,
+including state and actions. The advantage estimation is based on counterfactual baseline, which is different from other algorithms in A2C family.
 
-Critic learning:
-
-.. math::
-
-    \phi_{k+1} = \arg \min_{\phi} \frac{1}{|{\mathcal D}_k| T} \sum_{\tau \in {\mathcal D}_k} \sum_{t=0}^T\left( Q_{\phi} (s_t, a_t) - \hat{R}_t \right)^2
-
-Marginalized Advantage Estimation:
+Q learning: every iteration gives a better Q function.
 
 .. math::
 
-    A(s, \mathbf{s}^-, a, \mathbf{a}^-) = Q(s, \mathbf{s}^-, a, \mathbf{a}^-) - \sum_{a'} \pi(a' \vert \tau) Q(s,(\mathbf{a}^{-},a'))
+    \phi_{k+1} = \arg \min_{\phi} \frac{1}{|{\mathcal D}_k| T} \sum_{\tau \in {\mathcal D}_k} \sum_{t=0}^T\left( Q_{\phi} (o_t, s_t, a_t, (\mathbf{a_t}^-)) - \hat{R}_t \right)^2
+
+Marginalized Advantage Estimation: how good are current action's Q value compared to the average Q value of the whole action space.
+
+.. math::
+
+    A_t = Q_{\phi}(o_t, s_t, a_t, \mathbf{a}^-) - \sum_{a_t} \pi(a_t \vert \tau) Q_{\phi}(o_t, s_t, a_t, (\mathbf{a_t}^-))
 
 
 Policy learning:
 
 .. math::
 
-    L(s,\mathbf{s}^-,a, \mathbf{a}^-, \theta)=\log\pi_\theta(a|s)A(s, \mathbf{s}^-, a, \mathbf{a}^-)
+    L(o, s, a, \mathbf{a}^-, \theta)=\log\pi_\theta(a|s)A((o, s, a, \mathbf{a}^-)
 
 Here
 :math:`{\mathcal D}` is the collected trajectories.
 :math:`R` is the rewards-to-go.
 :math:`\tau` is the trajectory.
 :math:`A` is the advantage.
+:math:`o` is the current agent local observation.
 :math:`a` is the current agent action.
 :math:`\mathbf{a}^-` is the action set of all agents, except the current agent.
-:math:`s` is the current agent observation/state.
+:math:`s` is the global state.
 :math:`\mathbf{s}^-` is the observation/state set of all agents, except the current agent.
-:math:`\epsilon` is a hyperparameter controlling how far away the new policy is allowed to go from the old.
-:math:`Q_{\phi}` is the Q value function.
-:math:`\pi_{\theta}` is the policy net.
+:math:`Q_{\phi}` is the Q function.
+:math:`\pi_{\theta}` is the policy function.
 
 Implementation
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Based on MAA2C, we add the COMA loss function.
+Based on IA2C, we add the COMA loss function.
 The details can be found in:
 
     - ``centralized_critic_postprocessing``
@@ -501,7 +523,7 @@ Mathematical Form
 ^^^^^^^^^^^^^^^^^^
 
 VDA2C needs information sharing across agents. Therefore, the critic mixing utilizes both self-observation and other agents' observation.
-Here we bold the symbol (e.g., :math:`o` to :math:`\mathbf{o}`) to indicate that more than one agent information is contained.
+Here we bold the symbol (e.g., :math:`a` to :math:`\mathbf{a}`) to indicate that more than one agent information is contained.
 
 
 Critic mixing:
@@ -511,36 +533,39 @@ Critic mixing:
     V_{tot}(\mathbf{a}, s;\boldsymbol{\phi},\psi) = g_{\psi}\bigl(s, V_{\phi_1},V_{\phi_2},..,V_{\phi_n} \bigr)
 
 
-Mixed Critic learning:
+Mixed Critic learning: every iteration gives a better value function and a better mixing function.
+
 
 .. math::
 
     \phi_{k+1} = \arg \min_{\phi} \frac{1}{|{\mathcal D}_k| T} \sum_{\tau \in {\mathcal D}_k} \sum_{t=0}^T\left( V_{tot} - \hat{R}_t \right)^2
 
-Advantage Estimation:
+Advantage Estimation: how good are current joint action set regarding to the baseline critic value.
 
 .. math::
 
     A_t = r_{t+1} + \lambda V_{tot}^{t+1} - V_{tot}^{t}
 
-Policy learning:
+Policy learning: computing the policy gradient using estimated advantage to update the policy function.
 
 .. math::
 
     \nabla_\theta J(\theta) \sim \sum_{t=0}^{T-1}\nabla_\theta \log\pi_{\theta}(a_t|s_t)A_t
 
 Here
-:math:`{\mathcal D}` is the collected trajectories.
+:math:`\mathcal D` is the collected trajectories that can be shared across agents.
 :math:`R` is the rewards-to-go.
 :math:`\tau` is the trajectory.
 :math:`A` is the advantage.
 :math:`\gamma` is discount value.
+:math:`\lambda` is the weight value of GAE.
+:math:`o` is the current agent local observation.
 :math:`a` is the current agent action.
 :math:`\mathbf{a}^-` is the action set of all agents, except the current agent.
-:math:`s` is the current state.
-:math:`V_{\phi}` is the critic value function.
-:math:`\pi_{\theta}` is the policy net.
-:math:`g_{\psi}` is a mixing network.
+:math:`s` is the current agent global state.
+:math:`V_{\phi}` is the critic value function, which can be shared across agents.
+:math:`\pi_{\theta}` is the policy function, which can be shared across agents.
+:math:`g_{\psi}` is a mixing network, which must be shared across agents.
 
 
 
