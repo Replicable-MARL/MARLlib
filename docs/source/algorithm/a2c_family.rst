@@ -165,7 +165,7 @@ Policy learning: computing the policy gradient using estimated advantage to upda
 
 .. math::
 
-    \nabla_\theta J(\theta) \sim \sum_{t=0}^{T-1}\nabla_\theta \log\pi_{\theta}(a_t|o_t)A_t
+    \nabla_\theta J(\theta) \sim \sum_{t=0}^{T-1}\nabla_\theta \log\pi_{\theta}(u_t|o_t)A_t
 
 
 
@@ -264,25 +264,25 @@ Mathematical Form
 ^^^^^^^^^^^^^^^^^^
 
 MAA2C needs information sharing across agents. Critic learning utilizes self-observation and global information,
-including state and actions. Here we bold the symbol (e.g., :math:`a` to :math:`\mathbf{a}`) to indicate that more than one agent information is contained.
+including state and actions. Here we bold the symbol (e.g., :math:`u` to :math:`\mathbf{u}`) to indicate that more than one agent information is contained.
 
 Critic learning: every iteration gives a better value function.
 
 .. math::
 
-    \phi_{k+1} = \arg \min_{\phi} \frac{1}{|{\mathcal D}_k| T} \sum_{\tau \in {\mathcal D}_k} \sum_{t=0}^T\left( V_{\phi} (o_t,s_t,\mathbf{a_t^-}) - \hat{R}_t \right)^2
+    \phi_{k+1} = \arg \min_{\phi} \frac{1}{|{\mathcal D}_k| T} \sum_{\tau \in {\mathcal D}_k} \sum_{t=0}^T\left( V_{\phi} (o_t,s_t,\mathbf{u_t^-}) - \hat{R}_t \right)^2
 
 Advantage Estimation: how good are current action regarding to the baseline critic value.
 
 .. math::
 
-    A_t = r_{t+1} + \lambda V_{\phi} (o_{t+1},s_{t+1},\mathbf{a_{t+1}^-}) - V_{\phi} (o_t,s_t,\mathbf{a_t^-})
+    A_t = r_{t+1} + \lambda V_{\phi} (o_{t+1},s_{t+1},\mathbf{u_{t+1}^-}) - V_{\phi} (o_t,s_t,\mathbf{u_t^-})
 
 Policy learning: computing the policy gradient using estimated advantage to update the policy function.
 
 .. math::
 
-    \nabla_\theta J(\theta) \sim \sum_{t=0}^{T-1}\nabla_\theta \log\pi_{\theta}(a_t|o_t)A_t
+    \nabla_\theta J(\theta) \sim \sum_{t=0}^{T-1}\nabla_\theta \log\pi_{\theta}(u_t|o_t)A_t
 
 Here
 :math:`\mathcal D` is the collected trajectories that can be shared across agents.
@@ -292,8 +292,8 @@ Here
 :math:`\gamma` is discount value.
 :math:`\lambda` is the weight value of GAE.
 :math:`o` is the current agent local observation.
-:math:`a` is the current agent action.
-:math:`\mathbf{a}^-` is the action set of all agents, except the current agent.
+:math:`u` is the current agent action.
+:math:`\mathbf{u}^-` is the action set of all agents, except the current agent.
 :math:`s` is the current agent global state.
 :math:`V_{\phi}` is the critic value function, which can be shared across agents.
 :math:`\pi_{\theta}` is the policy function, which can be shared across agents.
@@ -405,13 +405,13 @@ Q learning: every iteration gives a better Q function.
 
 .. math::
 
-    \phi_{k+1} = \arg \min_{\phi} \frac{1}{|{\mathcal D}_k| T} \sum_{\tau \in {\mathcal D}_k} \sum_{t=0}^T\left( Q_{\phi} (o_t, s_t, a_t, (\mathbf{a_t}^-)) - \hat{R}_t \right)^2
+    \phi_{k+1} = \arg \min_{\phi} \frac{1}{|{\mathcal D}_k| T} \sum_{\tau \in {\mathcal D}_k} \sum_{t=0}^T\left( Q_{\phi} (o_t, s_t, u_t, (\mathbf{u_t}^-)) - \hat{R}_t \right)^2
 
 Marginalized Advantage Estimation: how good are current action's Q value compared to the average Q value of the whole action space.
 
 .. math::
 
-    A_t = Q_{\phi}(o_t, s_t, a_t, \mathbf{a}^-) - \sum_{a_t} \pi(a_t \vert \tau) Q_{\phi}(o_t, s_t, a_t, (\mathbf{a_t}^-))
+    A_t = Q_{\phi}(o_t, s_t, u_t, \mathbf{a}^-) - \sum_{u_t} \pi(u_t \vert \tau) Q_{\phi}(o_t, s_t, u_t, (\mathbf{u_t}^-))
 
 
 Policy learning:
@@ -426,10 +426,9 @@ Here
 :math:`\tau` is the trajectory.
 :math:`A` is the advantage.
 :math:`o` is the current agent local observation.
-:math:`a` is the current agent action.
-:math:`\mathbf{a}^-` is the action set of all agents, except the current agent.
+:math:`u` is the current agent action.
+:math:`\mathbf{u}^-` is the action set of all agents, except the current agent.
 :math:`s` is the global state.
-:math:`\mathbf{s}^-` is the observation/state set of all agents, except the current agent.
 :math:`Q_{\phi}` is the Q function.
 :math:`\pi_{\theta}` is the policy function.
 
@@ -523,14 +522,14 @@ Mathematical Form
 ^^^^^^^^^^^^^^^^^^
 
 VDA2C needs information sharing across agents. Therefore, the critic mixing utilizes both self-observation and other agents' observation.
-Here we bold the symbol (e.g., :math:`a` to :math:`\mathbf{a}`) to indicate that more than one agent information is contained.
+Here we bold the symbol (e.g., :math:`u` to :math:`\mathbf{u}`) to indicate that more than one agent information is contained.
 
 
 Critic mixing:
 
 .. math::
 
-    V_{tot}(\mathbf{a}, s;\boldsymbol{\phi},\psi) = g_{\psi}\bigl(s, V_{\phi_1},V_{\phi_2},..,V_{\phi_n} \bigr)
+    V_{tot}(\mathbf{u}, s;\boldsymbol{\phi},\psi) = g_{\psi}\bigl(s, V_{\phi_1},V_{\phi_2},..,V_{\phi_n} \bigr)
 
 
 Mixed Critic learning: every iteration gives a better value function and a better mixing function.
@@ -550,7 +549,7 @@ Policy learning: computing the policy gradient using estimated advantage to upda
 
 .. math::
 
-    \nabla_\theta J(\theta) \sim \sum_{t=0}^{T-1}\nabla_\theta \log\pi_{\theta}(a_t|s_t)A_t
+    \nabla_\theta J(\theta) \sim \sum_{t=0}^{T-1}\nabla_\theta \log\pi_{\theta}(u_t|s_t)A_t
 
 Here
 :math:`\mathcal D` is the collected trajectories that can be shared across agents.
@@ -560,8 +559,8 @@ Here
 :math:`\gamma` is discount value.
 :math:`\lambda` is the weight value of GAE.
 :math:`o` is the current agent local observation.
-:math:`a` is the current agent action.
-:math:`\mathbf{a}^-` is the action set of all agents, except the current agent.
+:math:`u` is the current agent action.
+:math:`\mathbf{u}^-` is the action set of all agents, except the current agent.
 :math:`s` is the current agent global state.
 :math:`V_{\phi}` is the critic value function, which can be shared across agents.
 :math:`\pi_{\theta}` is the policy function, which can be shared across agents.

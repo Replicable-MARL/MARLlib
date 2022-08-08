@@ -47,14 +47,14 @@ Here :math:`{\mathcal D}` is the replay buffer
 :math:`s'` is the next observation/state.
 :math:`d` is set to 1 (True) when episode ends else 0 (False).
 :math:`{\gamma}` is discount value.
-:math:`\mu_{\theta}` is policy net.
-:math:`Q_{\phi}` is Q net.
-:math:`\mu_{\theta_{\text{targ}}}` is target policy net
-:math:`Q_{\phi_{\text{targ}}}` is target Q net.
+:math:`\mu_{\theta}` is policy function.
+:math:`Q_{\phi}` is Q function.
+:math:`\mu_{\theta_{\text{targ}}}` is target policy function
+:math:`Q_{\phi_{\text{targ}}}` is target Q function.
 
 .. admonition:: You Should Know
 
-    Some tricks like `gumble softmax` enables DDPG policy net to output categorical-like action distribution.
+    Some tricks like `gumble softmax` enables DDPG policy function to output categorical-like action distribution.
 
 ---------------------
 
@@ -142,14 +142,44 @@ Mathematical Form
 ^^^^^^^^^^^^^^^^^^
 
 Standing at the view of a single agent, the mathematical formulation of IDDPG is the same as DDPG: :ref:`DDPG`.
+, except that in MARL,
+agent usually has no access to the global state typically under partial observable setting.
+Therefore, we use :math:`o` for
+local observation and :math:`s`for the global state. We then rewrite the mathematical formulation of DDPG as:
+
+Q learning: get a better Q function
+
+.. math::
+
+    L(\phi, {\mathcal D}) = \underset{(o,u,r,o',d) \sim {\mathcal D}}{{\mathrm E}}\left[
+        \Bigg( Q_{\phi}(o,u) - \left(r + \gamma (1 - d) Q_{\phi_{\text{targ}}}(o', \mu_{\theta_{\text{targ}}}(o')) \right) \Bigg)^2
+        \right]
+
+Policy learning: maximize the Q function output by updating the policy function.
+
+.. math::
+
+    \max_{\theta} \underset{o \sim {\mathcal D}}{{\mathrm E}}\left[ Q_{\phi}(o, \mu_{\theta}(o)) \right]
+
+Here :math:`{\mathcal D}` is the replay buffer
+:math:`a` is the action taken.
+:math:`r` is the reward.
+:math:`o` is the local observation.
+:math:`o'` is the next local observation.
+:math:`d` is set to 1 (True) when episode ends else 0 (False).
+:math:`{\gamma}` is discount value.
+:math:`\mu_{\theta}` is policy function.
+:math:`Q_{\phi}` is Q function.
+:math:`\mu_{\theta_{\text{targ}}}` is target policy function
+:math:`Q_{\phi_{\text{targ}}}` is target Q function.
 
 Note in multi-agent settings, all the agent models and buffer can be shared, including:
 
 - :math:`{\mathcal D}` replay buffer.
-- :math:`\mu_{\theta}` policy net.
-- :math:`Q_{\phi}` Q net.
-- :math:`\mu_{\theta_{\text{targ}}}` target policy net.
-- :math:`Q_{\phi_{\text{targ}}}` target Q net.
+- :math:`\mu_{\theta}` policy function.
+- :math:`Q_{\phi}` Q function.
+- :math:`\mu_{\theta_{\text{targ}}}` target policy function.
+- :math:`Q_{\phi_{\text{targ}}}` target Q function.
 
 
 
@@ -254,49 +284,48 @@ Traditional reinforcement learning approaches such as Q-Learning or policy gradi
 
 Multi-agent Deep Deterministic Policy Gradient (MADDPG) is an algorithm that extends DDPG with a centralized Q function that takes observation and action from current agents and other agents. Like DDPG, MADDPG also has a policy network :math:`\mu(s)` parameterized by :math:`\theta` to produce action value.
 While the centralized Q value is calculated as :math:`Q(\mathbf{s},\mu(\mathbf{s}))` and the Q network is parameterized by :math:`\phi`.
-Note :math:`s` in policy network is the self-observation/state while :math:`\mathbf{s}` in centralized Q is the joint observation/state, which also includes the opponents.
+Note :math:`o` in policy network is the local observation while :math:`\mathbf{s}` in centralized Q is the joint observation/state, which also includes the opponents.
 
 
 .. admonition:: You Should Know
 
     - MADDPG is the most famous work that started MARL research under centralized training and decentralized execution(CTDE) these years.
-    - Other works find that Q-learning-based algorithms can perform well under similar settings. E.g., :ref:`QMIX`.
-    - Recent works prove that policy gradient methods can be directly applied to MARL and maintain good performance. E.g., :ref:`IPPO`
-    - MADDPG is criticized for its unstable performance in recent MARL research.
+    - Recent works find that stochastic policy gradient methods can be directly applied to MARL and maintain good performance. E.g., :ref:`IPPO`
+    - MADDPG is criticized for its unstable performance in practice.
 
 Mathematical Form
 ^^^^^^^^^^^^^^^^^^
 
 MADDPG needs information sharing across agents. The Q learning utilizes self-observation and information other agents provide, including
- observation and actions. Here we bold the symbol (e.g., :math:`s` to :math:`\mathbf{s}`) to indicate more than one agent information is contained.
+observation and actions. Here we bold the symbol (e.g., :math:`u` to :math:`\mathbf{u}`) to indicate more than one agent information is contained.
 
 
-Q learning:
+Q learning: get a better centralized Q function
 
 .. math::
 
-    L(\phi, {\mathcal D}) = \underset{(\mathbf{s},\mathbf{a},r,\mathbf{s'},d) \sim {\mathcal D}}{{\mathrm E}}\left[
-        \Bigg( Q_{\phi}(\mathbf{s},\mathbf{a}) - \left(r + \gamma (1 - d) Q_{\phi_{\text{targ}}}(\mathbf{s'}, \mu_{\theta_{\text{targ}}}(\mathbf{s'})) \right) \Bigg)^2
+    L(\phi, {\mathcal D}) = \underset{(o,s,\mathbf{u},r,o',s',d)} \sim {\mathcal D}}{{\mathrm E}}\left[
+        \Bigg( Q_{\phi}(o,s,\mathbf{u},r,o',s',d) - \left(r + \gamma (1 - d) Q_{\phi_{\text{targ}}}(o', s', \mu_{\theta_{\text{targ}}}(\mathbf{o'})) \right) \Bigg)^2
         \right]
 
 
-Policy learning:
+Policy learning: maximize the Q function output by updating the policy function.
 
 .. math::
 
-    \max_{\theta} \underset{s \sim {\mathcal D}}{{\mathrm E}}\left[ Q_{\phi}(s,\mathbf{a}, \mu_{\theta}(s)) \right]
+    \max_{\theta} \underset{\mathbf{o},s \sim {\mathcal D}}{{\mathrm E}}\left[ Q_{\phi}(o,s, \mu_{\theta}(\mathbf{o})) \right]
 
 Here :math:`{\mathcal D}` is the replay buffer and can be shared across agents.
-:math:`\mathbf{a}` is an action set, including opponents.
+:math:`\mathbf{u}` is an action set, including opponents.
 :math:`r` is the reward.
-:math:`\mathbf{s}` is the observation/state set, including opponents.
-:math:`\mathbf{s'}` is the next observation/state set, including opponents.
+:math:`s` is the observation/state set, including opponents.
+:math:`s'` is the next observation/state set, including opponents.
 :math:`d` is set to 1(True) when an episode ends else 0(False).
 :math:`{\gamma}` is discount value.
-:math:`\mu_{\theta}` is a policy net that can be shared across agents.
-:math:`Q_{\phi}` is Q net, which can be shared across agents.
-:math:`\mu_{\theta_{\text{targ}}}` is target policy net, which can be shared across agents.
-:math:`Q_{\phi_{\text{targ}}}` is target Q net, which can be shared across agents.
+:math:`\mu_{\theta}` is a policy function that can be shared across agents.
+:math:`Q_{\phi}` is Q function, which can be shared across agents.
+:math:`\mu_{\theta_{\text{targ}}}` is target policy function, which can be shared across agents.
+:math:`Q_{\phi_{\text{targ}}}` is target Q function, which can be shared across agents.
 
 
 Implementation
@@ -414,42 +443,42 @@ Compared to existing methods, FACMAC:
 Mathematical Form
 ^^^^^^^^^^^^^^^^^^
 
-FAMAC needs information sharing across agents. Here we bold the symbol (e.g., :math:`s` to :math:`\mathbf{s}`) to indicate more than one agent information is contained.
+FAMAC needs information sharing across agents. Here we bold the symbol (e.g., :math:`u` to :math:`\mathbf{u}`) to indicate more than one agent information is contained.
 
 
-Q mixing:
-
-.. math::
-
-    Q_{tot}(\mathbf{a}, s;\boldsymbol{\phi},\psi) = g_{\psi}\bigl(`\mathbf{s}, Q_{\phi_1},Q_{\phi_2},..,Q_{\phi_n} \bigr)
-
-Q learning:
+Q mixing: using a learnable mixer to compute the global Q value.
 
 .. math::
 
-    L(\phi,\psi, {\mathcal D}) = \underset{(\mathbf{s},\mathbf{a},r,\mathbf{s'},d) \sim {\mathcal D}}{{\mathrm E}}\left[
-        \Bigg(Q_{tot}(\mathbf{a}, s;\boldsymbol{\phi},\psi) - \left(r + \gamma (1 - d) Q_{tot}(\mathbf{a'}, s';\boldsymbol{\phi_{\text{targ}}},\psi_{\text{targ}}) \right) \Bigg)^2
+    Q_{tot}(\mathbf{u}, s;\boldsymbol{\phi},\psi) = g_{\psi}\bigl(s, Q_{\phi_1},Q_{\phi_2},..,Q_{\phi_n} \bigr)
+
+Q learning: get a better Q function and mixer function
+
+.. math::
+
+    L(\phi,\psi, {\mathcal D}) = \underset{(o, s,\mathbf{u},r,o' s',d)} \sim {\mathcal D}}{{\mathrm E}}\left[
+        \Bigg(Q_{tot}(\mathbf{u},o,s;\boldsymbol{\phi},\psi) - \left(r + \gamma (1 - d) Q_{tot}(\mathbf{u'},o', s';\boldsymbol{\phi_{\text{targ}}},\psi_{\text{targ}}) \right) \Bigg)^2
         \right]
 
 
-Policy learning:
+Policy learning: maximize the Q function output by updating the policy function.
 
 .. math::
 
-    \max_{\theta} \underset{s \sim {\mathcal D}}{{\mathrm E}}\left[ Q_{\phi}(s,\mathbf{a}, \mu_{\theta}(s)) \right]
+    \max_{\theta} \underset{o \sim {\mathcal D}}{{\mathrm E}}\left[ Q_{\phi}(o,\mu_{\theta}(o)) \right]
 
 Here :math:`{\mathcal D}` is the replay buffer, which can be shared across agents.
-:math:`\mathbf{a}` is an action set, including opponents.
+:math:`\mathbf{u}` is an action set, including opponents.
 :math:`r` is the reward.
-:math:`\mathbf{s}` is the observation/state set, including opponents.
-:math:`\mathbf{s'}` is the next observation/state set, including opponents.
+:math:`s` is the observation/state set, including opponents.
+:math:`s'` is the next observation/state set, including opponents.
 :math:`d` is set to 1(True) when an episode ends else 0(False).
 :math:`{\gamma}` is discount value.
-:math:`\mu_{\theta}` is policy net, which can be shared across agents.
-:math:`Q_{\phi}` is Q net, which can be shared across agents.
+:math:`\mu_{\theta}` is policy function, which can be shared across agents.
+:math:`Q_{\phi}` is Q function, which can be shared across agents.
 :math:`g_{\psi}` is mixing network.
-:math:`\mu_{\theta_{\text{targ}}}` is target policy net, which can be shared across agents.
-:math:`Q_{\phi_{\text{targ}}}` is target Q net, which can be shared across agents.
+:math:`\mu_{\theta_{\text{targ}}}` is target policy function, which can be shared across agents.
+:math:`Q_{\phi_{\text{targ}}}` is target Q function, which can be shared across agents.
 :math:`g_{\psi_{\text{targ}}}` is target mixing network.
 
 
