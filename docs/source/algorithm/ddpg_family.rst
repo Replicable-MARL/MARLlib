@@ -67,7 +67,7 @@ IDDPG: multi-agent version of DDPG
 
     - Independent deep deterministic policy gradient (IDDPG) is a natural extension of DDPG under multi-agent settings.
     - An IDDPG agent architecture consists of two models: ``policy`` and ``Q``.
-    - IDDPG applies to cooperative, competitive, and mixed task modes.
+    - IDDPG is applicable for cooperative, collaborative, competitive, and mixed task modes.
 
 **Preliminary**
 
@@ -100,12 +100,13 @@ action space
 task mode
 
 .. list-table::
-   :widths: 25 25 25
+   :widths: 25 25 25 25
    :header-rows: 0
 
    * - ``cooperative``
      - ``collaborative``
      - ``competitive``
+     - ``mixed``
 
 taxonomy label
 
@@ -221,7 +222,7 @@ MADDPG: DDPG agent with a centralized Q
 
     - Multi-agent deep deterministic policy gradient(MADDPG) is one of the extended version of :ref:`IDDPG`.
     - Agent architecture of MADDPG consists of two models: ``policy`` and ``Q``.
-    - MADDPG applies to cooperative, competitive, and mixed task modes.
+    - MADDPG is applicable for cooperative, collaborative, competitive, and mixed task modes.
 
 **Preliminary**
 
@@ -254,12 +255,13 @@ action space
 task mode
 
 .. list-table::
-   :widths: 25 25 25
+   :widths: 25 25 25 25
    :header-rows: 0
 
    * - ``cooperative``
      - ``collaborative``
      - ``competitive``
+     - ``mixed``
 
 taxonomy label
 
@@ -366,7 +368,7 @@ FACMAC: mixing a bunch of DDPG agents
 
     - Factored Multi-Agent Centralised Policy Gradients (FACMAC) is one of the extended version of :ref:`IDDPG`.
     - Agent architecture of FACMAC consists of three models: ``policy``, ``Q``, and ``mixer``.
-    - FACMAC applies to cooperative task mode only.
+    - FACMAC is applicable for cooperative and collaborative task modes.
 
 **Preliminary**:
 
@@ -402,10 +404,11 @@ action space
 task mode
 
 .. list-table::
-   :widths: 25
+   :widths: 25 25
    :header-rows: 0
 
    * - ``cooperative``
+     - ``collaborative``
 
 taxonomy label
 

@@ -58,7 +58,7 @@ Policy learning step 2: Use the conjugate gradient algorithm to compute
 
 .. math::
 
-    \x_k \approx \H_k^{-1} \g_k
+    x_k \approx H_k^{-1} g_k
 
 Policy learning step 3
 
@@ -94,7 +94,7 @@ ITRPO: multi-agent version of TRPO
 
     - Independent trust region policy optimization (ITRPO) is a natural extension of standard trust region policy optimization (TRPO) in multi-agent settings.
     - Agent architecture of ITRPO consists of two modules: ``policy`` and ``critic``.
-    - ITRPO applies to cooperative, collaborative, competitive, and mixed tasks.
+    - ITRPO is applicable for cooperative, collaborative, competitive, and mixed task modes.
 
 **Preliminary**:
 
@@ -128,12 +128,13 @@ action space
 task mode
 
 .. list-table::
-   :widths: 25 25 25
+   :widths: 25 25 25 25
    :header-rows: 0
 
    * - ``cooperative``
      - ``collaborative``
      - ``competitive``
+     - ``mixed``
 
 taxonomy label
 
@@ -242,7 +243,7 @@ MATRPO: TRPO agent with a centralized critic
 
     - Multi-agent trust region policy optimization (MATRPO) is one of the extended version of :ref:`ITRPO`.
     - Agent architecture of MATRPO consists of two models: ``policy`` and ``critic``.
-    - MATRPO is applicable for cooperative, collaborative, competitive, and mixed tasks.
+    - MATRPO is applicable for cooperative, collaborative, competitive, and mixed task modes.
 
 **Preliminary**:
 
@@ -276,12 +277,13 @@ action space
 task mode
 
 .. list-table::
-   :widths: 25 25 25
+   :widths: 25 25 25 25
    :header-rows: 0
 
    * - ``cooperative``
      - ``collaborative``
      - ``competitive``
+     - ``mixed``
 
 taxonomy label
 
@@ -372,7 +374,7 @@ HATRPO: Sequentially updating critic of MATRPO agents
     - Heterogeneous-Agent Proximal Policy Optimisation (HATRPO) algorithm is based on :ref:`MATRPO`.
     - Agent architecture of HATRPO consists of three modules: ``policy``, ``critic``, and ``sequential updating``.
     - In HATRPO, agents have non-shared ``policy`` and shared ``critic``.
-    - HATRPO is proposed to solve cooperative tasks.
+    - HATRPO is proposed to solve cooperative and collaborative tasks.
 
 
 Workflow
@@ -405,12 +407,11 @@ action space
 task mode
 
 .. list-table::
-   :widths: 25 25 25
+   :widths: 25 25
    :header-rows: 0
 
    * - ``cooperative``
      - ``collaborative``
-     - ``competitive``
 
 taxonomy label
 

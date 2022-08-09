@@ -74,7 +74,7 @@ IPPO: multi-agent version of PPO
 
     - Independent proximal policy optimization (IPPO) is a natural extension of standard proximal policy optimization (PPO) in multi-agent settings.
     - Agent architecture of IPPO consists of two modules: ``policy`` and ``critic``.
-    - IPPO applies to cooperative, competitive, and mixed task modes.
+    - IPPO is applicable for cooperative, collaborative, competitive, and mixed task modes.
 
 **Preliminary**:
 
@@ -107,12 +107,13 @@ action space
 task mode
 
 .. list-table::
-   :widths: 25 25 25
+   :widths: 25 25 25 25
    :header-rows: 0
 
    * - ``cooperative``
      - ``collaborative``
      - ``competitive``
+     - ``mixed``
 
 taxonomy label
 
@@ -255,12 +256,13 @@ action space
 task mode
 
 .. list-table::
-   :widths: 25 25 25
+   :widths: 25 25 25 25
    :header-rows: 0
 
    * - ``cooperative``
      - ``collaborative``
      - ``competitive``
+     - ``mixed``
 
 taxonomy label
 
@@ -363,7 +365,7 @@ VDPPO: mixing a bunch of PPO agents' critics
 
     - Value decomposition proximal policy optimization (VDPPO) is one of the extended version of :ref:`IPPO`.
     - Agent architecture of VDPPO consists of three modules: ``policy``, ``critic``, and ``mixer``.
-    - VDPPO is proposed to solve cooperative tasks only.
+    - VDPPO is proposed to solve cooperative and collaborative task modes.
 
 **Preliminary**:
 
@@ -397,10 +399,12 @@ action space
 task mode
 
 .. list-table::
-   :widths: 25
+   :widths: 25 25
    :header-rows: 0
 
    * - ``cooperative``
+     - ``collaborative``
+
 
 
 taxonomy label
@@ -423,7 +427,7 @@ VDPPO focuses on the credit assignment learning, which is similar to the joint Q
 VDPPO is easy to understand when you have basic idea of :ref:`QMIX` and :ref:`VDA2C`.
 
 .. admonition:: You Should Know
-    - Like the joint Q learning family, VDPPO only applies to cooperative multi-agent tasks.
+    - Like the joint Q learning family, VDPPO is applicable for cooperative and collaborative multi-agent tasks.
     - The sampling efficiency of VDPPO is worse than joint Q learning family algorithms.
     - VDPPO can be applied to both discrete and continuous control problems, which is a good news compared to discrete-only joint Q learning algorithms
 
@@ -512,7 +516,7 @@ HAPPO: Sequentially updating critic of MAPPO agents
     - Heterogeneous-Agent Proximal Policy Optimisation (HAPPO) algorithm is based on :ref:`MAPPO`.
     - Agent architecture of HAPPO consists of three modules: ``policy``, ``critic``, and ``sequential updating``.
     - In HAPPO, agents have non-shared ``policy`` and shared ``critic``.
-    - HAPPO is proposed to solve cooperative tasks.
+    - HAPPO is proposed to solve cooperative and collaborative tasks.
 
 
 Workflow
@@ -545,12 +549,12 @@ action space
 task mode
 
 .. list-table::
-   :widths: 25 25 25
+   :widths: 25 25
    :header-rows: 0
 
    * - ``cooperative``
      - ``collaborative``
-     - ``competitive``
+
 
 taxonomy label
 

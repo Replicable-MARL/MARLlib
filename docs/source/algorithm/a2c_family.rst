@@ -71,7 +71,7 @@ IA2C: multi-agent version of A2C
 
     - Independent advanced actor-critic (IA2C) is a natural extension of standard advanced actor-critic (A2C) in multi-agent settings.
     - Agent architecture of IA2C consists of two modules: ``policy`` and ``critic``.
-    - IA2C applies to cooperative, competitive, and mixed task modes.
+    - IA2C is applicable for cooperative, collaborative, competitive, and mixed task modes.
 
 **Preliminary**:
 
@@ -104,12 +104,13 @@ action space
 task mode
 
 .. list-table::
-   :widths: 25 25 25
+   :widths: 25 25 25 25
    :header-rows: 0
 
    * - ``cooperative``
      - ``collaborative``
      - ``competitive``
+     - ``mixed``
 
 taxonomy label
 
@@ -198,7 +199,7 @@ MAA2C: A2C agent with a centralized critic
 
     - Multi-agent advanced actor-critic (MAA2C) is one of the extended versions of :ref:`IA2C`.
     - Agent architecture of MAA2C consists of two models: ``policy`` and ``critic``.
-    - MAA2C is applicable to collaborative, competitive, and mixed tasks.
+    - MAA2C is applicable for cooperative, collaborative, competitive, and mixed task modes.
 
 **Preliminary**:
 
@@ -232,12 +233,13 @@ action space
 task mode
 
 .. list-table::
-   :widths: 25 25 25
+   :widths: 25 25 25 25
    :header-rows: 0
 
    * - ``cooperative``
      - ``collaborative``
      - ``competitive``
+     - ``mixed``
 
 taxonomy label
 
@@ -325,7 +327,7 @@ COMA: MAA2C with Counterfactual Multi-Agent Policy Gradients
     - Counterfactual multi-agent policy gradients (COMA) is based on MAA2C.
     - Agent architecture of COMA consists of two models: ``policy`` and ``Q``.
     - COMA adopts a counterfactual baseline to marginalize a single agent’s action's contribution.
-    - COMA is applicable to collaborative, competitive, and mixed tasks.
+    - COMA is applicable for cooperative, collaborative, competitive, and mixed task modes.
 
 **Preliminary**:
 
@@ -359,12 +361,13 @@ action space
 task mode
 
 .. list-table::
-   :widths: 25 25 25
+   :widths: 25 25 25 25
    :header-rows: 0
 
    * - ``cooperative``
      - ``collaborative``
      - ``competitive``
+     - ``mixed``
 
 taxonomy label
 
@@ -458,7 +461,7 @@ VDA2C: mixing a bunch of A2C agents' critics
 
     - Value decomposition advanced actor-critic (VDA2C) is one of the extensions of :ref:`IA2C`.
     - Agent architecture of VDA2C consists of three modules: ``policy``, ``critic``, and ``mixer``.
-    - VDA2C is proposed to solve cooperative tasks only.
+    - VDA2C is proposed to solve cooperative and collaborative tasks only.
 
 **Preliminary**:
 
@@ -492,10 +495,12 @@ action space
 task mode
 
 .. list-table::
-   :widths: 25
+   :widths: 25 25
    :header-rows: 0
 
    * - ``cooperative``
+     - ``collaborative``
+
 
 
 taxonomy label

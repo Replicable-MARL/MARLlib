@@ -90,7 +90,7 @@ IQL: Independent Q Learning.
 
     - Independent Q Learning (IQL) is the natural extension of q learning under multi-agent settings.
     - Agent architecture of IQL consists of one module: ``Q``.
-    - IQL applies to cooperative, competitive, and mixed task modes.
+    - IQL is applicable for cooperative, collaborative, competitive, and mixed task modes.
 
 Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -118,12 +118,13 @@ action space
 task mode
 
 .. list-table::
-   :widths: 25 25 25
+   :widths: 25 25 25 25
    :header-rows: 0
 
    * - ``cooperative``
      - ``collaborative``
      - ``competitive``
+     - ``mixed``
 
 taxonomy label
 
@@ -201,7 +202,7 @@ VDN: mixing Q with value decomposition network
 
     - Value Decomposition Network(VDN) is one of the value decomposition versions of IQL.
     - Agent architecture of VDN consists of one module: ``Q`` network.
-    - VDN only applies to cooperative task mode.
+    - VDN is applicable for cooperative and collaborative task modes.
 
 Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -232,10 +233,12 @@ action space
 task mode
 
 .. list-table::
-   :widths: 25
+   :widths: 25 25
    :header-rows: 0
 
    * - ``cooperative``
+     - ``collaborative``
+
 
 taxonomy label
 
@@ -330,7 +333,7 @@ QMIX: mixing Q with monotonic factorization
 
     - Monotonic Value Function Factorisation(QMIX) is one of the value decomposition versions of IQL.
     - Agent architecture of QMIX consists of two modules: ``Q`` and ``Mixer``.
-    - QMIX only applies to cooperative task mode.
+    - QMIX is applicable for cooperative and collaborative task modes.
 
 Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -361,10 +364,12 @@ action space
 task mode
 
 .. list-table::
-   :widths: 25
+   :widths: 25 25
    :header-rows: 0
 
    * - ``cooperative``
+     - ``collaborative``
+
 
 taxonomy label
 
