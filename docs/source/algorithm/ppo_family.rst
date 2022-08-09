@@ -48,7 +48,7 @@ Policy learning: computing the policy gradient using estimated advantage to upda
     L(s,a,\theta_k,\theta) = \min\left(
     \frac{\pi_{\theta}(a|s)}{\pi_{\theta_k}(a|s)}  A^{\pi_{\theta_k}}(s,a), \;\;
     \text{clip}\left(\frac{\pi_{\theta}(a|s)}{\pi_{\theta_k}(a|s)}, 1 - \epsilon, 1+\epsilon \right) A^{\pi_{\theta_k}}(s,a)
-    \right),
+    \right)
 
 Here
 :math:`{\mathcal D}` is the collected trajectories.
@@ -301,7 +301,7 @@ Critic learning: every iteration gives a better centralized value function.
 
 .. math::
 
-    \phi_{k+1} = \arg \min_{\phi} \frac{1}{|{\mathcal D}_k| T} \sum_{\tau \in {\mathcal D}_k} \sum_{t=0}^T\left( V_{\phi} (o_t) - \hat{R}_t \right)^2
+    \phi_{k+1} = \arg \min_{\phi} \frac{1}{|{\mathcal D}_k| T} \sum_{\tau \in {\mathcal D}_k} \sum_{t=0}^T\left( V_{\phi} (o_t,s_t,\mathbf{u_t}^-) - \hat{R}_t \right)^2
 
 General Advantage Estimation: how good are current action regarding to the baseline critic value.
 
@@ -446,7 +446,7 @@ Critic learning: every iteration gives a better  global value function.
 
 .. math::
 
-    \phi_{k+1} = \arg \min_{\phi} \frac{1}{|{\mathcal D}_k| T} \sum_{\tau \in {\mathcal D}_k} \sum_{t=0}^T\left( V_{tot}(\mathbf{a}, s;\boldsymbol{\phi},\psi) - \hat{R}_t \right)^2
+    \phi_{k+1} = \arg \min_{\phi} \frac{1}{|{\mathcal D}_k| T} \sum_{\tau \in {\mathcal D}_k} \sum_{t=0}^T\left( V_{tot}(\mathbf{u}, s;\boldsymbol{\phi},\psi) - \hat{R}_t \right)^2
 
 General Advantage Estimation: how good are current joint action set regarding to the baseline critic value.
 

@@ -13,7 +13,7 @@ MARLlib: The MARL Extension for RLlib
 
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 2
    :caption: Navigate From RL To MARL
 
    intro_marl/rl
@@ -23,14 +23,15 @@ MARLlib: The MARL Extension for RLlib
    :maxdepth: 2
    :caption: Algorithm Documentation
 
+   algorithm/jointQ_family
    algorithm/ddpg_family
    algorithm/a2c_family
    algorithm/trpo_family
    algorithm/ppo_family
-   algorithm/jointQ_family
+
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 2
    :caption: Resources
 
    resources/awesome
