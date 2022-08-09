@@ -30,7 +30,7 @@ To allow continues action, simply change **continuous_actions** in `mpe.yaml <ht
 Hyper-parameter of MARL algorithms
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-After the environment is all set, you need to pay a visit to the MARL algorithms' hyper-parameter directory.
+After the environment is all set, you need to visit the MARL algorithms' hyper-parameter directory.
 Each algorithm has different hyper-parameters to finetune with.
 
 Most of the algorithms are sensitive to the environment settings.
@@ -49,7 +49,7 @@ Simply add **--finetuned** when you run from the terminal command to use the fin
 The architecture of the agent
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Observation space varies with different environment, MARLlib automatically constructs the agent model to fit the diverse input shape, including:
+Observation space varies with different environments, MARLlib automatically constructs the agent model to fit the diverse input shape, including:
 
 - observation
 - global state

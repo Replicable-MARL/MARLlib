@@ -23,7 +23,7 @@ SMAC
 ==============
 
 StarCraft Multi-Agent Challenge (SMAC) is a multi-agent environment for collaborative multi-agent reinforcement learning (MARL) research based on Blizzard's StarCraft II RTS game.
-It concentrates on decentralized micromanagement scenarios, where an individual RL agent controls each game unit.
+It focuses on decentralized micromanagement scenarios, where an individual RL agent controls each game unit.
 
 Official Link: https://github.com/oxwhirl/smac
 
@@ -210,7 +210,7 @@ Our version: https://github.com/Farama-Foundation/PettingZoo/tree/master/petting
    * - ``Original Learning Mode``
      - Collaborative + Competitive
    * - ``MARLlib Learning Mode``
-     - Cooperative + Collaborative + Competitive
+     - Cooperative + Collaborative + Competitive + Mixed
    * - ``Observability``
      - Full
    * - ``Action Space``
@@ -389,7 +389,7 @@ Official Link: https://github.com/MultiAgentLearning/playground
    * - ``Original Learning Mode``
      - Collaborative + Competitive
    * - ``MARLlib Learning Mode``
-     - Cooperative + Collaborative + Competitive
+     - Cooperative + Collaborative + Competitive + Mixed
    * - ``Observability``
      - Full
    * - ``Action Space``

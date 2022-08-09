@@ -2,15 +2,11 @@
 
 
 *******************************
-MARLlib Framework
+Framework
 *******************************
 
-Based on Ray and one of its toolkits RLlib, MARLlib is a highly modularized framework where standard
-single agent algorithms in RLlib are extended to be multi-agent compatible.
-
-The environment interface is also redesigned in MARLlib as multi-agent RL tasks are so diverse
-where building a unified algorithm that can run everywhere is so challenging.
-
+Based on Ray and one of its toolkits RLlib, MARLlib enriches the RLlib with 18 multi-agent reinforcement learning (MARL) algorithms and incorporates ten diverse multi-agent environments as a testing bed.
+All the algorithms can be smoothly run on any environment with auto adaptation like model architecture and environment interface, and flexible customization via simply modifying the configuration files.
 
 
 .. contents::
@@ -18,17 +14,14 @@ where building a unified algorithm that can run everywhere is so challenging.
     :depth: 3
 
 
-MARLlib Architecture
+Architecture
 ====================
 
-We introduce the training pipelines from three perspectives:
+In this part, we introduce the MARLlib training pipelines from three perspectives:
 
-- how agent and environment interact in MARLlib
-- what do the whole data sampling and training workflow look like
-- how the critical components of MARLlib are combined to form the whole pipeline
-
-In MARLlib, we implement 18 MARL algorithms covering ten different multi-agent environments.
-The major challenge is to make algorithms to be compatible with all the environments.
+- agent and environment interaction
+- data sampling and training workflow
+- core components that form the whole pipeline
 
 Environment Interface
 -----------------------
@@ -41,23 +34,20 @@ Environment Interface
 
 The environment interface in MARLlib enables the following abilities:
 
-- Ten diverse environments in one interface
-- Multi-task as one task.
-- Group by group interaction is available
-- Unique data collection for each agent
+#. agent-agnostic: each agent has insulated data in the training stage
+#. task-agnostic: diverse environments in one interface
+#. asynchronous sampling: flexible agent-environment interaction mode
 
-MARLlib successfully unifies all the ten environments into one abstract interface that helps the burden for algorithm design work. And the environment under this interface
+First, MARLlib treats MARL as the combination of single agent RL processes.
+
+Second, MARLlib unifies all the ten environments into one abstract interface that helps the burden for algorithm design work. And the environment under this interface
 can be any instance, enabling multi-tasks / task agnostic learning.
 
-Unlike most of the existing MARL framework that only supports synchronous interaction between agents and environments, MARLlib supports an asynchronous interacting style.
+Third, unlike most of the existing MARL framework that only supports synchronous interaction between agents and environments, MARLlib supports an asynchronous interacting style.
 This should be credited to RLlib's flexible data collecting mechanism as data of different agents can be collected and stored in both synchronous and asynchronous ways.
 
-The last crucial feature in MARLlib environment interface design is avoiding data sharing across agents. For instance, the global reward is duplicated to each agent.
-This duplication is a must for MARLlib as we treat MARL as a combination of several single agent RL processes.
 
-
-
-RLlib/MARLlib Workflow
+Workflow
 -----------------------
 
 Same as RLlib, MARLlib has two phases after launching the process.
@@ -78,7 +68,7 @@ If the fake batch goes through the whole learning workflow with no error reporte
 Phase 2: Sampling & Training
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-After checking the whole pipeline in the pre-learning stage, real jobs are assigned to the workers and the learner. Finally, these processes are scheduled under the execution plan, where MARL officially starts.
+After checking the whole pipeline in the pre-learning stage, real jobs are assigned to the workers and the learner. Then finally, these processes are scheduled under the execution plan, where MARL officially starts.
 
 In a standard learning iteration, each worker first samples the data by interacting with its environment instance(s) using agent model(s). Then, the workers pass The sampled data to the replay buffer.
 Reply buffer is initialized according to the algorithm, which will decide how the data are stored. For example, the buffer is a concatenation operation for the on-policy algorithm.
@@ -130,7 +120,7 @@ Value Decomposition (right) is another branch of centralized training strategies
 to share is the predicted Q value or critic value. Additional data is required according to the algorithm. For instance, QMIX needs a global state to
 compute the mixing Q value.
 
-The data collecting and storage logic is the same as a centralized critic. To be mentioned, the joint Q learning methods (VDN, QMIX) are heavily copied from the original PyMARL. Only the FACMAC, VDA2C, and VDPPO follow the standard RLlib training pipeline among all five value decomposition algorithms.
+The data collecting and storage logic is the same as a centralized critic. The joint Q learning methods (VDN, QMIX) are heavily copied from the original PyMARL. Only the FACMAC, VDA2C, and VDPPO follow the standard RLlib training pipeline among all five value decomposition algorithms.
 
 
 Key Component
@@ -175,7 +165,7 @@ Mixing Value function
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The value decomposition agent model preserves the original value function but adds a new mixing value function to get the mixing value function.
-The mixing function is customizable. Currently, VDN and QMIX mixing function is provided. To change the mixing value, simply modify
+The mixing function is customizable. Currently, VDN and QMIX mixing function is provided. To change the mixing value, modify
 the model configuration file in **marl/model/configs/mixer**.
 
 Heterogeneous Optimization
@@ -186,7 +176,7 @@ Therefore, policy function is not shared across different agents.
 According to the proof of the algorithm, if agents were to set the values of the loss-related summons by sequentially updating their policies,
 any positive update would lead to an increment in summation.
 
-In order to ensure the monotonic increment. We use the trust region to get the suitable parameters update (HATRPO).
+To ensure the monotonic increment, we use the trust region to get the suitable parameters update (HATRPO).
 Considering the computing consumption, we use the proximal policy optimization to speed up the policy and critic update (HAPPO).
 
 .. figure:: ../images/hetero.png
