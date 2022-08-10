@@ -17,7 +17,7 @@ After installing :ref:`basic-installation`, you don't have to install every one 
 Follow the instruction :ref:`env` to install the environment you need.
 
 
-Configuration of environment
+Environment Configuration
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 As the :ref:`env` we incorporate in MARLlib is diverse, and each one has its unique environmental setting,
@@ -27,7 +27,7 @@ For instance, the Multiple Particle Environments (MPE) are set to accept only di
 To allow continues action, simply change **continuous_actions** in `mpe.yaml <https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/envs/base_env/config/mpe.yaml>`_ to **True**
 
 
-Hyper-parameter of MARL algorithms
+Algorithm Hyper-parameter
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 After the environment is all set, you need to visit the MARL algorithms' hyper-parameter directory.
@@ -46,7 +46,7 @@ And a finetuned hyper-parameters sets for the four most used MARL environments/b
 
 Simply add **--finetuned** when you run from the terminal command to use the finetuned hyper-parameters (if available).
 
-The architecture of the agent
+Model Architecture
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Observation space varies with different environments, MARLlib automatically constructs the agent model to fit the diverse input shape, including:
@@ -63,7 +63,7 @@ The supported architecture change includes:
 - `Recurrent Neural Network <https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/marl/models/configs/rnn.yaml>`_: GRU, LSTM
 - `Q/Critic Value Mixer <https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/marl/models/configs/mixer.yaml>`_: VDN, QMIX
 
-Settings of Ray
+Running Configuration
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Ray provides a robust multi-processing scheduling framework at the bottom of the MARLlib.

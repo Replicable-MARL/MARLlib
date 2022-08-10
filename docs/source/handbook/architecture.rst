@@ -223,8 +223,8 @@ Independent Learning
 Centralized Critic
 ---------------------
 
-- :ref:`COMA`
 - :ref:`MAA2C`
+- :ref:`COMA`
 - :ref:`MADDPG`
 - :ref:`MATRPO`
 - :ref:`MAPPO`

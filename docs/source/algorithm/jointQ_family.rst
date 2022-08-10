@@ -77,13 +77,12 @@ Here
 
     - replace the deep Q net's multi-layer perception(MLP) module with a recurrent module, e.g., GRU, LSTM.
     - store the data in episode format. (while DQN has no such restriction)
-    - Other than above two, the whole pipeline is kept unchanged.
 
 ---------------------
 
 .. _IQL:
 
-IQL: Independent Q Learning.
+IQL: multi-agent version of D(R)QN.
 -----------------------------------------------------
 
 .. admonition:: Quick Facts

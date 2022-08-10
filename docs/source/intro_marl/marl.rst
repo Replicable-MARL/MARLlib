@@ -1,4 +1,4 @@
-.. _concept:
+.. _part2:
 
 ***************************************
 Part 2. Navigate From RL To MARL
