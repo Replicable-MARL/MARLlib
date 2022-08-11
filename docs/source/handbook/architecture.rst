@@ -220,6 +220,8 @@ Independent Learning
 - :ref:`ITRPO`
 - :ref:`IPPO`
 
+.. _cc:
+
 Centralized Critic
 ---------------------
 
@@ -230,6 +232,8 @@ Centralized Critic
 - :ref:`MAPPO`
 - :ref:`HATRPO`
 - :ref:`HAPPO`
+
+.. _vd:
 
 Value Decomposition
 ---------------------

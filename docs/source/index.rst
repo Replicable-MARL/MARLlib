@@ -18,6 +18,7 @@ MARLlib: The MARL Extension for RLlib
 
    intro_marl/rl
    intro_marl/marl
+   intro_marl/survey
 
 .. toctree::
    :maxdepth: 2
