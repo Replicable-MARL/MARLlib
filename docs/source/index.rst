@@ -1,8 +1,10 @@
-MARLlib: The MARL Extension for RLlib
-========================================
+.. figure:: ../images/logo1.png
+    :align: center
+
+    The MARL Extension for RLlib
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: MARLlib Handbook
 
    handbook/intro
@@ -32,7 +34,7 @@ MARLlib: The MARL Extension for RLlib
 
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Resources
 
    resources/awesome

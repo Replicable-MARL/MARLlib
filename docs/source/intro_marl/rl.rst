@@ -5,38 +5,26 @@ Part 1. Single Agent (Deep) RL
 ***************************************
 
 There have been many great RL tutorials and open-sourced repos where you can find both the principle of different RL algorithms and
-the implementation details. In this part, we will quickly review what single-agent RL has done. If you are pretty familiar with RL,
-especially model-free RL, you can skip this part and go to :ref:`part2`.
+the implementation details. In this part, we will quickly navigate from RL to DRL. If you are pretty familiar with this part, you can skip this part and go to :ref:`part2`.
 
 .. contents::
     :local:
     :depth: 2
 
-Standard Reinforcement Learning
+Reinforcement Learning (RL)
 ===================================
 
-Reinforcement Learning is focused on goal-directed learning from interaction.
+Reinforcement Learning focuses on goal-directed learning from interaction.
 The learning entity must discover which strategy produces the greatest reward by "trial and error".
 
-**Key Concepts**:
 
-- **Agent** represents the solution, making decisions (actions) to solve decision-making problems under uncertainty.
-- **Environment** represents a problem that responds to the consequences of agent decisions.
-- **State** is a set of variables that fully describe the environment.
-- **Observation** is part of the state. Commonly, an agent does not have access to the entire state of the environment.
-- **Action** is made by the agent, influencing the environment state.
-- **Transition Function** is the mapping responsible for the action-state change.
-- **Reward** is a signal provided by the environment to evaluate the agent's actions directly.
-- **Episode** only exists when a task has a natural ending. A sequence of **timesteps** from the beginning to the end of the task forms a task episode.
-
-
-Deep Reinforcement Learning(DRL)
-================================
+Deep Reinforcement Learning (DRL)
+==================================
 
 Deep Reinforcement Learning (DRL) combines Reinforcement Learning and Deep Learning.
 It can solve a wide range of complex decision-making tasks previously out of reach for a machine to solve real-world problems with human-like intelligence.
 
-Deep Learning(DL)
+Deep Learning (DL)
 ---------------------
 
 Deep learning can learn from a training set and then apply that learning to a new data set.
@@ -54,7 +42,7 @@ An instance of combining Q learning with Deep learning can be found in :ref:`DQN
 Learning Cycle
 -----------------
 
-**On-policy**(left) and **off-policy**(right) learning cycle:
+**On-policy** (left) and **off-policy** (right) learning cycle:
 
 .. image:: ../images/on_policy.png
    :width: 40%
@@ -70,7 +58,9 @@ Learning Cycle
 RL/DRL Algorithms
 ----------------------------
 
-A comprehensive collection of RL algorithms from very old to very new: `Awesome Deep RL <https://github.com/tigerneil/awesome-deep-rl>`_.
+A comprehensive collection of RL/DRL algorithms from very old to very new can be find:
+
+- `Awesome Deep RL <https://github.com/tigerneil/awesome-deep-rl>`_
 
 Resources
 =================

@@ -29,6 +29,7 @@ using RL algorithm with no external signal from other agents to help optimize cu
 Besides, diverse multi-agent task modes raise an extra demand on the MARL algorithm: an algorithm proposed for
 cooperative tasks may not fit the competitive task settings. In the following part, we introduce these challenges in detail.
 
+.. _POMDP:
 
 Partially Observable Markov Decision Process (POMDP)
 --------------------------------------------------
@@ -90,7 +91,7 @@ What can MARL do?
 
 We can see that MARL bridges RL and real-world scenarios in a specific way.
 Teaching a group of agents how to coordinate, providing extra information to guide the strategy evolution,
-and equipping agents with the ability to handle diverse tasks with a more general policy are the motivation of MARL,
+and equipping agents with the ability to handle diverse tasks with a more general policy. These are the motivations of MARL,
 also the target of artificial general intelligence.
 
 MARL can now outperform humans in games like chess and `MOBA <https://en.wikipedia.org/wiki/Multiplayer_online_battle_arena>`_,
