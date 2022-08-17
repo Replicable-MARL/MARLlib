@@ -108,8 +108,12 @@ A task can also contain heterogeneous agents, where these agents prefer learning
 Task Mode: Cooperative-like or Competitive-like
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Cooperative-like
-"""""""""""""""""""
+There are two commonly seen task mode: cooperative-like, where agents tends to work as a team; and competitive-like, where agents have adversarial target
+and can be aggressive to other agents.
+
+
+Mode 1: Cooperative-like
+"""""""""""""""""""""""""""""
 
 There are two sub-modes under cooperative-like mode.
 
@@ -147,8 +151,8 @@ Environments with **cooperative** mode in MARLlib:
 - :ref:`MetaDrive`
 - :ref:`Hanabi`
 
-Competitive-like
-"""""""""""""""""""
+Mode 2: Competitive-like
+""""""""""""""""""""""""""""""
 
 Once agents have different targets in one task, especially when the targets are adversaries,
 the task can become much more complicated. A famous example is **zero-sum** game, where the total reward is fixed.
@@ -208,8 +212,8 @@ Under CTDE framework, there are two main branches: **Centralized Critic (CC)** a
 CC-based algorithm covers broader modes of multi-agent tasks while having some restrictions on its architecture.
 The VD-based algorithm is good at solving cooperative tasks with its strong credit assignment mechanism, while the task mode it can cover is limited.
 
-Centralized Critic
-""""""""""""""""""""
+Type 1. Centralized Critic
+"""""""""""""""""""""""""""
 
 CC is firstly used in MARL since the :ref:`MADDPG`.
 As the name indicated, a critic is a must in a CC-based algorithm, which excludes most Q learning-based algorithms as they have no
@@ -235,8 +239,8 @@ A list of commonly seen centralized critic algorithms:
 - :ref:`HATRPO`
 - :ref:`HAPPO`
 
-Value Decomposition
-""""""""""""""""""""
+Type 2. Value Decomposition
+""""""""""""""""""""""""""""""
 
 VD is introduced to MARL since the :ref:`VDN`.
 The name **value decomposition** is based on the fact that the value function of each agent is updated by factorizing the global value function.
