@@ -2,9 +2,8 @@ MARLlib: The MARL Extension for RLlib
 ========================================
 
 .. figure:: images/logo1.png
-    :align: center
-
-    The MARL Extension for RLlib
+    :align: left
+    :width: 500
 
 .. toctree::
    :maxdepth: 1
