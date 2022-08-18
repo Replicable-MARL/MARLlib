@@ -371,7 +371,7 @@ HATRPO: Sequentially updating critic of MATRPO agents
 
 .. admonition:: Quick Facts
 
-    - Heterogeneous-Agent Proximal Policy Optimisation (HATRPO) algorithm is based on :ref:`MATRPO`.
+    - Heterogeneous-Agent Trust Region Policy Optimisation (HATRPO) algorithm is based on :ref:`MATRPO`.
     - Agent architecture of HATRPO consists of three modules: ``policy``, ``critic``, and ``sequential updating``.
     - In HATRPO, agents have non-shared ``policy`` and shared ``critic``.
     - HATRPO is proposed to solve cooperative and collaborative tasks.
@@ -381,10 +381,7 @@ Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 In the sampling stage, agents share information with others. The information includes others' observations and predicted actions. After collecting the necessary information from other agents,
-all agents follow the standard TRPO training pipeline, except HATRPO would update each policy sequentially. The `advantage value` of each policy updated iteration
-:math:`M_i` is computed based on the importance of sampling by
-:math:`M_{i-1}`, excepted the first round, which
-:math:`M_o` is directly assigned by the current agent's `advantage`.
+all agents follow the standard TRPO training pipeline, except HATRPO would update each policy sequentially.  In this updating sequence, the next agent's advantage is iterated by the current sampling importance and hte former advantage, except the first agent's advantage is the original advantae value.
 
 .. figure:: ../images/hatrpo.png
     :width: 600
@@ -482,12 +479,35 @@ Advantage Estimation if m > 1: how good are current action regarding to the base
     \mathbf{M}^{i_{1:m}}(s, \mathbf{u}) = \frac{\bar{\pi}^{i_{1:m-1}}(u^{1:m-1} | o)} {\pi^{i_{1:m-1}}(u^{1:m-1} | o)} \mathbf{M}^{i_{1:m-1}}(s, \mathbf{u})
 
 
-Policy learning: computing the policy gradient using estimated advantage to update the policy function.
+Estimate the gradient of the agent's maximisation objective.
 
 .. math::
 
-    \frac{1}{BT}\sum_{b=1}^{B} \sum_{t=0}^{T}\left[ min\left(  \frac{\pi_{\theta^{i_m}}^{i_m}(u^{i_m} |o)} {\pi_{\theta^{i_m}_{k}}^{i_m}(u^{i_m} | o)} M^{i_{1:m}}(s|u), clip\left( \frac{\pi_{\theta^{i_m}}^{i_m}(u^{i_m} | o)} {\pi_{\theta^{i_m}_{k}}^{i_m}(u^{i_m} | o)}, 1 \pm \epsilon \right)\right)M^{i_{1:m}}(s|u)\right]
+    \hat{\boldsymbol{g}}_{k}^{i_{m}}=\frac{1}{B} \sum_{b=1}^{B} \sum_{t=1}^{T} \nabla_{\theta_{k}^{i_{m}}} \log \pi_{\theta_{k}^{i_{m}}}^{i_{m}}\left(a_{t}^{i_{m}} \mid o_{t}^{i_{m}}\right) M^{i_{1: m}}\left(s_{t}, \boldsymbol{a}_{t}\right)
 
+HessianoftheaverageKL-divergence
+
+.. math::
+
+   \hat{\boldsymbol{H}}_{k}^{i_{m}} = \frac{1}{B T} \sum_{b=1}^{B} \sum_{t=1}^{T} D_{\mathrm{KL}}\left(\pi_{\theta_{k}^{i_{m}}}^{i_{m}}\left(\cdot \mid o_{t}^{i_{m}}\right), \pi_{\theta^{i_{m}}}^{i_{m}}\left(\cdot \mid o_{t}^{i_{m}}\right)\right)
+
+Use the conjugate gradient algorithm to compute the update direction.
+
+.. math::
+
+    \boldsymbol{x}_{k}^{i_{m}} \approx\left(\hat{\boldsymbol{H}}_{k}^{i_{m}}\right)^{-1} \boldsymbol{g}_{k}^{i_{m}}
+
+Estimate the maximal step size allowing for meeting the KL-constraint
+
+.. math::
+
+    \hat{\beta}_{k}^{i_{m}} \approx \sqrt{\frac{2 \delta}{\left(\hat{\boldsymbol{x}}_{k}^{i_{m}}\right)^{T} \hat{\boldsymbol{H}}_{k}^{i_{m}} \hat{\boldsymbol{x}}_{k}^{i_{m}}}}
+
+Update agent 𝑖𝑚’s policy by
+
+.. math::
+
+    \theta_{k+1}^{i_{m}}=\theta_{k}^{i_{m}}+\alpha^{j} \hat{\beta}_{k}^{i_{m}} \hat{\boldsymbol{x}}_{k}^{i_{m}}
 
 Here
 :math:`{\mathcal D}` is the collected trajectories.
@@ -505,17 +525,20 @@ Here
 :math:`\pi_{\theta}` is the policy function.
 :math:`B` is batch size
 :math:`T` is steps per episode
+:math:`j \in {0, 1, \dots, L}` is the smallest such 𝑗 which improves the sample loss by at least
+:math:`\kappa \alpha^{j} \hat{\beta}_{k}^{i_{m}} \hat{\boldsymbol{x}}_{k}^{i_{m}} \cdot \hat{\boldsymbol{g}}_{k}^{i_{m}}`, found by the backtracking line search.
 
 
 Implementation
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Based on MATRPO, we add three components to implement HATRPO.
+Based on MATRPO, we add four components to implement HATRPO.
 The details can be found in:
 
-- ``add_otrponent_information_and_critical_vf``
-- ``hatrpo_surrogate_loss``
-- ``add_all_agents_gae``
+- ``hatrpo_loss_fn``
+- ``hatrpo_post_process``
+- ``TrustRegionUpdator``
+- ``HATRPOUpdator``
 
 
 Key hyperparameter location:
