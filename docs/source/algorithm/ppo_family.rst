@@ -523,10 +523,7 @@ Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 In the sampling stage, agents share information with others. The information includes others' observations and predicted actions. After collecting the necessary information from other agents,
-all agents follow the standard PPO training pipeline, except HAPPO would update each policy sequentially. The `advantage value` of each policy updated iteration
-:math:`M_i` is computed based on the importance of sampling by
-:math:`M_{i-1}`, excepted the first round, which
-:math:`M_o` is directly assigned by the current agent's `advantage`.
+all agents follow the standard PPO training pipeline, except HAPPO would update each policy sequentially. In this updating sequence, the next agent's advantage is iterated by the current sampling importance and hte former advantage, except the first agent's advantage is the original advantae value.
 
 .. figure:: ../images/happo.png
     :width: 600
