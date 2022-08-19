@@ -51,6 +51,9 @@ One of the most commonly used techniques is **Centralized Training & Decentraliz
 Centralized Training & Decentralized Execution (CTDE)
 -----------------------------------------------------
 
+.. figure:: ../images/ctde.jpg
+    :align: center
+
 **Centralized Training & Decentralized Execution (CTDE)** is a setting where agent learn(train) together and execute(test) separately.
 Specifically, there is no restriction in the training stage of CTDE where the agent can access all the information the system can provide, including other agents' status, the global state, and even the reward other agents get.
 Therefore, the training style is fully centralized.

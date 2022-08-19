@@ -56,10 +56,10 @@ For MARL, there are many grid-world-based tasks. In addition, MARLlib incorporat
 Gaming and Physical Simulation
 --------------------------------------------------------------
 
-.. figure:: ../images/smac.jpg
+.. figure:: ../images/gaming.jpg
     :align: center
 
-    Starcraft II Battle Game
+    Gaming & Simulation: MaMujoco, Pommerman, Hanabi, Starcraft, etc.
 
 A significant offset between naive matrix games and the expensive cost of sampling and training on real-world scenarios brings most attention to gaming and physical simulation in RL, and so does MARL.
 In MARL, most algorithms try to prove their advance on these testing beds: towards solving more complicated tasks with a modest cost.
@@ -72,28 +72,38 @@ Some tasks contain more than one task mode like :ref:`MPE`. Please read the docu
 Towards Real-world Application
 --------------------------------------------------------------
 
-.. figure:: ../images/metadrive.jpg
+.. figure:: ../images/realworld.jpg
     :align: center
 
-    Autonomous Traffic Coordination
+    Real World Problem: MetaDrive, Flatland, Google Research Football, etc.
 
 Tasks that are real-world-problem oriented, like traffic system design(:ref:`MetaDrive`), football(:ref:`Football`), and auto driving, are also benchmarking
 recent years' MARL algorithms. These tasks are more practical that can
 inspire the next generation of AI solutions for real-world problems.
-Although the task belonging to this multi-agent categorization is of great significance to real life, unluckily, fewer algorithms choose to be built on
+Although the task belonging to this categorization is of great significance to real life, unluckily, fewer algorithms choose to be built on
 these tasks.
 It is not easy work to implement existing algorithms in a new environment, not to mention the more complicated settings based on real scenarios.
 
-Algorithms: Method for MARL Alchemy
-=======================================
+Methodology of MARL: Task First, Algorithm Second
+====================================================================
 
 Another significant characteristic of MARL is the diversity of its algorithms.
 This is partly due to the diversity of multi-agent tasks that we discussed in the above section,
 as well as the various learning styles and knowledge-sharing strategies.
+As the algorithm development is bound tightly with the task features, we can see an offset between algorithm's generalization on
+a broad topic and its expertise of one special multi-agent task.
+
+In the following part, we first give a brief introduction on how the environment are categorized according to agents relationship.
+Then how we categorize the algorithms depending on its learning style and how the learning style is connected to the agents relationship.
+Finally, we will talk about how to extend MARL algorithms to be the more general scenarios and applicable to real world tasks via knowledge sharing technique.
 
 
 Agent Relationship
 --------------------------------------------------------------
+
+.. figure:: ../images/relation.jpg
+    :align: center
+
 
 The relationship among agents regulates agent learning.
 Two aspects of this relationship affect the MARL algorithm development the most.
@@ -207,10 +217,11 @@ a coordinated behavior among agents. This is primarily due to the low utilizatio
 Centralized Training Decentralized Execution (CTDE)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Helping agents learn a coordinated behavior while keeping a low computation budget and optimization complexity, the Centralized Training Decentralized Execution (CDTE) framework has been proposed and has attracted the most attention in recent years of MARL research.
-Under CTDE framework, there are two main branches: **Centralized Critic (CC)** and **Value Decomposition (VD)**.
-CC-based algorithm covers broader modes of multi-agent tasks while having some restrictions on its architecture.
-The VD-based algorithm is good at solving cooperative tasks with its strong credit assignment mechanism, while the task mode it can cover is limited.
+Helping agents learn a coordinated behavior while keeping a low computation budget and optimization complexity,
+the Centralized Training Decentralized Execution (CDTE) framework has attracted the most attention in recent years of MARL research.
+Under the CTDE framework, there are two main branches of algorithms: **Centralized Critic (CC)** and **Value Decomposition (VD)**.
+CC-based algorithms cover broader modes of multi-agent tasks while having some restrictions on its architecture.
+The VD-based algorithms are good at solving cooperative tasks with its strong credit assignment mechanism, while the task mode it can cover is limited.
 
 Type 1. Centralized Critic
 """""""""""""""""""""""""""
@@ -220,16 +231,16 @@ As the name indicated, a critic is a must in a CC-based algorithm, which exclude
 critic module. Only actor-critic algorithms like :ref:`MAA2C` or actor-Q architecture like :ref:`MADDPG` fulfill this requirement.
 
 For the training pipeline of CC, the critic is targeting finding a good mapping between the value function and the combination of system state and self-state.
-This way, the critic is updated regarding the whole system and the agent itself.
-The policy is then updated using policy gradient according to GAE produced by the critic.
-To conduct a decentralized execution, the policy only takes self-got information as input.
+This way, the critic is updated regarding the system state and the local states.
+The policy is optimized using policy gradient according to GAE produced by the critic.
+To conduct a decentralized execution, the policy only takes the local states as input.
 
 The core idea of CC is to provide different information for critics and policy to update them differently.
 The critic is centralized as it utilizes all the system information to find the accurate estimation of the whole multi-agent system.
 The policy is decentralized, but as the policy gradient comes from the centralized critic,
-the policy can learn a coordinated strategy.
+it can learn a coordinated strategy.
 
-A list of commonly seen centralized critic algorithms:
+A list of commonly seen CC algorithms:
 
 - :ref:`MAA2C`
 - :ref:`COMA`
@@ -255,7 +266,7 @@ policy function by policy gradient.
 The pipeline of the VD algorithm is strictly CTDE. Global information like state and other agent status is only accessible in the mixing stage in order to maintain a decentralized policy or
 individual Q function.
 
-A list of commonly seen value decomposition algorithms:
+A list of commonly seen VD algorithms:
 
 - :ref:`VDN`
 - :ref:`QMIX`
