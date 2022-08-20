@@ -47,11 +47,12 @@ A more practical approach is only to provide one agent with a local observation 
 The only question remains on how to help the agent build its belief: the decision it makes based on local observation should align with both its teammates and the system state towards the final target.
 One of the most commonly used techniques is **Centralized Training & Decentralized Execution (CTDE)**, which we will discuss next.
 
+.. _CTDE:
 
 Centralized Training & Decentralized Execution (CTDE)
 -----------------------------------------------------
 
-.. figure:: ../images/ctde.jpg
+.. figure:: ../images/ctde.png
     :align: center
 
 **Centralized Training & Decentralized Execution (CTDE)** is a setting where agent learn(train) together and execute(test) separately.
