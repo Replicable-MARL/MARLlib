@@ -22,6 +22,9 @@ Environment list of MARLlib, including installation and description.
 SMAC
 ==============
 
+.. figure:: ../images/env_smac.png
+    :align: center
+
 StarCraft Multi-Agent Challenge (SMAC) is a multi-agent environment for collaborative multi-agent reinforcement learning (MARL) research based on Blizzard's StarCraft II RTS game.
 It focuses on decentralized micromanagement scenarios, where an individual RL agent controls each game unit.
 
@@ -78,6 +81,9 @@ and put it in the right place.
 
 MaMujoco
 ==============
+
+.. figure:: ../images/env_mamujoco.png
+    :align: center
 
 Multi-Agent Mujoco (MaMujoco) is an environment for continuous cooperative multi-agent robotic control.
 Based on the popular single-agent robotic MuJoCo control suite provides a wide variety of novel scenarios in which multiple agents within a single robot have to solve a task cooperatively.
@@ -143,6 +149,10 @@ Google Research Football
 ================================
 
 
+.. figure:: ../images/env_football.png
+    :align: center
+
+
 Google Research Football (GRF) is a reinforcement learning environment where agents are trained to play football in an advanced,
 physics-based 3D simulator. It also provides support for multiplayer and multi-agent experiments.
 
@@ -196,6 +206,9 @@ We provide solutions (may work) for potential bugs
 MPE
 ==============
 
+.. figure:: ../images/env_mpe.png
+    :align: center
+
 Multi-particle Environments (MPE) are a set of communication-oriented environments where particle agents can (sometimes) move,
 communicate, see each other, push each other around, and interact with fixed landmarks.
 
@@ -245,6 +258,9 @@ We use the pettingzoo version of MPE
 LBF
 ==============
 
+.. figure:: ../images/env_lbf.png
+    :align: center
+
 Level-based Foraging (LBF) is a mixed cooperative-competitive game that focuses on coordinating the agents involved.
 Agents navigate a grid world and collect food by cooperating with other agents if needed.
 
@@ -288,6 +304,9 @@ Installation
 RWARE
 ==============
 
+.. figure:: ../images/env_rware.png
+    :align: center
+
 Robot Warehouse (RWARE) simulates a warehouse with robots moving and delivering requested goods.
 Real-world applications inspire the simulator, in which robots pick up shelves and deliver them to a workstation.
 
@@ -330,6 +349,9 @@ Installation
 
 MAgent
 ==============
+
+.. figure:: ../images/env_magent.png
+    :align: center
 
 MAgent is a set of environments where large numbers of pixel agents in a grid world interact in battles or other competitive scenarios.
 
@@ -375,6 +397,9 @@ Installation
 
 Pommerman
 ==============
+
+.. figure:: ../images/env_pommerman.png
+    :align: center
 
 Pommerman is stylistically similar to Bomberman, the famous game from Nintendo.
 Pommerman's FFA is a simple but challenging setup for engaging adversarial research where coalitions are possible,
@@ -426,6 +451,9 @@ Installation
 MetaDrive
 ==============
 
+.. figure:: ../images/env_metadrive.png
+    :align: center
+
 MetaDrive is a driving simulator that supports generating infinite scenes with various road maps and
 traffic settings to research generalizable RL. It provides accurate physics simulation and multiple sensory inputs,
 including Lidar, RGB images, top-down semantic maps, and first-person view images.
@@ -469,6 +497,9 @@ Installation
 
 Hanabi
 ==============
+
+.. figure:: ../images/env_hanabi.png
+    :align: center
 
 Hanabi is a cooperative card game created by French game designer Antoine Bauza.
 Players are aware of other players' cards but not their own and attempt to play a series of cards in a
