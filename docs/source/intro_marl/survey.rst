@@ -13,8 +13,8 @@ Tasks: Arenas of MARL
 =====================
 
 Finding a dataset to evaluate the new idea has become a consensus in machine learning.
-The best way is to get a representative or commonly acknowledged dataset in your research area,
-follow its standard evaluation pipeline, and finally compare the performance of your idea with other existing algorithms.
+The best way is to get a representative or commonly acknowledged dataset,
+follow its standard evaluation pipeline, and compare the performance with other existing algorithms.
 
 In MARL, the dataset is now a set of scenarios contained in one multi-agent task.
 Most multi-agent tasks are customizable on many aspects like agent number, map size, reward function, unit status, etc.
@@ -29,71 +29,86 @@ Matrix Problem and Grid World
 
     Two-step game
 
-Quickly verifying the new idea, using a matrix and grid world-based problem is the best choice.
-It can help analyze the algorithms with less complexity. A famous example of this type of task is the **Two-step Game**.
-In this task, two agents act to gain the highest reward in a cooperative style.
-The task can not be more straightforward as:
+Using a matrix and grid world task to quickly verify a new idea in MARL is the first option.
+A well-known example is the **Two-step Game**.
+In this task, two agents act in turn to gain the highest team reward.
+The task is very straightforward:
 
-#. only two agents in the task.
-#. the observation is a short vector.
-#. only two actions are available for agents to choose from.
+#. two agents in the task
+#. the observation is a short vector with length four
+#. two actions (A&B) to choose from
 
-However, the game is still a challenge as the agent act in the first turn needs to coordinate with the agent act in the second turn
-to achieve the highest reward: the joint action of two agents with the highest reward is seemingly a wrong choice from the view of the first agent.
-In other words, the **Two-step Game** is targeted at evaluating whether the agent can sacrifice an individual reward for a higher team reward.
+Despite the simple task setting, however, the game is still very challenging as one agent needs to coordinate with another agent
+to achieve the highest reward: the joint action with the highest reward is not a good option from the view of the first agent if it is not willing to cooperate with another agent.
+**Two-step Game** is targeted at evaluating whether an agent has learned to cooperate by sacrificing its individual reward for a higher team reward.
 
-As the value(reward) of the matrix can be customized, how many different matrix combinations (scenario) can the algorithms solve
-to avoid getting stuck in the sub-optimal is a good measurement of how well the algorithm solves **cooperative-game-theory**-like multi-agent tasks.
+As the value(reward) of the matrix can be customized, the number of matrix combinations (scenarios) can be solved is a good measurement of robustness of an algorithm in solving **cooperative-like** multi-agent tasks.
 
-You can find more matrix games in **game-theory** based MARL.
+The grid world-based tasks are relatively complicate than the matrix problem.
+In RL, a well-known grid world example is `frozen lake <https://towardsdatascience.com/q-learning-for-beginners-2837b777741>`_.
+For MARL, there are many grid-world-based tasks, including:
 
-The grid world is relatively more complicated than the matrix problem. Nevertheless, the element is more enriched.
-RL's well-known grid world task example is `frozen lake <https://towardsdatascience.com/q-learning-for-beginners-2837b777741>`_.
-For MARL, there are many grid-world-based tasks. In addition, MARLlib incorporates three tasks namely :ref:`LBF`, :ref:`RWARE`, and :ref:`MAgent`, which focus on different MARL topics.
+- :ref:`LBF`
+- :ref:`RWARE`
+- :ref:`MAgent`
 
-
+Different tasks target at different topics like mixed cooperative-competitive task mode, sparse reward in MARL, and large number of agents in one system.
 
 Gaming and Physical Simulation
 --------------------------------------------------------------
 
-.. figure:: ../images/smac.jpg
+.. figure:: ../images/gaming.jpg
     :align: center
 
-    Starcraft II Battle Game
+    Gaming & Simulation: MaMujoco, Pommerman, Hanabi, Starcraft, etc.
 
-A significant offset between naive matrix games and the expensive cost of sampling and training on real-world scenarios brings most attention to gaming and physical simulation in RL, and so does MARL.
-In MARL, most algorithms try to prove their advance on these testing beds: towards solving more complicated tasks with a modest cost.
-The most popular multi-agent task in MARL is StarCraft Multi-Agent Challenge(:ref:`SMAC`), which is for discrete control and cooperative task mode.
-If you are interested in continuous control, try the multi-agent version of MuJoCo(:ref:`MaMujoco`).
-To take the challenge of adversary task modes, refer to :ref:`Pommerman`.
-Some tasks contain more than one task mode like :ref:`MPE`. Please read the document carefully before using them.
+To find a offset between naive matrix games and the expensive cost of sampling and training on real-world scenarios,  recent MARL research focus more on video gaming and physical simulation,
+as most algorithms try to prove their advance on more complicated tasks with a modest cost.
+One of the most popular multi-agent task in MARL is StarCraft Multi-Agent Challenge(:ref:`SMAC`), which is for discrete control and cooperative task mode.
+For continuous control, the most used task is the multi-agent version of MuJoCo: (:ref:`MaMujoco`).
+To analysis the agent behavior of adversary agents, a typical task is :ref:`Pommerman`.
+Scenarios within one task can contain different task modes, like :ref:`MPE`, which simplifies the evaluation procedure of algorithm's generalization ability within one task domain.
 
 
 Towards Real-world Application
 --------------------------------------------------------------
 
-.. figure:: ../images/metadrive.jpg
+.. figure:: ../images/realworld.jpg
     :align: center
 
-    Autonomous Traffic Coordination
+    Real World Problem: MetaDrive, Flatland, Google Research Football, etc.
 
-Tasks that are real-world-problem oriented, like traffic system design(:ref:`MetaDrive`), football(:ref:`Football`), and auto driving, are also benchmarking
-recent years' MARL algorithms. These tasks are more practical that can
-inspire the next generation of AI solutions for real-world problems.
-Although the task belonging to this multi-agent categorization is of great significance to real life, unluckily, fewer algorithms choose to be built on
-these tasks.
-It is not easy work to implement existing algorithms in a new environment, not to mention the more complicated settings based on real scenarios.
+Tasks that are real-world-problem oriented, including traffic system design(:ref:`MetaDrive`), football(:ref:`Football`), and auto driving, also benchmark
+recent years' MARL algorithms. These tasks can
+inspire the next generation of AI solutions.
+Although the tasks belonging to this categorization is of great significance to real application, unluckily, fewer algorithms choose to be built on
+these tasks due to high complexity and standard evaluation procedure.
 
-Algorithms: Method for MARL Alchemy
-=======================================
 
-Another significant characteristic of MARL is the diversity of its algorithms.
-This is partly due to the diversity of multi-agent tasks that we discussed in the above section,
+Methodology of MARL: Task First or Algorithm First
+====================================================================
+
+Recent survey shows that current research of MARL are struggling with both the diversity of multi-agent tasks and categorization  of MARL algorithms.
+These characteristics makes the fair comparision of different algorithms hard to conduct and throw a question to researchers: should algorithms developed for one task (task first)
+or for general tasks (algorithm first)
+This is partly due to multi-agent tasks,
 as well as the various learning styles and knowledge-sharing strategies.
+
+As the algorithm development is bound tightly with the task features, we can see an offset between the algorithm's generalization on
+a broad topic and its expertise in one special multi-agent task.
+
+In the following part, we first give a brief introduction to how the environment is categorized according to the agents' relationship.
+Then we categorize the algorithms depending on their learning style and how the learning style is connected to the agents' relationship.
+
+Finally, we will talk about how to extend MARL algorithms to be more general and applicable to real-world scenarios via knowledge-sharing techniques.
 
 
 Agent Relationship
 --------------------------------------------------------------
+
+.. figure:: ../images/relation.png
+    :align: center
+
 
 The relationship among agents regulates agent learning.
 Two aspects of this relationship affect the MARL algorithm development the most.
@@ -102,26 +117,23 @@ First is the **working mode** of agents. For example, a task can be Cooperative-
 A task can be Competitive-like, where agents have different or adversary targets.
 We also refer **working mode** as **task mode**, as an overall description of how agents work and learn in a multi-agent task.
 
-The second is the type of agents. A task can contain homogeneous agents. These agents prefer knowledge sharing with others and learning as a team.
-A task can also contain heterogeneous agents, where these agents prefer learning separately, and the intersection of the learned knowledge is relatively small.
+Second is the agent similarity. A task can contain homogeneous agents, which prefer knowledge sharing with others and learning as a team.
+A task can also contain heterogeneous agents, which prefers learning their policies separately.
 
 Task Mode: Cooperative-like or Competitive-like
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-There are two commonly seen task mode: cooperative-like, where agents tends to work as a team; and competitive-like, where agents have adversarial target
-and can be aggressive to other agents.
+The task modes can be roughly divided into two types: **cooperative-like**, where agents tend to work as a team, and **competitive-like**, where agents have adversarial targets and are aggressive to other agents.
 
 
 Mode 1: Cooperative-like
 """""""""""""""""""""""""""""
 
-There are two sub-modes under cooperative-like mode.
+Cooperative-like task mode is commonly seen in many scenarios that agents are only awarded when the team target are met.
+This mode is strictly **cooperative**, where each agent cannot access its individual reward.
+**cooperative** tasks require agents to have a strong credit assignment mechanism to decompose the global reward to update their policies.
 
-The first mode is **cooperative**, where all agents cannot access their individual rewards.
-These tasks require algorithms to have a strong credit assignment mechanism to decompose the global reward to each agent.
-:ref:`vd`-based methods are proposed to deal with this problem.
-
-Environments with **cooperative** mode in MARLlib:
+Environments contain **cooperative** scenarios:
 
 - :ref:`SMAC`
 - :ref:`MaMujoco`
@@ -131,14 +143,15 @@ Environments with **cooperative** mode in MARLlib:
 - :ref:`RWARE`
 - :ref:`Pommerman`
 
-The second mode is **collaborative**, where agents can access their individual rewards. Therefore, the credit assignment mechanism is no longer needed.
-With less restriction and richer reward information, algorithms for **collaborative** task mode are more diverse.
-:ref:`il` is naturally a good solution now as each agent has been allocated an individual reward for doing a standard RL.
-:ref:`cc` is a more robust algorithm family for **collaborative** tasks as the improved critic help agent coordinate using global information.
-:ref:`vd`-based methods are still applicable for **collaborative** tasks as we can integrate all the individual rewards received into one (only the agents act simultaneously).
-**Cooperative** mode can also be transformed to **collaborative** as we can copy the global reward agent number times and treat them as an individual reward.
+Another mode is **collaborative**, where agents can access individual rewards. Under this mode, the agents tend to work as together but the target varies between different agents.
+Sometimes individual reward may cause some potential interest conflict.
+Collaborative task mode has less restriction and richer reward information for wilder algorithms development:
+:ref:`il` is naturally a good solution for collaborative tasks now as each agent has been allocated an individual reward for doing a standard RL.
+:ref:`cc` is a more robust algorithm family for collaborative tasks as the improved critic help agent coordinate using global information.
+:ref:`vd`-based methods are still applicable for collaborative tasks as we can integrate all the individual rewards received into one (only the agents act simultaneously).
+**Cooperative** mode can also be transformed to **collaborative** as we can copy the global reward to each agent and treat them as an individual reward.
 
-Environments with **cooperative** mode in MARLlib:
+Environments contain **collaborative** scenarios:
 
 - :ref:`SMAC`
 - :ref:`MaMujoco`
@@ -157,13 +170,13 @@ Mode 2: Competitive-like
 Once agents have different targets in one task, especially when the targets are adversaries,
 the task can become much more complicated. A famous example is **zero-sum** game, where the total reward is fixed.
 One agent being rewarded will result in another agent being punished.
-A specific example can be found in :ref:`MPE` that in scenarios like **simple_push**, agent one is trying to gain more reward by
-getting closer to its target location while agent two gains reward by pushing agent one away from the target location.
+A specific example can be found in :ref:`MPE` that in scenarios like **simple_push**, agent ONE is trying to gain more reward by
+getting closer to its target location while agent TWO gains reward by pushing agent ONE away from the target location.
 
 Moreover, the competitive-like mode can also be not so **pure competitive**. It can incorporate some cooperative agents' relationships.
 This type of work mode is referred as **mixed** mode. A representative task of mixed mode is :ref:`MAgent`, where agents are divided into several groups. Agents in the same group need to attack the enemy group cooperatively.
 
-Environments with **Competitive** or **Mixed** mode in MARLlib:
+Environments contain **competitive** or **mixed** scenarios:
 
 - :ref:`MPE`
 - :ref:`Pommerman`
@@ -174,7 +187,6 @@ Agents Type: Heterogeneous or Homogeneous
 
 There are two methods to solve the multi-agent problem, **heterogeneous** and **homogeneous** method. In homogeneous each agent affiliate with the environment holds the same policy. The policy will give out different actions based on the agent's observation.
 However, the heterogeneous methods give each agent with different or individual policy, which may accept different environment observation dimension or could give different actions, though, based on same observation for different agents.
-
 
 Learning Style
 --------------------------------------------------------------
@@ -200,16 +212,19 @@ Every RL algorithm can be extended to be MARL compatible, including:
 - :ref:`ITRPO`
 
 However, independent learning always falls into local-optimal, and performance degrades rapidly when the multi-agent tasks require
-a coordinated behavior among agents. This is primarily due to the low utilization of the information from other agents and the global state of the system.
+a coordinated behavior among agents. This is primarily due to the low utilization of other agents' information and the system's global state.
 
 
 Centralized Training Decentralized Execution (CTDE)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Helping agents learn a coordinated behavior while keeping a low computation budget and optimization complexity, the Centralized Training Decentralized Execution (CDTE) framework has been proposed and has attracted the most attention in recent years of MARL research.
-Under CTDE framework, there are two main branches: **Centralized Critic (CC)** and **Value Decomposition (VD)**.
-CC-based algorithm covers broader modes of multi-agent tasks while having some restrictions on its architecture.
-The VD-based algorithm is good at solving cooperative tasks with its strong credit assignment mechanism, while the task mode it can cover is limited.
+To help agents learn a coordinated behavior while keeping a low computation budget and optimization complexity, many different learning settings have been proposed,
+among which the Centralized Training Decentralized Execution (CDTE) framework has attracted the most attention in recent years' MARL research.
+We have introduced the CTDE framework here: :ref:`CTDE`.
+
+Under the CTDE framework, there are two main branches of algorithms: **Centralized Critic (CC)** and **Value Decomposition (VD)**.
+The CC-based algorithms can cover general multi-agent tasks while having some restrictions on their architecture.
+The VD-based algorithms are good at solving cooperative-like tasks with the credit assignment mechanism, while the tasks it can cover are limited.
 
 Type 1. Centralized Critic
 """""""""""""""""""""""""""
@@ -219,16 +234,16 @@ As the name indicated, a critic is a must in a CC-based algorithm, which exclude
 critic module. Only actor-critic algorithms like :ref:`MAA2C` or actor-Q architecture like :ref:`MADDPG` fulfill this requirement.
 
 For the training pipeline of CC, the critic is targeting finding a good mapping between the value function and the combination of system state and self-state.
-This way, the critic is updated regarding the whole system and the agent itself.
-The policy is then updated using policy gradient according to GAE produced by the critic.
-To conduct a decentralized execution, the policy only takes self-got information as input.
+This way, the critic is updated regarding the system state and the local states.
+The policy is optimized using policy gradient according to GAE produced by the critic.
+The policy only takes the local states as input to conduct a decentralized execution.
 
 The core idea of CC is to provide different information for critics and policy to update them differently.
-The critic is centralized as it utilizes all the system information to find the accurate estimation of the whole multi-agent system.
+The critic is centralized as it utilizes all the system information to accurately estimate the whole multi-agent system.
 The policy is decentralized, but as the policy gradient comes from the centralized critic,
-the policy can learn a coordinated strategy.
+it can learn a coordinated strategy.
 
-A list of commonly seen centralized critic algorithms:
+A list of commonly seen CC algorithms:
 
 - :ref:`MAA2C`
 - :ref:`COMA`
@@ -245,7 +260,7 @@ VD is introduced to MARL since the :ref:`VDN`.
 The name **value decomposition** is based on the fact that the value function of each agent is updated by factorizing the global value function.
 Take the most used baseline algorithms of VD :ref:`VDN` and :ref:`QMIX` for instance: VDN sums all the individual value functions to get the global function.
 QMIX mixes the individual value function and sets non-negative constraints on the mixing weight.
-The mixed global value function can then be optimized to follow standard RL. Back propagated gradient updates all the individual value functions and the mixer if learnable.
+The mixed global value function can then be optimized to follow standard RL. Finally, if learnable, backpropagated gradient updates all the individual value functions and the mixer.
 
 Although VDN and QMIX are all off-policy algorithms, the value decomposition can be easily transferred to on-policy algorithms like :ref:`VDA2C` and :ref:`VDPPO`.
 Instead of decomposing the Q value function, on-policy VD algorithms decompose the critic value function. And using the decomposed individual critic function to update the
@@ -254,7 +269,7 @@ policy function by policy gradient.
 The pipeline of the VD algorithm is strictly CTDE. Global information like state and other agent status is only accessible in the mixing stage in order to maintain a decentralized policy or
 individual Q function.
 
-A list of commonly seen value decomposition algorithms:
+A list of commonly seen VD algorithms:
 
 - :ref:`VDN`
 - :ref:`QMIX`
@@ -282,7 +297,7 @@ Agents can share the knowledge with others to learn faster or reuse the knowledg
 We can quickly get this inspiration based on the fact that different strategies may share a similar function.
 Moreover, this similarity exists across three levels in MARL: agent, scenario, and task.
 Agent-level knowledge sharing is targeted to increase sample efficiency and improve learning speed.
-Scenario level sharing focuses on developing a multi-task MARL to handle multiple scenarios simultaneously but still in the same task domain.
+Scenario level sharing focuses on developing a multi-task MARL to handle multiple scenarios simultaneously but in the same task domain.
 Task level sharing is the most difficult, and it requires an algorithm to learn and conclude general knowledge from one task domain and apply them to
 a new domain.
 
@@ -319,7 +334,7 @@ adopting to new tasks and reusing the knowledge from other tasks.
 
 Task-level knowledge sharing requires agents to conclude common sense from different tasks.
 For instance, when a new cooperative-like task comes, agents behave more agreeable with others and can quickly find a way to cooperate as a team.
-As common sense and team-working concepts are what make human being intelligent, achieving task-level knowledge sharing equals training an agent
+As common sense and team-working concepts are what make human beings intelligent, achieving task-level knowledge sharing equals training an agent
 to learn and act like humans is the holy grail of artificial general intelligence.
 
 Future Direction
