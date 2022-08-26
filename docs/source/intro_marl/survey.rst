@@ -172,9 +172,8 @@ Environments with **Competitive** or **Mixed** mode in MARLlib:
 Agents Type: Heterogeneous or Homogeneous
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Etiam turis ante, luctus sed velit tristique, finibus volutpat dui. Nam sagittis vel ante nec malesuada.
-Praesent dignissim mi nec ornare elementum. Nunc eu augue vel sem dignissim cursus sed et nulla.
-
+There are two methods to solve the multi-agent problem, **heterogeneous** and **homogeneous** method. In homogeneous each agent affiliate with the environment holds the same policy. The policy will give out different actions based on the agent's observation.
+However, the heterogeneous methods give each agent with different or individual policy, which may accept different environment observation dimension or could give different actions, though, based on same observation for different agents.
 
 
 Learning Style
