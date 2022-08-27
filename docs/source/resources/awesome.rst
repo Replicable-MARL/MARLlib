@@ -4,8 +4,7 @@
 Awesome Paper List
 ***************************************
 
-Etiam turis ante, luctus sed velit tristique, finibus volutpat dui. Nam sagittis vel ante nec malesuada.
-Praesent dignissim mi nec ornare elementum. Nunc eu augue vel sem dignissim cursus sed et nulla.
+We collect most of the existing MARL algorithms based on the multi-agent environment they choose to conduct on, with tag to annotate the sub-topic.
 
 
 .. contents::
