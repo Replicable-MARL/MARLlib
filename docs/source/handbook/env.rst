@@ -227,7 +227,7 @@ Our version: https://github.com/Farama-Foundation/PettingZoo/tree/master/petting
    * - ``Observability``
      - Full
    * - ``Action Space``
-     - Discrete + Continues
+     - Discrete + Continuous
    * - ``Observation Space Dim``
      - 1D
    * - ``Action Mask``
