@@ -26,7 +26,7 @@ Here we show the example of building python 3.6 based conda environment.
 
     # add patches to fix ray bugs
     cd PathToMARLlib/patch
-    python add_patch.py
+    python add_patch.py -y
 
     # recommended gym version for all envs
     pip install gym==0.21.0

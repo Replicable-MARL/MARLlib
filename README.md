@@ -182,7 +182,7 @@ pip install ray==1.8.0 # version sensitive
 Add patch of MARLlib
 ```
 cd patch
-python add_patch.py
+python add_patch.py -y
 ```
 
 **Y** to replace source-packages code
