@@ -123,7 +123,7 @@ action space
    :header-rows: 0
 
    * - ``discrete``
-     - ``continues``
+     - ``continuous``
 
 task mode
 
@@ -272,7 +272,7 @@ action space
    :header-rows: 0
 
    * - ``discrete``
-     - ``continues``
+     - ``continuous``
 
 task mode
 
@@ -399,7 +399,7 @@ action space
    :header-rows: 0
 
    * - ``discrete``
-     - ``continues``
+     - ``continuous``
 
 task mode
 

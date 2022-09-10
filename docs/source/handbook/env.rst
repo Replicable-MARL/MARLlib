@@ -101,7 +101,7 @@ Official Link: https://github.com/schroederdewitt/multiagent_mujoco
    * - ``Observability``
      - Partial
    * - ``Action Space``
-     - Continues
+     - Continuous
    * - ``Observation Space Dim``
      - 1D
    * - ``Action Mask``
@@ -471,7 +471,7 @@ Official Link: https://github.com/decisionforce/metadrive
    * - ``Observability``
      - Partial
    * - ``Action Space``
-     - Continues
+     - Continuous
    * - ``Observation Space Dim``
      - 1D
    * - ``Action Mask``

@@ -69,7 +69,7 @@ class CC_RNN(Base_RNN):
 
         # Central VF
         if self.custom_config["opp_action_in_cc"]:
-            if isinstance(self.custom_config["space_act"], Box):  # continues
+            if isinstance(self.custom_config["space_act"], Box):  # continuous
                 input_size = cc_input_dim + num_outputs * (self.custom_config["num_agents"] - 1) // 2
             else:
                 input_size = cc_input_dim + num_outputs * (self.custom_config["num_agents"] - 1)
@@ -98,7 +98,7 @@ class CC_RNN(Base_RNN):
             x = self.cc_encoder(state)
 
         if opponent_actions is not None:
-            if isinstance(self.custom_config["space_act"], Box):  # continues
+            if isinstance(self.custom_config["space_act"], Box):  # continuous
                 opponent_actions_ls = [opponent_actions[:, i, :]
                                        for i in
                                        range(self.n_agents - 1)]

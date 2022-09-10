@@ -13,7 +13,7 @@ It provides MARL research community a unified platform for developing and evalua
 There are four core features of **MARLlib**. 
 
 - it collects most of the existing MARL algorithms widely acknowledged by the community and unifies them under one framework. 
-- it gives a solution that enables different multi-agent environments using the same interface to interact with the agents.
+- it gives a solution that enables different multi-agent environments to use the same interface to interact with the agents.
 - it guarantees excellent efficiency in both the training and sampling process.
 - it provides trained results, including learning curves and pretrained models specific to each task and algorithm's combination, with finetuned hyper-parameters to guarantee credibility. 
 
@@ -52,7 +52,7 @@ The algorithm code and environment code are fully separated. Changing the enviro
 
 Here we provide a table for comparison of MARLlib and before benchmarks.
 
-|   Benchmark   | Github Stars | Learning Mode | Available Env | Algorithm Type | Algorithm Number | Continues Control | Asynchronous Interact | Distributed Training |          Framework          | Last Update |
+|   Benchmark   | Github Stars | Learning Mode | Available Env | Algorithm Type | Algorithm Number | Continuous Control | Asynchronous Interact | Distributed Training |          Framework          | Last Update |
 |:-------------:|:-------------:|:-------------:|:-------------:|:--------------:|:----------------:|:-----------------:|:---------------------:|:--------------------:|:---------------------------:|:---------------------------:
 |     [PyMARL](https://github.com/oxwhirl/pymarl) | [![GitHub stars](https://img.shields.io/github/stars/oxwhirl/pymarl)](https://github.com/oxwhirl/pymarl/stargazers)    |       CP      |       1       |       VD       |         5        |                   |                       |                      |              *              | ![GitHub last commit](https://img.shields.io/github/last-commit/oxwhirl/pymarl?label=last%20update) |
 |    [PyMARL2](https://github.com/hijkzzz/pymarl2) | [![GitHub stars](https://img.shields.io/github/stars/hijkzzz/pymarl2)](https://github.com/hijkzzz/pymarl2/stargazers)    |       CP      |       1       |       VD       |         12        |                   |                       |                      | [PyMARL](https://github.com/oxwhirl/pymarl) | ![GitHub last commit](https://img.shields.io/github/last-commit/hijkzzz/pymarl2?label=last%20update) |
@@ -257,7 +257,7 @@ Here we only list the common bugs, not RLlib-related. (Mostly is your mistake)
     - the returned env observation contained the required key (e.g., action_mask/state)
     
 - *Action NaN is invaild* bug
-    - this is common bug espectially in continues control problem, carefully finetune the algorithm's hyperparameter
+    - this is common bug espectially in continuous control problem, carefully finetune the algorithm's hyperparameter
         - smaller learning rate
         - set some action value bound
 

@@ -95,7 +95,7 @@ action space
    :widths: 25
    :header-rows: 0
 
-   * - ``continues``
+   * - ``continuous``
 
 task mode
 
@@ -204,12 +204,12 @@ Key hyperparameter location:
 - ``marl/algos/hyperparams/common/ddpg``
 - ``marl/algos/hyperparams/fintuned/env/ddpg``
 
-.. admonition:: Continues Control Tasks
+.. admonition:: Continuous Control Tasks
 
     - There is only a few MARL dataset focusing on continuous control. The popular three are:
-        - :ref:`MPE` (discrete+continues)
-        - :ref:`MaMujoco` (continues only)
-        - :ref:`MetaDrive` (continues only)
+        - :ref:`MPE` (discrete+continuous)
+        - :ref:`MaMujoco` (continuous only)
+        - :ref:`MetaDrive` (continuous only)
 
 ---------------------
 
@@ -250,7 +250,7 @@ action space
    :widths: 25
    :header-rows: 0
 
-   * - ``continues``
+   * - ``continuous``
 
 task mode
 
@@ -399,7 +399,7 @@ action space
    :widths: 25
    :header-rows: 0
 
-   * - ``continues``
+   * - ``continuous``
 
 task mode
 

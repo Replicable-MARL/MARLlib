@@ -24,7 +24,7 @@ As the :ref:`env` we incorporate in MARLlib is diverse, and each one has its uni
 we leave a `env configure <https://github.com/Replicable-MARL/MARLlib/tree/sy_dev/envs/base_env/config>`_ directory to change the hyper-parameter passed to the environment initialization.
 
 For instance, the Multiple Particle Environments (MPE) are set to accept only discrete action.
-To allow continues action, simply change **continuous_actions** in `mpe.yaml <https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/envs/base_env/config/mpe.yaml>`_ to **True**
+To allow continuous action, simply change **continuous_actions** in `mpe.yaml <https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/envs/base_env/config/mpe.yaml>`_ to **True**
 
 
 Algorithm Hyper-parameter
