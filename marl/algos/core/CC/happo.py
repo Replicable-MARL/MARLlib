@@ -67,6 +67,8 @@ def new_happo_surrogate_loss(
     policy._central_value_out = model.value_function()
     loss = ppo_surrogate_loss(policy, model, dist_class, train_batch)
 
+    model.value_function = vf_saved
+
     return loss
 
 
