@@ -223,7 +223,7 @@ def make_happo_optimizers(policy: Policy,
 def happo_policy_after_ppo_config(ppo_critic):
     return PPOTorchPolicy.with_updates(
         name="HAPPOTorchPolicy",
-        get_default_config=ppo_critic,
+        get_default_config=lambda : ppo_critic,
         postprocess_fn=add_all_agents_gae,
         loss_fn=happo_surrogate_loss,
         before_init=setup_torch_mixins,
