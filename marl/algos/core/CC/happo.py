@@ -250,7 +250,7 @@ def happo_policy_after_ppo_config(ppo_critic):
         name="HAPPOTorchPolicy",
         get_default_config=lambda : ppo_critic,
         postprocess_fn=add_all_agents_gae,
-        loss_fn=happo_surrogate_loss,
+        loss_fn=new_happo_surrogate_loss,
         before_init=setup_torch_mixins,
         extra_grad_process_fn=apply_grad_clipping,
         mixins=[
