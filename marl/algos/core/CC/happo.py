@@ -65,11 +65,132 @@ def new_happo_surrogate_loss(
     )
 
     policy._central_value_out = model.value_function()
-    loss = ppo_surrogate_loss(policy, model, dist_class, train_batch)
+
+    contain_global_information = bool(torch.any(global_actions > 0))
+
+    logits, state = model(train_batch)
+    curr_action_dist = dist_class(logits, model)
+
+    # RNN case: Mask away 0-padded chunks at end of time axis.
+    if state:
+        B = len(train_batch[SampleBatch.SEQ_LENS])
+        max_seq_len = logits.shape[0] // B
+        mask = sequence_mask(
+            train_batch[SampleBatch.SEQ_LENS],
+            max_seq_len,
+            time_major=model.is_time_major())
+        mask = torch.reshape(mask, [-1])
+        num_valid = torch.sum(mask)
+
+        def reduce_mean_valid(t):
+            return torch.sum(t[mask]) / num_valid
+
+    # non-RNN case: No masking.
+    else:
+        mask = None
+        reduce_mean_valid = torch.mean
+
+    prev_action_dist = dist_class(train_batch[SampleBatch.ACTION_DIST_INPUTS], model)
+
+    logp_ratio = torch.exp(
+        curr_action_dist.logp(train_batch[SampleBatch.ACTIONS]) -
+        train_batch[SampleBatch.ACTION_LOGP])
+    action_kl = prev_action_dist.kl(curr_action_dist)
+    mean_kl_loss = reduce_mean_valid(action_kl)
+
+    curr_entropy = curr_action_dist.entropy()
+    mean_entropy = reduce_mean_valid(curr_entropy)
+
+    if not contain_global_information:
+        surrogate_loss = torch.min(
+            train_batch[Postprocessing.ADVANTAGES] * logp_ratio,
+            train_batch[Postprocessing.ADVANTAGES] * torch.clamp(
+                logp_ratio, 1 - policy.config["clip_param"],
+                            1 + policy.config["clip_param"]))
+        mean_policy_loss = reduce_mean_valid(-surrogate_loss)
+    else:
+        sub_losses = []
+
+        m_advantage = train_batch[Postprocessing.ADVANTAGES]
+
+        agents_num = get_agent_num(policy)
+
+        random_indices = np.random.permutation(range(agents_num))
+
+        for agent_id in random_indices:
+            if agent_id == agents_num - 1: # is current agent
+                logits, state = model(train_batch)
+                current_action_dist = dist_class(logits, model)
+                action_logp = train_batch[SampleBatch.ACTION_LOGP]
+                actions = train_batch[SampleBatch.ACTIONS]
+            else:
+                current_action_logits = train_batch[get_global_name(SampleBatch.ACTION_DIST_INPUTS, agent_id)].detach()
+                current_action_dist = dist_class(current_action_logits, None)
+
+                action_logp = train_batch[get_global_name(SampleBatch.ACTION_LOGP, agent_id)].detach()
+                actions = train_batch[get_global_name(SampleBatch.ACTIONS, agent_id)].detach()
+
+            logp_ratio = torch.exp(current_action_dist.logp(actions) - action_logp)
+
+            sub_loss = torch.min(
+                m_advantage * logp_ratio,
+                m_advantage * torch.clamp(
+                    logp_ratio, 1 - policy.config["clip_param"],
+                    1 + policy.config["clip_param"])
+            )
+
+            # how to update actor_{im} with \theta_{k+1}^{im}, the argmax of the ppo-clip object above?
+            # get the new-model?
+
+            # get the \theta_{k+1}^{im}, then, get the new_importance_sampling
+            # logits, state = new_model(train_batch)
+            # new_action_dist = dist_class(logits, model)
+            # action_logp = train_batch[SampleBatch.ACTION_LOGP]
+            # actions = train_batch[SampleBatch.ACTIONS]
+            # update_sampling_importance = torch.exp(new_action_dist.logp(actions) - action_logp)
+            # m_advantage = update_sampling * m_advantage
+
+            sub_losses.append(sub_loss)
+
+        surrogate_loss = torch.mean(torch.stack(sub_losses, axis=1), axis=1)
+
+    # Compute a value function loss.
+    if policy.config["use_critic"]:
+        prev_value_fn_out = train_batch[SampleBatch.VF_PREDS]
+        value_fn_out = model.value_function()
+        vf_loss1 = torch.pow(
+            value_fn_out - train_batch[Postprocessing.VALUE_TARGETS], 2.0)
+        vf_clipped = prev_value_fn_out + torch.clamp(
+            value_fn_out - prev_value_fn_out, -policy.config["vf_clip_param"],
+            policy.config["vf_clip_param"])
+        vf_loss2 = torch.pow(
+            vf_clipped - train_batch[Postprocessing.VALUE_TARGETS], 2.0)
+        vf_loss = torch.max(vf_loss1, vf_loss2)
+        mean_vf_loss = reduce_mean_valid(vf_loss)
+    # Ignore the value function.
+    else:
+        vf_loss = mean_vf_loss = 0.0
+
+    mean_policy_loss = reduce_mean_valid(-surrogate_loss)
+
+    total_loss = reduce_mean_valid(-surrogate_loss +
+                                   policy.kl_coeff * action_kl +
+                                   policy.config["vf_loss_coeff"] * vf_loss -
+                                   policy.entropy_coeff * curr_entropy)
+
+    # Store values for stats function in model (tower), such that for
+    # multi-GPU, we do not override them during the parallel loss phase.
+    model.tower_stats["total_loss"] = total_loss
+    model.tower_stats["mean_policy_loss"] = mean_policy_loss
+    model.tower_stats["mean_vf_loss"] = mean_vf_loss
+    model.tower_stats["vf_explained_var"] = explained_variance(
+        train_batch[Postprocessing.VALUE_TARGETS], model.value_function())
+    model.tower_stats["mean_entropy"] = mean_entropy
+    model.tower_stats["mean_kl_loss"] = mean_kl_loss
 
     model.value_function = vf_saved
 
-    return loss
+    return total_loss
 
 
 def happo_surrogate_loss(
