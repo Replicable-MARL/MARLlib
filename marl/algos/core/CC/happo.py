@@ -17,7 +17,7 @@ from ray.rllib.utils.framework import try_import_tf, try_import_torch
 from ray.rllib.utils.typing import TrainerConfigDict, TensorType, \
     LocalOptimizer
 from ray.rllib.agents.ppo.ppo import PPOTrainer, DEFAULT_CONFIG as PPO_CONFIG
-from ray.rllib.agents.ppo.ppo_torch_policy import PPOTorchPolicy, ValueNetworkMixin, KLCoeffMixin
+from ray.rllib.agents.ppo.ppo_torch_policy import PPOTorchPolicy, ValueNetworkMixin, KLCoeffMixin, ppo_surrogate_loss
 from ray.rllib.utils.torch_ops import apply_grad_clipping
 from ray.rllib.policy.torch_policy import LearningRateSchedule, EntropyCoeffSchedule
 from marl.algos.utils.setup_utils import setup_torch_mixins, get_agent_num
@@ -46,6 +46,28 @@ def surrogate_for_one_agent(importance_sampling, advantage, epsilon):
     )
 
     return surrogate_loss
+
+
+def new_happo_surrogate_loss(
+        policy: Policy, model: ModelV2,
+        dist_class: Type[TorchDistributionWrapper],
+        train_batch: SampleBatch) -> Union[TensorType, List[TensorType]]:
+
+    CentralizedValueMixin.__init__(policy)
+    vf_saved = model.value_function
+
+    opp_action_in_cc = policy.config["model"]["custom_model_config"]["opp_action_in_cc"]
+    global_actions = train_batch[get_global_name(SampleBatch.ACTIONS)]
+
+    model.value_function = lambda: policy.model.central_value_function(
+        train_batch[STATE],
+        global_actions if opp_action_in_cc else None
+    )
+
+    policy._central_value_out = model.value_function()
+    loss = ppo_surrogate_loss(policy, model, dist_class, train_batch)
+
+    return loss
 
 
 def happo_surrogate_loss(
