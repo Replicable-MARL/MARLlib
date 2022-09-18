@@ -59,9 +59,20 @@ def run_happo(config_dict, common_config, env_dict, stop):
             "custom_model": "Centralized_Critic_Model",
             "max_seq_len": episode_limit,
             "custom_model_config": merge_dicts(config_dict, env_dict),
+            "vf_share_layers": True,
         },
     }
     config.update(common_config)
+
+    PPO_CONFIG.update({
+        'critic_lr': 1e-3,
+        # 'actor_lr': 5e-5,
+        'lr': 5e-6,
+        "lr_schedule": [
+            (0, 5e-6),
+            (int(1e7), 1e-8),
+        ]
+    })
 
     algorithm = config_dict["algorithm"]
     map_name = config_dict["env_args"]["map_name"]
