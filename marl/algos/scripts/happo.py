@@ -1,7 +1,7 @@
 from ray import tune
 from ray.tune.utils import merge_dicts
 from ray.tune import CLIReporter
-from marl.algos.core.CC.happo import HAPPOTrainer
+from marl.algos.core.CC.happo import get_happo_trainer
 from marl.algos.utils.setup_utils import AlgVar
 from marl.algos.utils.log_dir_util import available_local_dir
 from ray.rllib.agents.ppo.ppo import PPOTrainer, DEFAULT_CONFIG as PPO_CONFIG
@@ -79,7 +79,7 @@ def run_happo(config_dict, common_config, env_dict, stop):
     arch = config_dict["model_arch_args"]["core_arch"]
     RUNNING_NAME = '_'.join([algorithm, arch, map_name])
 
-    results = tune.run(HAPPOTrainer(PPO_CONFIG),
+    results = tune.run(get_happo_trainer(PPO_CONFIG),
                        name=RUNNING_NAME,
                        stop=stop,
                        config=config,

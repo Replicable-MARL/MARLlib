@@ -220,9 +220,10 @@ def make_happo_optimizers(policy: Policy,
     return policy._actor_optimizer, policy._critic_optimizer
 
 
-HAPPOTorchPolicy = lambda ppo_with_critic: PPOTorchPolicy.with_updates(
+def happo_policy_after_ppo_config(ppo_critic):
+    return PPOTorchPolicy.with_updates(
         name="HAPPOTorchPolicy",
-        get_default_config=lambda: ppo_with_critic,
+        get_default_config=ppo_critic,
         postprocess_fn=add_all_agents_gae,
         loss_fn=happo_surrogate_loss,
         before_init=setup_torch_mixins,
@@ -236,12 +237,16 @@ HAPPOTorchPolicy = lambda ppo_with_critic: PPOTorchPolicy.with_updates(
 def get_policy_class_happo(ppo_with_critic):
     def __inner(config_):
         if config_["framework"] == "torch":
-            return HAPPOTorchPolicy(ppo_with_critic)
+            return happo_policy_after_ppo_config(ppo_with_critic)
     return __inner
 
 
-HAPPOTrainer = lambda ppo_with_critic: PPOTrainer.with_updates(
-    name="HAPPOTrainer",
-    default_policy=None,
-    get_policy_class=get_policy_class_happo(ppo_with_critic),
-)
+def get_happo_trainer(ppo_critic):
+    HAPPOTrainer = PPOTrainer.with_updates(
+        name="HAPPOTrainer",
+        default_policy=None,
+        get_policy_class=get_policy_class_happo(ppo_critic),
+    )
+
+    return HAPPOTrainer
+
