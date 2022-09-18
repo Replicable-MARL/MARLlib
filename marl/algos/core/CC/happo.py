@@ -98,7 +98,10 @@ def happo_surrogate_loss(
         global_actions if opp_action_in_cc else None
     )
 
-    contain_global_information = bool(torch.any(global_actions > 0))
+    # contain_global_information = bool(torch.any(global_actions > 0))
+
+    contain_global_information = False
+
     if contain_global_information:
         sub_losses = []
 
@@ -123,11 +126,11 @@ def happo_surrogate_loss(
                 old_action_log_dist = train_batch[SampleBatch.ACTION_LOGP]
                 actions = train_batch[SampleBatch.ACTIONS]
             else:
-                current_action_logits = train_batch[get_global_name(SampleBatch.ACTION_DIST_INPUTS, agent_id)]
+                current_action_logits = train_batch[get_global_name(SampleBatch.ACTION_DIST_INPUTS, agent_id)].detach()
                 current_action_dist = dist_class(current_action_logits, None)
 
-                old_action_log_dist = train_batch[get_global_name(SampleBatch.ACTION_LOGP, agent_id)]
-                actions = train_batch[get_global_name(SampleBatch.ACTIONS, agent_id)]
+                old_action_log_dist = train_batch[get_global_name(SampleBatch.ACTION_LOGP, agent_id)].detach()
+                actions = train_batch[get_global_name(SampleBatch.ACTIONS, agent_id)].detach()
 
             importance_sampling = torch.exp(current_action_dist.logp(actions) - old_action_log_dist)
 
