@@ -9,9 +9,9 @@ algo_args:
   num_sgd_iter: 5
   grad_clip: 10
   clip_param: 0.3
-  critic_lr: 0.0005
+  critic_lr: 0.005
   vf_loss_coeff: 1.0
-  lr: 0.0000005
+  lr: 0.000005
   entropy_coeff: 0.01
   vf_clip_param: 10.0
   batch_mode: "complete_episodes"

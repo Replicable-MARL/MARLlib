@@ -1,7 +1,7 @@
 from ray import tune
 from ray.tune.utils import merge_dicts
 from ray.tune import CLIReporter
-from marl.algos.core.CC.happo import get_happo_trainer
+from marl.algos.core.CC.happo import HAPPOTrainer
 from marl.algos.utils.setup_utils import AlgVar
 from marl.algos.utils.log_dir_util import available_local_dir
 from ray.rllib.agents.ppo.ppo import PPOTrainer, DEFAULT_CONFIG as PPO_CONFIG
@@ -36,11 +36,8 @@ def run_happo(config_dict, common_config, env_dict, stop):
     vf_clip_param = _param["vf_clip_param"]
     gamma = _param["gamma"]
 
-    PPO_CONFIG.update({
-        'critic_lr': critic_lr
-    })
-
     config = {
+        "seed": 1,
         "batch_mode": batch_mode,
         "use_gae": use_gae,
         "lambda": gae_lambda,
@@ -65,12 +62,12 @@ def run_happo(config_dict, common_config, env_dict, stop):
     config.update(common_config)
 
     PPO_CONFIG.update({
-        'critic_lr': 1e-3,
+        'critic_lr': critic_lr,
         # 'actor_lr': 5e-5,
-        'lr': 5e-6,
+        'lr': lr,
         "lr_schedule": [
-            (0, 5e-6),
-            (int(1e7), 1e-8),
+            (0, lr),
+            (int(config_dict['stop_timesteps']), 1e-8),
         ]
     })
 
@@ -79,7 +76,7 @@ def run_happo(config_dict, common_config, env_dict, stop):
     arch = config_dict["model_arch_args"]["core_arch"]
     RUNNING_NAME = '_'.join([algorithm, arch, map_name])
 
-    results = tune.run(get_happo_trainer(PPO_CONFIG),
+    results = tune.run(HAPPOTrainer(PPO_CONFIG),
                        name=RUNNING_NAME,
                        stop=stop,
                        config=config,

@@ -11,6 +11,9 @@ torch, nn = try_import_torch()
 
 class CC_RNN(Base_RNN):
 
+    CRITIC_ENCODER = None
+    CRITIC_VF = None
+
     def __init__(
             self,
             obs_space,
@@ -86,6 +89,15 @@ class CC_RNN(Base_RNN):
             self.central_vf = nn.Sequential(
                 nn.Linear(input_size, num_outputs),
             )
+
+        if self.custom_config['algorithm'] in ['happo', 'hatrpo']:
+            if CC_RNN.CRITIC_ENCODER is None:
+                CC_RNN.CRITIC_ENCODER = self.cc_encoder
+            if CC_RNN.CRITIC_VF is None:
+                CC_RNN.CRITIC_VF = self.central_vf
+
+            self.cc_encoder = CC_RNN.CRITIC_ENCODER
+            self.central_vf = CC_RNN.CRITIC_VF
 
     def central_value_function(self, state, opponent_actions=None):
         B = state.shape[0]
