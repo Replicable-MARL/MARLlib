@@ -5,6 +5,7 @@ __data__: March-29-2022
 """
 
 import logging
+import random
 from typing import Dict, List, Type, Union, Tuple
 from ray.rllib.models.torch.torch_action_dist import TorchDistributionWrapper
 from ray.rllib.policy.policy import Policy
@@ -29,24 +30,14 @@ from marl.algos.utils.centralized_critic_hetero import (
 )
 from ray.rllib.examples.centralized_critic import CentralizedValueMixin
 from marl.algos.utils.setup_utils import get_device
+from marl.algos.utils.manipulate_tensor import flat_grad, flat_params
+from torch.nn.utils import parameters_to_vector, vector_to_parameters
 from icecream import ic
 
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
 
 logger = logging.getLogger(__name__)
-
-
-def surrogate_for_one_agent(importance_sampling, advantage, epsilon):
-    surrogate_loss = torch.min(
-        advantage * importance_sampling,
-        advantage * torch.clamp(
-            importance_sampling, 1 - epsilon,
-            1 + epsilon
-        )
-    )
-
-    return surrogate_loss
 
 
 def happo_surrogate_loss(
@@ -106,7 +97,6 @@ def happo_surrogate_loss(
 
     if g_action_key in train_batch: # if global action key in train batch, the other info must not be empty.
         sub_losses = []
-
         m_advantage = train_batch[Postprocessing.ADVANTAGES]
 
         agents_num = get_agent_num(policy)
@@ -121,44 +111,81 @@ def happo_surrogate_loss(
 
         # torch.autograd.set_detect_anomaly(True)
 
-        ic([id(p) for p in model.other_policies])
-        ic(len(model.other_policies))
-        ic(agents_num)
+        # ic([id(p) for p in model.other_policies])
+        # ic(len(model.other_policies))
+        # ic(agents_num)
 
-        for agent_id in random_indices:
-            if is_current_agent(agent_id):
-                logits, state = model(train_batch)
-                current_action_dist = dist_class(logits, model)
-                old_action_log_dist = train_batch[SampleBatch.ACTION_LOGP]
-                actions = train_batch[SampleBatch.ACTIONS]
-            # else:
-            #     current_action_logits = train_batch[get_global_name(SampleBatch.ACTION_DIST_INPUTS, agent_id)]
-            #     current_action_dist = dist_class(current_action_logits, None)
-            #
-            #     old_action_log_dist = train_batch[get_global_name(SampleBatch.ACTION_LOGP, agent_id)]
-            #     actions = train_batch[get_global_name(SampleBatch.ACTIONS, agent_id)]
+        all_policies_names = list(model.other_policies.keys()) + ['self']
 
-            # importance_sampling = torch.exp(current_action_dist.logp(actions) - old_action_log_dist)
-            #
-            # sub_loss = surrogate_for_one_agent(importance_sampling=importance_sampling,
-            #                                    advantage=m_advantage,
-            #                                    epsilon=policy.config["clip_param"])
+        random.shuffle(all_policies_names)
 
-            # m_advantage = importance_sampling * m_advantage
+        m_advantage = train_batch[Postprocessing.ADVANTAGES]
 
-            # sub_losses.append(sub_loss)
+        for policy_name in all_policies_names:
+            # ic(policy_name)
+            if policy_name == 'self':
+                agent_policy = policy
+                old_action_log = train_batch[SampleBatch.ACTION_LOGP]
+                # curr_action_dist = dist_class(logits, model)
+            else:
+                agent_policy = model.other_policies[policy_name]
+                old_action_log = train_batch[get_global_name(SampleBatch.ACTION_LOGP, policy_name)]
 
-        # surrogate_loss = torch.mean(torch.stack(sub_losses, axis=1), axis=1)
-    # for testing, turn on this always
-    logp_ratio = torch.exp(
-        curr_action_dist.logp(train_batch[SampleBatch.ACTIONS]) -
-        train_batch[SampleBatch.ACTION_LOGP])
+            _p_model = agent_policy.model
 
-    surrogate_loss = torch.min(
-        train_batch[Postprocessing.ADVANTAGES] * logp_ratio,
-        train_batch[Postprocessing.ADVANTAGES] * torch.clamp(
-            logp_ratio, 1 - policy.config["clip_param"],
-            1 + policy.config["clip_param"]))
+            _p_model.train()
+            logits, state = _p_model(train_batch)
+            curr_action_dist = dist_class(logits, _p_model)
+
+            step_logp_ratio = torch.exp(
+                curr_action_dist.logp(train_batch[SampleBatch.ACTIONS]) -
+                old_action_log)
+
+            step_loss = torch.min(
+                m_advantage * step_logp_ratio,
+                m_advantage * torch.clamp(
+                    step_logp_ratio, 1 - policy.config["clip_param"],
+                    1 + policy.config["clip_param"])
+            )
+
+            sub_losses.append(step_loss)  # for recoding, need the real step-loss,
+
+            torch.autograd.set_detect_anomaly(True)
+
+            loss_grad = torch.autograd.grad(reduce_mean_valid(-1 * step_loss), _p_model.actor_parameters(), allow_unused=True, retain_graph=True)
+
+            adam_update_part = _p_model.update_adam(flat_grad(loss_grad))
+
+            new_parameters = (
+                parameters_to_vector(_p_model.actor_parameters()) - adam_update_part * policy.cur_lr
+            )
+
+            vector_to_parameters(new_parameters, _p_model.actor_parameters())
+
+            new_logits, _ = _p_model(train_batch)
+            new_action_dist = dist_class(new_logits, _p_model)
+
+            new_logp_ratio = torch.exp(
+                new_action_dist.logp(train_batch[SampleBatch.ACTIONS]) -
+                old_action_log
+            )
+
+            m_advantage = new_logp_ratio * m_advantage
+
+        surrogate_loss = torch.mean(torch.stack(sub_losses, axis=1), axis=1)
+
+        model_already_updated = True
+    else:
+        logp_ratio = torch.exp(
+            curr_action_dist.logp(train_batch[SampleBatch.ACTIONS]) -
+            train_batch[SampleBatch.ACTION_LOGP])
+
+        surrogate_loss = torch.min(
+            train_batch[Postprocessing.ADVANTAGES] * logp_ratio,
+            train_batch[Postprocessing.ADVANTAGES] * torch.clamp(
+                logp_ratio, 1 - policy.config["clip_param"],
+                1 + policy.config["clip_param"]))
+        model_already_updated = False
 
     mean_policy_loss = reduce_mean_valid(-surrogate_loss)
 
@@ -193,10 +220,14 @@ def happo_surrogate_loss(
     # model.value_function = vf_saved
     # recovery the value function.
 
-    total_loss = reduce_mean_valid(-surrogate_loss.to(device=get_device()) +
-                                   policy.kl_coeff * action_kl.to(device=get_device()) +
-                                   policy.config["vf_loss_coeff"] * vf_loss.to(device=get_device()) -
-                                   policy.entropy_coeff * curr_entropy.to(device=get_device()))
+    total_loss = (policy.kl_coeff * action_kl.to(device=get_device()) +
+                  policy.config["vf_loss_coeff"] * vf_loss.to(device=get_device()) -
+                  policy.entropy_coeff * curr_entropy.to(device=get_device()))
+
+    if not model_already_updated:
+        total_loss = -surrogate_loss.to(device=get_device()) + total_loss
+
+    total_loss = reduce_mean_valid(total_loss)
 
     # Store values for stats function in model (tower), such that for
     # multi-GPU, we do not override them during the parallel loss phase.
@@ -230,16 +261,16 @@ def make_happo_optimizers(policy: Policy,
 
 
 HAPPOTorchPolicy = lambda ppo_with_critic: PPOTorchPolicy.with_updates(
-        name="HAPPOTorchPolicy",
-        get_default_config=lambda: ppo_with_critic,
-        postprocess_fn=add_all_agents_gae,
-        loss_fn=happo_surrogate_loss,
-        before_init=setup_torch_mixins,
-        extra_grad_process_fn=apply_grad_clipping,
-        mixins=[
-            LearningRateSchedule, EntropyCoeffSchedule, KLCoeffMixin,
-            CentralizedValueMixin
-        ])
+    name="HAPPOTorchPolicy",
+    get_default_config=lambda: ppo_with_critic,
+    postprocess_fn=add_all_agents_gae,
+    loss_fn=happo_surrogate_loss,
+    before_init=setup_torch_mixins,
+    extra_grad_process_fn=apply_grad_clipping,
+    mixins=[
+        LearningRateSchedule, EntropyCoeffSchedule, KLCoeffMixin,
+        CentralizedValueMixin
+    ])
 
 
 def get_policy_class_happo(ppo_with_critic):
