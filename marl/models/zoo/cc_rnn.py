@@ -90,6 +90,9 @@ class CC_RNN(Base_RNN):
 
         self.other_policies = {}
 
+        self.adam_update_info = {'m': 0, 'v': 0}
+        self.__t = 1
+
     def central_value_function(self, state, opponent_actions=None):
         B = state.shape[0]
 
@@ -139,3 +142,21 @@ class CC_RNN(Base_RNN):
                 raise ValueError('the policy is not same with the two time look up')
         else:
             self.other_policies[agent_id] = policy
+
+    def update_adam(self, gradient):
+        beta1, beta2 = 0.9, 0.999
+        eps = 1e-08
+
+        m = beta1 * self.adam_update_info['m'] + (1 - beta1) * gradient
+        v = beta2 * self.adam_update_info['v'] + (1 - beta2) * (gradient**2)
+
+        self.adam_update_info['m'] = m
+        self.adam_update_info['v'] = v
+
+        m_t_bar = m / (1 - beta1 ** self.__t)
+        v_t_bar = v / (1 - beta2 ** self.__t)
+        self.__t += 1
+
+        update_part = m_t_bar / (torch.sqrt(v_t_bar)+eps)
+
+        return update_part
