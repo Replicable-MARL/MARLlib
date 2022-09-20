@@ -11,6 +11,11 @@ import multiprocessing
 import re
 from icecream import ic
 from collections import Counter
+from marl.algos.utils.manipulate_tensor import flat_params
+from ray.rllib.utils.framework import try_import_tf, try_import_torch
+
+tf1, tf, tfv = try_import_tf()
+torch, nn = try_import_torch()
 
 """
 centralized critic postprocessing for 
@@ -197,6 +202,9 @@ def get_vf_pred(policy, algorithm, sample_batch, opp_action_in_cc):
 
 
 def link_with_other_agents(current_policy, agent_num, other_agent_info):
+    # ic('self')
+    # ic(torch.std(flat_params(current_policy.model.actor_parameters())))
+    # ic(torch.mean(flat_params(current_policy.model.actor_parameters())))
     if not other_agent_info:
         pass
     else:
@@ -218,6 +226,10 @@ def link_with_other_agents(current_policy, agent_num, other_agent_info):
                     _p.model.value_branch = current_policy.model.value_branch
 
             current_policy.model.link_other_agent_policy(name, _p)
+
+            # ic(name)
+            # ic(torch.std(flat_params(_p.model.actor_parameters())))
+            # ic(torch.mean(flat_params(_p.model.actor_parameters())))
 
 
 def get_real_state_by_one_sample():
