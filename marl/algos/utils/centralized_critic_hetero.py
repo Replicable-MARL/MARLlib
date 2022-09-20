@@ -20,7 +20,7 @@ centralized critic postprocessing for
 
 mul_manager = multiprocessing.Manager()
 
-GLOBAL_NEED_COLLECT = [SampleBatch.ACTION_LOGP, SampleBatch.ACTIONS,
+GLOBAL_NEED_COLLECT = [SampleBatch.ACTION_LOGP,
                        SampleBatch.ACTION_DIST_INPUTS, SampleBatch.OBS]
 GLOBAL_PREFIX = 'global_'
 GLOBAL_MODEL_LOGITS = f'{GLOBAL_PREFIX}model_logits'
@@ -168,12 +168,6 @@ def add_other_agent_mul_info(sample_batch, other_agent_info, agent_num):
                 _p, _b = other_agent_info[name] # _p means policy, _b means batch
                 sample_batch[get_global_name(key, name)] = _b[key]
 
-    if other_agent_info and SampleBatch.ACTIONS in GLOBAL_NEED_COLLECT:
-        sample_batch[get_global_name(SampleBatch.ACTIONS)] = np.stack([
-            sample_batch[get_global_name(SampleBatch.ACTIONS, name)]
-            for name in other_agent_info], axis=1
-        )
-
     return sample_batch
 
 
@@ -183,19 +177,19 @@ def get_vf_pred(policy, algorithm, sample_batch, opp_action_in_cc):
             convert_to_torch_tensor(
                 sample_batch[STATE], policy.device),
             convert_to_torch_tensor(
-                sample_batch[get_global_name(SampleBatch.ACTIONS)], policy.device) if opp_action_in_cc else None,
+                sample_batch['opponent_actions'], policy.device) if opp_action_in_cc else None,
         ) \
             .cpu().detach().numpy()
         sample_batch[SampleBatch.VF_PREDS] = np.take(
             sample_batch[SampleBatch.VF_PREDS],
-            np.expand_dims(sample_batch[SampleBatch.ACTIONS], axis=1)
+            np.expand_dims(sample_batch['opponent_actions'], axis=1)
         ).squeeze(axis=1)
     else:
         sample_batch[SampleBatch.VF_PREDS] = policy.compute_central_vf(
             convert_to_torch_tensor(
                 sample_batch[STATE], policy.device),
             convert_to_torch_tensor(
-                sample_batch[get_global_name(SampleBatch.ACTIONS)], policy.device) if opp_action_in_cc else None,
+                sample_batch['opponent_actions'], policy.device) if opp_action_in_cc else None,
         ) \
             .cpu().detach().numpy()
 
@@ -342,6 +336,10 @@ def add_opponent_information_and_critical_vf(policy,
                     [sample_batch[SampleBatch.OBS][:, action_mask_dim:action_mask_dim + obs_dim]] + [
                         opponent_batch[i][SampleBatch.OBS][:, action_mask_dim:action_mask_dim + obs_dim] for i in
                         range(opponent_agents_num)], 1)
+
+            sample_batch["opponent_actions"] = np.stack(
+                [opponent_batch[i]["actions"] for i in range(opponent_agents_num)],
+                1)
     else:
         # Policy hasn't been initialized yet, use zeros.
         o = sample_batch[SampleBatch.CUR_OBS]
@@ -352,6 +350,9 @@ def add_opponent_information_and_critical_vf(policy,
         else:
             sample_batch[STATE] = np.zeros((o.shape[0], n_agents, obs_dim),
                                            dtype=sample_batch[SampleBatch.CUR_OBS].dtype)
+        sample_batch["opponent_actions"] = np.stack(
+            [np.zeros_like(sample_batch["actions"], dtype=sample_batch["actions"].dtype) for _ in
+             range(opponent_agents_num)], axis=1)
 
     sample_batch = add_other_agent_mul_info(
         sample_batch=sample_batch,

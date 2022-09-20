@@ -55,7 +55,7 @@ def happo_surrogate_loss(
             of loss tensors.
     """
 
-    # CentralizedValueMixin.__init__(policy)
+    CentralizedValueMixin.__init__(policy)
 
     logits, state = model(train_batch)
     curr_action_dist = dist_class(logits, model)
@@ -79,21 +79,14 @@ def happo_surrogate_loss(
         mask = None
         reduce_mean_valid = torch.mean
 
-    # vf_saved = model.value_function
+    vf_saved = model.value_function
 
     g_action_key = get_global_name(SampleBatch.ACTIONS)
+    opp_action_in_cc = policy.config["model"]["custom_model_config"]["opp_action_in_cc"]
 
-    opp_action_in_cc = policy.config["model"]["custom_model_config"]["opp_action_in_cc"] and g_action_key in train_batch
-
-    if opp_action_in_cc in train_batch:
-        global_actions = train_batch[g_action_key]
-    else:
-        global_actions = None
-
-    # model.value_function = lambda: policy.model.central_value_function(
-    #     train_batch[STATE],
-    #     global_actions
-    # )
+    model.value_function = lambda: policy.model.central_value_function(train_batch["state"],
+                                                                       train_batch[
+                                                                           "opponent_actions"] if opp_action_in_cc else None)
 
     if g_action_key in train_batch: # if global action key in train batch, the other info must not be empty.
         sub_losses = []
@@ -157,7 +150,7 @@ def happo_surrogate_loss(
             adam_update_part = _p_model.update_adam(flat_grad(loss_grad))
 
             new_parameters = (
-                parameters_to_vector(_p_model.actor_parameters()) - adam_update_part * policy.cur_lr
+                parameters_to_vector(_p_model.actor_parameters()) - adam_update_part * policy.config['lr']
             )
 
             vector_to_parameters(new_parameters, _p_model.actor_parameters())
@@ -217,7 +210,7 @@ def happo_surrogate_loss(
     else:
         vf_loss = mean_vf_loss = 0.0
 
-    # model.value_function = vf_saved
+    model.value_function = vf_saved
     # recovery the value function.
 
     total_loss = (policy.kl_coeff * action_kl.to(device=get_device()) +
@@ -231,7 +224,7 @@ def happo_surrogate_loss(
 
     # Store values for stats function in model (tower), such that for
     # multi-GPU, we do not override them during the parallel loss phase.
-    model.tower_stats["total_loss"] = total_loss
+    model.tower_stats["total_loss"] = total_loss if not model_already_updated else total_loss + -surrogate_loss.to(device=get_device())
     model.tower_stats["mean_policy_loss"] = mean_policy_loss
     model.tower_stats["mean_vf_loss"] = mean_vf_loss
     model.tower_stats["vf_explained_var"] = explained_variance(
@@ -241,23 +234,6 @@ def happo_surrogate_loss(
     model.tower_stats["mean_kl_loss"] = mean_kl_loss
 
     return total_loss
-
-
-def make_happo_optimizers(policy: Policy,
-                          config: TrainerConfigDict) -> Tuple[LocalOptimizer]:
-    """Create separate optimizers for actor & critic losses."""
-
-    # Set epsilons to match tf.keras.optimizers.Adam's epsilon default.
-    policy._actor_optimizer = torch.optim.Adam(
-        params=policy.model.policy_variables(),
-        lr=config["actor_lr"],
-        eps=1e-7)
-
-    policy._critic_optimizer = torch.optim.Adam(
-        params=policy.model.critic_variables(), lr=config["critic_lr"], eps=1e-5)
-
-    # Return them in the same order as the respective loss terms are returned.
-    return policy._actor_optimizer, policy._critic_optimizer
 
 
 HAPPOTorchPolicy = lambda ppo_with_critic: PPOTorchPolicy.with_updates(

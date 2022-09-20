@@ -96,9 +96,9 @@ class CC_RNN(Base_RNN):
     def central_value_function(self, state, opponent_actions=None):
         B = state.shape[0]
 
-        ic(id(self))
-        ic(id(self.cc_encoder))
-        ic(id(self.central_vf))
+        # ic(id(self))
+        # ic(id(self.cc_encoder))
+        # ic(id(self.central_vf))
 
         if "conv_layer" in self.custom_config["model_arch_args"]:
             x = state.reshape(-1, self.state_dim[0], self.state_dim[1], self.state_dim[2]).permute(0, 3, 1, 2)

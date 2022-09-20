@@ -1,3 +1,5 @@
+import random
+
 from ray import tune
 from ray.tune.utils import merge_dicts
 from ray.tune import CLIReporter
@@ -37,7 +39,7 @@ def run_happo(config_dict, common_config, env_dict, stop):
     gamma = _param["gamma"]
 
     config = {
-        "seed": 1,
+        "seed": random.randint(0, 100),
         "batch_mode": batch_mode,
         "use_gae": use_gae,
         "lambda": gae_lambda,
