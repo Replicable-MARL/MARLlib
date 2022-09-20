@@ -29,6 +29,7 @@ from marl.algos.utils.centralized_critic_hetero import (
 )
 from ray.rllib.examples.centralized_critic import CentralizedValueMixin
 from marl.algos.utils.setup_utils import get_device
+from icecream import ic
 
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
@@ -63,7 +64,7 @@ def happo_surrogate_loss(
             of loss tensors.
     """
 
-    CentralizedValueMixin.__init__(policy)
+    # CentralizedValueMixin.__init__(policy)
 
     logits, state = model(train_batch)
     curr_action_dist = dist_class(logits, model)
@@ -87,19 +88,23 @@ def happo_surrogate_loss(
         mask = None
         reduce_mean_valid = torch.mean
 
-    vf_saved = model.value_function
+    # vf_saved = model.value_function
 
-    opp_action_in_cc = policy.config["model"]["custom_model_config"]["opp_action_in_cc"]
+    g_action_key = get_global_name(SampleBatch.ACTIONS)
 
-    global_actions = train_batch[get_global_name(SampleBatch.ACTIONS)]
+    opp_action_in_cc = policy.config["model"]["custom_model_config"]["opp_action_in_cc"] and g_action_key in train_batch
 
-    model.value_function = lambda: policy.model.central_value_function(
-        train_batch[STATE],
-        global_actions if opp_action_in_cc else None
-    )
+    if opp_action_in_cc in train_batch:
+        global_actions = train_batch[g_action_key]
+    else:
+        global_actions = None
 
-    contain_global_information = bool(torch.any(global_actions > 0))
-    if contain_global_information:
+    # model.value_function = lambda: policy.model.central_value_function(
+    #     train_batch[STATE],
+    #     global_actions
+    # )
+
+    if g_action_key in train_batch: # if global action key in train batch, the other info must not be empty.
         sub_losses = []
 
         m_advantage = train_batch[Postprocessing.ADVANTAGES]
@@ -116,40 +121,44 @@ def happo_surrogate_loss(
 
         # torch.autograd.set_detect_anomaly(True)
 
+        ic([id(p) for p in model.other_policies])
+        ic(len(model.other_policies))
+        ic(agents_num)
+
         for agent_id in random_indices:
             if is_current_agent(agent_id):
                 logits, state = model(train_batch)
                 current_action_dist = dist_class(logits, model)
                 old_action_log_dist = train_batch[SampleBatch.ACTION_LOGP]
                 actions = train_batch[SampleBatch.ACTIONS]
-            else:
-                current_action_logits = train_batch[get_global_name(SampleBatch.ACTION_DIST_INPUTS, agent_id)]
-                current_action_dist = dist_class(current_action_logits, None)
+            # else:
+            #     current_action_logits = train_batch[get_global_name(SampleBatch.ACTION_DIST_INPUTS, agent_id)]
+            #     current_action_dist = dist_class(current_action_logits, None)
+            #
+            #     old_action_log_dist = train_batch[get_global_name(SampleBatch.ACTION_LOGP, agent_id)]
+            #     actions = train_batch[get_global_name(SampleBatch.ACTIONS, agent_id)]
 
-                old_action_log_dist = train_batch[get_global_name(SampleBatch.ACTION_LOGP, agent_id)]
-                actions = train_batch[get_global_name(SampleBatch.ACTIONS, agent_id)]
+            # importance_sampling = torch.exp(current_action_dist.logp(actions) - old_action_log_dist)
+            #
+            # sub_loss = surrogate_for_one_agent(importance_sampling=importance_sampling,
+            #                                    advantage=m_advantage,
+            #                                    epsilon=policy.config["clip_param"])
 
-            importance_sampling = torch.exp(current_action_dist.logp(actions) - old_action_log_dist)
+            # m_advantage = importance_sampling * m_advantage
 
-            sub_loss = surrogate_for_one_agent(importance_sampling=importance_sampling,
-                                               advantage=m_advantage,
-                                               epsilon=policy.config["clip_param"])
+            # sub_losses.append(sub_loss)
 
-            m_advantage = importance_sampling * m_advantage
+        # surrogate_loss = torch.mean(torch.stack(sub_losses, axis=1), axis=1)
+    # for testing, turn on this always
+    logp_ratio = torch.exp(
+        curr_action_dist.logp(train_batch[SampleBatch.ACTIONS]) -
+        train_batch[SampleBatch.ACTION_LOGP])
 
-            sub_losses.append(sub_loss)
-
-        surrogate_loss = torch.mean(torch.stack(sub_losses, axis=1), axis=1)
-    else:
-        logp_ratio = torch.exp(
-            curr_action_dist.logp(train_batch[SampleBatch.ACTIONS]) -
-            train_batch[SampleBatch.ACTION_LOGP])
-
-        surrogate_loss = torch.min(
-            train_batch[Postprocessing.ADVANTAGES] * logp_ratio,
-            train_batch[Postprocessing.ADVANTAGES] * torch.clamp(
-                logp_ratio, 1 - policy.config["clip_param"],
-                1 + policy.config["clip_param"]))
+    surrogate_loss = torch.min(
+        train_batch[Postprocessing.ADVANTAGES] * logp_ratio,
+        train_batch[Postprocessing.ADVANTAGES] * torch.clamp(
+            logp_ratio, 1 - policy.config["clip_param"],
+            1 + policy.config["clip_param"]))
 
     mean_policy_loss = reduce_mean_valid(-surrogate_loss)
 
@@ -181,7 +190,7 @@ def happo_surrogate_loss(
     else:
         vf_loss = mean_vf_loss = 0.0
 
-    model.value_function = vf_saved
+    # model.value_function = vf_saved
     # recovery the value function.
 
     total_loss = reduce_mean_valid(-surrogate_loss.to(device=get_device()) +

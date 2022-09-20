@@ -1,3 +1,5 @@
+import pdb
+
 from ray.rllib.policy.sample_batch import SampleBatch
 import numpy as np
 from ray.rllib.evaluation.postprocessing import discount_cumsum, Postprocessing, compute_gae_for_sample_batch
@@ -6,6 +8,9 @@ from marl.algos.utils.centralized_critic import convert_to_torch_tensor
 from marl.algos.utils.setup_utils import get_agent_num
 from marl.algos.utils.centralized_Q import get_dim
 import multiprocessing
+import re
+from icecream import ic
+from collections import Counter
 
 """
 centralized critic postprocessing for 
@@ -53,6 +58,7 @@ def extract_other_agents_train_batch(other_agent_batches):
 
 
 def add_all_agents_gae(policy, sample_batch, other_agent_batches=None, episode=None):
+    # print('------------step into post processing ----------\n'*8)
     sample_batch = add_opponent_information_and_critical_vf(policy, sample_batch, other_agent_batches, episode=episode)
 
     global value_normalizer
@@ -128,18 +134,14 @@ def hatrpo_post_process(policy, sample_batch, other_agent_batches=None, epsisode
 
     n_agents = get_agent_num(policy)
 
-    for i in range(n_agents - 1):
-        cur_training = 0
+    if other_agent_batches:
+        for name in other_agent_batches:
+            _p, _b = other_agent_batches[name]
+            cur_training = _b.is_training
 
-        if other_agent_batches:
-            name = exist_in_opponent(opponent_index=i, opponent_batches=other_agent_batches)
-            if name:
-                _p, _b = other_agent_batches[name]
-                cur_training = _b.is_training
-
-        sample_batch[get_global_name(TRAINING, i)] = np.array([
-                                                                  int(cur_training)
-                                                              ] * len(sample_batch))
+            sample_batch[get_global_name(TRAINING, name)] = np.array([
+                                                                         int(cur_training)
+                                                                     ] * len(sample_batch))
 
     return sample_batch
 
@@ -158,30 +160,19 @@ def get_action_from_batch(train_batch, model, dist_class):
 def add_other_agent_mul_info(sample_batch, other_agent_info, agent_num):
     global GLOBAL_NEED_COLLECT
 
-    for agent_i in range(agent_num - 1):
-        for key in GLOBAL_NEED_COLLECT:
-            if key not in sample_batch: continue
+    if other_agent_info:
+        for name in other_agent_info:
+            for key in GLOBAL_NEED_COLLECT:
+                if key not in sample_batch: continue
 
-            value_added = False
+                _p, _b = other_agent_info[name] # _p means policy, _b means batch
+                sample_batch[get_global_name(key, name)] = _b[key]
 
-            if other_agent_info:
-                name = exist_in_opponent(opponent_index=agent_i, opponent_batches=other_agent_info)
-                if name:
-                    _p, _b = other_agent_info[name]
-                    sample_batch[get_global_name(key, agent_i)] = _b[key]
-                    value_added = True
-
-            if not value_added:
-                sample_batch[get_global_name(key, agent_i)] = np.zeros_like(
-                    sample_batch[key],
-                    dtype=sample_batch[key].dtype
-                )
-
-    if SampleBatch.ACTIONS in GLOBAL_NEED_COLLECT:
+    if other_agent_info and SampleBatch.ACTIONS in GLOBAL_NEED_COLLECT:
         sample_batch[get_global_name(SampleBatch.ACTIONS)] = np.stack([
-            sample_batch[get_global_name(SampleBatch.ACTIONS, a_i)]
-            for a_i in range(agent_num - 1)
-        ], axis=1)
+            sample_batch[get_global_name(SampleBatch.ACTIONS, name)]
+            for name in other_agent_info], axis=1
+        )
 
     return sample_batch
 
@@ -209,6 +200,30 @@ def get_vf_pred(policy, algorithm, sample_batch, opp_action_in_cc):
             .cpu().detach().numpy()
 
     return sample_batch
+
+
+def link_with_other_agents(current_policy, agent_num, other_agent_info):
+    if not other_agent_info:
+        pass
+    else:
+        policies = [current_policy]
+
+        # set all the other-models critic as current policy critic
+
+        for name in other_agent_info:
+            _p, _b = other_agent_info[name]
+
+            if any([
+                _p.model.cc_encoder is not current_policy.model.cc_encoder,
+                _p.model.central_vf is not current_policy.model.central_vf,
+                _p.model.vf_encoder is not current_policy.model.vf_encoder,
+                _p.model.value_branch is not current_policy.model.value_branch]):
+                    _p.model.cc_encoder = current_policy.model.cc_encoder
+                    _p.model.central_vf = current_policy.model.central_vf
+                    _p.model.vf_encoder = current_policy.model.vf_encoder
+                    _p.model.value_branch = current_policy.model.value_branch
+
+            current_policy.model.link_other_agent_policy(name, _p)
 
 
 def get_real_state_by_one_sample():
@@ -263,23 +278,23 @@ def add_state_in_for_opponent(sample_batch, other_agent_batches, agent_num):
     # get how many state in layer
     # agent_indices = [0, 1, 2]
 
-    for a_i in range(agent_num - 1):
-        # name = agent(a_i)
+    if other_agent_batches:
+        for name in other_agent_batches:
+            # name = agent(a_i)
 
-        for s_i in range(state_in_num):
-            opponent_state_exist = False
-            if other_agent_batches:
-                name = exist_in_opponent(opponent_index=a_i, opponent_batches=other_agent_batches)
-                if name and state_name(s_i) in other_agent_batches[name]:
-                    _policy, _batch = other_agent_batches[name]
-                    sample_batch[global_state_name(s_i, a_i)] = _batch[state_name(s_i)]
-                    opponent_state_exist = True
+            for s_i in range(state_in_num):
+                opponent_state_exist = False
+                if other_agent_batches:
+                    if state_name(s_i) in other_agent_batches[name]:
+                        _policy, _batch = other_agent_batches[name]
+                        sample_batch[global_state_name(s_i, name)] = _batch[state_name(s_i)]
+                        opponent_state_exist = True
 
-            if not opponent_state_exist:
-                sample_batch[global_state_name(s_i, a_i)] = np.zeros_like(
-                    sample_batch[state_name(s_i)],
-                    dtype=sample_batch[state_name(s_i)].dtype
-                )
+                if not opponent_state_exist:
+                    sample_batch[global_state_name(s_i, name)] = np.zeros_like(
+                        sample_batch[state_name(s_i)],
+                        dtype=sample_batch[state_name(s_i)].dtype
+                    )
 
     return sample_batch
 
@@ -349,6 +364,8 @@ def add_opponent_information_and_critical_vf(policy,
         other_agent_batches=other_agent_batches,
         agent_num=n_agents,
     )
+
+    link_with_other_agents(policy, n_agents, other_agent_batches)
 
     if opponent_info_exists:
         sample_batch = get_vf_pred(policy, algorithm, sample_batch, opp_action_in_cc)

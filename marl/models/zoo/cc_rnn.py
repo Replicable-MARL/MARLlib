@@ -4,15 +4,13 @@ from marl.models.base.base_rnn import Base_RNN
 import copy
 from ray.rllib.utils.annotations import override
 from functools import reduce
+from icecream import ic
 
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
 
 
 class CC_RNN(Base_RNN):
-
-    CRITIC_ENCODER = None
-    CRITIC_VF = None
 
     def __init__(
             self,
@@ -90,17 +88,14 @@ class CC_RNN(Base_RNN):
                 nn.Linear(input_size, num_outputs),
             )
 
-        if self.custom_config['algorithm'] in ['happo', 'hatrpo']:
-            if CC_RNN.CRITIC_ENCODER is None:
-                CC_RNN.CRITIC_ENCODER = self.cc_encoder
-            if CC_RNN.CRITIC_VF is None:
-                CC_RNN.CRITIC_VF = self.central_vf
-
-            self.cc_encoder = CC_RNN.CRITIC_ENCODER
-            self.central_vf = CC_RNN.CRITIC_VF
+        self.other_policies = {}
 
     def central_value_function(self, state, opponent_actions=None):
         B = state.shape[0]
+
+        ic(id(self))
+        ic(id(self.cc_encoder))
+        ic(id(self.central_vf))
 
         if "conv_layer" in self.custom_config["model_arch_args"]:
             x = state.reshape(-1, self.state_dim[0], self.state_dim[1], self.state_dim[2]).permute(0, 3, 1, 2)
@@ -137,3 +132,10 @@ class CC_RNN(Base_RNN):
             self.central_vf,
         ]
         return reduce(lambda x, y: x + y, map(lambda p: list(p.parameters()), critics))
+
+    def link_other_agent_policy(self, agent_id, policy):
+        if agent_id in self.other_policies:
+            if self.other_policies[agent_id] != policy:
+                raise ValueError('the policy is not same with the two time look up')
+        else:
+            self.other_policies[agent_id] = policy
