@@ -38,6 +38,8 @@ def run_happo(config_dict, common_config, env_dict, stop):
     vf_clip_param = _param["vf_clip_param"]
     gamma = _param["gamma"]
 
+    config_dict['actor_lr'] = lr
+
     config = {
         "seed": random.randint(0, 100),
         "batch_mode": batch_mode,

@@ -31,13 +31,22 @@ from marl.algos.utils.centralized_critic_hetero import (
 from ray.rllib.examples.centralized_critic import CentralizedValueMixin
 from marl.algos.utils.setup_utils import get_device
 from marl.algos.utils.manipulate_tensor import flat_grad, flat_params
-from torch.nn.utils import parameters_to_vector, vector_to_parameters
+import logging
 from icecream import ic
 
-tf1, tf, tfv = try_import_tf()
-torch, nn = try_import_torch()
+# tf1, tf, tfv = try_import_tf()
+# torch, nn = try_import_torch()
+import torch
+import datetime
 
 logger = logging.getLogger(__name__)
+
+FORMAT = '%(asctime)s %(levelname)s | %(message)s'
+logging.basicConfig(filename=f'/root/happo_running_logs/test-{datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")}.log',
+                    filemode='a',
+                    format=FORMAT,
+                    level=logging.DEBUG
+                    )
 
 
 def happo_surrogate_loss(
@@ -87,7 +96,7 @@ def happo_surrogate_loss(
                                                                        train_batch[
                                                                            "opponent_actions"] if opp_action_in_cc else None)
 
-    opponent_info_exists = hasattr(policy, "compute_central_vf") or policy.loss_initialized()
+    # opponent_info_exists = hasattr(policy, "compute_central_vf") or policy.loss_initialized()
 
     # if True:
     # if torch.count_nonzero(train_batch['opponent_actions']) > 0:
@@ -105,100 +114,78 @@ def happo_surrogate_loss(
 
     m_advantage = train_batch[Postprocessing.ADVANTAGES]
 
+    # torch.autograd.set_detect_anomaly(True)
+
     for policy_name in all_policies_names:
         # ic(policy_name)
         if policy_name == 'self':
             agent_policy = policy
-            old_action_log = train_batch[SampleBatch.ACTION_LOGP]
-            # curr_action_dist = dist_class(logits, model)
+            action_input_lopg = train_batch[SampleBatch.ACTION_LOGP]
         else:
             agent_policy = model.other_policies[policy_name]
-            old_action_log = train_batch[get_global_name(SampleBatch.ACTION_LOGP, policy_name)]
+            action_input_lopg = train_batch[get_global_name(SampleBatch.ACTION_LOGP, policy_name)]
 
         _p_model = agent_policy.model
-        if policy_name == 'self':
-            assert agent_policy.model is model
 
         _p_model.train()
         logits, state = _p_model(train_batch)
         curr_action_dist = dist_class(logits, _p_model)
 
-        step_logp_ratio = torch.exp(
-            curr_action_dist.logp(train_batch[SampleBatch.ACTIONS]) -
-            old_action_log)
+        step_logp_ratio = torch.exp(curr_action_dist.logp(train_batch[SampleBatch.ACTIONS]) - action_input_lopg)
 
         step_loss = torch.min(
             m_advantage * step_logp_ratio,
             m_advantage * torch.clamp(
-                step_logp_ratio, 1 - policy.config["clip_param"],
-                1 + policy.config["clip_param"])
+                step_logp_ratio, 1 - policy.config["clip_param"], 1 + policy.config["clip_param"]
+            )
         )
 
-        sub_losses.append(step_loss)  # for recoding, need the real step-loss,
+        sub_losses.append(step_loss.detach())  # for recoding, need the real step-loss,
 
-        # torch.autograd.set_detect_anomaly(True)
+        logging.debug(f'sub-loss is: {reduce_mean_valid(step_loss)}')
+        logging.debug(f'learning-rate is: {policy.cur_lr}')
+        logging.debug('BEFORE update')
+        logging.debug(f'policy-name: {policy_name}, policy-model-id: {id(_p_model)}')
+        logging.debug(f'-- model-mean: {torch.mean(flat_params(_p_model.actor_parameters()))}')
+        logging.debug(f'-- model-std: {torch.std(flat_params(_p_model.actor_parameters()))}')
 
-        # ic(policy_name)
-        # all_parameters = flat_params(_p_model.actor_parameters())
-        # ic(torch.mean(all_parameters))
-        # ic(torch.std(all_parameters))
+        torch.autograd.set_detect_anomaly(True)
 
-        loss_grad = torch.autograd.grad(reduce_mean_valid(-1 * step_loss), _p_model.actor_parameters(), allow_unused=True, retain_graph=True)
+        _p_model.update_adam(loss=reduce_mean_valid(step_loss), lr=agent_policy.config['lr'], grad_clip=agent_policy.config['grad_clip'])
 
-        adam_update_part = _p_model.update_adam(flat_grad(loss_grad))
+        with torch.no_grad():
+            _p_model.eval()
+            new_logits, _ = _p_model(train_batch)
+            if torch.any(torch.isnan(new_logits)): ic(new_logits)
+            new_action_dist = dist_class(new_logits, _p_model)
 
-        new_parameters = (
-            parameters_to_vector(_p_model.actor_parameters()) - adam_update_part * policy.cur_lr
-        )
-
-        vector_to_parameters(new_parameters, _p_model.actor_parameters())
-
-        # TODO: check if model was updated succeed
-
-        new_logits, _ = _p_model(train_batch)
-        new_action_dist = dist_class(new_logits, _p_model)
-
-        new_logp_ratio = torch.exp(
-            new_action_dist.logp(train_batch[SampleBatch.ACTIONS]) -
-            old_action_log
-        )
+            new_logp_ratio = torch.exp(
+                new_action_dist.logp(train_batch[SampleBatch.ACTIONS]) -
+                action_input_lopg
+            )
 
         m_advantage = new_logp_ratio * m_advantage
 
-        # ic(policy_name)
-        # all_parameters = flat_params(_p_model.actor_parameters())
-        # ic(torch.mean(all_parameters))
-        # ic(torch.std(all_parameters))
+        logging.debug('AFTER update')
+        logging.debug(f'policy-name: {policy_name}, policy-model-id: {id(_p_model)}')
+        logging.debug(f'-- model-mean: {torch.mean(flat_params(_p_model.actor_parameters()))}')
+        logging.debug(f'-- model-std: {torch.std(flat_params(_p_model.actor_parameters()))}')
 
-    surrogate_loss = torch.mean(torch.stack(sub_losses, axis=1), axis=1)
-
-        # model_already_updated = True
-
-    # else:
-    #     logp_ratio = torch.exp(
-    #         curr_action_dist.logp(train_batch[SampleBatch.ACTIONS]) -
-    #         train_batch[SampleBatch.ACTION_LOGP])
-    #
-    #     surrogate_loss = torch.min(
-    #         train_batch[Postprocessing.ADVANTAGES] * logp_ratio,
-    #         train_batch[Postprocessing.ADVANTAGES] * torch.clamp(
-    #             logp_ratio, 1 - policy.config["clip_param"],
-    #             1 + policy.config["clip_param"]))
-    #     model_already_updated = False
+    surrogate_loss = torch.mean(torch.stack(sub_losses, dim=1), dim=1)
 
     mean_policy_loss = reduce_mean_valid(-surrogate_loss)
 
-    prev_action_dist = dist_class(train_batch[SampleBatch.ACTION_DIST_INPUTS], model)
-    action_kl = prev_action_dist.kl(curr_action_dist)
-    mean_kl_loss = reduce_mean_valid(action_kl)
+    # prev_action_dist = dist_class(train_batch[SampleBatch.ACTION_DIST_INPUTS], model)
+    # action_kl = prev_action_dist.kl(curr_action_dist)
+    # mean_kl_loss = reduce_mean_valid(action_kl)
 
     curr_entropy = curr_action_dist.entropy()
     mean_entropy = reduce_mean_valid(curr_entropy)
 
     # Compute a value function loss.
     # if policy.model.model_config['custom_model_config']['normal_value']:
-    value_normalizer.update(train_batch[Postprocessing.VALUE_TARGETS])
-    train_batch[Postprocessing.VALUE_TARGETS] = value_normalizer.normalize(train_batch[Postprocessing.VALUE_TARGETS])
+    # value_normalizer.update(train_batch[Postprocessing.VALUE_TARGETS])
+    # train_batch[Postprocessing.VALUE_TARGETS] = value_normalizer.normalize(train_batch[Postprocessing.VALUE_TARGETS])
 
     if policy.config["use_critic"]:
         prev_value_fn_out = train_batch[SampleBatch.VF_PREDS] #
@@ -216,6 +203,8 @@ def happo_surrogate_loss(
     else:
         vf_loss = mean_vf_loss = 0.0
 
+    value_pred_clipped = prev_value_fn_out
+
     model.value_function = vf_saved
     # recovery the value function.
 
@@ -227,7 +216,7 @@ def happo_surrogate_loss(
 
     # Store values for stats function in model (tower), such that for
     # multi-GPU, we do not override them during the parallel loss phase.
-    model.tower_stats["total_loss"] = remain_loss + -surrogate_loss.to(device=get_device())
+    model.tower_stats["total_loss"] = remain_loss + mean_policy_loss
     model.tower_stats["mean_policy_loss"] = mean_policy_loss
     model.tower_stats["mean_vf_loss"] = mean_vf_loss
     model.tower_stats["vf_explained_var"] = explained_variance(
