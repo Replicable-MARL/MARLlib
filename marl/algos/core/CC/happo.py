@@ -175,17 +175,17 @@ def happo_surrogate_loss(
 
     mean_policy_loss = reduce_mean_valid(-surrogate_loss)
 
-    # prev_action_dist = dist_class(train_batch[SampleBatch.ACTION_DIST_INPUTS], model)
-    # action_kl = prev_action_dist.kl(curr_action_dist)
-    # mean_kl_loss = reduce_mean_valid(action_kl)
+    prev_action_dist = dist_class(train_batch[SampleBatch.ACTION_DIST_INPUTS], model)
+    action_kl = prev_action_dist.kl(curr_action_dist)
+    mean_kl_loss = reduce_mean_valid(action_kl)
 
     curr_entropy = curr_action_dist.entropy()
     mean_entropy = reduce_mean_valid(curr_entropy)
 
     # Compute a value function loss.
     # if policy.model.model_config['custom_model_config']['normal_value']:
-    # value_normalizer.update(train_batch[Postprocessing.VALUE_TARGETS])
-    # train_batch[Postprocessing.VALUE_TARGETS] = value_normalizer.normalize(train_batch[Postprocessing.VALUE_TARGETS])
+    value_normalizer.update(train_batch[Postprocessing.VALUE_TARGETS])
+    train_batch[Postprocessing.VALUE_TARGETS] = value_normalizer.normalize(train_batch[Postprocessing.VALUE_TARGETS])
 
     if policy.config["use_critic"]:
         prev_value_fn_out = train_batch[SampleBatch.VF_PREDS] #

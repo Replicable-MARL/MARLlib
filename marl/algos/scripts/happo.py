@@ -39,17 +39,23 @@ def run_happo(config_dict, common_config, env_dict, stop):
     gamma = _param["gamma"]
 
     config_dict['actor_lr'] = lr
+    config_dict['optim_eps'] = 1e-5
+    config_dict['critic_lr'] = 5e-3
+    config_dict['std_x_coef'] = 1
+    config_dict['std_y_coef'] = 0.5
+    config_dict['gain'] = 0.01
 
     config = {
         "seed": random.randint(0, 100),
         "batch_mode": batch_mode,
         "use_gae": use_gae,
         "lambda": gae_lambda,
-        "kl_coeff": kl_coeff,
+        # "kl_coeff": kl_coeff,
         "gamma": gamma,
         "vf_loss_coeff": vf_loss_coeff,
         "vf_clip_param": vf_clip_param,
         "entropy_coeff": entropy_coeff,
+        "kl_coeff": 0,
         "lr": lr,
         "num_sgd_iter": num_sgd_iter,
         "train_batch_size": train_batch_size,

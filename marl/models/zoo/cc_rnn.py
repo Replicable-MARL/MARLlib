@@ -7,6 +7,7 @@ from functools import reduce
 from icecream import ic
 from torch.optim import RMSprop, Adam
 from torch.nn.utils import parameters_to_vector, vector_to_parameters
+from marl.algos.utils.distributions import init
 
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
@@ -96,6 +97,12 @@ class CC_RNN(Base_RNN):
         self.__t = 1
 
         self.optimizer = Adam(params=self.actor_parameters(), lr=self.custom_config['actor_lr'])
+
+        if self.custom_config['algorithm'].lower() in ['happo']:
+            def init_(m):
+                return init(m, nn.init.orthogonal_, lambda x: nn.init.constant_(x, 0), self.custom_config['gain'])
+            self.action_branch = init_(nn.Linear(self.hidden_state_size, num_outputs))
+            self.actors = [self.encoder, self.rnn, self.action_branch]
 
     def central_value_function(self, state, opponent_actions=None):
         B = state.shape[0]
