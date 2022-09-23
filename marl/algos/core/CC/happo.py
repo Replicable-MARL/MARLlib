@@ -42,11 +42,12 @@ import datetime
 logger = logging.getLogger(__name__)
 
 FORMAT = '%(asctime)s %(levelname)s | %(message)s'
-logging.basicConfig(filename=f'/root/happo_running_logs/test-{datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")}.log',
-                    filemode='a',
-                    format=FORMAT,
-                    level=logging.DEBUG
-                    )
+logging.basicConfig(
+    filename=f'/root/happo_running_logs/test-{datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")}.log',
+    filemode='a',
+    format=FORMAT,
+    level=logging.DEBUG
+)
 
 
 def happo_surrogate_loss(
@@ -151,7 +152,18 @@ def happo_surrogate_loss(
 
         torch.autograd.set_detect_anomaly(True)
 
-        _p_model.update_adam(loss=reduce_mean_valid(step_loss), lr=agent_policy.config['lr'], grad_clip=agent_policy.config['grad_clip'])
+        curr_entropy = curr_action_dist.entropy()
+        mean_entropy = reduce_mean_valid(curr_entropy)
+
+        prev_action_dist = dist_class(train_batch[SampleBatch.ACTION_DIST_INPUTS], model)
+        action_kl = prev_action_dist.kl(curr_action_dist)
+        mean_kl_loss = reduce_mean_valid(action_kl)
+
+        _p_model.update_actor(
+            loss=reduce_mean_valid(step_loss) + agent_policy.entropy_coeff * mean_entropy - agent_policy.kl_coeff * mean_kl_loss,
+            lr=agent_policy.config['lr'],
+            grad_clip=agent_policy.config['grad_clip'],
+        )
 
         with torch.no_grad():
             _p_model.eval()
@@ -175,23 +187,24 @@ def happo_surrogate_loss(
 
     mean_policy_loss = reduce_mean_valid(-surrogate_loss)
 
-    # prev_action_dist = dist_class(train_batch[SampleBatch.ACTION_DIST_INPUTS], model)
-    # action_kl = prev_action_dist.kl(curr_action_dist)
-    # mean_kl_loss = reduce_mean_valid(action_kl)
+    prev_action_dist = dist_class(train_batch[SampleBatch.ACTION_DIST_INPUTS], model)
+    action_kl = prev_action_dist.kl(curr_action_dist)
+    mean_kl_loss = reduce_mean_valid(action_kl)
 
     curr_entropy = curr_action_dist.entropy()
     mean_entropy = reduce_mean_valid(curr_entropy)
 
     # Compute a value function loss.
     # if policy.model.model_config['custom_model_config']['normal_value']:
-    # value_normalizer.update(train_batch[Postprocessing.VALUE_TARGETS])
-    # train_batch[Postprocessing.VALUE_TARGETS] = value_normalizer.normalize(train_batch[Postprocessing.VALUE_TARGETS])
+    value_normalizer.update(train_batch[Postprocessing.VALUE_TARGETS])
+    train_batch[Postprocessing.VALUE_TARGETS] = value_normalizer.normalize(train_batch[Postprocessing.VALUE_TARGETS])
 
     if policy.config["use_critic"]:
-        prev_value_fn_out = train_batch[SampleBatch.VF_PREDS] #
+        prev_value_fn_out = train_batch[SampleBatch.VF_PREDS]  #
         value_fn_out = model.value_function()  # same as values
         vf_loss1 = torch.pow(
-            value_fn_out.to(device=get_device()) - train_batch[Postprocessing.VALUE_TARGETS].to(device=get_device()), 2.0)
+            value_fn_out.to(device=get_device()) - train_batch[Postprocessing.VALUE_TARGETS].to(device=get_device()),
+            2.0)
         vf_clipped = (prev_value_fn_out + torch.clamp(
             value_fn_out - prev_value_fn_out, -policy.config["vf_clip_param"],
             policy.config["vf_clip_param"])).to(device=get_device())
@@ -203,20 +216,26 @@ def happo_surrogate_loss(
     else:
         vf_loss = mean_vf_loss = 0.0
 
-    value_pred_clipped = prev_value_fn_out
-
     model.value_function = vf_saved
     # recovery the value function.
 
-    remain_loss = (policy.kl_coeff * action_kl.to(device=get_device()) +
-                   policy.config["vf_loss_coeff"] * vf_loss.to(device=get_device()) -
-                   policy.entropy_coeff * curr_entropy.to(device=get_device()))
+    # remain_loss = (policy.kl_coeff * action_kl.to(device=get_device()) +
+    #                policy.config["vf_loss_coeff"] * vf_loss.to(device=get_device()) -
+    #                policy.entropy_coeff * curr_entropy.to(device=get_device()))
 
-    remain_loss = reduce_mean_valid(remain_loss)
+    # remain_loss = reduce_mean_valid(remain_loss)
+
+    value_loss = reduce_mean_valid(policy.config['vf_loss_coeff'] * vf_loss.to(device=get_device()))
+
+    model.update_critic(
+        loss=value_loss,
+        lr=(policy.cur_lr / model.custom_config['actor_lr']) * model.custom_config['critic_lr'],
+        grad_clip=policy.config['grad_clip'],
+    )
 
     # Store values for stats function in model (tower), such that for
     # multi-GPU, we do not override them during the parallel loss phase.
-    model.tower_stats["total_loss"] = remain_loss + mean_policy_loss
+    model.tower_stats["total_loss"] = value_loss + mean_policy_loss
     model.tower_stats["mean_policy_loss"] = mean_policy_loss
     model.tower_stats["mean_vf_loss"] = mean_vf_loss
     model.tower_stats["vf_explained_var"] = explained_variance(
@@ -225,7 +244,8 @@ def happo_surrogate_loss(
     model.tower_stats["mean_entropy"] = mean_entropy
     model.tower_stats["mean_kl_loss"] = mean_kl_loss
 
-    return remain_loss
+    with torch.no_grad():
+        return value_loss
 
 
 HAPPOTorchPolicy = lambda ppo_with_critic: PPOTorchPolicy.with_updates(
@@ -241,15 +261,40 @@ HAPPOTorchPolicy = lambda ppo_with_critic: PPOTorchPolicy.with_updates(
     ])
 
 
+class StableKLCoeffMixin:
+    """Assigns the `update_kl()` method to the PPOPolicy.
+
+    This is used in PPO's execution plan (see ppo.py) for updating the KL
+    coefficient after each learning step based on `config.kl_target` and
+    the measured KL value (from the train_batch).
+    """
+
+    def __init__(self, config):
+        # The current KL value (as python float).
+        self.kl_coeff = config["kl_coeff"]
+        # Constant target value.
+        self.kl_target = config["kl_target"]
+
+    def update_kl(self, sampled_kl):
+        # Update the current KL value based on the recently measured value.
+        # if sampled_kl > 2.0 * self.kl_target:
+        #     self.kl_coeff *= 1.5
+        # elif sampled_kl < 0.5 * self.kl_target:
+        #     self.kl_coeff *= 0.5
+        # Return the current KL value.
+        return self.kl_coeff
+
+
 def get_policy_class_happo(ppo_with_critic):
     def __inner(config_):
         if config_["framework"] == "torch":
             return HAPPOTorchPolicy(ppo_with_critic)
+
     return __inner
 
 
 HAPPOTrainer = lambda ppo_with_critic: PPOTrainer.with_updates(
-    name="HAPPOTrainer",
+    name="HAPPOTrainer-fix-loss_fn",
     default_policy=None,
     get_policy_class=get_policy_class_happo(ppo_with_critic),
 )

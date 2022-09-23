@@ -92,10 +92,10 @@ class CC_RNN(Base_RNN):
 
         self.other_policies = {}
 
-        self.adam_update_info = {'m': [], 'v': []}
-        self.__t = 1
-
-        self.optimizer = Adam(params=self.actor_parameters(), lr=self.custom_config['actor_lr'])
+        self.actor_adam_update_info = {'m': [], 'v': []}
+        self.critic_adam_update_info = {'m': [], 'v': []}
+        self.__t_actor = 1
+        self.__t_critic = 1
 
     def central_value_function(self, state, opponent_actions=None):
         B = state.shape[0]
@@ -147,12 +147,26 @@ class CC_RNN(Base_RNN):
         else:
             self.other_policies[agent_id] = policy
 
-    def update_adam(self, loss, lr, grad_clip):
+    def update_actor(self, loss, lr, grad_clip):
+        self.__t_actor = self.__update_adam(
+            loss=loss, parameters=self.actor_parameters(),
+            adam_info=self.actor_adam_update_info,
+            lr=lr, grad_clip=grad_clip, step=self.__t_actor,
+        )
 
-        for p in self.actor_parameters():
+    def update_critic(self, loss, lr, grad_clip):
+        self.__t_critic = self.__update_adam(
+            loss=loss, parameters=self.critic_parameters(),
+            adam_info=self.critic_adam_update_info,
+            lr=lr, grad_clip=grad_clip, step=self.__t_critic,
+        )
+
+    def __update_adam(self, loss, parameters, adam_info, lr, grad_clip, step, maximum=False):
+
+        for p in self.parameters():
             p.grad = None
 
-        gradients = torch.autograd.grad(loss, self.actor_parameters(), allow_unused=True, retain_graph=True)
+        gradients = torch.autograd.grad(loss, parameters, allow_unused=True, retain_graph=True)
         total_norm = torch.norm(torch.stack([torch.norm(grad) for grad in gradients]))
         max_norm = grad_clip
         clip_coef = max_norm / (total_norm + 1e-6)
@@ -164,47 +178,41 @@ class CC_RNN(Base_RNN):
         beta1, beta2 = 0.9, 0.999
         eps = 1e-05
 
-        params = self.actor_parameters()
-        for i, param in enumerate(params):
-            grad = -gradients[i]  # get maximize
-
+        if maximum:
+            for i, param in enumerate(parameters):
+                grad = -gradients[i]  # get maximize
 
         m_v = []
         v_v = []
 
-        if len(self.adam_update_info['m']) == 0:
-            self.adam_update_info['m'] = [0] * len(gradients)
-            self.adam_update_info['v'] = [0] * len(gradients)
+        if len(adam_info['m']) == 0:
+            adam_info['m'] = [0] * len(gradients)
+            adam_info['v'] = [0] * len(gradients)
 
         for i, g in enumerate(gradients):
-            mt = beta1 * self.adam_update_info['m'][i] + (1 - beta1) * g
-            vt = beta2 * self.adam_update_info['v'][i] + (1 - beta2) * (g ** 2)
+            mt = beta1 * adam_info['m'][i] + (1 - beta1) * g
+            vt = beta2 * adam_info['v'][i] + (1 - beta2) * (g ** 2)
 
-            m_t_bar = mt / (1 - beta1 ** self.__t)
-            v_t_bar = vt / (1 - beta2 ** self.__t)
+            m_t_bar = mt / (1 - beta1 ** step)
+            v_t_bar = vt / (1 - beta2 ** step)
 
             vector_to_parameters(
-                parameters_to_vector([self.actor_parameters()[i]]) - parameters_to_vector(lr * m_t_bar / (torch.sqrt(v_t_bar) + eps)),
-                [self.actor_parameters()[i]],
+                parameters_to_vector([parameters[i]]) - parameters_to_vector(lr * m_t_bar / (torch.sqrt(v_t_bar) + eps)),
+                [parameters[i]],
             )
 
             m_v.append(mt)
             v_v.append(vt)
 
-        self.__t += 1
-        self.adam_update_info['m'] = m_v
-        self.adam_update_info['v'] = v_v
+        step += 1
+
+        adam_info['m'] = m_v
+        adam_info['v'] = v_v
+
+        return step
 
         # m = beta1 * self.adam_update_info['m'] + (1 - beta1) * gradients
         # v = beta2 * self.adam_update_info['v'] + (1 - beta2) * (gradients**2)
 
         # self.adam_update_info['m'] = m
         # self.adam_update_info['v'] = v
-
-
-
-
-
-
-
-

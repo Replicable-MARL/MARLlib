@@ -39,6 +39,7 @@ def run_happo(config_dict, common_config, env_dict, stop):
     gamma = _param["gamma"]
 
     config_dict['actor_lr'] = lr
+    config_dict['critic_lr'] = critic_lr
 
     config = {
         "seed": random.randint(0, 100),
