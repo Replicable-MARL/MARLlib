@@ -113,6 +113,9 @@ class RllibMAMujoco(MultiAgentEnv):
 
         o = self.env.get_obs()  # obs
         s = self.env.get_state()  # g state
+
+        o = normalize_obs(o)
+
         rewards = {}
         obs = {}
         infos = {}
@@ -139,6 +142,11 @@ class RllibMAMujoco(MultiAgentEnv):
             "policy_mapping_info": policy_mapping_dict
         }
         return env_info
+
+
+def normalize_obs(obs):
+    obs = (obs - np.mean(obs)) / np.std(obs)
+    return obs
 
 
 def normalize_action(action, action_space):

@@ -21,7 +21,7 @@ from ray.rllib.policy.torch_policy import LearningRateSchedule, EntropyCoeffSche
 from marl.algos.utils.setup_utils import setup_torch_mixins
 from marl.algos.utils.centralized_critic_hetero import (
     trpo_post_process,
-    value_normalizer,
+    # value_normalizer,
 )
 
 from marl.algos.utils.trust_regions import TrustRegionUpdator

@@ -1,3 +1,4 @@
+import numpy as np
 from gym.spaces import Box
 from ray.rllib.utils.framework import try_import_tf, try_import_torch
 from marl.models.base.base_rnn import Base_RNN
@@ -8,6 +9,7 @@ from icecream import ic
 from torch.optim import RMSprop, Adam
 from torch.nn.utils import parameters_to_vector, vector_to_parameters
 from marl.algos.utils.distributions import init
+from marl.algos.utils.mlp import MLPBase
 
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
@@ -84,6 +86,30 @@ class CC_RNN(Base_RNN):
             nn.Linear(input_size, 1),
         )
 
+        self.input_size = input_size
+
+        # if self.custom_config['algorithm'] in ['happo']:
+            # set critic
+            # def init_(m):
+            #     return init(m, nn.init.orthogonal_, lambda x: nn.init.constant_(x, 0))
+
+            # self.central_vf = nn.Sequential(
+            #     init_(nn.Linear(input_size, 1)),
+            # )
+        #
+        if self.custom_config['algorithm'].lower() in ['happo']:
+            # set actor
+            def init_(m):
+                return init(m, nn.init.orthogonal_, lambda x: nn.init.constant_(x, 0), self.custom_config['gain'])
+
+            # self.encoder = MLPBase(
+            #     obs_space.shape
+            # )
+
+            self.action_branch = init_(nn.Linear(self.hidden_state_size, num_outputs))
+
+            self.actors = [self.encoder, self.rnn, self.action_branch]
+
         if self.custom_config["algorithm"] in ["coma"]:
             self.q_flag = True
             self.value_branch = nn.Linear(self.input_dim, num_outputs)
@@ -98,11 +124,7 @@ class CC_RNN(Base_RNN):
         self.__t_actor = 1
         self.__t_critic = 1
 
-        if self.custom_config['algorithm'].lower() in ['happo']:
-            def init_(m):
-                return init(m, nn.init.orthogonal_, lambda x: nn.init.constant_(x, 0), self.custom_config['gain'])
-            self.action_branch = init_(nn.Linear(self.hidden_state_size, num_outputs))
-            self.actors = [self.encoder, self.rnn, self.action_branch]
+        self._train_batch_ = None
 
     def central_value_function(self, state, opponent_actions=None):
         B = state.shape[0]
@@ -154,11 +176,29 @@ class CC_RNN(Base_RNN):
         else:
             self.other_policies[agent_id] = policy
 
-    def update_actor(self, loss, lr, grad_clip):
+    def set_train_batch(self, batch):
+        self._train_batch_ = batch.copy()
+
+        for key, value in batch.items():
+            if isinstance(value, np.ndarray):
+                try:
+                    self._train_batch_[key] = torch.Tensor(value)
+                except TypeError as e:
+                    # print(f'key: {key} cannot be convert to Tensor')
+                    pass
+
+    def get_train_batch(self):
+        return self._train_batch_
+
+    def get_actions(self):
+        return self(self._train_batch_)
+
+    def update_actor(self, loss, lr, grad_clip, maximum=True):
         self.__t_actor = self.__update_adam(
             loss=loss, parameters=self.actor_parameters(),
             adam_info=self.actor_adam_update_info,
             lr=lr, grad_clip=grad_clip, step=self.__t_actor,
+            maximum=maximum,
         )
 
     def update_critic(self, loss, lr, grad_clip):
