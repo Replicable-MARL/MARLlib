@@ -86,17 +86,6 @@ class CC_RNN(Base_RNN):
             nn.Linear(input_size, 1),
         )
 
-        self.input_size = input_size
-
-        # if self.custom_config['algorithm'] in ['happo']:
-            # set critic
-            # def init_(m):
-            #     return init(m, nn.init.orthogonal_, lambda x: nn.init.constant_(x, 0))
-
-            # self.central_vf = nn.Sequential(
-            #     init_(nn.Linear(input_size, 1)),
-            # )
-        #
         if self.custom_config['algorithm'].lower() in ['happo']:
             # set actor
             def init_(m):
@@ -128,10 +117,6 @@ class CC_RNN(Base_RNN):
 
     def central_value_function(self, state, opponent_actions=None):
         B = state.shape[0]
-
-        # ic(id(self))
-        # ic(id(self.cc_encoder))
-        # ic(id(self.central_vf))
 
         if "conv_layer" in self.custom_config["model_arch_args"]:
             x = state.reshape(-1, self.state_dim[0], self.state_dim[1], self.state_dim[2]).permute(0, 3, 1, 2)
