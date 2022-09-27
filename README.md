@@ -12,12 +12,11 @@
 
 There are five core features of **MARLlib**.
 
-- It unifies multi-agent environment interfaces with a new interface following Gym standard and supports both synchronous and asynchronous agent-environment interaction. Currently, MARLlib provides support to ten environments (...).
-
+- It unifies multi-agent environment interfaces with a new interface following Gym standard and supports both synchronous and asynchronous agent-environment interaction. Currently, MARLlib provides support to ten environments.
 - It unifies diverse algorithm pipeline with a newly proposed single-agent perspective of implementation. Currently, MARLlib incorporates 18 algorithms and is able to handle cooperative (team-reward-only cooperation), collaborative (individual-reward-accessible cooperation), competitive (individual competition), and mixed (teamwork-based competition) tasks.
 - It classifies algorithms into independent learning, centralized critic, and value decomposition categories(inspired by EPyMARL) and enables module reuse and extensibility within each category.
 - It provides three parameter sharing strategies, namely full-sharing, non-sharing, and group-sharing, by implementing the policy mapping API of RLlib. This is implemented to be fully decoupled from algorithms and environments, and is completely controlled by configuration files.
-- It provides exhaustive experimental results (in the form of learning curves, pretrained models, logs......) of each task-algorithm combination for reference. These results are reproducible as configuration files for each experiment are provided along.
+- It provides standard 2 or 20 millions timesteps learning curve in the form of CSV of each task-algorithm for reference. These results are reproducible as configuration files for each experiment are provided along.
 
 <div align="center">
 <img src=image/overview.png width=100% />
@@ -170,11 +169,13 @@ We provide an introduction to the code directory to help you get familiar with t
 <div align="center">
 <img src=image/code-MARLlib.png width=120% />
 </div>
+
 **MARL directory structure:**
 
 <div align="center">
 <img src=image/code-MARL.png width=70% />
 </div>
+
 **ENVS directory structure:**
 
 <div align="center">
@@ -183,8 +184,6 @@ We provide an introduction to the code directory to help you get familiar with t
 
 
 ## Experiment Results
-
-
 
 
 
