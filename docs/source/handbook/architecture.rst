@@ -87,12 +87,8 @@ and broadcasts the new model to each worker for the next sampling round.
 Algorithm Pipeline
 ----------------------------------------
 
-.. image:: ../images/IL.png
-   :width: 30%
-.. image:: ../images/CC.png
-   :width: 30%
-.. image:: ../images/VD.png
-   :width: 30%
+.. image:: ../images/pipeline.png
+    :align: center
 
 Independent Learning
 ^^^^^^^^^^^^^^^^^^^^
