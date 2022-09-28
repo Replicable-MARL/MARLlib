@@ -208,7 +208,7 @@ Key hyperparameter location:
 
     - There is only a few MARL dataset focusing on continuous control. The popular three are:
         - :ref:`MPE` (discrete+continuous)
-        - :ref:`MaMujoco` (continuous only)
+        - :ref:`MAMuJoCo` (continuous only)
         - :ref:`MetaDrive` (continuous only)
 
 ---------------------
@@ -307,7 +307,7 @@ Q learning: get a better centralized Q function
 
 .. math::
 
-    L(\phi, {\mathcal D}) = \underset{(o,s,\mathbf{u},r,o',s',d)} \sim {\mathcal D}{{\mathrm E}}\left[
+    L(\phi, {\mathcal D}) = \underset{(o,s,\mathbf{u},r,o',s',d) \sim {\mathcal D}}{{\mathrm E}}\left[
         \Bigg( Q_{\phi}(o,s,\mathbf{u},r,o',s',d) - \left(r + \gamma (1 - d) Q_{\phi_{\text{targ}}}(o', s', \mu_{\theta_{\text{targ}}}(\mathbf{o'})) \right) \Bigg)^2
         \right]
 
@@ -429,7 +429,7 @@ FACMAC is a variant of :ref:`IDDPG` in the value decomposition method and a coun
 The main contribution of FACMAC is:
 
 #. MARL's first value decomposition method can deal with a continuous control problem.
-#. Proposed with a multi-agent benchmark :ref:`MaMujoco` that focuses on continuous control with heterogeneous agents.
+#. Proposed with a multi-agent benchmark :ref:`MAMuJoCo` that focuses on continuous control with heterogeneous agents.
 #. It can also be applied to discrete action space with tricks like `gumble softmax` and keep robust performance
 
 Compared to existing methods, FACMAC:
@@ -460,7 +460,7 @@ Q learning: get a better Q function and mixer function
 
 .. math::
 
-    L(\phi,\psi, {\mathcal D}) = \underset{(o, s,\mathbf{u},r,o' s',d)} \sim {\mathcal D}{{\mathrm E}}\left[
+    L(\phi,\psi, {\mathcal D}) = \underset{(o, s,\mathbf{u},r,o' s',d) \sim {\mathcal D}}{{\mathrm E}}\left[
         \Bigg(Q_{tot}(\mathbf{u},o,s;\boldsymbol{\phi},\psi) - \left(r + \gamma (1 - d) Q_{tot}(\mathbf{u'},o', s';\boldsymbol{\phi_{\text{targ}}},\psi_{\text{targ}}) \right) \Bigg)^2
         \right]
 

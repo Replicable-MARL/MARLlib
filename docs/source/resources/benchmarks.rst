@@ -17,9 +17,8 @@ PyMARL
 
 Github: https://github.com/oxwhirl/pymarl
 
-PyMARL is the first and the most well-known benchmark for micro-management in Starcraft II.
-It contains five available MARL algorithms including IQL, VDN, QMIX, QTRAN, and COMA.
- The code is easy to read and understand. However, it only supports SMAC, which is a cooperative MAS with discrete action space.
+PyMARL is the first and most well-known MARL library. All algorithms in PyMARL is built for SMAC, where agents learn to cooperate for a higher team reward. However, PyMARL has not been updated for a long time,
+and can not catch up with the recent progress. To address this, the extension versions of PyMARL are presented including PyMARL2 and EPyMARL.
 
 
 PyMARL2
@@ -27,51 +26,43 @@ PyMARL2
 
 Github: https://github.com/hijkzzz/pymarl2
 
-PyMARL2 extends the original PyMARL to more available algorithms, including 15 code-level tricks in MARL training,
-7 value-based methods, and 5 gradient-based methods. It provides a more comprehensive overview of existing algorithms
-on SMAC and gives a study on how to finetune the MARL algorithms for better performance.
+PyMARL2 focuses on credit assignment mechanism and provide a finetuned QMIX with state-of-art-performance on SMAC.
+The number of available algorithms increases to ten, with more code-level tricks incorporated.
 
-
-MARL-Algorithms
-========================
-
-Github: https://github.com/starry-sky6688/MARL-Algorithms
-
-MARL-Algorithm is another famous MARL benchmark focusing on SMAC,
-it includes 9 different MARL algorithms covering broader research topics including communication-based, graph-based and multi-task training in MARL.
 
 EPyMARL
 ========================
 
 Github: https://github.com/uoe-agents/epymarl
 
-EPyMARL is the first cooperative MARL benchmark that contains more than one task. EPyMARL is also built upon PyMARL,
-it contains three more multi-agent tasks including Multi-particle Environment (MPE), Level-based Foraging (LBF), and Robot Warehouse (RWARE) other than SMAC.
-All four tasks are cooperative tasks and take discrete action to interact with the environment. EPyMARL is also the first to categorize the existing MARL algorithms into three types:
-Independent Learning, Centralized Critic, and Value Decomposition.
-EPyMARL successfully unifies the current cooperative MARL tasks and provides a great benchmark for people to understand and compare the cooperative MARL algorithms.
+EPyMARL is another extension for PyMARL that aims to present a comprehensive view on how to unify cooperative MARL algorithms.
+It first proposed the independent learning, value decomposition, and centralized critic categorization, but is restricted to cooperative algorithms. Nine algorithms are implemented in EPyMARL.
+Three more cooperative environments LBF, RWARE, and MPE are incorporated to evaluate the generalization of the algorithms.
 
-Marlbenchmark
+MARL-Algorithms
+========================
+
+Github: https://github.com/starry-sky6688/MARL-Algorithms
+
+MARL-Algorithm is a library that covers broader topics compared to PyMARL including learning better credit assignment, communication-based learning,
+graph-based learning, and multi-task curriculum learning. Each topic has at least one algorithm, with nine implemented algorithms in total. The testing bed is limited to SMAC.
+
+MAPPO benchmark
 ========================
 
 Github: https://github.com/marlbenchmark/on-policy
 
-Marlbenchmark is the first MARL benchmark that contains mixed MARL tasks including cooperative (SMAC, Hanabi), collaborative (MPE), and competitive (MPE) with both on-policy and off-policy algorithms including VDN, QMIX, MADDPG, and MATD3.
-It is also the first implementation of MAPPO, which combine the state-of-the-art policy-gradient RL method PPO and centralized critic framework, and performs surprisingly well in practice.
+MAPPO benchmark is the official code base of MAPPO. It focuses on cooperative MARL and covers four environments. It aims at building a strong baseline and only contains MAPPO.
 
 MAlib
 ========================
 
 Github: https://github.com/sjtu-marl/malib
 
-MALib is a parallel framework of population-based learning nested with (multi-agent) reinforcement learning (RL) methods, such as Policy Space Response Oracle,
-Self-Play and Neural Fictitious Self-Play. MALib provides higher-level abstractions of MARL training paradigms, which enables efficient code reuse and flexible deployments on different distributed computing paradigms.
-The design of MALib also strives to promote the research of other multi-agent learning, including multi-agent imitation learning and model-based MARL.
+MAlib is a recent library for population-based MARL which combines game-theory and MARL algorithm to solve multi-agent tasks in the scope of meta-game.
 
 MARLlib
 ========================
-
-Github: https://github.com/Replicable-MARL/MARLlib
 
 Please refer to :ref:`intro`.
 

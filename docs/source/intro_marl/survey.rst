@@ -60,12 +60,12 @@ Gaming and Physical Simulation
 .. figure:: ../images/gaming.jpg
     :align: center
 
-    Gaming & Simulation: MaMujoco, Pommerman, Hanabi, Starcraft, etc.
+    Gaming & Simulation: MAMuJoCo, Pommerman, Hanabi, Starcraft, etc.
 
 To find a offset between naive matrix games and the expensive cost of sampling and training on real-world scenarios,  recent MARL research focus more on video gaming and physical simulation,
 as most algorithms try to prove their advance on more complicated tasks with a modest cost.
 One of the most popular multi-agent task in MARL is StarCraft Multi-Agent Challenge(:ref:`SMAC`), which is for discrete control and cooperative task mode.
-For continuous control, the most used task is the multi-agent version of MuJoCo: (:ref:`MaMujoco`).
+For continuous control, the most used task is the multi-agent version of MuJoCo: (:ref:`MAMuJoCo`).
 To analysis the agent behavior of adversary agents, a typical task is :ref:`Pommerman`.
 Scenarios within one task can contain different task modes, like :ref:`MPE`, which simplifies the evaluation procedure of algorithm's generalization ability within one task domain.
 
@@ -136,7 +136,7 @@ This mode is strictly **cooperative**, where each agent cannot access its indivi
 Environments contain **cooperative** scenarios:
 
 - :ref:`SMAC`
-- :ref:`MaMujoco`
+- :ref:`MAMuJoCo`
 - :ref:`Football`
 - :ref:`MPE`
 - :ref:`LBF`
@@ -154,7 +154,7 @@ Collaborative task mode has less restriction and richer reward information for w
 Environments contain **collaborative** scenarios:
 
 - :ref:`SMAC`
-- :ref:`MaMujoco`
+- :ref:`MAMuJoCo`
 - :ref:`Football`
 - :ref:`MPE`
 - :ref:`LBF`
