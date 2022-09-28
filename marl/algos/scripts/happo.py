@@ -42,8 +42,9 @@ def run_happo(config_dict, common_config, env_dict, stop):
     config_dict['critic_lr'] = critic_lr
     config_dict['gain'] = 0.01
 
+    seed = random.randint(0, 10)
     config = {
-        "seed": random.randint(0, 10),
+        "seed": seed,
         "horizon": episode_limit,
         "batch_mode": batch_mode,
         "use_gae": use_gae,
@@ -53,7 +54,7 @@ def run_happo(config_dict, common_config, env_dict, stop):
         "vf_loss_coeff": vf_loss_coeff,
         "vf_clip_param": vf_clip_param,
         "entropy_coeff": entropy_coeff,
-        "lr": lr,
+        "lr": critic_lr,
         "num_sgd_iter": num_sgd_iter,
         "train_batch_size": train_batch_size,
         # "train_batch_size": train_batch_size,
@@ -69,22 +70,20 @@ def run_happo(config_dict, common_config, env_dict, stop):
     }
     config.update(common_config)
 
-    TRAIN_MARK = ''
+    TRAIN_MARK = 't-adam-and-lr-is-critic'
 
     PPO_CONFIG.update({
-        'critic_lr': critic_lr,
-        # 'actor_lr': 5e-5,
-        'lr': lr,
+        'lr': critic_lr,
         "lr_schedule": [
-            (0, lr),
-            (int(config_dict['stop_timesteps']), 1e-8),
+            (0, critic_lr),
+            (int(config_dict['stop_timesteps']), 1e-11),
         ]
     })
 
     algorithm = config_dict["algorithm"]
     map_name = config_dict["env_args"]["map_name"]
     arch = config_dict["model_arch_args"]["core_arch"]
-    RUNNING_NAME = '_'.join([algorithm, arch, map_name, str(lr), str(critic_lr), TRAIN_MARK.upper()])
+    RUNNING_NAME = '_'.join([algorithm, arch, map_name, str(lr), str(critic_lr), TRAIN_MARK.upper(), f'seed-{seed}'])
 
     results = tune.run(HAPPOTrainer(PPO_CONFIG),
                        name=RUNNING_NAME,
