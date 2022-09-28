@@ -77,15 +77,15 @@ Installation
 or you can just follow the error log (when the process can not found the game's location)
 and put it in the right place.
 
-.. _MaMujoco:
+.. _MAMuJoCo:
 
-MaMujoco
+MAMuJoCo
 ==============
 
 .. figure:: ../images/env_mamujoco.png
     :align: center
 
-Multi-Agent Mujoco (MaMujoco) is an environment for continuous cooperative multi-agent robotic control.
+Multi-Agent Mujoco (MAMuJoCo) is an environment for continuous cooperative multi-agent robotic control.
 Based on the popular single-agent robotic MuJoCo control suite provides a wide variety of novel scenarios in which multiple agents within a single robot have to solve a task cooperatively.
 
 Official Link: https://github.com/schroederdewitt/multiagent_mujoco

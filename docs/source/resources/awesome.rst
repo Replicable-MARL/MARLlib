@@ -72,7 +72,7 @@ SMAC
 - `Uneven: Universal value exploration for multi-agent reinforcement learning <http://proceedings.mlr.press/v139/gupta21a/gupta21a.pdf>`_ **[B][2021]**
 - `Value-decomposition multi-agent actor-critics <https://www.aaai.org/AAAI21Papers/AAAI-2412.SuJ.pdf>`_ **[B][2021]**
 
-MaMujoco
+MAMuJoCo
 ========================
 
 - `FACMAC: Factored Multi-Agent Centralised Policy Gradients <https://arxiv.org/pdf/2003.06709>`_ **[B][2020]**
