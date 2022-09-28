@@ -7,6 +7,8 @@ __data__: March-29-2022
 import logging
 import random
 from typing import Dict, List, Type, Union, Tuple
+
+import pylab as p
 from ray.rllib.models.torch.torch_action_dist import TorchDistributionWrapper
 from ray.rllib.policy.policy import Policy
 from ray.rllib.models.modelv2 import ModelV2
@@ -262,7 +264,8 @@ def happo_surrogate_loss(
     all_policies_with_names = list(model.other_policies.items()) + [('self', policy)]
     random.shuffle(all_policies_with_names)
 
-    sub_losses = []
+    total_policy_loss = 0
+
     m_advantage = train_batch[Postprocessing.ADVANTAGES]
 
     reduce_mean_valid, mean_entropy, mean_kl_loss = None, None, None
@@ -303,15 +306,21 @@ def happo_surrogate_loss(
             )
         )
 
-        sub_losses.append(iter_surrogate_loss.detach())  # for recoding, need the real step-loss,
+        iter_surrogate_loss = iter_reduce_mean(iter_surrogate_loss)
+
+        total_policy_loss = total_policy_loss + iter_surrogate_loss
 
         torch.autograd.set_detect_anomaly(True)
 
+        current_lr = (
+            iter_policy.cur_lr / iter_model.custom_config['critic_lr'] * iter_model.custom_config['actor_lr']
+        )
+        # parameters_prev = [p.clone() for p in iter_model.parameters()]
+
         iter_model.update_actor(
-            loss=iter_reduce_mean(iter_surrogate_loss) +
-                 iter_policy.entropy_coeff * iter_mean_entropy -
+            loss=iter_surrogate_loss + iter_policy.entropy_coeff * iter_mean_entropy -
                  iter_policy.kl_coeff * iter_mean_kl_loss,
-            lr=iter_policy.cur_lr,
+            lr=current_lr,
             grad_clip=iter_policy.config['grad_clip'],
         )
 
@@ -331,12 +340,10 @@ def happo_surrogate_loss(
 
         m_advantage = iter_new_logp_ratio * m_advantage
 
-    surrogate_loss = torch.mean(torch.stack(sub_losses, dim=0), dim=0)
+    mean_policy_loss = -1 * (total_policy_loss / len(all_policies_with_names))
 
-    mean_policy_loss = torch.mean(-surrogate_loss)
-
-    value_normalizer.update(train_batch[Postprocessing.VALUE_TARGETS])
-    train_batch[Postprocessing.VALUE_TARGETS] = value_normalizer.normalize(train_batch[Postprocessing.VALUE_TARGETS])
+    # value_normalizer.update(train_batch[Postprocessing.VALUE_TARGETS])
+    # train_batch[Postprocessing.VALUE_TARGETS] = value_normalizer.normalize(train_batch[Postprocessing.VALUE_TARGETS])
 
     if policy.config["use_critic"]:
         prev_value_fn_out = train_batch[SampleBatch.VF_PREDS]  #
@@ -360,11 +367,11 @@ def happo_surrogate_loss(
 
     value_loss = reduce_mean_valid(policy.config['vf_loss_coeff'] * vf_loss.to(device=get_device()))
 
-    model.update_critic(
-        loss=value_loss,
-        lr=(policy.cur_lr / model.custom_config['actor_lr']) * model.custom_config['critic_lr'],
-        grad_clip=policy.config['grad_clip'],
-    )
+    # model.update_critic(
+    #     loss=value_loss,
+    #     lr=model.custom_config['critic_lr'],
+    #     grad_clip=policy.config['grad_clip'],
+    # )
 
     # Store values for stats function in model (tower), such that for
     # multi-GPU, we do not override them during the parallel loss phase.
@@ -377,8 +384,11 @@ def happo_surrogate_loss(
     model.tower_stats["mean_entropy"] = mean_entropy
     model.tower_stats["mean_kl_loss"] = mean_kl_loss
 
-    with torch.no_grad():
-        return value_loss
+    # with torch.no_grad():
+    #     return None
+    # return torch.Tensor([])
+
+    return value_loss
 
 
 HAPPOTorchPolicy = lambda ppo_with_critic: PPOTorchPolicy.with_updates(
