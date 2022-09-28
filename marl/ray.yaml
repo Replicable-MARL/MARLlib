@@ -14,6 +14,6 @@ num_gpus: 1
 num_cpus_per_worker: 1
 num_gpus_per_worker: 0
 stop_iters: 9999999
-stop_timesteps: 10000
+stop_timesteps: 2000000
 stop_reward: 999999
 seed: 123
