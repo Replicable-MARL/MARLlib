@@ -4,7 +4,6 @@ __author__: minquan
 __data__: March-29-2022
 """
 
-import logging
 import random
 from typing import Dict, List, Type, Union, Tuple
 
@@ -34,7 +33,6 @@ from marl.algos.utils.centralized_critic_hetero import (
 from ray.rllib.examples.centralized_critic import CentralizedValueMixin
 from marl.algos.utils.setup_utils import get_device
 from marl.algos.utils.manipulate_tensor import flat_grad, flat_params
-import logging
 from icecream import ic
 from ray.rllib.agents.ppo.ppo_torch_policy import PPOTorchPolicy, ValueNetworkMixin, KLCoeffMixin, ppo_surrogate_loss
 # tf1, tf, tfv = try_import_tf()
@@ -42,16 +40,6 @@ from ray.rllib.agents.ppo.ppo_torch_policy import PPOTorchPolicy, ValueNetworkMi
 import torch
 import datetime
 import re
-
-logger = logging.getLogger(__name__)
-
-FORMAT = '%(asctime)s %(levelname)s | %(message)s'
-logging.basicConfig(
-    filename=f'/root/happo_running_logs/test-{datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")}.log',
-    filemode='a',
-    format=FORMAT,
-    level=logging.DEBUG
-)
 
 
 def new_happo_surrogate_loss(
