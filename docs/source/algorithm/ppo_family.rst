@@ -442,7 +442,7 @@ Critic mixing: a learnable mixer for computing the global value function.
 
 .. math::
 
-    V_{tot}(\mathbf{a}, s;\boldsymbol{\phi},\psi) = g_{\psi}\bigl(`\mathbf{s}, V_{\phi_1},Q_{\phi_2},..,Q_{\phi_n} \bigr)
+    V_{tot}(\mathbf{a}, s;\boldsymbol{\phi},\psi) = g_{\psi}\bigl(s, V_{\phi_1},V_{\phi_2},..,V_{\phi_n} \bigr)
 
 
 
@@ -490,7 +490,7 @@ Here
 Implementation
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Based on IPPO, we add the mixing Q module to implement VDPPO.
+Based on IPPO, we add the mixer to implement VDPPO.
 The details can be found in:
 
 - ``value_mixing_postprocessing``
