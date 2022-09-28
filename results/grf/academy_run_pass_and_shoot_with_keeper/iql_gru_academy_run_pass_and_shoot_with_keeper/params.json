@@ -1,0 +1,79 @@
+{
+  "env": "grouped_football_academy_run_pass_and_shoot_with_keeper",
+  "evaluation_interval": 10,
+  "framework": "torch",
+  "model": {
+    "custom_model_config": {
+      "algo_args": {
+        "batch_episode": 8,
+        "buffer_size": 500,
+        "epsilon_timesteps": 50000,
+        "final_epsilon": 0.05,
+        "lr": 0.0005,
+        "optimizer": "rmsprop",
+        "reward_standardize": true,
+        "rollout_fragment_length": 1,
+        "target_network_update_freq": 100
+      },
+      "algorithm": "iql",
+      "env": "football",
+      "env_args": {
+        "dump_frequency": 0,
+        "logdir": "",
+        "map_name": "academy_run_pass_and_shoot_with_keeper",
+        "render": false
+      },
+      "episode_limit": 400,
+      "evaluation_interval": 10,
+      "fixed_batch_timesteps": 4000,
+      "framework": "torch",
+      "global_state_flag": false,
+      "local_mode": false,
+      "mask_flag": false,
+      "model_arch_args": {
+        "conv_layer": 1,
+        "core_arch": "gru",
+        "hidden_state_size": 256,
+        "kernel_size_layer_0": 5,
+        "mixer_arch": "qmix",
+        "mixer_embedding": 256,
+        "out_channel_layer_0": 8,
+        "padding_layer_0": 2,
+        "pool_size_layer_0": 3,
+        "stride_layer_0": 2
+      },
+      "num_agents": 2,
+      "num_cpus_per_worker": 1,
+      "num_gpus": 1,
+      "num_gpus_per_worker": 0,
+      "num_workers": 1,
+      "opp_action_in_cc": true,
+      "policy_mapping_info": {
+        "all_scenario": {
+          "all_agents_one_policy": true,
+          "description": "football all scenarios",
+          "one_agent_one_policy": true,
+          "team_prefix": [
+            "agent_"
+          ]
+        }
+      },
+      "seed": 123,
+      "share_policy": "all",
+      "space_act": "Discrete(19)",
+      "space_obs": "Dict(obs:Box([[[0 0 0 0]\n  [0 0 0 0]\n  [0 0 0 0]\n  ...\n  [0 0 0 0]\n  [0 0 0 0]\n  [0 0 0 0]]\n\n [[0 0 0 0]\n  [0 0 0 0]\n  [0 0 0 0]\n  ...\n  [0 0 0 0]\n  [0 0 0 0]\n  [0 0 0 0]]\n\n [[0 0 0 0]\n  [0 0 0 0]\n  [0 0 0 0]\n  ...\n  [0 0 0 0]\n  [0 0 0 0]\n  [0 0 0 0]]\n\n ...\n\n [[0 0 0 0]\n  [0 0 0 0]\n  [0 0 0 0]\n  ...\n  [0 0 0 0]\n  [0 0 0 0]\n  [0 0 0 0]]\n\n [[0 0 0 0]\n  [0 0 0 0]\n  [0 0 0 0]\n  ...\n  [0 0 0 0]\n  [0 0 0 0]\n  [0 0 0 0]]\n\n [[0 0 0 0]\n  [0 0 0 0]\n  [0 0 0 0]\n  ...\n  [0 0 0 0]\n  [0 0 0 0]\n  [0 0 0 0]]], [[[255 255 255 255]\n  [255 255 255 255]\n  [255 255 255 255]\n  ...\n  [255 255 255 255]\n  [255 255 255 255]\n  [255 255 255 255]]\n\n [[255 255 255 255]\n  [255 255 255 255]\n  [255 255 255 255]\n  ...\n  [255 255 255 255]\n  [255 255 255 255]\n  [255 255 255 255]]\n\n [[255 255 255 255]\n  [255 255 255 255]\n  [255 255 255 255]\n  ...\n  [255 255 255 255]\n  [255 255 255 255]\n  [255 255 255 255]]\n\n ...\n\n [[255 255 255 255]\n  [255 255 255 255]\n  [255 255 255 255]\n  ...\n  [255 255 255 255]\n  [255 255 255 255]\n  [255 255 255 255]]\n\n [[255 255 255 255]\n  [255 255 255 255]\n  [255 255 255 255]\n  ...\n  [255 255 255 255]\n  [255 255 255 255]\n  [255 255 255 255]]\n\n [[255 255 255 255]\n  [255 255 255 255]\n  [255 255 255 255]\n  ...\n  [255 255 255 255]\n  [255 255 255 255]\n  [255 255 255 255]]], (42, 42, 4), uint8))",
+      "stop_iters": 9999999,
+      "stop_reward": 999999,
+      "stop_timesteps": 2000000
+    },
+    "max_seq_len": 400
+  },
+  "multiagent": {
+    "policies": null,
+    "policy_mapping_fn": null
+  },
+  "num_gpus": 1,
+  "num_gpus_per_worker": 0,
+  "num_workers": 1,
+  "simple_optimizer": false
+}

@@ -1,0 +1,92 @@
+{
+  "batch_mode": "complete_episodes",
+  "clip_param": 0.2,
+  "entropy_coeff": 0.01,
+  "env": "football_academy_run_pass_and_shoot_with_keeper",
+  "evaluation_interval": 10,
+  "framework": "torch",
+  "kl_coeff": 0.2,
+  "lambda": 1.0,
+  "lr": 0.0005,
+  "model": {
+    "custom_model": "Base_Model",
+    "custom_model_config": {
+      "algo_args": {
+        "batch_episode": 4,
+        "batch_mode": "complete_episodes",
+        "clip_param": 0.2,
+        "entropy_coeff": 0.01,
+        "kl_coeff": 0.2,
+        "lambda": 1.0,
+        "lr": 0.0005,
+        "num_sgd_iter": 5,
+        "use_gae": true,
+        "vf_clip_param": 10.0,
+        "vf_loss_coeff": 1.0
+      },
+      "algorithm": "ppo",
+      "env": "football",
+      "env_args": {
+        "dump_frequency": 0,
+        "logdir": "",
+        "map_name": "academy_run_pass_and_shoot_with_keeper",
+        "render": false
+      },
+      "episode_limit": 400,
+      "evaluation_interval": 10,
+      "fixed_batch_timesteps": 800,
+      "framework": "torch",
+      "global_state_flag": false,
+      "local_mode": false,
+      "mask_flag": false,
+      "model_arch_args": {
+        "conv_layer": 1,
+        "core_arch": "gru",
+        "hidden_state_size": 256,
+        "kernel_size_layer_0": 5,
+        "out_channel_layer_0": 8,
+        "padding_layer_0": 2,
+        "pool_size_layer_0": 5,
+        "stride_layer_0": 5
+      },
+      "num_agents": 2,
+      "num_cpus_per_worker": 10,
+      "num_gpus": 1,
+      "num_gpus_per_worker": 0,
+      "num_workers": 10,
+      "opp_action_in_cc": true,
+      "policy_mapping_info": {
+        "all_scenario": {
+          "all_agents_one_policy": true,
+          "description": "football all scenarios",
+          "one_agent_one_policy": true,
+          "team_prefix": [
+            "agent_"
+          ]
+        }
+      },
+      "seed": 123,
+      "share_policy": "group",
+      "space_act": "Discrete(19)",
+      "space_obs": "Dict(obs:Box([[[0 0 0 0]\n  [0 0 0 0]\n  [0 0 0 0]\n  ...\n  [0 0 0 0]\n  [0 0 0 0]\n  [0 0 0 0]]\n\n [[0 0 0 0]\n  [0 0 0 0]\n  [0 0 0 0]\n  ...\n  [0 0 0 0]\n  [0 0 0 0]\n  [0 0 0 0]]\n\n [[0 0 0 0]\n  [0 0 0 0]\n  [0 0 0 0]\n  ...\n  [0 0 0 0]\n  [0 0 0 0]\n  [0 0 0 0]]\n\n ...\n\n [[0 0 0 0]\n  [0 0 0 0]\n  [0 0 0 0]\n  ...\n  [0 0 0 0]\n  [0 0 0 0]\n  [0 0 0 0]]\n\n [[0 0 0 0]\n  [0 0 0 0]\n  [0 0 0 0]\n  ...\n  [0 0 0 0]\n  [0 0 0 0]\n  [0 0 0 0]]\n\n [[0 0 0 0]\n  [0 0 0 0]\n  [0 0 0 0]\n  ...\n  [0 0 0 0]\n  [0 0 0 0]\n  [0 0 0 0]]], [[[255 255 255 255]\n  [255 255 255 255]\n  [255 255 255 255]\n  ...\n  [255 255 255 255]\n  [255 255 255 255]\n  [255 255 255 255]]\n\n [[255 255 255 255]\n  [255 255 255 255]\n  [255 255 255 255]\n  ...\n  [255 255 255 255]\n  [255 255 255 255]\n  [255 255 255 255]]\n\n [[255 255 255 255]\n  [255 255 255 255]\n  [255 255 255 255]\n  ...\n  [255 255 255 255]\n  [255 255 255 255]\n  [255 255 255 255]]\n\n ...\n\n [[255 255 255 255]\n  [255 255 255 255]\n  [255 255 255 255]\n  ...\n  [255 255 255 255]\n  [255 255 255 255]\n  [255 255 255 255]]\n\n [[255 255 255 255]\n  [255 255 255 255]\n  [255 255 255 255]\n  ...\n  [255 255 255 255]\n  [255 255 255 255]\n  [255 255 255 255]]\n\n [[255 255 255 255]\n  [255 255 255 255]\n  [255 255 255 255]\n  ...\n  [255 255 255 255]\n  [255 255 255 255]\n  [255 255 255 255]]], (42, 42, 4), uint8))",
+      "stop_iters": 99999999,
+      "stop_reward": 99999999,
+      "stop_timesteps": 2000000
+    },
+    "max_seq_len": 400
+  },
+  "multiagent": {
+    "policies": "{'shared_policy'}",
+    "policy_mapping_fn": "<function run_il.<locals>.<lambda> at 0x7fe1c7c4b158>"
+  },
+  "num_gpus": 1,
+  "num_gpus_per_worker": 0,
+  "num_sgd_iter": 5,
+  "num_workers": 10,
+  "sgd_minibatch_size": 800,
+  "simple_optimizer": false,
+  "train_batch_size": 800,
+  "use_gae": true,
+  "vf_clip_param": 10.0,
+  "vf_loss_coeff": 1.0
+}

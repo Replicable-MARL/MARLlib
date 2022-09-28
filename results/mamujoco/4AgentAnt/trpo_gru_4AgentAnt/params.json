@@ -1,0 +1,89 @@
+{
+  "batch_mode": "complete_episodes",
+  "clip_param": 0.3,
+  "entropy_coeff": 0.01,
+  "env": "mamujoco_4AgentAnt",
+  "evaluation_interval": 10,
+  "framework": "torch",
+  "grad_clip": 10,
+  "kl_coeff": 0.2,
+  "lambda": 1.0,
+  "model": {
+    "custom_model": "Base_Model",
+    "custom_model_config": {
+      "algo_args": {
+        "accept_ratio": 0.5,
+        "batch_episode": 10,
+        "batch_mode": "complete_episodes",
+        "clip_param": 0.3,
+        "critic_lr": 0.0005,
+        "entropy_coeff": 0.01,
+        "gamma": 0.99,
+        "grad_clip": 10,
+        "kl_coeff": 0.2,
+        "kl_threshold": 1e-05,
+        "lambda": 1.0,
+        "num_sgd_iter": 1,
+        "use_gae": true,
+        "vf_clip_param": 10.0,
+        "vf_loss_coeff": 1.0
+      },
+      "algorithm": "trpo",
+      "env": "mamujoco",
+      "env_args": {
+        "map_name": "4AgentAnt"
+      },
+      "episode_limit": 1000,
+      "evaluation_interval": 10,
+      "fixed_batch_timesteps": 2000,
+      "framework": "torch",
+      "global_state_flag": true,
+      "local_mode": false,
+      "mask_flag": false,
+      "model_arch_args": {
+        "core_arch": "gru",
+        "fc_layer": 1,
+        "hidden_state_size": 256,
+        "out_dim_fc_0": 128
+      },
+      "num_agents": 4,
+      "num_cpus_per_worker": 1,
+      "num_gpus": 1,
+      "num_gpus_per_worker": 0,
+      "num_workers": 10,
+      "opp_action_in_cc": true,
+      "policy_mapping_info": {
+        "all_scenario": {
+          "all_agents_one_policy": true,
+          "description": "mamujoco all scenarios",
+          "one_agent_one_policy": true,
+          "team_prefix": [
+            "agent_"
+          ]
+        }
+      },
+      "seed": 123,
+      "share_policy": "group",
+      "space_act": "Box([-1. -1.], [1. 1.], (2,), float32)",
+      "space_obs": "Dict(obs:Box([-10000. -10000. -10000. -10000. -10000. -10000. -10000. -10000. -10000.\n -10000. -10000. -10000. -10000. -10000. -10000. -10000. -10000. -10000.\n -10000. -10000. -10000. -10000. -10000. -10000. -10000. -10000. -10000.\n -10000. -10000. -10000. -10000.], [10000. 10000. 10000. 10000. 10000. 10000. 10000. 10000. 10000. 10000.\n 10000. 10000. 10000. 10000. 10000. 10000. 10000. 10000. 10000. 10000.\n 10000. 10000. 10000. 10000. 10000. 10000. 10000. 10000. 10000. 10000.\n 10000.], (31,), float32), state:Box([-100. -100. -100. -100. -100. -100. -100. -100. -100. -100. -100. -100.\n -100. -100. -100. -100. -100. -100. -100. -100. -100. -100. -100. -100.\n -100. -100. -100. -100. -100. -100. -100. -100. -100. -100. -100. -100.\n -100. -100. -100. -100. -100. -100. -100. -100. -100. -100. -100. -100.\n -100. -100. -100. -100. -100. -100. -100. -100. -100. -100. -100. -100.\n -100. -100. -100. -100. -100. -100. -100. -100. -100. -100. -100. -100.\n -100. -100. -100. -100. -100. -100. -100. -100. -100. -100. -100. -100.\n -100. -100. -100. -100. -100. -100. -100. -100. -100. -100. -100. -100.\n -100. -100. -100. -100. -100. -100. -100. -100. -100. -100. -100. -100.\n -100. -100. -100.], [100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100.\n 100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100.\n 100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100.\n 100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100.\n 100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100.\n 100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100.\n 100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100.\n 100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100.], (111,), float32))",
+      "stop_iters": 9999999,
+      "stop_reward": 999999,
+      "stop_timesteps": 20000000
+    },
+    "max_seq_len": 1000
+  },
+  "multiagent": {
+    "policies": "{'shared_policy'}",
+    "policy_mapping_fn": "<function run_il.<locals>.<lambda> at 0x7f20ac0a90d0>"
+  },
+  "num_gpus": 1,
+  "num_gpus_per_worker": 0,
+  "num_sgd_iter": 1,
+  "num_workers": 10,
+  "sgd_minibatch_size": 2000,
+  "simple_optimizer": false,
+  "train_batch_size": 2000,
+  "use_gae": true,
+  "vf_clip_param": 10.0,
+  "vf_loss_coeff": 1.0
+}
