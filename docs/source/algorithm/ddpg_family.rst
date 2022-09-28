@@ -307,7 +307,7 @@ Q learning: get a better centralized Q function
 
 .. math::
 
-    L(\phi, {\mathcal D}) = \underset{(o,s,\mathbf{u},r,o',s',d)} \sim {\mathcal D}{{\mathrm E}}\left[
+    L(\phi, {\mathcal D}) = \underset{(o,s,\mathbf{u},r,o',s',d) \sim {\mathcal D}}{{\mathrm E}}\left[
         \Bigg( Q_{\phi}(o,s,\mathbf{u},r,o',s',d) - \left(r + \gamma (1 - d) Q_{\phi_{\text{targ}}}(o', s', \mu_{\theta_{\text{targ}}}(\mathbf{o'})) \right) \Bigg)^2
         \right]
 
@@ -460,7 +460,7 @@ Q learning: get a better Q function and mixer function
 
 .. math::
 
-    L(\phi,\psi, {\mathcal D}) = \underset{(o, s,\mathbf{u},r,o' s',d)} \sim {\mathcal D}{{\mathrm E}}\left[
+    L(\phi,\psi, {\mathcal D}) = \underset{(o, s,\mathbf{u},r,o' s',d) \sim {\mathcal D}}{{\mathrm E}}\left[
         \Bigg(Q_{tot}(\mathbf{u},o,s;\boldsymbol{\phi},\psi) - \left(r + \gamma (1 - d) Q_{tot}(\mathbf{u'},o', s';\boldsymbol{\phi_{\text{targ}}},\psi_{\text{targ}}) \right) \Bigg)^2
         \right]
 
