@@ -26,8 +26,8 @@ sys.path.insert(0, __location__)
 # -- Project information -----------------------------------------------------
 
 project = "MARLlib"
-copyright = "2022, Replicable-MARL"
-author = "Replicable-MARL"
+copyright = "2022, ICLR2023"
+author = "ICLR2023"
 
 # The full version, including alpha/beta/rc tags
 release = "v0.1.0"
