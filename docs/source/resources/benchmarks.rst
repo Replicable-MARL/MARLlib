@@ -64,8 +64,6 @@ MAlib is a recent library for population-based MARL which combines game-theory a
 MARLlib
 ========================
 
-Github: https://github.com/Replicable-MARL/MARLlib
-
 Please refer to :ref:`intro`.
 
 

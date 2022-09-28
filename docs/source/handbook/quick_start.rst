@@ -53,10 +53,10 @@ This means you need to give a set of hyper-parameters that fit for current MARL 
 We provide a `commonly used hyper-parameters directory url not specified <https://github.com/Replicable-MARL/MARLlib/tree/sy_dev/marl/algos/hyperparams/common>`_.
 And a finetuned hyper-parameters sets for the four most used MARL environments/benchmarks, including
 
-- `GRF <https://github.com/Replicable-MARL/MARLlib/tree/sy_dev/marl/algos/hyperparams/finetuned/football>`_
-- `SMAC <https://github.com/Replicable-MARL/MARLlib/tree/sy_dev/marl/algos/hyperparams/finetuned/smac>`_
-- `MPE <https://github.com/Replicable-MARL/MARLlib/tree/sy_dev/marl/algos/hyperparams/finetuned/mpe>`_
-- `MAMuJoCo <https://github.com/Replicable-MARL/MARLlib/tree/sy_dev/marl/algos/hyperparams/finetuned/mamujoco>`_
+- `GRF url not specified<https://github.com/Replicable-MARL/MARLlib/tree/sy_dev/marl/algos/hyperparams/finetuned/football>`_
+- `SMAC url not specified <https://github.com/Replicable-MARL/MARLlib/tree/sy_dev/marl/algos/hyperparams/finetuned/smac>`_
+- `MPE url not specified <https://github.com/Replicable-MARL/MARLlib/tree/sy_dev/marl/algos/hyperparams/finetuned/mpe>`_
+- `MAMuJoCo url not specified <https://github.com/Replicable-MARL/MARLlib/tree/sy_dev/marl/algos/hyperparams/finetuned/mamujoco>`_
 
 Simply add **--finetuned** when you run from the terminal command to use the finetuned hyper-parameters (if available).
 
