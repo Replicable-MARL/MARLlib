@@ -63,10 +63,10 @@ def add_all_agents_gae(policy, sample_batch, other_agent_batches=None, episode=N
     # print('------------step into post processing ----------\n'*8)
     sample_batch = add_opponent_information_and_critical_vf(policy, sample_batch, other_agent_batches, episode=episode)
 
-    global value_normalizer
+    # global value_normalizer
 
-    if value_normalizer.updated:
-        sample_batch[SampleBatch.VF_PREDS] = value_normalizer.denormalize(sample_batch[SampleBatch.VF_PREDS])
+    # if value_normalizer.updated:
+    #     sample_batch[SampleBatch.VF_PREDS] = value_normalizer.denormalize(sample_batch[SampleBatch.VF_PREDS])
 
     train_batch = compute_gae_for_sample_batch(policy, sample_batch, other_agent_batches, episode)
 
@@ -359,7 +359,8 @@ def add_opponent_information_and_critical_vf(policy,
             [np.zeros_like(sample_batch["actions"], dtype=sample_batch["actions"].dtype) for _ in
              range(opponent_agents_num)], axis=1)
 
-    link_with_other_agents(policy, n_agents, sample_batch, other_agent_batches)
+    if algorithm.upper() in ['HAPPO', 'HATRPO']:
+        link_with_other_agents(policy, n_agents, sample_batch, other_agent_batches)
 
     sample_batch = add_other_agent_mul_info(
         sample_batch=sample_batch,
