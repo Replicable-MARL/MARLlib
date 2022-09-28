@@ -23,9 +23,7 @@ centralized critic postprocessing for
 2. HATRPO 
 """
 
-mul_manager = multiprocessing.Manager()
-
-GLOBAL_NEED_COLLECT = [SampleBatch.ACTION_LOGP,
+GLOBAL_NEED_COLLECT = [SampleBatch.ACTION_LOGP, SampleBatch.ACTIONS,
                        SampleBatch.ACTION_DIST_INPUTS, SampleBatch.OBS]
 GLOBAL_PREFIX = 'global_'
 GLOBAL_MODEL_LOGITS = f'{GLOBAL_PREFIX}model_logits'
@@ -40,9 +38,8 @@ value_normalizer = ValueNorm(1)
 
 
 def get_global_name(key, i=None):
+    if i == 'self': return key
     # converts a key to global format
-
-    if i is None: i = 'all'
 
     return f'{GLOBAL_PREFIX}{key}_agent_{i}'
 
@@ -66,10 +63,10 @@ def add_all_agents_gae(policy, sample_batch, other_agent_batches=None, episode=N
     # print('------------step into post processing ----------\n'*8)
     sample_batch = add_opponent_information_and_critical_vf(policy, sample_batch, other_agent_batches, episode=episode)
 
-    global value_normalizer
+    # global value_normalizer
 
-    if value_normalizer.updated:
-        sample_batch[SampleBatch.VF_PREDS] = value_normalizer.denormalize(sample_batch[SampleBatch.VF_PREDS])
+    # if value_normalizer.updated:
+    #     sample_batch[SampleBatch.VF_PREDS] = value_normalizer.denormalize(sample_batch[SampleBatch.VF_PREDS])
 
     train_batch = compute_gae_for_sample_batch(policy, sample_batch, other_agent_batches, episode)
 
@@ -201,7 +198,7 @@ def get_vf_pred(policy, algorithm, sample_batch, opp_action_in_cc):
     return sample_batch
 
 
-def link_with_other_agents(current_policy, agent_num, other_agent_info):
+def link_with_other_agents(current_policy, agent_num, sample_batches, other_agent_info):
     # ic('self')
     # ic(torch.std(flat_params(current_policy.model.actor_parameters())))
     # ic(torch.mean(flat_params(current_policy.model.actor_parameters())))
@@ -226,10 +223,6 @@ def link_with_other_agents(current_policy, agent_num, other_agent_info):
                     _p.model.value_branch = current_policy.model.value_branch
 
             current_policy.model.link_other_agent_policy(name, _p)
-
-            # ic(name)
-            # ic(torch.std(flat_params(_p.model.actor_parameters())))
-            # ic(torch.mean(flat_params(_p.model.actor_parameters())))
 
 
 def get_real_state_by_one_sample():
@@ -366,6 +359,9 @@ def add_opponent_information_and_critical_vf(policy,
             [np.zeros_like(sample_batch["actions"], dtype=sample_batch["actions"].dtype) for _ in
              range(opponent_agents_num)], axis=1)
 
+    if algorithm.upper() in ['HAPPO', 'HATRPO']:
+        link_with_other_agents(policy, n_agents, sample_batch, other_agent_batches)
+
     sample_batch = add_other_agent_mul_info(
         sample_batch=sample_batch,
         other_agent_info=other_agent_batches,
@@ -377,8 +373,6 @@ def add_opponent_information_and_critical_vf(policy,
         other_agent_batches=other_agent_batches,
         agent_num=n_agents,
     )
-
-    link_with_other_agents(policy, n_agents, other_agent_batches)
 
     if opponent_info_exists:
         sample_batch = get_vf_pred(policy, algorithm, sample_batch, opp_action_in_cc)

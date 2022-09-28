@@ -27,9 +27,8 @@ from marl.algos.utils.centralized_critic_hetero import (
     get_global_name,
     contain_global_obs,
     hatrpo_post_process,
-    value_normalizer,
+    # value_normalizer,
     MODEL,
-    global_state_name,
     STATE,
     TRAINING,
     state_name,
@@ -149,27 +148,18 @@ def hatrpo_loss_fn(
 
     policy.trpo_updator = trust_region_updator
 
-    agent_model_pat = get_global_name(MODEL, '(\d+)')
-    matched_keys = [re.findall(agent_model_pat, key) for key in train_batch]
+    all_policies_with_names = list(model.other_policies.items()) + [('self', policy)]
 
-    collected_agent_ids = [int(m[0]) for m in matched_keys if m]
-
-    contain_opponent_info = all(
-        len(train_batch[get_global_name(MODEL, i)]) > 0 and train_batch[get_global_name(MODEL, i)][0] > 0
-        for i in collected_agent_ids
-    )
-
-    if contain_opponent_info:
-        agents_num = get_agent_num(policy)
-
+    if len(all_policies_with_names) == 1:
+        policy.group_trpo_updator = None
+    else:
         policy.group_trpo_updator = HATRPOUpdator(
-            agents_num=agents_num, dist_class=dist_class,
-            model_updator=trust_region_updator,
+            policies_with_name=all_policies_with_names,
+            dist_class=dist_class,
+            updator=trust_region_updator,
             importance_sampling=logp_ratio,
             train_batch=train_batch, adv_targ=advantages
         )
-    else:
-        policy.group_trpo_updator = None
 
     model.value_function = vf_saved
     # recovery the value function.

@@ -11,41 +11,40 @@ torch, nn = try_import_torch()
 
 
 class HATRPOUpdator:
-    def __init__(self, model_updator, importance_sampling, agents_num, dist_class, train_batch, adv_targ):
+    def __init__(self, policies_with_name, updator, importance_sampling, dist_class, train_batch, adv_targ):
         self.updaters = []
         self.dist_class = dist_class
-        self.agents_num = agents_num
-        self.main_updator = model_updator
+        self.main_updator = updator
 
         m_advantage = adv_targ
 
-        random_indices = np.random.permutation(agents_num)
+        random_policies = np.random.permutation(policies_with_name)
 
-        for i in random_indices:
-            if i == agents_num - 1:
+        for name, p in random_policies:
+            if name == 'self':
                 importance_sampling = importance_sampling
-                trpo_updator = model_updator
+                trpo_updator = updator
                 trpo_updator.adv_targ = m_advantage
                 m_advantage = m_advantage * importance_sampling
                 self.main_updator.adv_targ = m_advantage
             else:
-                m_advantage = self.update_advantage(train_batch, i, m_advantage)
+                m_advantage = self.update_advantage(train_batch, name, m_advantage)
 
     def update(self):
         self.main_updator.update()
 
-    def update_advantage(self, train_batch, agent_id, m_advantage):
+    def update_advantage(self, train_batch, agent_name, m_advantage):
 
         current_action_logits = train_batch[
-            get_global_name(SampleBatch.ACTION_DIST_INPUTS, agent_id)
+            get_global_name(SampleBatch.ACTION_DIST_INPUTS, agent_name)
         ]
         current_action_dist = self.dist_class(current_action_logits, None)
         old_action_log_dist = train_batch[
-            get_global_name(SampleBatch.ACTION_LOGP, agent_id)
+            get_global_name(SampleBatch.ACTION_LOGP, agent_name)
         ]
 
-        actions = train_batch[get_global_name(SampleBatch.ACTIONS, agent_id)]
-        obs = train_batch[get_global_name(SampleBatch.OBS, agent_id)]
+        actions = train_batch[get_global_name(SampleBatch.ACTIONS, agent_name)]
+        obs = train_batch[get_global_name(SampleBatch.OBS, agent_name)]
         importance_sampling = torch.exp(current_action_dist.logp(actions) - old_action_log_dist)
         m_advantage = m_advantage * importance_sampling
 
