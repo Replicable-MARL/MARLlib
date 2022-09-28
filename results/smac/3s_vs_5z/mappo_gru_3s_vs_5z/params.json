@@ -1,0 +1,86 @@
+{
+  "batch_mode": "complete_episodes",
+  "clip_param": 0.3,
+  "entropy_coeff": 0.001,
+  "env": "smac_3s_vs_5z",
+  "evaluation_interval": 10,
+  "framework": "torch",
+  "kl_coeff": 0.2,
+  "lambda": 1.0,
+  "lr": 0.0005,
+  "model": {
+    "custom_model": "Centralized_Critic_Model",
+    "custom_model_config": {
+      "algo_args": {
+        "batch_episode": 10,
+        "batch_mode": "complete_episodes",
+        "clip_param": 0.3,
+        "entropy_coeff": 0.001,
+        "kl_coeff": 0.2,
+        "lambda": 1.0,
+        "lr": 0.0005,
+        "num_sgd_iter": 5,
+        "use_gae": true,
+        "vf_clip_param": 20.0,
+        "vf_loss_coeff": 1.0
+      },
+      "algorithm": "mappo",
+      "env": "smac",
+      "env_args": {
+        "difficulty": "7",
+        "map_name": "3s_vs_5z",
+        "reward_scale_rate": 20
+      },
+      "episode_limit": 250,
+      "evaluation_interval": 10,
+      "fixed_batch_timesteps": 3200,
+      "framework": "torch",
+      "global_state_flag": true,
+      "local_mode": false,
+      "mask_flag": true,
+      "model_arch_args": {
+        "core_arch": "gru",
+        "fc_layer": 1,
+        "hidden_state_size": 256,
+        "out_dim_fc_0": 128
+      },
+      "num_agents": 3,
+      "num_cpus_per_worker": 1,
+      "num_gpus": 1,
+      "num_gpus_per_worker": 0,
+      "num_workers": 5,
+      "opp_action_in_cc": true,
+      "policy_mapping_info": {
+        "all_scenario": {
+          "all_agents_one_policy": true,
+          "description": "smac all scenarios",
+          "one_agent_one_policy": true,
+          "team_prefix": [
+            "agent_"
+          ]
+        }
+      },
+      "seed": 123,
+      "share_policy": "group",
+      "space_act": "Discrete(11)",
+      "space_obs": "Dict(action_mask:Box([-2. -2. -2. -2. -2. -2. -2. -2. -2. -2. -2.], [2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2.], (11,), float32), obs:Box([-2. -2. -2. -2. -2. -2. -2. -2. -2. -2. -2. -2. -2. -2. -2. -2. -2. -2.\n -2. -2. -2. -2. -2. -2. -2. -2. -2. -2. -2. -2. -2. -2. -2. -2. -2. -2.\n -2. -2. -2. -2. -2. -2. -2. -2. -2. -2. -2. -2.], [2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2.\n 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2.], (48,), float32), state:Box([-2. -2. -2. -2. -2. -2. -2. -2. -2. -2. -2. -2. -2. -2. -2. -2. -2. -2.\n -2. -2. -2. -2. -2. -2. -2. -2. -2. -2. -2. -2. -2. -2. -2. -2. -2. -2.\n -2. -2. -2. -2. -2. -2. -2. -2. -2. -2. -2. -2. -2. -2. -2. -2. -2. -2.\n -2. -2. -2. -2. -2. -2. -2. -2. -2. -2. -2. -2. -2. -2.], [2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2.\n 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2.\n 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2. 2.], (68,), float32))",
+      "stop_iters": 999999999,
+      "stop_reward": 99999999,
+      "stop_timesteps": 20000000
+    }
+  },
+  "multiagent": {
+    "policies": "{'shared_policy'}",
+    "policy_mapping_fn": "<function run_cc.<locals>.<lambda> at 0x7fc33a9c0510>"
+  },
+  "num_gpus": 1,
+  "num_gpus_per_worker": 0,
+  "num_sgd_iter": 5,
+  "num_workers": 5,
+  "sgd_minibatch_size": 3200,
+  "simple_optimizer": false,
+  "train_batch_size": 3200,
+  "use_gae": true,
+  "vf_clip_param": 20.0,
+  "vf_loss_coeff": 1.0
+}

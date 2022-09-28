@@ -1,0 +1,79 @@
+{
+  "batch_mode": "complete_episodes",
+  "entropy_coeff": 0.01,
+  "env": "mamujoco_2AgentHalfCheetah",
+  "evaluation_interval": 10,
+  "framework": "torch",
+  "lambda": 1.0,
+  "lr": 0.0005,
+  "model": {
+    "custom_model": "Value_Decomposition_Model",
+    "custom_model_config": {
+      "algo_args": {
+        "batch_episode": 10,
+        "batch_mode": "complete_episodes",
+        "entropy_coeff": 0.01,
+        "lambda": 1.0,
+        "lr": 0.0005,
+        "mixer": "qmix",
+        "use_gae": true,
+        "vf_loss_coeff": 1.0
+      },
+      "algorithm": "vda2c",
+      "env": "mamujoco",
+      "env_args": {
+        "map_name": "2AgentHalfCheetah"
+      },
+      "episode_limit": 1000,
+      "evaluation_interval": 10,
+      "fixed_batch_timesteps": 4000,
+      "framework": "torch",
+      "global_state_flag": true,
+      "local_mode": false,
+      "mask_flag": false,
+      "model_arch_args": {
+        "core_arch": "gru",
+        "fc_layer": 1,
+        "hidden_state_size": 256,
+        "mixer_arch": "qmix",
+        "mixer_embedding": 256,
+        "out_dim_fc_0": 128
+      },
+      "num_agents": 2,
+      "num_cpus_per_worker": 10,
+      "num_gpus": 1,
+      "num_gpus_per_worker": 0,
+      "num_workers": 10,
+      "opp_action_in_cc": true,
+      "policy_mapping_info": {
+        "all_scenario": {
+          "all_agents_one_policy": true,
+          "description": "mamujoco all scenarios",
+          "one_agent_one_policy": true,
+          "team_prefix": [
+            "agent_"
+          ]
+        }
+      },
+      "seed": 123,
+      "share_policy": "all",
+      "space_act": "Box([-1. -1. -1.], [1. 1. 1.], (3,), float32)",
+      "space_obs": "Dict(obs:Box([-10000. -10000. -10000. -10000. -10000. -10000. -10000.], [10000. 10000. 10000. 10000. 10000. 10000. 10000.], (7,), float32), state:Box([-100. -100. -100. -100. -100. -100. -100. -100. -100. -100. -100. -100.\n -100. -100. -100. -100. -100.], [100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100.\n 100. 100. 100.], (17,), float32))",
+      "stop_iters": 99999999,
+      "stop_reward": 99999999,
+      "stop_timesteps": 20000000
+    },
+    "max_seq_len": 1000
+  },
+  "multiagent": {
+    "policies": "{'shared_policy'}",
+    "policy_mapping_fn": "<function run_vd.<locals>.<lambda> at 0x7efbb0103d08>"
+  },
+  "num_gpus": 1,
+  "num_gpus_per_worker": 0,
+  "num_workers": 10,
+  "simple_optimizer": false,
+  "train_batch_size": 4000,
+  "use_gae": true,
+  "vf_loss_coeff": 1.0
+}
