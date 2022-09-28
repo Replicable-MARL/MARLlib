@@ -88,16 +88,24 @@ class CC_RNN(Base_RNN):
 
         if self.custom_config['algorithm'].lower() in ['happo']:
             # set actor
-            def init_(m):
-                return init(m, nn.init.orthogonal_, lambda x: nn.init.constant_(x, 0), self.custom_config['gain'])
+            def init_(m, value):
+                return init(m, nn.init.orthogonal_, lambda x: nn.init.constant_(x, 0), value)
 
             # self.encoder = MLPBase(
             #     obs_space.shape
             # )
 
-            self.action_branch = init_(nn.Linear(self.hidden_state_size, num_outputs))
+            self.action_branch = init_(nn.Linear(self.hidden_state_size, num_outputs), value=self.custom_config['gain'])
+
+            self.central_vf = nn.Sequential(
+                init_(nn.Linear(input_size, 1), value=1)
+            )
 
             self.actors = [self.encoder, self.rnn, self.action_branch]
+
+            # self.actor_optimizer = Adam(params=self.actor_parameters(), lr=self.custom_config['actor_lr'])
+            self.actor_optimizer = Adam(params=self.parameters(), lr=self.custom_config['actor_lr'])
+            # self.critic_optimizer = Adam(params=self.critic_parameters(), lr=self.custom_config['critic_lr'])
 
         if self.custom_config["algorithm"] in ["coma"]:
             self.q_flag = True
@@ -178,20 +186,52 @@ class CC_RNN(Base_RNN):
     def get_actions(self):
         return self(self._train_batch_)
 
-    def update_actor(self, loss, lr, grad_clip, maximum=True):
-        self.__t_actor = self.__update_adam(
-            loss=loss, parameters=self.actor_parameters(),
-            adam_info=self.actor_adam_update_info,
-            lr=lr, grad_clip=grad_clip, step=self.__t_actor,
-            maximum=maximum,
+    def update_actor(self, loss, lr, grad_clip):
+        # self.__t_actor = self.__update_adam(
+        #     loss=loss, parameters=self.actor_parameters(),
+        #     adam_info=self.actor_adam_update_info,
+        #     lr=lr, grad_clip=grad_clip, step=self.__t_actor,
+        #     maximum=maximum,
+        # )
+        CC_RNN.update_use_torch_adam(
+            loss=(-1 * loss),
+            optimizer=self.actor_optimizer,
+            parameters=self.parameters(),
+            grad_clip=grad_clip
         )
 
     def update_critic(self, loss, lr, grad_clip):
-        self.__t_critic = self.__update_adam(
-            loss=loss, parameters=self.critic_parameters(),
-            adam_info=self.critic_adam_update_info,
-            lr=lr, grad_clip=grad_clip, step=self.__t_critic,
+        # self.__t_critic = self.__update_adam(
+        #     loss=loss, parameters=self.critic_parameters(),
+        #     adam_info=self.critic_adam_update_info,
+        #     lr=lr, grad_clip=grad_clip, step=self.__t_critic,
+        # )
+        CC_RNN.update_use_torch_adam(
+            loss=loss,
+            optimizer=self.critic_optimizer,
+            parameters=self.critic_parameters(),
+            grad_clip=grad_clip
         )
+
+    @staticmethod
+    def update_use_torch_adam(loss, parameters, optimizer, grad_clip):
+
+        optimizer.zero_grad()
+
+        loss.backward()
+
+        # total_norm = torch.norm(torch.stack([torch.norm(p.grad) for p in parameters if p.grad is not None]))
+        torch.nn.utils.clip_grad_norm_(parameters, grad_clip)
+        # after_norm = torch.nn.utils.clip_grad_norm_(parameters, grad_clip)
+        # after_norm = torch.norm(torch.stack([torch.norm(p.grad) for p in parameters if p.grad is not None]))
+
+        # if before_norm != after_norm:
+        #     print(f'before clip norm: {before_norm}')
+        #     print(f'after clip norm: {after_norm}')
+        # if after_norm - grad_clip > 1:
+        #     raise ValueError(f'grad clip error!, after clip norm: {after_norm}, clip norm threshold: {grad_clip}')
+
+        optimizer.step()
 
     def __update_adam(self, loss, parameters, adam_info, lr, grad_clip, step, maximum=False):
 
@@ -207,12 +247,26 @@ class CC_RNN(Base_RNN):
             for g in gradients:
                 g.detach().mul_(clip_coef.to(g.device))
 
+        after_total_norm = torch.norm(torch.stack([torch.norm(grad) for grad in gradients]))
+        if total_norm != after_total_norm:
+            print(f'before clip norm: {total_norm}')
+            print(f'after clip norm: {after_total_norm}')
+        if after_total_norm - grad_clip > 1:
+            raise ValueError(f'grad clip error!, after clip norm: {after_total_norm}, clip norm threshold: {grad_clip}')
+
         beta1, beta2 = 0.9, 0.999
         eps = 1e-05
 
+        real_gradients = []
+
         if maximum:
-            for i, param in enumerate(parameters):
-                grad = -gradients[i]  # get maximize
+            # for i, param in enumerate(parameters):
+            for grad in gradients:
+                # gradients[i] = -gradients[i]  # get maximize
+                grad = -1 * grad
+                real_gradients.append(grad)
+
+            gradients = real_gradients
 
         m_v = []
         v_v = []
