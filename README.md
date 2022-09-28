@@ -162,7 +162,7 @@ python add_patch.py -y
 ## Usage
 
 ```
-python marl/main.py --algo_config=MAPPO [--finetuned] --env-config=smac with env_args.map_name=3m
+python marl/main.py --algo_config=MAPPO [--finetuned] --env_config=smac with env_args.map_name=3m
 ```
 --finetuned is optional, force using the finetuned hyperparameter 
 

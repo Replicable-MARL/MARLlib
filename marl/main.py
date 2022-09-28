@@ -15,7 +15,7 @@ if __name__ == '__main__':
         f.close()
 
     # env
-    env_config = _get_config(params, "--env-config")
+    env_config = _get_config(params, "--env_config")
     config_dict = recursive_dict_update(config_dict, env_config)
 
     for param in params:

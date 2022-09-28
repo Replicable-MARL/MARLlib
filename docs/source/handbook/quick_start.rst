@@ -96,14 +96,14 @@ To start training, run:
 
 .. code-block:: shell
 
-    python marl/main.py --algo_config=$algo [--finetuned] --env-config=$env with env_args.map_name=$map
+    python marl/main.py --algo_config=$algo [--finetuned] --env_config=$env with env_args.map_name=$map
 
 
 Examples
 
 .. code-block:: shell
 
-    python marl/main.py --algo_config=MAPPO --finetuned --env-config=smac with env_args.map_name=3m
+    python marl/main.py --algo_config=MAPPO --finetuned --env_config=smac with env_args.map_name=3m
 
 
 Logging & Saving
