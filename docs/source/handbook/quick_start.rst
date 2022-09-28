@@ -14,7 +14,6 @@ Before Running
 
 .. image:: ../images/configurations.png
     :align: center
-    :caption:
 
     Prepare all the configuration files to start your MARL journey
 
@@ -112,11 +111,50 @@ To start training, make sure you are under MARLlib directory and run:
 
     python marl/main.py --algo_config=$algo [--finetuned] --env-config=$env with env_args.map_name=$map
 
+Available algorithms (case sensitive):
+
+- iql
+- pg
+- a2c
+- ddpg
+- trpo
+- ppo
+- maa2c
+- coma
+- maddpg
+- matrpo
+- mappo
+- hatrpo
+- happo
+- vdn
+- qmix
+- facmac
+- vda2c
+- vdppo
+
+Available env-map pairs (case sensitive):
+
+- smac: `smac maps <https://github.com/oxwhirl/smac/blob/master/smac/env/starcraft2/maps/smac_maps.py>`_
+- mpe: `mpe map url not specified <https://github.com/Replicable-MARL/MARLlib/blob/main/envs/base_env/mpe.py>`_
+- mamujoco: `mamujoco map url not specified <https://github.com/Replicable-MARL/MARLlib/blob/main/envs/base_env/mamujoco.py>`_
+- football: `football map url not specified <https://github.com/Replicable-MARL/MARLlib/blob/main/envs/base_env/mamujoco.py>`_
+- magent: `magent map url not specified <https://github.com/Replicable-MARL/MARLlib/blob/main/envs/base_env/magent.py>`_
+- lbf: use `lbf config url not specified <https://github.com/Replicable-MARL/MARLlib/blob/main/envs/base_env/config/lbf.yaml>`_ to generate the map. Details can be found https://github.com/semitable/lb-foraging#usage
+- rware: use `rware config url not specified <https://github.com/Replicable-MARL/MARLlib/blob/main/envs/base_env/config/rware.yaml>`_ to generate the map. Details can be found https://github.com/semitable/robotic-warehouse#naming-scheme
+- pommerman: OneVsOne-v0, PommeFFACompetition-v0, PommeTeamCompetition-v0
+- metadrive: Bottleneck, ParkingLot, Intersection, Roundabout, Tollgate
+- hanabi: Hanabi-Very-Small, Hanabi-Full, Hanabi-Full-Minimal, Hanabi-Small
+
+--finetuned is optional, force using the finetuned hyperparameter if available in `this directory <https://github.com/Replicable-MARL/MARLlib/tree/sy_dev/marl/algos/hyperparams/finetuned>`_
+
+
 Example on SMAC:
 
 .. code-block:: shell
 
-    python marl/main.py --algo_config=MAPPO --finetuned --env-config=smac with env_args.map_name=3m
+    python marl/main.py --algo_config=mappo --finetuned --env-config=smac with env_args.map_name=3m
+
+
 
 
 Logging & Saving
