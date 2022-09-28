@@ -5,7 +5,6 @@ import shutil
 import subprocess
 
 import ray
-import pommerman
 
 
 def do_link(file_path, force=False, local_path=None, packagent=None):
@@ -66,13 +65,15 @@ if __name__ == "__main__":
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description="Setup dev.")
     parser.add_argument(
-        "--yes", "-y", action="store_true", help="Don't ask for confirmation.")
+        "--yes", "-y", action="store_true", help="RLlib_patch.")
     parser.add_argument(
-        "pommerman", action="store_true", help="Don't ask for confirmation.")
+        "pommerman", action="store_true", help="pommerman_patch")
     args = parser.parse_args()
 
     # pommerman
     if args.pommerman:
+
+        import pommerman
 
         do_link('graphics.py', force=args.yes, local_path='./pommerman_patch/graphics.py', packagent=pommerman)
 

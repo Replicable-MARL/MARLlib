@@ -31,16 +31,16 @@ Most of the popular environments in MARL research are supported by MARLlib:
 
 | Env Name | Learning Mode | Observability | Action Space | Observations |
 | ----------- | ----------- | ----------- | ----------- | ----------- |
-| [LBF](https://github.com/semitable/lb-foraging)  | Mixed | Both | Discrete | Discrete  |
-| [RWARE](https://github.com/semitable/robotic-warehouse)  | Collaborative | Partial | Discrete | Discrete  |
-| [MPE](https://github.com/openai/multiagent-particle-envs)  | Mixed | Both | Both | Continuous  |
-| [SMAC](https://github.com/oxwhirl/smac)  | Cooperative | Partial | Discrete | Continuous |
-| [MetaDrive](https://github.com/decisionforce/metadrive)  | Collaborative | Partial | Continuous | Continuous |
-|[MAgent](https://www.pettingzoo.ml/magent) | Mixed | Partial | Discrete | Discrete |
-| [Pommerman](https://github.com/MultiAgentLearning/playground)  | Mixed | Both | Discrete | Discrete |
-| [MaMujoco](https://github.com/schroederdewitt/multiagent_mujoco)  | Cooperative | Partial | Continuous | Continuous |
-| [GRF](https://github.com/google-research/football)  | Collaborative | Full | Discrete | Continuous |
-| [Hanabi](https://github.com/deepmind/hanabi-learning-environment) | Cooperative | Partial | Discrete | Discrete |
+| [LBF](https://github.com/semitable/lb-foraging)  | cooperative + collaborative | Both | Discrete | Discrete  |
+| [RWARE](https://github.com/semitable/robotic-warehouse)  | cooperative | Partial | Discrete | Discrete  |
+| [MPE](https://github.com/openai/multiagent-particle-envs)  | cooperative + collaborative + mixed | Both | Both | Continuous  |
+| [SMAC](https://github.com/oxwhirl/smac)  | cooperative | Partial | Discrete | Continuous |
+| [MetaDrive](https://github.com/decisionforce/metadrive)  | collaborative | Partial | Continuous | Continuous |
+|[MAgent](https://www.pettingzoo.ml/magent) | collaborative + mixed | Partial | Discrete | Discrete |
+| [Pommerman](https://github.com/MultiAgentLearning/playground)  | collaborative + competitive + mixed | Both | Discrete | Discrete |
+| [MaMujoco](https://github.com/schroederdewitt/multiagent_mujoco)  | cooperative | Partial | Continuous | Continuous |
+| [GRF](https://github.com/google-research/football)  | collaborative + mixed | Full | Discrete | Continuous |
+| [Hanabi](https://github.com/deepmind/hanabi-learning-environment) | cooperative | Partial | Discrete | Discrete |
 
 Each environment has a readme file, standing as the instruction for this task, talking about env settings, installation, and some important notes.
 
@@ -75,26 +75,26 @@ VDPPO
 
 Here is a chart describing the characteristics of each algorithm:
 
-| Algorithm                                                    | Support Task Mode | Need Global State | Action     | Learning Mode        | Type       |
-| ------------------------------------------------------------ | ----------------- | ----------------- | ---------- | -------------------- | ---------- |
-| IQL*                                                         | Mixed             | No                | Discrete   | Independent Learning | Off Policy |
-| [PG](https://papers.nips.cc/paper/1713-policy-gradient-methods-for-reinforcement-learning-with-function-approximation.pdf) | Mixed             | No                | Both       | Independent Learning | On Policy  |
-| [A2C](https://arxiv.org/abs/1602.01783)                      | Mixed             | No                | Both       | Independent Learning | On Policy  |
-| [DDPG](https://arxiv.org/abs/1509.02971)                     | Mixed             | No                | Continuous | Independent Learning | Off Policy |
-| [TRPO](http://proceedings.mlr.press/v37/schulman15.pdf)      | Mixed             | No                | Both       | Independent Learning | On Policy  |
-| [PPO](https://arxiv.org/abs/1707.06347)                      | Mixed             | No                | Both       | Independent Learning | On Policy  |
-| [COMA](https://ojs.aaai.org/index.php/AAAI/article/download/11794/11653) | Mixed             | Yes               | Both       | Centralized Critic   | On Policy  |
-| [MADDPG](https://arxiv.org/abs/1706.02275)                   | Mixed             | Yes               | Continuous | Centralized Critic   | Off Policy |
-| MAA2C*                                                       | Mixed             | Yes               | Both       | Centralized Critic   | On Policy  |
-| MATRPO*                                                      | Mixed             | Yes               | Both       | Centralized Critic   | On Policy  |
-| [MAPPO](https://arxiv.org/abs/2103.01955)                    | Mixed             | Yes               | Both       | Centralized Critic   | On Policy  |
-| [HATRPO](https://arxiv.org/abs/2109.11251)                   | Cooperative       | Yes               | Both       | Centralized Critic   | On Policy  |
-| [HAPPO](https://arxiv.org/abs/2109.11251)                    | Cooperative       | Yes               | Both       | Centralized Critic   | On Policy  |
-| [VDN](https://arxiv.org/abs/1706.05296)                      | Cooperative       | No                | Discrete   | Value Decomposition  | Off Policy |
-| [QMIX](https://arxiv.org/abs/1803.11485)                     | Cooperative       | Yes               | Discrete   | Value Decomposition  | Off Policy |
-| [FACMAC](https://arxiv.org/abs/2003.06709)                   | Cooperative       | Yes               | Continuous | Value Decomposition  | Off Policy |
-| [VDAC](https://arxiv.org/abs/2007.12306)                     | Cooperative       | Yes               | Both       | Value Decomposition  | On Policy  |
-| VDPPO*                                                       | Cooperative       | Yes               | Both       | Value Decomposition  | On Policy  |
+| Algorithm                                                    | Support Task Mode | Need Central Information | Discrete Action   | Continuous Action | Learning Categorize        | Type       |
+| ------------------------------------------------------------ | ----------------- | ----------------- | ---------- | -------------------- | ---------- | ---------- |
+| IQL*                                                         | cooperative collaborative competitive mixed             |                 | :heavy_check_mark:   |    | Independent Learning | Off Policy |
+| [PG](https://papers.nips.cc/paper/1713-policy-gradient-methods-for-reinforcement-learning-with-function-approximation.pdf) | cooperative collaborative competitive mixed             |                 | :heavy_check_mark:       | :heavy_check_mark:   | Independent Learning | On Policy  |
+| [A2C](https://arxiv.org/abs/1602.01783)                      | cooperative collaborative competitive mixed             |                 | :heavy_check_mark:       | :heavy_check_mark:   | Independent Learning | On Policy  |
+| [DDPG](https://arxiv.org/abs/1509.02971)                     | cooperative collaborative competitive mixed             |                 |  | :heavy_check_mark:   | Independent Learning | Off Policy |
+| [TRPO](http://proceedings.mlr.press/v37/schulman15.pdf)      | cooperative collaborative competitive mixed             |                 | :heavy_check_mark:       | :heavy_check_mark:   | Independent Learning | On Policy  |
+| [PPO](https://arxiv.org/abs/1707.06347)                      | cooperative collaborative competitive mixed             |                 | :heavy_check_mark:       | :heavy_check_mark:   | Independent Learning | On Policy  |
+| [COMA](https://ojs.aaai.org/index.php/AAAI/article/download/11794/11653) | cooperative collaborative competitive mixed              | :heavy_check_mark:               | :heavy_check_mark:       |   | Centralized Critic   | On Policy  |
+| [MADDPG](https://arxiv.org/abs/1706.02275)                   | cooperative collaborative competitive mixed             | :heavy_check_mark:               |  | :heavy_check_mark:   | Centralized Critic   | Off Policy |
+| MAA2C*                                                       | cooperative collaborative competitive mixed             | :heavy_check_mark:               | :heavy_check_mark:       | :heavy_check_mark:   | Centralized Critic   | On Policy  |
+| MATRPO*                                                      | cooperative collaborative competitive mixed             | :heavy_check_mark:               | :heavy_check_mark:       | :heavy_check_mark:   | Centralized Critic   | On Policy  |
+| [MAPPO](https://arxiv.org/abs/2103.01955)                    | cooperative collaborative competitive mixed             | :heavy_check_mark:               | :heavy_check_mark:       | :heavy_check_mark:   | Centralized Critic   | On Policy  |
+| [HATRPO](https://arxiv.org/abs/2109.11251)                   | Cooperative       | :heavy_check_mark:               | :heavy_check_mark:       | :heavy_check_mark:   | Centralized Critic   | On Policy  |
+| [HAPPO](https://arxiv.org/abs/2109.11251)                    | Cooperative       | :heavy_check_mark:               | :heavy_check_mark:       | :heavy_check_mark:   | Centralized Critic   | On Policy  |
+| [VDN](https://arxiv.org/abs/1706.05296)                      | Cooperative       |                 | :heavy_check_mark:   |    | Value Decomposition  | Off Policy |
+| [QMIX](https://arxiv.org/abs/1803.11485)                     | Cooperative       | :heavy_check_mark:               | :heavy_check_mark:   |   | Value Decomposition  | Off Policy |
+| [FACMAC](https://arxiv.org/abs/2003.06709)                   | Cooperative       | :heavy_check_mark:               |  | :heavy_check_mark:   | Value Decomposition  | Off Policy |
+| [VDAC](https://arxiv.org/abs/2007.12306)                     | Cooperative       | :heavy_check_mark:               | :heavy_check_mark:       | :heavy_check_mark:   | Value Decomposition  | On Policy  |
+| VDPPO*                                                       | Cooperative       | :heavy_check_mark:               | :heavy_check_mark:       | :heavy_check_mark:   | Value Decomposition  | On Policy  |
 
 *IQL* is the multi-agent version of Q learning.
 *MAA2C* and *MATRPO* are the centralized version of A2C and TRPO.
@@ -128,7 +128,15 @@ You can find a comprehensive list of existing MARL algorithms in different envir
 
 Here we provide a table for the comparison of MARLlib and existing work.
 
-
+|   Library   | Github Stars | Task Mode | Supported Env | Algorithm | Parameter Sharing  | Asynchronous Interact | Framework
+|:-------------:|:-------------:|:-------------:|:-------------:|:--------------:|:----------------:|:-----------------:|:---------------------:
+|     [PyMARL](https://github.com/oxwhirl/pymarl) | [![GitHub stars](https://img.shields.io/github/stars/oxwhirl/pymarl)](https://github.com/oxwhirl/pymarl/stargazers)    |       cooperative      |       1       |       IL(1) + CC(1) + VD(3)       |         full-sharing        |                   | *
+|    [PyMARL2](https://github.com/hijkzzz/pymarl2) | [![GitHub stars](https://img.shields.io/github/stars/hijkzzz/pymarl2)](https://github.com/hijkzzz/pymarl2/stargazers)    |       cooperative      |       1       |       IL(1) +  CC(1) +  VD(9)     |         full-sharing        |                   |   PyMARL
+|   [MARL-Algorithms](https://github.com/starry-sky6688/MARL-Algorithms)| [![GitHub stars](https://img.shields.io/github/stars/starry-sky6688/MARL-Algorithms)](https://github.com/starry-sky6688/MARL-Algorithms/stargazers)  |       cooperative      |       1       |     CTDE(6) + Communication(1) + Graph(1) + Multi-task(1)   |         full-sharing        |  | *
+|    [EPyMARL](https://github.com/uoe-agents/epymarl)| [![GitHub stars](https://img.shields.io/github/stars/uoe-agents/epymarl)](https://github.com/hijkzzz/uoe-agents/epymarl/stargazers)    |       cooperative      |       4       |    IL(3) + VD(4) + CC(2)    |        full-sharing + non-sharing       |                   |           PyMARL            | 
+| [MAlib](https://github.com/sjtu-marl/malib) | [![GitHub stars](https://img.shields.io/github/stars/sjtu-marl/malib)](https://github.com/hijkzzz/sjtu-marl/malib/stargazers) | self-play | 2 +  [PettingZoo](https://www.pettingzoo.ml/) + [OpenSpiel](https://github.com/deepmind/open_spiel) | Population-based | full-sharing + group-sharing + non-sharing | :heavy_check_mark: | *
+| [Marlbenchmark](https://github.com/marlbenchmark/on-policy)| [![GitHub stars](https://img.shields.io/github/stars/marlbenchmark/on-policy)](https://github.com/marlbenchmark/on-policy/stargazers) |     cooperative     |       4       |      MAPPO(1)     |         full-sharing + non-sharing        |         :heavy_check_mark:         |         pytorch-a2c-ppo-acktr-gail              |
+|    [MARLlib]()| |  cooperative collaborative competitive mixed  |       10 + [PettingZoo](https://www.pettingzoo.ml/)      |    IL(6) + CC(7) + VD(5)     |        full-sharing + group-sharing + non-sharing        |         :heavy_check_mark:         |           Ray/Rllib           |
 
 
 ## Installation
@@ -220,7 +228,7 @@ Here we only list the common bugs, not RLlib-related. (Mostly is your mistake)
     - the returned env observation contained the required key (e.g., action_mask/state)
     
 - *Action NaN is invaild* bug
-    - this is common bug espectially in continuous control problem, carefully finetune the algorithm's hyperparameter
+    - this is common bug in continuous control problem, carefully finetune the algorithm's hyperparameter
         - smaller learning rate
         - set some action value bound
 
