@@ -167,7 +167,7 @@ python add_patch.py -y
 <img src=image/configurations.png width=100% />
 </div>
 
-There are four configuration files you need to ensure that meets your training demand. 
+There are four configuration files you need to ensure correctness for your training demand. 
 
 - scenario: specify your environment/task settings
 - algorithm: finetune your algorithm hyperparameters
