@@ -3,7 +3,7 @@
 Introduction
 ============
 
-**Multi-Agent RLlib (MARLlib)** is **a comprehensive Multi-Agent Reinforcement Learning algorithm library** based on `Ray <https://github.com/ray-project/ray>` and one of its toolkits `RLlib <https://github.com/ray-project/ray/tree/master/rllib>`. It provides MARL research community with a unified platform for building, training, and evaluating MARL algorithms.
+**Multi-Agent RLlib (MARLlib)** is **a comprehensive Multi-Agent Reinforcement Learning algorithm library** based on `Ray <https://github.com/ray-project/ray>`_ and one of its toolkits `RLlib <https://github.com/ray-project/ray/tree/master/rllib>`_. It provides MARL research community with a unified platform for building, training, and evaluating MARL algorithms.
 
 .. figure:: ../images/marllib_open.png
     :align: center
