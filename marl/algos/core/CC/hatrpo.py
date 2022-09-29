@@ -101,12 +101,9 @@ def hatrpo_loss_fn(
 
     if contain_global_obs(train_batch):
         opp_action_in_cc = policy.config["model"]["custom_model_config"]["opp_action_in_cc"]
-        model.value_function = lambda: policy.model.central_value_function(
-            train_batch[STATE],
-            train_batch[get_global_name(SampleBatch.ACTIONS)]
-            if opp_action_in_cc else None
-        )
-
+        model.value_function = lambda: policy.model.central_value_function(train_batch["state"],
+                                                                           train_batch[
+                                                                               "opponent_actions"] if opp_action_in_cc else None)
     # if not contain_opponent_info:
     #     updater = TrustRegionUpdator
     # else:
