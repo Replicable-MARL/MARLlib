@@ -31,7 +31,6 @@ def run_happo(config_dict, common_config, env_dict, stop):
     use_gae = _param["use_gae"]
     critic_lr = _param["critic_lr"]
     gae_lambda = _param["lambda"]
-    kl_coeff = _param["kl_coeff"]
     num_sgd_iter = _param["num_sgd_iter"]
     vf_loss_coeff = _param["vf_loss_coeff"]
     entropy_coeff = _param["entropy_coeff"]
@@ -40,16 +39,16 @@ def run_happo(config_dict, common_config, env_dict, stop):
 
     config_dict['actor_lr'] = lr
     config_dict['critic_lr'] = critic_lr
-    config_dict['gain'] = 0.01
+    config_dict['gain'] = _param['gain']
 
     seed = random.randint(0, 10)
+
     config = {
         "seed": seed,
         "horizon": episode_limit,
         "batch_mode": batch_mode,
         "use_gae": use_gae,
         "lambda": gae_lambda,
-        # "kl_coeff": 0,
         "gamma": gamma,
         "vf_loss_coeff": vf_loss_coeff,
         "vf_clip_param": vf_clip_param,
@@ -57,7 +56,6 @@ def run_happo(config_dict, common_config, env_dict, stop):
         "lr": critic_lr,
         "num_sgd_iter": num_sgd_iter,
         "train_batch_size": train_batch_size,
-        # "train_batch_size": train_batch_size,
         "sgd_minibatch_size": sgd_minibatch_size,
         "grad_clip": grad_clip,
         "clip_param": clip_param,
@@ -76,7 +74,7 @@ def run_happo(config_dict, common_config, env_dict, stop):
         'lr': critic_lr,
         "lr_schedule": [
             (0, critic_lr),
-            (int(config_dict['stop_timesteps']), 1e-11),
+            (int(config_dict['stop_timesteps']), _param['min_lr_schedule']),
         ]
     })
 
