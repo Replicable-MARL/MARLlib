@@ -1,0 +1,132 @@
+{
+  "batch_mode": "complete_episodes",
+  "clip_param": 0.3,
+  "entropy_coeff": 0.01,
+  "env": "mamujoco_6AgentHalfCheetah",
+  "evaluation_interval": 10,
+  "framework": "torch",
+  "gamma": 0.99,
+  "grad_clip": 10,
+  "horizon": 1000,
+  "lambda": 1.0,
+  "lr": 0.0005,
+  "model": {
+    "custom_model": "Centralized_Critic_Model",
+    "custom_model_config": {
+      "actor_lr": 0.0005,
+      "algo_args": {
+        "batch_episode": 10,
+        "batch_mode": "complete_episodes",
+        "clip_param": 0.3,
+        "critic_lr": 0.0005,
+        "entropy_coeff": 0.01,
+        "gamma": 0.99,
+        "grad_clip": 10,
+        "kl_coeff": 0.2,
+        "lambda": 1.0,
+        "lr": 0.0005,
+        "num_sgd_iter": 5,
+        "use_gae": true,
+        "vf_clip_param": 10.0,
+        "vf_loss_coeff": 1.0
+      },
+      "algorithm": "happo",
+      "critic_lr": 0.0005,
+      "env": "mamujoco",
+      "env_args": {
+        "map_name": "6AgentHalfCheetah"
+      },
+      "episode_limit": 1000,
+      "evaluation_interval": 10,
+      "fixed_batch_timesteps": 4000,
+      "framework": "torch",
+      "gain": 0.01,
+      "global_state_flag": true,
+      "local_mode": false,
+      "mask_flag": false,
+      "model_arch_args": {
+        "core_arch": "gru",
+        "fc_layer": 1,
+        "hidden_state_size": 256,
+        "out_dim_fc_0": 128
+      },
+      "num_agents": 6,
+      "num_cpus_per_worker": 1,
+      "num_gpus": 1,
+      "num_gpus_per_worker": 0,
+      "num_workers": 0,
+      "opp_action_in_cc": false,
+      "policy_mapping_info": {
+        "all_scenario": {
+          "all_agents_one_policy": true,
+          "description": "mamujoco all scenarios",
+          "one_agent_one_policy": true,
+          "team_prefix": [
+            "agent_"
+          ]
+        }
+      },
+      "seed": 123,
+      "share_policy": "individual",
+      "space_act": "Box([-1.], [1.], (1,), float32)",
+      "space_obs": "Dict(obs:Box([-10000. -10000. -10000. -10000.], [10000. 10000. 10000. 10000.], (4,), float32), state:Box([-100. -100. -100. -100. -100. -100. -100. -100. -100. -100. -100. -100.\n -100. -100. -100. -100. -100.], [100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100.\n 100. 100. 100.], (17,), float32))",
+      "stop_iters": 9999999,
+      "stop_reward": 999999,
+      "stop_timesteps": 2000000
+    },
+    "max_seq_len": 1000,
+    "vf_share_layers": true
+  },
+  "multiagent": {
+    "policies": {
+      "policy_0": [
+        null,
+        "Dict(obs:Box([-10000. -10000. -10000. -10000.], [10000. 10000. 10000. 10000.], (4,), float32), state:Box([-100. -100. -100. -100. -100. -100. -100. -100. -100. -100. -100. -100.\n -100. -100. -100. -100. -100.], [100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100.\n 100. 100. 100.], (17,), float32))",
+        "Box([-1.], [1.], (1,), float32)",
+        {}
+      ],
+      "policy_1": [
+        null,
+        "Dict(obs:Box([-10000. -10000. -10000. -10000.], [10000. 10000. 10000. 10000.], (4,), float32), state:Box([-100. -100. -100. -100. -100. -100. -100. -100. -100. -100. -100. -100.\n -100. -100. -100. -100. -100.], [100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100.\n 100. 100. 100.], (17,), float32))",
+        "Box([-1.], [1.], (1,), float32)",
+        {}
+      ],
+      "policy_2": [
+        null,
+        "Dict(obs:Box([-10000. -10000. -10000. -10000.], [10000. 10000. 10000. 10000.], (4,), float32), state:Box([-100. -100. -100. -100. -100. -100. -100. -100. -100. -100. -100. -100.\n -100. -100. -100. -100. -100.], [100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100.\n 100. 100. 100.], (17,), float32))",
+        "Box([-1.], [1.], (1,), float32)",
+        {}
+      ],
+      "policy_3": [
+        null,
+        "Dict(obs:Box([-10000. -10000. -10000. -10000.], [10000. 10000. 10000. 10000.], (4,), float32), state:Box([-100. -100. -100. -100. -100. -100. -100. -100. -100. -100. -100. -100.\n -100. -100. -100. -100. -100.], [100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100.\n 100. 100. 100.], (17,), float32))",
+        "Box([-1.], [1.], (1,), float32)",
+        {}
+      ],
+      "policy_4": [
+        null,
+        "Dict(obs:Box([-10000. -10000. -10000. -10000.], [10000. 10000. 10000. 10000.], (4,), float32), state:Box([-100. -100. -100. -100. -100. -100. -100. -100. -100. -100. -100. -100.\n -100. -100. -100. -100. -100.], [100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100.\n 100. 100. 100.], (17,), float32))",
+        "Box([-1.], [1.], (1,), float32)",
+        {}
+      ],
+      "policy_5": [
+        null,
+        "Dict(obs:Box([-10000. -10000. -10000. -10000.], [10000. 10000. 10000. 10000.], (4,), float32), state:Box([-100. -100. -100. -100. -100. -100. -100. -100. -100. -100. -100. -100.\n -100. -100. -100. -100. -100.], [100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100.\n 100. 100. 100.], (17,), float32))",
+        "Box([-1.], [1.], (1,), float32)",
+        {}
+      ]
+    },
+    "policy_mapping_fn": "<function run_cc.<locals>.<lambda> at 0x7ff6896701f0>"
+  },
+  "num_gpus": 1,
+  "num_gpus_per_worker": 0,
+  "num_sgd_iter": 5,
+  "num_workers": 0,
+  "seed": 10,
+  "sgd_minibatch_size": 4000,
+  "simple_optimizer": false,
+  "train_batch_size": 4000,
+  "use_gae": true,
+  "vf_clip_param": 10.0,
+  "vf_loss_coeff": 1.0
+}
