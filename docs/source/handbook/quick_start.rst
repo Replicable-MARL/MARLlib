@@ -109,7 +109,7 @@ To start training, make sure you are under MARLlib directory and run:
 
 .. code-block:: shell
 
-    python marl/main.py --algo_config=$algo [--finetuned] --env-config=$env with env_args.map_name=$map
+    python marl/main.py --algo_config=$algo [--finetuned] --env_config=$env with env_args.map_name=$map
 
 Available algorithms (case sensitive):
 
@@ -152,7 +152,7 @@ Example on SMAC:
 
 .. code-block:: shell
 
-    python marl/main.py --algo_config=mappo --finetuned --env-config=smac with env_args.map_name=3m
+    python marl/main.py --algo_config=mappo --finetuned --env_config=smac with env_args.map_name=3m
 
 
 

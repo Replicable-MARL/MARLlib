@@ -187,7 +187,7 @@ pip install gym==1.21.0
 ### Step 3. Start training
 ```
 cd /Path/To/MARLlib
-python marl/main.py --algo_config=MAPPO [--finetuned] --env-config=smac with env_args.map_name=3m
+python marl/main.py --algo_config=MAPPO [--finetuned] --env_config=smac with env_args.map_name=3m
 ```
 --finetuned is optional, force using the finetuned hyperparameter if available.
 
