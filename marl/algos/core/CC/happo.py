@@ -4,8 +4,9 @@ __author__: minquan
 __data__: March-29-2022
 """
 
-import logging
+import random
 from typing import Dict, List, Type, Union, Tuple
+
 from ray.rllib.models.torch.torch_action_dist import TorchDistributionWrapper
 from ray.rllib.policy.policy import Policy
 from ray.rllib.models.modelv2 import ModelV2
@@ -23,50 +24,22 @@ from ray.rllib.policy.torch_policy import LearningRateSchedule, EntropyCoeffSche
 from marl.algos.utils.setup_utils import setup_torch_mixins, get_agent_num
 from marl.algos.utils.centralized_critic_hetero import (
     get_global_name,
-    STATE,
     add_all_agents_gae,
-    value_normalizer,
+    global_state_name,
 )
 from ray.rllib.examples.centralized_critic import CentralizedValueMixin
 from marl.algos.utils.setup_utils import get_device
-
-tf1, tf, tfv = try_import_tf()
-torch, nn = try_import_torch()
-
-logger = logging.getLogger(__name__)
-
-
-def surrogate_for_one_agent(importance_sampling, advantage, epsilon):
-    surrogate_loss = torch.min(
-        advantage * importance_sampling,
-        advantage * torch.clamp(
-            importance_sampling, 1 - epsilon,
-            1 + epsilon
-        )
-    )
-
-    return surrogate_loss
+from marl.algos.utils.manipulate_tensor import flat_grad, flat_params
+from icecream import ic
+from ray.rllib.agents.ppo.ppo_torch_policy import PPOTorchPolicy, ValueNetworkMixin, KLCoeffMixin, ppo_surrogate_loss
+import torch
+import datetime
+import re
 
 
-def happo_surrogate_loss(
-        policy: Policy, model: ModelV2,
-        dist_class: Type[TorchDistributionWrapper],
-        train_batch: SampleBatch) -> Union[TensorType, List[TensorType]]:
-    """Constructs the loss for Proximal Policy Objective.
-    Args:
-        policy (Policy): The Policy to calculate the loss for.
-        model (ModelV2): The Model to calculate the loss for.
-        dist_class (Type[ActionDistribution]: The action distr. class.
-        train_batch (SampleBatch): The training data.
-    Returns:
-        Union[TensorType, List[TensorType]]: A single loss tensor or a list
-            of loss tensors.
-    """
-
-    CentralizedValueMixin.__init__(policy)
-
+def get_mask_and_reduce_mean(model, train_batch):
     logits, state = model(train_batch)
-    curr_action_dist = dist_class(logits, model)
+    # curr_action_dist = dist_class(logits, model)
 
     # RNN case: Mask away 0-padded chunks at end of time axis.
     if state:
@@ -87,89 +60,163 @@ def happo_surrogate_loss(
         mask = None
         reduce_mean_valid = torch.mean
 
+    return mask, reduce_mean_valid
+
+
+class IterTrainBatch(SampleBatch):
+    def __init__(self, main_train_batch, policy_name):
+        self.main_train_batch = main_train_batch
+        self.policy_name = policy_name
+
+        self.copy = self.main_train_batch.copy
+        self.keys = self.main_train_batch.keys
+        self.is_training = self.main_train_batch.is_training
+
+        self.pat = re.compile(r'^state_in_(\d+)')
+
+    def get_state_index(self, string):
+        match = self.pat.findall(string)
+        if match:
+            return match[0]
+        else:
+            return None
+
+    def __getitem__(self, item):
+        """
+        Adds an adaptor to get the item.
+        Input a key name, it would get the corresponding opponent's key-value
+        """
+        directly_get = [SampleBatch.SEQ_LENS]
+
+        if item in directly_get:
+            return self.main_train_batch[item]
+        elif get_global_name(item, self.policy_name) in self.main_train_batch:
+            return self.main_train_batch[get_global_name(item, self.policy_name)]
+        elif state_index := self.get_state_index(item):
+            return self.main_train_batch[global_state_name(state_index, self.policy_name)]
+
+    def __contains__(self, item):
+        if item in self.keys() or get_global_name(item, self.policy_name) in self.keys():
+            return True
+        elif state_index := self.get_state_index(item):
+            if global_state_name(state_index, self.policy_name) in self.keys():
+                return True
+
+        return False
+
+
+def happo_surrogate_loss(
+        policy: Policy, model: ModelV2,
+        dist_class: Type[TorchDistributionWrapper],
+        train_batch: SampleBatch) -> Union[TensorType, List[TensorType]]:
+    """Constructs the loss for Proximal Policy Objective.
+    Args:
+        policy (Policy): The Policy to calculate the loss for.
+        model (ModelV2): The Model to calculate the loss for.
+        dist_class (Type[ActionDistribution]: The action distr. class.
+        train_batch (SampleBatch): The training data.
+    Returns:
+        Union[TensorType, List[TensorType]]: A single loss tensor or a list
+            of loss tensors.
+    """
+
+    CentralizedValueMixin.__init__(policy)
+
     vf_saved = model.value_function
 
+    # set Global-V-Network
     opp_action_in_cc = policy.config["model"]["custom_model_config"]["opp_action_in_cc"]
 
-    global_actions = train_batch[get_global_name(SampleBatch.ACTIONS)]
+    model.value_function = lambda: policy.model.central_value_function(train_batch["state"],
+                                                                       train_batch[
+                                                                           "opponent_actions"] if opp_action_in_cc else None)
 
-    model.value_function = lambda: policy.model.central_value_function(
-        train_batch[STATE],
-        global_actions if opp_action_in_cc else None
-    )
+    all_policies_with_names = list(model.other_policies.items()) + [('self', policy)]
+    random.shuffle(all_policies_with_names)
 
-    contain_global_information = bool(torch.any(global_actions > 0))
-    if contain_global_information:
-        sub_losses = []
+    total_policy_loss = 0
 
-        m_advantage = train_batch[Postprocessing.ADVANTAGES]
+    m_advantage = train_batch[Postprocessing.ADVANTAGES]
 
-        agents_num = get_agent_num(policy)
+    reduce_mean_valid, mean_entropy, mean_kl_loss = None, None, None
 
-        random_indices = np.random.permutation(range(agents_num))
+    for policy_name, iter_policy in all_policies_with_names:
+        is_self = (policy_name == 'self')
+        iter_model = [iter_policy.model, model][is_self]
+        iter_dist_class = [iter_policy.dist_class, dist_class][is_self]
+        iter_train_batch = [IterTrainBatch(train_batch, policy_name), train_batch][is_self]
+        iter_mask, iter_reduce_mean = get_mask_and_reduce_mean(iter_model, iter_train_batch)
 
-        # in order to get each agent's information, if random_indices is len(agents_num) - 1, we set
-        # this as our current_agent, and get the information from generally train batch.
-        # otherwise, we get the agent information from "GLOBAL_LOGITS", "GLOBAL_ACTIONS", etc
+        iter_model.train()
 
-        def is_current_agent(i): return i == (agents_num - 1)
+        iter_logits, iter_state = iter_model(iter_train_batch)
+        iter_current_action_dist = iter_dist_class(iter_logits, iter_model)
 
-        # torch.autograd.set_detect_anomaly(True)
+        iter_prev_action_dist = iter_dist_class(iter_train_batch[SampleBatch.ACTION_DIST_INPUTS], iter_model)
+        iter_prev_action_logp = iter_train_batch[SampleBatch.ACTION_LOGP]
+        iter_actions = iter_train_batch[SampleBatch.ACTIONS]
 
-        for agent_id in random_indices:
-            if is_current_agent(agent_id):
-                logits, state = model(train_batch)
-                current_action_dist = dist_class(logits, model)
-                old_action_log_dist = train_batch[SampleBatch.ACTION_LOGP]
-                actions = train_batch[SampleBatch.ACTIONS]
-            else:
-                current_action_logits = train_batch[get_global_name(SampleBatch.ACTION_DIST_INPUTS, agent_id)]
-                current_action_dist = dist_class(current_action_logits, None)
+        logp_ratio = torch.exp(iter_current_action_dist.logp(iter_actions) - iter_prev_action_logp)
 
-                old_action_log_dist = train_batch[get_global_name(SampleBatch.ACTION_LOGP, agent_id)]
-                actions = train_batch[get_global_name(SampleBatch.ACTIONS, agent_id)]
+        iter_action_kl = iter_prev_action_dist.kl(iter_current_action_dist)
+        iter_mean_kl_loss = iter_reduce_mean(iter_action_kl)
 
-            importance_sampling = torch.exp(current_action_dist.logp(actions) - old_action_log_dist)
+        iter_curr_entropy = iter_current_action_dist.entropy()
+        iter_mean_entropy = iter_reduce_mean(iter_curr_entropy)
 
-            sub_loss = surrogate_for_one_agent(importance_sampling=importance_sampling,
-                                               advantage=m_advantage,
-                                               epsilon=policy.config["clip_param"])
+        if policy_name == 'self':
+            reduce_mean_valid = iter_reduce_mean
+            mean_entropy = iter_mean_entropy
+            mean_kl_loss = iter_mean_kl_loss
 
-            m_advantage = importance_sampling * m_advantage
+        iter_surrogate_loss = torch.min(
+            m_advantage * logp_ratio,
+            m_advantage * torch.clamp(
+                logp_ratio, 1 - iter_policy.config["clip_param"], 1 + iter_policy.config["clip_param"]
+            )
+        )
 
-            sub_losses.append(sub_loss)
+        iter_surrogate_loss = iter_reduce_mean(iter_surrogate_loss)
 
-        surrogate_loss = torch.mean(torch.stack(sub_losses, axis=1), axis=1)
-    else:
-        logp_ratio = torch.exp(
-            curr_action_dist.logp(train_batch[SampleBatch.ACTIONS]) -
-            train_batch[SampleBatch.ACTION_LOGP])
+        total_policy_loss = total_policy_loss + iter_surrogate_loss
 
-        surrogate_loss = torch.min(
-            train_batch[Postprocessing.ADVANTAGES] * logp_ratio,
-            train_batch[Postprocessing.ADVANTAGES] * torch.clamp(
-                logp_ratio, 1 - policy.config["clip_param"],
-                1 + policy.config["clip_param"]))
+        torch.autograd.set_detect_anomaly(True)
 
-    mean_policy_loss = reduce_mean_valid(-surrogate_loss)
+        current_lr = (
+            iter_policy.cur_lr / iter_model.custom_config['critic_lr'] * iter_model.custom_config['actor_lr']
+        )
 
-    prev_action_dist = dist_class(train_batch[SampleBatch.ACTION_DIST_INPUTS], model)
-    action_kl = prev_action_dist.kl(curr_action_dist)
-    mean_kl_loss = reduce_mean_valid(action_kl)
+        iter_model.update_actor(
+            loss=iter_surrogate_loss + iter_policy.entropy_coeff * iter_mean_entropy -
+                 iter_policy.kl_coeff * iter_mean_kl_loss,
+            lr=current_lr,
+            grad_clip=iter_policy.config['grad_clip'],
+        )
 
-    curr_entropy = curr_action_dist.entropy()
-    mean_entropy = reduce_mean_valid(curr_entropy)
+        with torch.no_grad():
+            iter_model.eval()
+            iter_new_logits, _ = iter_model(iter_train_batch)
+            if torch.any(torch.isnan(iter_new_logits)): ic(iter_new_logits)
+            try:
+                iter_new_action_dist = iter_dist_class(iter_new_logits, iter_model)
+                iter_new_logp_ratio = torch.exp(
+                    iter_new_action_dist.logp(iter_actions) -
+                    iter_prev_action_logp
+                )
+            except ValueError as e:
+                print(e)
+                ic(iter_new_logits)
 
-    # Compute a value function loss.
-    # if policy.model.model_config['custom_model_config']['normal_value']:
-    value_normalizer.update(train_batch[Postprocessing.VALUE_TARGETS])
-    train_batch[Postprocessing.VALUE_TARGETS] = value_normalizer.normalize(train_batch[Postprocessing.VALUE_TARGETS])
+        m_advantage = iter_new_logp_ratio * m_advantage
+
+    mean_policy_loss = -1 * (total_policy_loss / len(all_policies_with_names))
 
     if policy.config["use_critic"]:
-        prev_value_fn_out = train_batch[SampleBatch.VF_PREDS] #
+        prev_value_fn_out = train_batch[SampleBatch.VF_PREDS]  #
         value_fn_out = model.value_function()  # same as values
         vf_loss1 = torch.pow(
-            value_fn_out.to(device=get_device()) - train_batch[Postprocessing.VALUE_TARGETS].to(device=get_device()), 2.0)
+            value_fn_out.to(device=get_device()) - train_batch[Postprocessing.VALUE_TARGETS].to(device=get_device()),
+            2.0)
         vf_clipped = (prev_value_fn_out + torch.clamp(
             value_fn_out - prev_value_fn_out, -policy.config["vf_clip_param"],
             policy.config["vf_clip_param"])).to(device=get_device())
@@ -184,59 +231,40 @@ def happo_surrogate_loss(
     model.value_function = vf_saved
     # recovery the value function.
 
-    total_loss = reduce_mean_valid(-surrogate_loss +
-                                   policy.kl_coeff * action_kl +
-                                   policy.config["vf_loss_coeff"] * vf_loss -
-                                   policy.entropy_coeff * curr_entropy)
+    value_loss = reduce_mean_valid(policy.config['vf_loss_coeff'] * vf_loss.to(device=get_device()))
 
     # Store values for stats function in model (tower), such that for
     # multi-GPU, we do not override them during the parallel loss phase.
-    model.tower_stats["total_loss"] = total_loss
+    model.tower_stats["total_loss"] = value_loss + mean_policy_loss
     model.tower_stats["mean_policy_loss"] = mean_policy_loss
     model.tower_stats["mean_vf_loss"] = mean_vf_loss
     model.tower_stats["vf_explained_var"] = explained_variance(
         train_batch[Postprocessing.VALUE_TARGETS].to(device=get_device()),
-        model.value_function())
+        model.value_function().to(device=get_device()))
     model.tower_stats["mean_entropy"] = mean_entropy
     model.tower_stats["mean_kl_loss"] = mean_kl_loss
 
-    return total_loss
-
-
-def make_happo_optimizers(policy: Policy,
-                          config: TrainerConfigDict) -> Tuple[LocalOptimizer]:
-    """Create separate optimizers for actor & critic losses."""
-
-    # Set epsilons to match tf.keras.optimizers.Adam's epsilon default.
-    policy._actor_optimizer = torch.optim.Adam(
-        params=policy.model.policy_variables(),
-        lr=config["actor_lr"],
-        eps=1e-7)
-
-    policy._critic_optimizer = torch.optim.Adam(
-        params=policy.model.critic_variables(), lr=config["critic_lr"], eps=1e-5)
-
-    # Return them in the same order as the respective loss terms are returned.
-    return policy._actor_optimizer, policy._critic_optimizer
+    return value_loss
 
 
 HAPPOTorchPolicy = lambda ppo_with_critic: PPOTorchPolicy.with_updates(
-        name="HAPPOTorchPolicy",
-        get_default_config=lambda: ppo_with_critic,
-        postprocess_fn=add_all_agents_gae,
-        loss_fn=happo_surrogate_loss,
-        before_init=setup_torch_mixins,
-        extra_grad_process_fn=apply_grad_clipping,
-        mixins=[
-            LearningRateSchedule, EntropyCoeffSchedule, KLCoeffMixin,
-            CentralizedValueMixin
-        ])
+    name="HAPPOTorchPolicy",
+    get_default_config=lambda: ppo_with_critic,
+    postprocess_fn=add_all_agents_gae,
+    loss_fn=happo_surrogate_loss,
+    before_init=setup_torch_mixins,
+    extra_grad_process_fn=apply_grad_clipping,
+    mixins=[
+        LearningRateSchedule, EntropyCoeffSchedule, KLCoeffMixin,
+        CentralizedValueMixin
+    ])
 
 
 def get_policy_class_happo(ppo_with_critic):
     def __inner(config_):
         if config_["framework"] == "torch":
             return HAPPOTorchPolicy(ppo_with_critic)
+
     return __inner
 
 

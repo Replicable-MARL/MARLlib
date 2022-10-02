@@ -1,8 +1,11 @@
+import random
+
 from ray import tune
 from ray.tune.utils import merge_dicts
 from ray.tune import CLIReporter
 from marl.algos.core.CC.happo import HAPPOTrainer
 from marl.algos.utils.setup_utils import AlgVar
+from marl.algos.utils.log_dir_util import available_local_dir
 from ray.rllib.agents.ppo.ppo import PPOTrainer, DEFAULT_CONFIG as PPO_CONFIG
 
 
@@ -28,27 +31,29 @@ def run_happo(config_dict, common_config, env_dict, stop):
     use_gae = _param["use_gae"]
     critic_lr = _param["critic_lr"]
     gae_lambda = _param["lambda"]
-    kl_coeff = _param["kl_coeff"]
     num_sgd_iter = _param["num_sgd_iter"]
     vf_loss_coeff = _param["vf_loss_coeff"]
     entropy_coeff = _param["entropy_coeff"]
     vf_clip_param = _param["vf_clip_param"]
     gamma = _param["gamma"]
 
-    PPO_CONFIG.update({
-        'critic_lr': critic_lr
-    })
+    config_dict['actor_lr'] = lr
+    config_dict['critic_lr'] = critic_lr
+    config_dict['gain'] = _param['gain']
+
+    seed = random.randint(0, 10)
 
     config = {
+        "seed": seed,
+        "horizon": episode_limit,
         "batch_mode": batch_mode,
         "use_gae": use_gae,
         "lambda": gae_lambda,
-        "kl_coeff": kl_coeff,
         "gamma": gamma,
         "vf_loss_coeff": vf_loss_coeff,
         "vf_clip_param": vf_clip_param,
         "entropy_coeff": entropy_coeff,
-        "lr": lr,
+        "lr": critic_lr,
         "num_sgd_iter": num_sgd_iter,
         "train_batch_size": train_batch_size,
         "sgd_minibatch_size": sgd_minibatch_size,
@@ -58,20 +63,33 @@ def run_happo(config_dict, common_config, env_dict, stop):
             "custom_model": "Centralized_Critic_Model",
             "max_seq_len": episode_limit,
             "custom_model_config": merge_dicts(config_dict, env_dict),
+            "vf_share_layers": True,
         },
     }
     config.update(common_config)
 
+    TRAIN_MARK = 't-adam-and-lr-is-critic'
+
+    PPO_CONFIG.update({
+        'lr': critic_lr,
+        "lr_schedule": [
+            (0, critic_lr),
+            (int(config_dict['stop_timesteps']), _param['min_lr_schedule']),
+        ]
+    })
+
     algorithm = config_dict["algorithm"]
     map_name = config_dict["env_args"]["map_name"]
     arch = config_dict["model_arch_args"]["core_arch"]
-    RUNNING_NAME = '_'.join([algorithm, arch, map_name])
+    RUNNING_NAME = '_'.join([algorithm, arch, map_name, str(lr), str(critic_lr), TRAIN_MARK.upper(), f'seed-{seed}'])
 
     results = tune.run(HAPPOTrainer(PPO_CONFIG),
                        name=RUNNING_NAME,
                        stop=stop,
                        config=config,
                        verbose=1,
-                       progress_reporter=CLIReporter())
+                       progress_reporter=CLIReporter(),
+                       local_dir=available_local_dir
+                       )
 
     return results

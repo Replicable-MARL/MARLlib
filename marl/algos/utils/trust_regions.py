@@ -5,46 +5,46 @@ from ray.rllib.utils.torch_ops import sequence_mask
 from torch.nn.utils import parameters_to_vector, vector_to_parameters
 from marl.algos.utils.centralized_critic_hetero import get_global_name
 from marl.algos.utils.setup_utils import get_device
+from marl.algos.utils.manipulate_tensor import flat_grad, flat_params, flat_hessian
 
 torch, nn = try_import_torch()
 
 
 class HATRPOUpdator:
-    def __init__(self, model_updator, importance_sampling, agents_num, dist_class, train_batch, adv_targ):
+    def __init__(self, policies_with_name, updator, importance_sampling, dist_class, train_batch, adv_targ):
         self.updaters = []
         self.dist_class = dist_class
-        self.agents_num = agents_num
-        self.main_updator = model_updator
+        self.main_updator = updator
 
         m_advantage = adv_targ
 
-        random_indices = np.random.permutation(agents_num)
+        random_policies = np.random.permutation(policies_with_name)
 
-        for i in random_indices:
-            if i == agents_num - 1:
+        for name, p in random_policies:
+            if name == 'self':
                 importance_sampling = importance_sampling
-                trpo_updator = model_updator
+                trpo_updator = updator
                 trpo_updator.adv_targ = m_advantage
                 m_advantage = m_advantage * importance_sampling
                 self.main_updator.adv_targ = m_advantage
             else:
-                m_advantage = self.update_advantage(train_batch, i, m_advantage)
+                m_advantage = self.update_advantage(train_batch, name, m_advantage)
 
     def update(self):
         self.main_updator.update()
 
-    def update_advantage(self, train_batch, agent_id, m_advantage):
+    def update_advantage(self, train_batch, agent_name, m_advantage):
 
         current_action_logits = train_batch[
-            get_global_name(SampleBatch.ACTION_DIST_INPUTS, agent_id)
+            get_global_name(SampleBatch.ACTION_DIST_INPUTS, agent_name)
         ]
         current_action_dist = self.dist_class(current_action_logits, None)
         old_action_log_dist = train_batch[
-            get_global_name(SampleBatch.ACTION_LOGP, agent_id)
+            get_global_name(SampleBatch.ACTION_LOGP, agent_name)
         ]
 
-        actions = train_batch[get_global_name(SampleBatch.ACTIONS, agent_id)]
-        obs = train_batch[get_global_name(SampleBatch.OBS, agent_id)]
+        actions = train_batch[get_global_name(SampleBatch.ACTIONS, agent_name)]
+        obs = train_batch[get_global_name(SampleBatch.OBS, agent_name)]
         importance_sampling = torch.exp(current_action_dist.logp(actions) - old_action_log_dist)
         m_advantage = m_advantage * importance_sampling
 
@@ -131,33 +131,6 @@ class TrustRegionUpdator:
     def critic_parameters(self):
         return self.model.critic_parameters()
 
-    @staticmethod
-    def flat_grad(grads):
-        grad_flatten = []
-        for grad in grads:
-            if grad is None:
-                continue
-            grad_flatten.append(grad.reshape(-1))
-        grad_flatten = torch.cat(grad_flatten)
-        return grad_flatten
-
-    @staticmethod
-    def flat_hessian(hessians):
-        hessians_flatten = []
-        for hessian in hessians:
-            if hessian is None:
-                continue
-            hessians_flatten.append(hessian.contiguous().view(-1))
-        hessians_flatten = torch.cat(hessians_flatten).data
-        return hessians_flatten
-
-    @staticmethod
-    def flat_params(parameters):
-        params = []
-        for param in parameters:
-            params.append(param.data.view(-1))
-        params_flatten = torch.cat(params)
-        return params_flatten
 
     def set_actor_params(self, new_flat_params):
         vector_to_parameters(new_flat_params, self.actor_parameters)
@@ -166,21 +139,21 @@ class TrustRegionUpdator:
         self.stored_actor_parameters = self.actor_parameters
 
     def recovery_actor_params_to_before_linear_search(self):
-        stored_actor_parameters = self.flat_params(self.stored_actor_parameters)
+        stored_actor_parameters = flat_params(self.stored_actor_parameters)
         self.set_actor_params(stored_actor_parameters)
 
     def reset_actor_params(self):
-        initialized_actor_parameters = self.flat_params(self.model.actor_initialized_parameters)
+        initialized_actor_parameters = flat_params(self.model.actor_initialized_parameters)
         self.set_actor_params(initialized_actor_parameters)
 
     def fisher_vector_product(self, p):
         p.detach()
         kl = self.kl.mean()
         kl_grads = torch.autograd.grad(kl, self.actor_parameters, create_graph=True, allow_unused=True)
-        kl_grads = self.flat_grad(kl_grads)
+        kl_grads = flat_grad(kl_grads)
         kl_grad_p = (kl_grads * p).sum()
         kl_hessian_p = torch.autograd.grad(kl_grad_p, self.actor_parameters, allow_unused=True)
-        kl_hessian_p = self.flat_hessian(kl_hessian_p)
+        kl_hessian_p = flat_hessian(kl_hessian_p)
 
         return kl_hessian_p + 0.1 * p
 
@@ -212,7 +185,7 @@ class TrustRegionUpdator:
         critic_loss_grad = torch.autograd.grad(critic_loss, self.critic_parameters, allow_unused=True)
 
         new_params = (
-                parameters_to_vector(self.critic_parameters) - self.flat_grad(
+                parameters_to_vector(self.critic_parameters) - flat_grad(
             critic_loss_grad) * TrustRegionUpdator.critic_lr
         )
 
@@ -223,7 +196,7 @@ class TrustRegionUpdator:
     def update_actor(self, policy_loss):
 
         loss_grad = torch.autograd.grad(policy_loss, self.actor_parameters, allow_unused=True, retain_graph=True)
-        pol_grad = self.flat_grad(loss_grad)
+        pol_grad = flat_grad(loss_grad)
         step_dir = self.conjugate_gradients(
             b=pol_grad.data,
             nsteps=10,
@@ -233,7 +206,7 @@ class TrustRegionUpdator:
         scala = 0 if fisher_norm < 0 else torch.sqrt(2 * self.kl_threshold / (fisher_norm + 1e-8))
         full_step = scala * step_dir
         loss = policy_loss.data.cpu().numpy()
-        params = self.flat_grad(self.actor_parameters)
+        params = flat_grad(self.actor_parameters)
         self.store_current_actor_params()
 
         expected_improve = pol_grad.dot(full_step).item()

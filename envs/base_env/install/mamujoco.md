@@ -1,4 +1,4 @@
-# MaMujoco for Ray
+# MAMuJoCo for Ray
 
 ### Getting Started
 

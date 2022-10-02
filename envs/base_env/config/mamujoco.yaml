@@ -5,5 +5,5 @@ env_args:
 
 mask_flag: False
 global_state_flag: True
-opp_action_in_cc: True
+opp_action_in_cc: False
 fixed_batch_timesteps: 4000 # optional, all scenario will use this batch size, only valid for on-policy algorithms
