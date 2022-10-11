@@ -10,13 +10,12 @@
 
 **Multi-Agent RLlib (MARLlib)** is ***a comprehensive Multi-Agent Reinforcement Learning algorithm library*** based on [**Ray**](https://github.com/ray-project/ray) and one of its toolkits [**RLlib**](https://github.com/ray-project/ray/tree/master/rllib). It provides MARL research community with a unified platform for building, training, and evaluating MARL algorithms.
 
-There are five core features of **MARLlib**.
+There are four core features of **MARLlib**.
 
+- It unifies diverse algorithm pipeline with a newly proposed agent-level distributed dataflow. Currently, MARLlib delivers 18 algorithms and is able to handle cooperative (team-reward-only cooperation), collaborative (individual-reward-accessible cooperation), competitive (individual competition), and mixed (teamwork-based competition) tasks.
 - It unifies multi-agent environment interfaces with a new interface following Gym standard and supports both synchronous and asynchronous agent-environment interaction. Currently, MARLlib provides support to ten environments.
-- It unifies diverse algorithm pipeline with a newly proposed single-agent perspective of implementation. Currently, MARLlib incorporates 18 algorithms and is able to handle cooperative (team-reward-only cooperation), collaborative (individual-reward-accessible cooperation), competitive (individual competition), and mixed (teamwork-based competition) tasks.
-- It classifies algorithms into independent learning, centralized critic, and value decomposition categories(inspired by EPyMARL) and enables module reuse and extensibility within each category.
 - It provides three parameter sharing strategies, namely full-sharing, non-sharing, and group-sharing, by implementing the policy mapping API of RLlib. This is implemented to be fully decoupled from algorithms and environments, and is completely controlled by configuration files.
-- It provides standard 2 or 20 millions timesteps learning curve in the form of CSV of each task-algorithm for reference. These results are reproducible as configuration files for each experiment are provided along.
+- It provides standard 2 or 20 millions timesteps learning curve in the form of CSV of each task-algorithm for reference. These results are reproducible as configuration files for each experiment are provided along. In total, more than a thousand experiments are conducted and released. 
 
 <div align="center">
 <img src=image/overview.png width=100% />
@@ -120,7 +119,7 @@ Y for available, N for not suitable, P for partially available on some scenarios
 | GRF             | Y    | Y    | Y    | N    | Y    | Y    | Y    | N      | Y    | Y      | Y     | Y      | Y     | Y    | Y    | Y      | Y    | Y     |
 | Hanabi          | Y    | Y    | Y    | N    | Y    | Y    | Y    | N      | Y    | Y      | Y     | Y      | Y     | N    | N    | N      | N    | N     |
 
-You can find a comprehensive list of existing MARL algorithms in different environments  [url not specified yet]().
+You can find a comprehensive list of existing MARL algorithms in different environments  [here](https://github.com/Replicable-MARL/MARLlib/tree/main/envs).
 
 
 
@@ -130,32 +129,57 @@ Here we provide a table for the comparison of MARLlib and existing work.
 
 |   Library   | Github Stars | Task Mode | Supported Env | Algorithm | Parameter Sharing  | Asynchronous Interact | Framework
 |:-------------:|:-------------:|:-------------:|:-------------:|:--------------:|:----------------:|:-----------------:|:---------------------:
-|     [PyMARL](https://github.com/oxwhirl/pymarl) | [![GitHub stars](https://img.shields.io/github/stars/oxwhirl/pymarl)](https://github.com/oxwhirl/pymarl/stargazers)    |       cooperative      |       1       |       IL(1) + CC(1) + VD(3)       |         full-sharing        |                   | *
-|    [PyMARL2](https://github.com/hijkzzz/pymarl2) | [![GitHub stars](https://img.shields.io/github/stars/hijkzzz/pymarl2)](https://github.com/hijkzzz/pymarl2/stargazers)    |       cooperative      |       1       |       IL(1) +  CC(1) +  VD(9)     |         full-sharing        |                   |   PyMARL
+|     [PyMARL](https://github.com/oxwhirl/pymarl) | [![GitHub stars](https://img.shields.io/github/stars/oxwhirl/pymarl)](https://github.com/oxwhirl/pymarl/stargazers)    |       cooperative      |       1       |       Independent Learning(1) + Centralized Critic(1) + Value Decomposition(3)       |         full-sharing        |                   | *
+|    [PyMARL2](https://github.com/hijkzzz/pymarl2) | [![GitHub stars](https://img.shields.io/github/stars/hijkzzz/pymarl2)](https://github.com/hijkzzz/pymarl2/stargazers)    |       cooperative      |       1       |       Independent Learning(1) +  Centralized Critic(1) +  Value Decomposition(9)     |         full-sharing        |                   |   PyMARL
 |   [MARL-Algorithms](https://github.com/starry-sky6688/MARL-Algorithms)| [![GitHub stars](https://img.shields.io/github/stars/starry-sky6688/MARL-Algorithms)](https://github.com/starry-sky6688/MARL-Algorithms/stargazers)  |       cooperative      |       1       |     CTDE(6) + Communication(1) + Graph(1) + Multi-task(1)   |         full-sharing        |  | *
-|    [EPyMARL](https://github.com/uoe-agents/epymarl)| [![GitHub stars](https://img.shields.io/github/stars/uoe-agents/epymarl)](https://github.com/hijkzzz/uoe-agents/epymarl/stargazers)    |       cooperative      |       4       |    IL(3) + VD(4) + CC(2)    |        full-sharing + non-sharing       |                   |           PyMARL            | 
+|    [EPyMARL](https://github.com/uoe-agents/epymarl)| [![GitHub stars](https://img.shields.io/github/stars/uoe-agents/epymarl)](https://github.com/hijkzzz/uoe-agents/epymarl/stargazers)    |       cooperative      |       4       |    Independent Learning(3) + Value Decomposition(4) + Centralized Critic(2)    |        full-sharing + non-sharing       |                   |           PyMARL            | 
 | [MAlib](https://github.com/sjtu-marl/malib) | [![GitHub stars](https://img.shields.io/github/stars/sjtu-marl/malib)](https://github.com/hijkzzz/sjtu-marl/malib/stargazers) | self-play | 2 +  [PettingZoo](https://www.pettingzoo.ml/) + [OpenSpiel](https://github.com/deepmind/open_spiel) | Population-based | full-sharing + group-sharing + non-sharing | :heavy_check_mark: | *
 | [MAPPO Benchmark](https://github.com/marlbenchmark/on-policy)| [![GitHub stars](https://img.shields.io/github/stars/marlbenchmark/on-policy)](https://github.com/marlbenchmark/on-policy/stargazers) |     cooperative     |       4       |      MAPPO(1)     |         full-sharing + non-sharing        |         :heavy_check_mark:         |         pytorch-a2c-ppo-acktr-gail              |
-|    [MARLlib]()| |  cooperative collaborative competitive mixed  |       10 + [PettingZoo](https://www.pettingzoo.ml/)      |    IL(6) + CC(7) + VD(5)     |        full-sharing + group-sharing + non-sharing        |         :heavy_check_mark:         |           Ray/Rllib           |
+|    [MARLlib](https://github.com/Replicable-MARL/MARLlib)| |  cooperative collaborative competitive mixed  |       10 + [PettingZoo](https://www.pettingzoo.ml/)      |    Independent Learning(6) + Centralized Critic(7) + Value Decomposition(5)     |        full-sharing + group-sharing + non-sharing        |         :heavy_check_mark:         |           Ray/Rllib           |
 
 
 ## Installation
 
-Install Ray 
-```
-pip install ray==1.8.0 # version sensitive
+
+To use MARLlib, first install MARLlib, then install desired environments following [this guide](https://marllib.readthedocs.io/en/latest/handbook/env.html), finally install patches for RLlib. After installation, training can be launched by following the usage section below.
+
+
+### Install MARLlib
+
+```bash
+    conda create -n marllib python==3.8
+    conda activate marllib
+    # please install pytorch <= 1.9.1 compatible with your hardware.
+
+    pip install ray==1.8.0
+    pip install ray[tune]
+    pip install ray[rllib]
+
+    git clone https://github.com/Replicable-MARL/MARLlib.git
+    cd MARLlib
+    pip install -e .
 ```
 
 
-Add patch of MARLlib
+### Install environments
+
+Please follow [this guide](https://marllib.readthedocs.io/en/latest/handbook/env.html).
+
+### Install patches for RLlib
+
+We fix bugs of RLlib by providing patches. After installing Ray, run the following command:
+
 ```
 cd /Path/To/MARLlib/patch
 python add_patch.py -y
 ```
 
-**Y** to replace source-packages code
+For pommerman users, run
 
-**Attention**: Above is the common installation. Each environment needs extra dependency. Please read the installation instruction in envs/base_env/install.
+```
+cd /Path/To/MARLlib/patch
+python add_patch.py -y -p
+```
 
 
 
@@ -176,7 +200,7 @@ There are four configuration files you need to ensure correctness for your train
 
 ### Step 2. Making sure all the dependency are installed for your environment.
 
-You can refer to [url not specified]() to install the environment.
+You can refer to [here](https://marllib.readthedocs.io/en/latest/handbook/env.html) to install the environment.
 After everything settled, make sure to change back you Gym version to 1.21.0.
 All environment MARLlib supported should work fine with this version.
 
@@ -185,10 +209,55 @@ pip install gym==1.21.0
 ```
 
 ### Step 3. Start training
+
 ```
 cd /Path/To/MARLlib
+python marl/main.py --algo_config=$algo [--finetuned] --env_config=$env with env_args.map_name=$map
+```
+
+Available algorithms (case sensitive):
+
+- iql
+- pg
+- a2c
+- ddpg
+- trpo
+- ppo
+- maa2c
+- coma
+- maddpg
+- matrpo
+- mappo
+- hatrpo
+- happo
+- vdn
+- qmix
+- facmac
+- vda2c
+- vdppo
+
+Available env-map pairs (case sensitive):
+
+- smac: [smac maps](https://github.com/oxwhirl/smac/blob/master/smac/env/starcraft2/maps/smac_maps.py)
+- mpe: [mpe map](https://github.com/Replicable-MARL/MARLlib/blob/main/envs/base_env/mpe.py)
+- mamujoco: [mamujoco map](https://github.com/Replicable-MARL/MARLlib/blob/main/envs/base_env/mamujoco.py)
+- football: [football map](https://github.com/Replicable-MARL/MARLlib/blob/main/envs/base_env/mamujoco.py)
+- magent: [magent map](https://github.com/Replicable-MARL/MARLlib/blob/main/envs/base_env/magent.py)
+- lbf: use [lbf config](https://github.com/Replicable-MARL/MARLlib/blob/main/envs/base_env/config/lbf.yaml) to generate the map. Details can be found https://github.com/semitable/lb-foraging#usage
+- rware: use [rware config](https://github.com/Replicable-MARL/MARLlib/blob/main/envs/base_env/config/rware.yaml) to generate the map. Details can be found https://github.com/semitable/robotic-warehouse#naming-scheme
+- pommerman: OneVsOne-v0, PommeFFACompetition-v0, PommeTeamCompetition-v0
+- metadrive: Bottleneck, ParkingLot, Intersection, Roundabout, Tollgate
+- hanabi: Hanabi-Very-Small, Hanabi-Full, Hanabi-Full-Minimal, Hanabi-Small
+
+--finetuned is optional, force using the finetuned hyperparameter if available in [this directory](https://github.com/Replicable-MARL/MARLlib/tree/main/marl/algos/hyperparams/finetuned)
+
+
+Example on SMAC:
+
+```
 python marl/main.py --algo_config=MAPPO [--finetuned] --env_config=smac with env_args.map_name=3m
 ```
+
 --finetuned is optional, force using the finetuned hyperparameter if available.
 
 
@@ -218,7 +287,7 @@ We provide an introduction to the code directory to help you get familiar with t
 
 ## Experiment Results
 
-
+All results are listed [here](https://github.com/Replicable-MARL/MARLlib/tree/main/results).
 
 ## Contribute
 
@@ -227,9 +296,9 @@ Before contributing new environment, you must know:
 
 Things you ought to cover:
 
-- provide a new environment interface python file, follow the style of [MARLlib/envs/base_env]()
-- provide a corresponding config yaml file, follow the style of [MARLlib/envs/base_env/config]()
-- provide a corresponding instruction readme file, follow the style of [MARLlib/envs/base_env/install]()
+- provide a new environment interface python file, follow the style of [MARLlib/envs/base_env](https://github.com/Replicable-MARL/MARLlib/tree/main/envs/base_env)
+- provide a corresponding config yaml file, follow the style of [MARLlib/envs/base_env/config](https://github.com/Replicable-MARL/MARLlib/tree/main/envs/base_env/config)
+- provide a corresponding instruction readme file, follow the style of [MARLlib/envs/base_env/install](https://github.com/Replicable-MARL/MARLlib/tree/main/envs/base_env/install)
 
 Things not essential:
 
@@ -240,21 +309,5 @@ Things not essential:
 The ten environments we already contained have covered great diversity in action space,  observation space, agent-env interaction style, task mode, additional information like action mask, etc. 
 The best practice to incorporate your environment is to find an existing similar one and provide the same interface.
 
-## Bug Shooting
-
-Our patch files fix most RLlib-related errors on MARL.
-
-Here we only list the common bugs, not RLlib-related. (Mostly is your mistake)
-
-- *observation/action out of space* bug:
-    - make sure the observation/action space defined in env init function 
-        - has same data type with env returned data (e.g., float32/64)
-        - env returned data range is in the space scope (e.g., box(-2,2))
-    - the returned env observation contained the required key (e.g., action_mask/state)
-    
-- *Action NaN is invaild* bug
-    - this is common bug in continuous control problem, carefully finetune the algorithm's hyperparameter
-        - smaller learning rate
-        - set some action value bound
 
     
