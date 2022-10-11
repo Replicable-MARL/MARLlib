@@ -39,5 +39,5 @@ External environments are not auto-integrated. However, you can install them by 
 Contribute
 ----------------------------
 
-Please refer to the `Contribute url not specified yet <https://github.com/Replicable-MARL/MARLlib>`_ in our repository cover.
+Please refer to the `Contribute <https://github.com/Replicable-MARL/MARLlib>`_ in our repository cover.
 
