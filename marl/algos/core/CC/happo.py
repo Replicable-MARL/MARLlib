@@ -38,48 +38,6 @@ import re
 from marl.algos.utils.heterogeneous_updateing import update_m_advantage, get_each_agent_train
 
 
-class IterTrainBatch(SampleBatch):
-    def __init__(self, main_train_batch, policy_name):
-        self.main_train_batch = main_train_batch
-        self.policy_name = policy_name
-
-        self.copy = self.main_train_batch.copy
-        self.keys = self.main_train_batch.keys
-        self.is_training = self.main_train_batch.is_training
-
-        self.pat = re.compile(r'^state_in_(\d+)')
-
-    def get_state_index(self, string):
-        match = self.pat.findall(string)
-        if match:
-            return match[0]
-        else:
-            return None
-
-    def __getitem__(self, item):
-        """
-        Adds an adaptor to get the item.
-        Input a key name, it would get the corresponding opponent's key-value
-        """
-        directly_get = [SampleBatch.SEQ_LENS]
-
-        if item in directly_get:
-            return self.main_train_batch[item]
-        elif get_global_name(item, self.policy_name) in self.main_train_batch:
-            return self.main_train_batch[get_global_name(item, self.policy_name)]
-        elif state_index := self.get_state_index(item):
-            return self.main_train_batch[global_state_name(state_index, self.policy_name)]
-
-    def __contains__(self, item):
-        if item in self.keys() or get_global_name(item, self.policy_name) in self.keys():
-            return True
-        elif state_index := self.get_state_index(item):
-            if global_state_name(state_index, self.policy_name) in self.keys():
-                return True
-
-        return False
-
-
 def happo_surrogate_loss(
         policy: Policy, model: ModelV2,
         dist_class: Type[TorchDistributionWrapper],
@@ -106,14 +64,14 @@ def happo_surrogate_loss(
                                                                        train_batch[
                                                                            "opponent_actions"] if opp_action_in_cc else None)
 
-    total_policy_loss = 0
+    policies_loss = []
 
     m_advantage = train_batch[Postprocessing.ADVANTAGES]
 
     reduce_mean_valid, mean_entropy, mean_kl_loss = None, None, None
 
-    for iter_train_info in get_each_agent_train(model):
-        iter_model, iter_dist_class, iter_train_batch, iter_mask, iter_reduce_mean, iter_actions = iter_train_info
+    for iter_train_info in get_each_agent_train(model, policy, dist_class, train_batch):
+        iter_model, iter_dist_class, iter_train_batch, iter_mask, iter_reduce_mean, iter_actions, iter_policy = iter_train_info
 
         iter_model.train()
 
@@ -130,7 +88,7 @@ def happo_surrogate_loss(
         iter_curr_entropy = iter_current_action_dist.entropy()
         iter_mean_entropy = iter_reduce_mean(iter_curr_entropy)
 
-        if policy_name == 'self':
+        if iter_model == model:
             reduce_mean_valid = iter_reduce_mean
             mean_entropy = iter_mean_entropy
             mean_kl_loss = iter_mean_kl_loss
@@ -144,7 +102,7 @@ def happo_surrogate_loss(
 
         iter_surrogate_loss = iter_reduce_mean(iter_surrogate_loss)
 
-        total_policy_loss = total_policy_loss + iter_surrogate_loss
+        policies_loss.append(iter_surrogate_loss)
 
         torch.autograd.set_detect_anomaly(True)
 
@@ -166,7 +124,7 @@ def happo_surrogate_loss(
             m_advantage=m_advantage
         )
 
-    mean_policy_loss = -1 * (total_policy_loss / len(all_policies_with_names))
+    mean_policy_loss = -1 * np.mean(policies_loss)
 
     if policy.config["use_critic"]:
         prev_value_fn_out = train_batch[SampleBatch.VF_PREDS]  #

@@ -34,8 +34,8 @@ from marl.algos.utils.centralized_critic_hetero import (
     state_name,
 )
 
-from marl.algos.utils.trust_regions import TrustRegionUpdator, HATRPOUpdator
-from marl.algos.utils.heterogeneous_updateing import update_m_advantage, get_each_agent_train
+from marl.algos.utils.trust_regions import TrustRegionUpdator
+from marl.algos.utils.heterogeneous_updateing import update_m_advantage, get_each_agent_train, get_mask_and_reduce_mean
 
 from ray.rllib.examples.centralized_critic import CentralizedValueMixin
 import ctypes
@@ -88,6 +88,8 @@ def hatrpo_loss_fn(
     #     updater = TrustRegionUpdator
     # else:
 
+    _, reduce_mean_valid, curr_action_dist = get_mask_and_reduce_mean(model, train_batch, dist_class)
+
     curr_entropy = curr_action_dist.entropy()
 
     # Compute a value function loss.
@@ -118,24 +120,29 @@ def hatrpo_loss_fn(
 
     m_advantage = train_batch[Postprocessing.ADVANTAGES]
 
-    for i_model, i_dist_class, i_train_batch, i_mask, i_reduce_mean, i_action in get_each_agent_train(model):
+    losses = []
+
+    for iter_agent_info in get_each_agent_train(model):
+        iter_model, iter_dist_class, iter_train_batch, iter_mask, iter_reduce_mean, iter_actions, iter_policy = iter_agent_info
 
         iter_logits, iter_state = iter_model(iter_train_batch)
         iter_current_action_dist = iter_dist_class(iter_logits, iter_model)
         iter_prev_action_logp = iter_train_batch[SampleBatch.ACTION_LOGP]
-        i_logp_ratio = torch.exp(iter_current_action_dist.logp(iter_actions) - iter_prev_action_logp)
+        iter_logp_ratio = torch.exp(iter_current_action_dist.logp(iter_actions) - iter_prev_action_logp)
 
         i_loss = get_trpo_loss(
-            reduce_mean=i_reduce_mean,
-            mask=i_mask,
-            logp_ratio=i_logp_ratio,
+            reduce_mean=iter_reduce_mean,
+            mask=iter_mask,
+            logp_ratio=iter_logp_ratio,
             advantages=m_advantage
         )
 
+        losses.append(i_loss)
+
         trust_region_updator = TrustRegionUpdator(
-            model=i_model,
-            dist_class=i_dist_class,
-            train_batch=i_train_batch,
+            model=iter_model,
+            dist_class=iter_dist_class,
+            train_batch=iter_train_batch,
             adv_targ=m_advantage,
             initialize_policy_loss=i_loss,
         )
@@ -143,9 +150,9 @@ def hatrpo_loss_fn(
         trust_region_updator.update(update_critic=False)
 
         m_advantage = update_m_advantage(
-            iter_model=i_model,
-            iter_train_batch=i_train_batch,
-            iter_actions=i_actions,
+            iter_model=iter_model,
+            iter_train_batch=iter_train_batch,
+            iter_actions=iter_actions,
             m_advantage=m_advantage
         )
 
@@ -160,7 +167,7 @@ def hatrpo_loss_fn(
     # Store values for stats function in model (tower), such that for
     # multi-GPU, we do not override them during the parallel loss phase.
     mean_kl_loss = reduce_mean_valid(action_kl)
-    mean_policy_loss = -loss
+    mean_policy_loss = -np.mean(losses)
     mean_entropy = reduce_mean_valid(curr_entropy)
 
     model.tower_stats["total_loss"] = total_loss
