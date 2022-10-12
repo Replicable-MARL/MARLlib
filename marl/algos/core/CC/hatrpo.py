@@ -120,41 +120,48 @@ def hatrpo_loss_fn(
 
     m_advantage = train_batch[Postprocessing.ADVANTAGES]
 
-    losses = []
+    loss = 0
 
-    for iter_agent_info in get_each_agent_train(model):
-        iter_model, iter_dist_class, iter_train_batch, iter_mask, iter_reduce_mean, iter_actions, iter_policy = iter_agent_info
+    agent_num = 1
+
+    for i, iter_agent_info in enumerate(get_each_agent_train(model, policy, dist_class, train_batch)):
+        iter_model, iter_dist_class, iter_train_batch, iter_mask, \
+            iter_reduce_mean, iter_actions, iter_policy, iter_prev_action_logp = iter_agent_info
 
         iter_logits, iter_state = iter_model(iter_train_batch)
         iter_current_action_dist = iter_dist_class(iter_logits, iter_model)
         iter_prev_action_logp = iter_train_batch[SampleBatch.ACTION_LOGP]
         iter_logp_ratio = torch.exp(iter_current_action_dist.logp(iter_actions) - iter_prev_action_logp)
 
-        i_loss = get_trpo_loss(
+        iter_loss = get_trpo_loss(
             reduce_mean=iter_reduce_mean,
             mask=iter_mask,
             logp_ratio=iter_logp_ratio,
             advantages=m_advantage
         )
 
-        losses.append(i_loss)
+        loss += iter_loss
 
         trust_region_updator = TrustRegionUpdator(
             model=iter_model,
             dist_class=iter_dist_class,
             train_batch=iter_train_batch,
             adv_targ=m_advantage,
-            initialize_policy_loss=i_loss,
+            initialize_policy_loss=iter_loss,
         )
 
         trust_region_updator.update(update_critic=False)
 
         m_advantage = update_m_advantage(
             iter_model=iter_model,
+            iter_dist_class=iter_dist_class,
             iter_train_batch=iter_train_batch,
             iter_actions=iter_actions,
-            m_advantage=m_advantage
+            m_advantage=m_advantage,
+            iter_prev_action_logp=iter_prev_action_logp
         )
+
+        agent_num += 1
 
     model.value_function = vf_saved
     # recovery the value function.
@@ -167,7 +174,7 @@ def hatrpo_loss_fn(
     # Store values for stats function in model (tower), such that for
     # multi-GPU, we do not override them during the parallel loss phase.
     mean_kl_loss = reduce_mean_valid(action_kl)
-    mean_policy_loss = -np.mean(losses)
+    mean_policy_loss = -1 * loss / agent_num
     mean_entropy = reduce_mean_valid(curr_entropy)
 
     model.tower_stats["total_loss"] = total_loss

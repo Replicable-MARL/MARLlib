@@ -64,14 +64,16 @@ def happo_surrogate_loss(
                                                                        train_batch[
                                                                            "opponent_actions"] if opp_action_in_cc else None)
 
-    policies_loss = []
+    reduce_mean_valid, mean_entropy, mean_kl_loss = None, None, None
+
+    agent_num = 1
+    policies_loss = 0
 
     m_advantage = train_batch[Postprocessing.ADVANTAGES]
 
-    reduce_mean_valid, mean_entropy, mean_kl_loss = None, None, None
-
-    for iter_train_info in get_each_agent_train(model, policy, dist_class, train_batch):
-        iter_model, iter_dist_class, iter_train_batch, iter_mask, iter_reduce_mean, iter_actions, iter_policy = iter_train_info
+    for i, iter_train_info in enumerate(get_each_agent_train(model, policy, dist_class, train_batch)):
+        iter_model, iter_dist_class, iter_train_batch, iter_mask, \
+            iter_reduce_mean, iter_actions, iter_policy, iter_prev_action_logp = iter_train_info
 
         iter_model.train()
 
@@ -79,7 +81,6 @@ def happo_surrogate_loss(
 
         iter_logits, iter_state = iter_model(iter_train_batch)
         iter_current_action_dist = iter_dist_class(iter_logits, iter_model)
-        iter_prev_action_logp = iter_train_batch[SampleBatch.ACTION_LOGP]
         logp_ratio = torch.exp(iter_current_action_dist.logp(iter_actions) - iter_prev_action_logp)
 
         iter_action_kl = iter_prev_action_dist.kl(iter_current_action_dist)
@@ -102,7 +103,7 @@ def happo_surrogate_loss(
 
         iter_surrogate_loss = iter_reduce_mean(iter_surrogate_loss)
 
-        policies_loss.append(iter_surrogate_loss)
+        policies_loss += iter_surrogate_loss
 
         torch.autograd.set_detect_anomaly(True)
 
@@ -121,10 +122,14 @@ def happo_surrogate_loss(
             iter_model=iter_model,
             iter_train_batch=iter_train_batch,
             iter_actions=iter_actions,
-            m_advantage=m_advantage
+            m_advantage=m_advantage,
+            iter_dist_class=iter_dist_class,
+            iter_prev_action_logp=iter_prev_action_logp
         )
 
-    mean_policy_loss = -1 * np.mean(policies_loss)
+        agent_num += 1
+
+    mean_policy_loss = policies_loss / agent_num
 
     if policy.config["use_critic"]:
         prev_value_fn_out = train_batch[SampleBatch.VF_PREDS]  #
