@@ -35,32 +35,7 @@ from ray.rllib.agents.ppo.ppo_torch_policy import PPOTorchPolicy, ValueNetworkMi
 import torch
 import datetime
 import re
-
-
-def get_mask_and_reduce_mean(model, train_batch):
-    logits, state = model(train_batch)
-    # curr_action_dist = dist_class(logits, model)
-
-    # RNN case: Mask away 0-padded chunks at end of time axis.
-    if state:
-        B = len(train_batch[SampleBatch.SEQ_LENS])
-        max_seq_len = logits.shape[0] // B
-        mask = sequence_mask(
-            train_batch[SampleBatch.SEQ_LENS],
-            max_seq_len,
-            time_major=model.is_time_major())
-        mask = torch.reshape(mask, [-1])
-        num_valid = torch.sum(mask)
-
-        def reduce_mean_valid(t):
-            return torch.sum(t[mask]) / num_valid
-
-    # non-RNN case: No masking.
-    else:
-        mask = None
-        reduce_mean_valid = torch.mean
-
-    return mask, reduce_mean_valid
+from marl.algos.utils.heterogeneous_updateing import update_m_advantage, get_each_agent_train
 
 
 class IterTrainBatch(SampleBatch):
@@ -131,31 +106,22 @@ def happo_surrogate_loss(
                                                                        train_batch[
                                                                            "opponent_actions"] if opp_action_in_cc else None)
 
-    all_policies_with_names = list(model.other_policies.items()) + [('self', policy)]
-    random.shuffle(all_policies_with_names)
-
     total_policy_loss = 0
 
     m_advantage = train_batch[Postprocessing.ADVANTAGES]
 
     reduce_mean_valid, mean_entropy, mean_kl_loss = None, None, None
 
-    for policy_name, iter_policy in all_policies_with_names:
-        is_self = (policy_name == 'self')
-        iter_model = [iter_policy.model, model][is_self]
-        iter_dist_class = [iter_policy.dist_class, dist_class][is_self]
-        iter_train_batch = [IterTrainBatch(train_batch, policy_name), train_batch][is_self]
-        iter_mask, iter_reduce_mean = get_mask_and_reduce_mean(iter_model, iter_train_batch)
+    for iter_train_info in get_each_agent_train(model):
+        iter_model, iter_dist_class, iter_train_batch, iter_mask, iter_reduce_mean, iter_actions = iter_train_info
 
         iter_model.train()
 
+        iter_prev_action_dist = iter_dist_class(iter_train_batch[SampleBatch.ACTION_DIST_INPUTS], iter_model)
+
         iter_logits, iter_state = iter_model(iter_train_batch)
         iter_current_action_dist = iter_dist_class(iter_logits, iter_model)
-
-        iter_prev_action_dist = iter_dist_class(iter_train_batch[SampleBatch.ACTION_DIST_INPUTS], iter_model)
         iter_prev_action_logp = iter_train_batch[SampleBatch.ACTION_LOGP]
-        iter_actions = iter_train_batch[SampleBatch.ACTIONS]
-
         logp_ratio = torch.exp(iter_current_action_dist.logp(iter_actions) - iter_prev_action_logp)
 
         iter_action_kl = iter_prev_action_dist.kl(iter_current_action_dist)
@@ -193,21 +159,12 @@ def happo_surrogate_loss(
             grad_clip=iter_policy.config['grad_clip'],
         )
 
-        with torch.no_grad():
-            iter_model.eval()
-            iter_new_logits, _ = iter_model(iter_train_batch)
-            if torch.any(torch.isnan(iter_new_logits)): ic(iter_new_logits)
-            try:
-                iter_new_action_dist = iter_dist_class(iter_new_logits, iter_model)
-                iter_new_logp_ratio = torch.exp(
-                    iter_new_action_dist.logp(iter_actions) -
-                    iter_prev_action_logp
-                )
-            except ValueError as e:
-                print(e)
-                ic(iter_new_logits)
-
-        m_advantage = iter_new_logp_ratio * m_advantage
+        m_advantage = update_m_advantage(
+            iter_model=iter_model,
+            iter_train_batch=iter_train_batch,
+            iter_actions=iter_actions,
+            m_advantage=m_advantage
+        )
 
     mean_policy_loss = -1 * (total_policy_loss / len(all_policies_with_names))
 
