@@ -205,7 +205,7 @@ After everything settled, make sure to change back you Gym version to 1.21.0.
 All environment MARLlib supported should work fine with this version.
 
 ```
-pip install gym==1.21.0
+pip install gym==0.21.0
 ```
 
 ### Step 3. Start training
