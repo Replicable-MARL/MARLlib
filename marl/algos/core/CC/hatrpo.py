@@ -34,7 +34,8 @@ from marl.algos.utils.centralized_critic_hetero import (
     state_name,
 )
 
-from marl.algos.utils.trust_regions import TrustRegionUpdator, HATRPOUpdator
+from marl.algos.utils.trust_regions import TrustRegionUpdator
+from marl.algos.utils.heterogeneous_updateing import update_m_advantage, get_each_agent_train, get_mask_and_reduce_mean
 
 from ray.rllib.examples.centralized_critic import CentralizedValueMixin
 import ctypes
@@ -44,6 +45,16 @@ torch, nn = try_import_torch()
 
 
 logger = logging.getLogger(__name__)
+
+
+def get_trpo_loss(reduce_mean, mask, logp_ratio, advantages):
+    if reduce_mean == torch.mean:
+        loss = torch.sum(logp_ratio * advantages, dim=-1, keepdim=True).mean()
+    else:
+        loss = (torch.sum(logp_ratio * advantages, dim=-1, keepdim=True) *
+                mask).sum() / mask.sum()
+
+    return loss
 
 
 def hatrpo_loss_fn(
@@ -63,39 +74,8 @@ def hatrpo_loss_fn(
 
     CentralizedValueMixin.__init__(policy)
 
-    logits, state = model(train_batch)
-    curr_action_dist = dist_class(logits, model)
-    # RNN case: Mask away 0-padded chunks at end of time axis.
-
-
-    advantages = train_batch[Postprocessing.ADVANTAGES]
-    advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
-
-    logp_ratio = torch.exp(
-        curr_action_dist.logp(train_batch[SampleBatch.ACTIONS]) -
-        train_batch[SampleBatch.ACTION_LOGP]
-    )
-
-    if state:
-        B = len(train_batch[SampleBatch.SEQ_LENS])
-        max_seq_len = logits.shape[0] // B
-        mask = sequence_mask(
-            train_batch[SampleBatch.SEQ_LENS],
-            max_seq_len,
-            time_major=model.is_time_major())
-        mask = torch.reshape(mask, [-1])
-        num_valid = torch.sum(mask)
-
-        def reduce_mean_valid(t):
-            return torch.sum(t[mask]) / num_valid
-
-        loss = (torch.sum(logp_ratio * advantages, dim=-1, keepdim=True) *
-                mask).sum() / mask.sum()
-    # non-RNN case: No masking.
-    else:
-        mask = None
-        reduce_mean_valid = torch.mean
-        loss = torch.sum(logp_ratio * advantages, dim=-1, keepdim=True).mean()
+    # advantages = train_batch[Postprocessing.ADVANTAGES]
+    # advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
 
     vf_saved = model.value_function
 
@@ -107,6 +87,8 @@ def hatrpo_loss_fn(
     # if not contain_opponent_info:
     #     updater = TrustRegionUpdator
     # else:
+
+    _, reduce_mean_valid, curr_action_dist = get_mask_and_reduce_mean(model, train_batch, dist_class)
 
     curr_entropy = curr_action_dist.entropy()
 
@@ -134,34 +116,57 @@ def hatrpo_loss_fn(
     prev_action_dist = dist_class(train_batch[SampleBatch.ACTION_DIST_INPUTS], model)
     action_kl = prev_action_dist.kl(curr_action_dist)
 
-    trust_region_updator = TrustRegionUpdator(
-        model=model,
-        dist_class=dist_class,
-        train_batch=train_batch,
-        adv_targ=advantages,
-        initialize_policy_loss=loss,
-        initialize_critic_loss=mean_vf_loss,
-    )
-
-    policy.trpo_updator = trust_region_updator
-
     all_policies_with_names = list(model.other_policies.items()) + [('self', policy)]
 
-    if len(all_policies_with_names) == 1:
-        policy.group_trpo_updator = None
-    else:
-        policy.group_trpo_updator = HATRPOUpdator(
-            policies_with_name=all_policies_with_names,
-            dist_class=dist_class,
-            updator=trust_region_updator,
-            importance_sampling=logp_ratio,
-            train_batch=train_batch, adv_targ=advantages
+    m_advantage = train_batch[Postprocessing.ADVANTAGES]
+
+    loss = 0
+
+    agent_num = 1
+
+    for i, iter_agent_info in enumerate(get_each_agent_train(model, policy, dist_class, train_batch)):
+        iter_model, iter_dist_class, iter_train_batch, iter_mask, \
+            iter_reduce_mean, iter_actions, iter_policy, iter_prev_action_logp = iter_agent_info
+
+        iter_logits, iter_state = iter_model(iter_train_batch)
+        iter_current_action_dist = iter_dist_class(iter_logits, iter_model)
+        iter_prev_action_logp = iter_train_batch[SampleBatch.ACTION_LOGP]
+        iter_logp_ratio = torch.exp(iter_current_action_dist.logp(iter_actions) - iter_prev_action_logp)
+
+        iter_loss = get_trpo_loss(
+            reduce_mean=iter_reduce_mean,
+            mask=iter_mask,
+            logp_ratio=iter_logp_ratio,
+            advantages=m_advantage
         )
+
+        loss += iter_loss
+
+        trust_region_updator = TrustRegionUpdator(
+            model=iter_model,
+            dist_class=iter_dist_class,
+            train_batch=iter_train_batch,
+            adv_targ=m_advantage,
+            initialize_policy_loss=iter_loss,
+        )
+
+        trust_region_updator.update(update_critic=False)
+
+        m_advantage = update_m_advantage(
+            iter_model=iter_model,
+            iter_dist_class=iter_dist_class,
+            iter_train_batch=iter_train_batch,
+            iter_actions=iter_actions,
+            m_advantage=m_advantage,
+            iter_prev_action_logp=iter_prev_action_logp
+        )
+
+        agent_num += 1
 
     model.value_function = vf_saved
     # recovery the value function.
 
-    total_loss = -loss + reduce_mean_valid(policy.kl_coeff * action_kl +
+    total_loss = reduce_mean_valid(policy.kl_coeff * action_kl +
                                                   policy.config["vf_loss_coeff"] * vf_loss -
                                                   policy.entropy_coeff * curr_entropy
                                                   )
@@ -169,7 +174,7 @@ def hatrpo_loss_fn(
     # Store values for stats function in model (tower), such that for
     # multi-GPU, we do not override them during the parallel loss phase.
     mean_kl_loss = reduce_mean_valid(action_kl)
-    mean_policy_loss = -loss
+    mean_policy_loss = -1 * loss / agent_num
     mean_entropy = reduce_mean_valid(curr_entropy)
 
     model.tower_stats["total_loss"] = total_loss
@@ -183,22 +188,13 @@ def hatrpo_loss_fn(
     return total_loss
 
 
-def apply_gradients(policy, gradients) -> None:
-    # print('\nstep into apply updater!')
-    if policy.group_trpo_updator is not None:
-        policy.group_trpo_updator.update()
-    else:
-        policy.trpo_updator.update()
-
-
 HAPTRPOTorchPolicy = PPOTorchPolicy.with_updates(
         name="HAPPOTorchPolicy",
         get_default_config=lambda: PPO_CONFIG,
         postprocess_fn=hatrpo_post_process,
         loss_fn=hatrpo_loss_fn,
         before_init=setup_torch_mixins,
-        # extra_grad_process_fn=apply_grad_clipping,
-        apply_gradients_fn=apply_gradients,
+        extra_grad_process_fn=apply_grad_clipping,
         mixins=[
             EntropyCoeffSchedule, KLCoeffMixin,
             CentralizedValueMixin, LearningRateSchedule,

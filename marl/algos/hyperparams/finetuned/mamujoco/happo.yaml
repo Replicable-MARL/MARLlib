@@ -11,7 +11,7 @@ algo_args:
   clip_param: 0.3
   critic_lr: 0.000001
   vf_loss_coeff: 1.0
-  lr: 0.0005
+  lr: 0.0001
   entropy_coeff: 0.01
   vf_clip_param: 10.0
   batch_mode: "complete_episodes"
