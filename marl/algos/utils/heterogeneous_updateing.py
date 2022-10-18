@@ -53,7 +53,39 @@ def update_m_advantage(iter_model, iter_train_batch, iter_dist_class, iter_prev_
 
 class IterTrainBatch(SampleBatch):
     """
-    #TODO : add document to explain the HA-train batch getitem mechanism. And make sure the document is fit
+    This is an adaptor for heterogeneous updating.
+    At firstly, We add the opponent or collaborator information, which includes [actions, obs, states, .. etc], into
+    train_batch in post-processing method.
+
+    When update individual model in heterogeneous, we need the following evaluation:
+
+        logits, states = model(train_batch), the train_batch is the train information of one specific agent.
+
+    therefore, the complete statement is the following:
+
+        ith_logits, ith_states = ith_model(ith_train_batch)
+
+    It means, if we have n agents, we want to update ith agent, we need give the ith agent's train batch to ith model.
+    we can get the ith model by
+
+    Reconstruction a new individual agent-wise train batch from the post processed is difficult, actually.
+
+    We could build an adaptor to solve this.
+
+    the ith_train_batch will be created by IterTrainBatch(train_batch, policy_name), named as iter_batch in the following.
+
+    after created, we redefine the __getitem__ and __contains__ methods.
+
+    in __getitem__, if  iter_batch get one key, such as iter_batch['action'], the really thing will occur is that the
+    train_batch['<policy_name>_action'] will be gotten. And also like other keys.
+
+    the __contains__ also performs like above, if you want to test 'action' in iter_batch, will not test the 'action', but
+    test the '<policy_name>_action' in train_batch.
+
+    The benefits about this Adaptor is that we will not modify the actor model.
+
+    If not by this way, we need to refactor the calculation process in actor forward() or need to reconstruction an iter
+    train batch.
     """
     def __init__(self, main_train_batch, policy_name):
         self.main_train_batch = main_train_batch
