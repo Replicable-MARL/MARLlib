@@ -8,7 +8,7 @@
 
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)]()
 
-**Multi-Agent RLlib (MARLlib)** is ***a comprehensive Multi-Agent Reinforcement Learning algorithm library*** based on [**Ray**](https://github.com/ray-project/ray) and one of its toolkits [**RLlib**](https://github.com/ray-project/ray/tree/master/rllib). It provides MARL research community with a unified platform for building, training, and evaluating MARL algorithms.
+**Multi-Agent RLlib ([MARLlib](https://arxiv.org/abs/2210.13708))** is ***a comprehensive Multi-Agent Reinforcement Learning algorithm library*** based on [**Ray**](https://github.com/ray-project/ray) and one of its toolkits [**RLlib**](https://github.com/ray-project/ray/tree/master/rllib). It provides MARL research community with a unified platform for building, training, and evaluating MARL algorithms.
 
 There are four core features of **MARLlib**.
 
@@ -289,6 +289,12 @@ We provide an introduction to the code directory to help you get familiar with t
 
 All results are listed [here](https://github.com/Replicable-MARL/MARLlib/tree/main/results).
 
+
+
+## Documentation
+
+See [MARLlib Docs](https://marllib.readthedocs.io/en/latest/)
+
 ## Contribute
 
 MARLlib is friendly to incorporating a new environment. Besides the ten we already implemented, we support almost all kinds of MARL environments.
@@ -309,5 +315,18 @@ Things not essential:
 The ten environments we already contained have covered great diversity in action space,  observation space, agent-env interaction style, task mode, additional information like action mask, etc. 
 The best practice to incorporate your environment is to find an existing similar one and provide the same interface.
 
+## Citing MARLlib
 
-    
+
+If you use MARLlib in your work, please cite the accompanying [paper](https://arxiv.org/abs/2210.13708).
+
+```bibtex
+@misc{hu2022marllib,  
+  title = {MARLlib: Extending RLlib for Multi-agent Reinforcement Learning},
+  author = {Hu, Siyi and Zhong, Yifan and Gao, Minquan and Wang, Weixun and Dong, Hao and Li, Zhihui and Liang, Xiaodan and Chang, Xiaojun and Yang, Yaodong},  
+  year = {2022},
+  eprint = {2210.13708},
+  archivePrefix={arXiv},
+}
+
+```
