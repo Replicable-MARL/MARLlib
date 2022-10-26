@@ -23,3 +23,18 @@ Before starting, please ensure you've installed the dependencies by following th
 The environment-specific description is maintained in :ref:`env`.
 :ref:`quick-start` gives some basic examples.
 
+Citing MARLlib
+^^^^^^^^^^^^^^^^
+
+If you use MARLlib in your work, please cite the accompanying `paper <https://arxiv.org/abs/2210.13708>`_.
+
+.. code-block:: bibtex
+
+    @misc{hu2022marllib,
+      title = {MARLlib: Extending RLlib for Multi-agent Reinforcement Learning},
+      author = {Hu, Siyi and Zhong, Yifan and Gao, Minquan and Wang, Weixun and Dong, Hao and Li, Zhihui and Liang, Xiaodan and Chang, Xiaojun and Yang, Yaodong},
+      year = {2022},
+      eprint = {2210.13708},
+      archivePrefix={arXiv},
+    }
+

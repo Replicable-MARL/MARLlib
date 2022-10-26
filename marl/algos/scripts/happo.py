@@ -68,7 +68,7 @@ def run_happo(config_dict, common_config, env_dict, stop):
     }
     config.update(common_config)
 
-    TRAIN_MARK = 't-adam-and-lr-is-critic'
+    TRAIN_MARK = 'append-data'
 
     PPO_CONFIG.update({
         'lr': critic_lr,

@@ -10,50 +10,6 @@ from marl.algos.utils.manipulate_tensor import flat_grad, flat_params, flat_hess
 torch, nn = try_import_torch()
 
 
-class HATRPOUpdator:
-    def __init__(self, policies_with_name, updator, importance_sampling, dist_class, train_batch, adv_targ):
-        self.updaters = []
-        self.dist_class = dist_class
-        self.main_updator = updator
-
-        m_advantage = adv_targ
-
-        random_policies = np.random.permutation(policies_with_name)
-
-        for name, p in random_policies:
-            if name == 'self':
-                importance_sampling = importance_sampling
-                trpo_updator = updator
-                trpo_updator.adv_targ = m_advantage
-                m_advantage = m_advantage * importance_sampling
-                self.main_updator.adv_targ = m_advantage
-            else:
-                m_advantage = self.update_advantage(train_batch, name, m_advantage)
-
-    def update(self):
-        self.main_updator.update()
-
-    def update_advantage(self, train_batch, agent_name, m_advantage):
-
-        current_action_logits = train_batch[
-            get_global_name(SampleBatch.ACTION_DIST_INPUTS, agent_name)
-        ]
-        current_action_dist = self.dist_class(current_action_logits, None)
-        old_action_log_dist = train_batch[
-            get_global_name(SampleBatch.ACTION_LOGP, agent_name)
-        ]
-
-        actions = train_batch[get_global_name(SampleBatch.ACTIONS, agent_name)]
-        obs = train_batch[get_global_name(SampleBatch.OBS, agent_name)]
-        importance_sampling = torch.exp(current_action_dist.logp(actions) - old_action_log_dist)
-        m_advantage = m_advantage * importance_sampling
-
-        return m_advantage
-
-    def is_main_model(self, m):
-        return m is self.main_model
-
-
 class TrustRegionUpdator:
     kl_threshold = 0.01
     ls_step = 15
@@ -64,7 +20,7 @@ class TrustRegionUpdator:
 
     # delta = 0.01
 
-    def __init__(self, model, dist_class, train_batch, adv_targ, initialize_policy_loss, initialize_critic_loss):
+    def __init__(self, model, dist_class, train_batch, adv_targ, initialize_policy_loss, initialize_critic_loss=None):
         self.model = model
         self.dist_class = dist_class
         self.train_batch = train_batch
@@ -130,7 +86,6 @@ class TrustRegionUpdator:
     @property
     def critic_parameters(self):
         return self.model.critic_parameters()
-
 
     def set_actor_params(self, new_flat_params):
         vector_to_parameters(new_flat_params, self.actor_parameters)
@@ -212,9 +167,10 @@ class TrustRegionUpdator:
         expected_improve = pol_grad.dot(full_step).item()
         linear_search_updated = False
         fraction = 1
-
+        print('')
         if expected_improve >= self.atol:
             for i in range(self.ls_step):
+                print(i, end=' ')
                 new_params = params + fraction * full_step
                 self.set_actor_params(new_params)
                 new_loss = self.loss.data.cpu().numpy()
