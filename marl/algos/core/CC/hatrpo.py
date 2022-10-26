@@ -38,6 +38,7 @@ from marl.algos.utils.trust_regions import TrustRegionUpdator
 from marl.algos.utils.heterogeneous_updateing import update_m_advantage, get_each_agent_train, get_mask_and_reduce_mean
 
 from ray.rllib.examples.centralized_critic import CentralizedValueMixin
+from marl.algos.utils.setup_utils import get_device
 import ctypes
 
 tf1, tf, tfv = try_import_tf()
@@ -116,15 +117,15 @@ def hatrpo_loss_fn(
     prev_action_dist = dist_class(train_batch[SampleBatch.ACTION_DIST_INPUTS], model)
     action_kl = prev_action_dist.kl(curr_action_dist)
 
-    all_policies_with_names = list(model.other_policies.items()) + [('self', policy)]
-
     m_advantage = train_batch[Postprocessing.ADVANTAGES]
 
     loss = 0
 
     agent_num = 1
 
+    print('')
     for i, iter_agent_info in enumerate(get_each_agent_train(model, policy, dist_class, train_batch)):
+        print(i, end=' ')
         iter_model, iter_dist_class, iter_train_batch, iter_mask, \
             iter_reduce_mean, iter_actions, iter_policy, iter_prev_action_logp = iter_agent_info
 
@@ -146,8 +147,8 @@ def hatrpo_loss_fn(
             model=iter_model,
             dist_class=iter_dist_class,
             train_batch=iter_train_batch,
-            adv_targ=m_advantage,
-            initialize_policy_loss=iter_loss,
+            adv_targ=m_advantage.to(device=get_device()),
+            initialize_policy_loss=iter_loss.to(device=get_device()),
         )
 
         trust_region_updator.update(update_critic=False)
@@ -170,6 +171,7 @@ def hatrpo_loss_fn(
                                                   policy.config["vf_loss_coeff"] * vf_loss -
                                                   policy.entropy_coeff * curr_entropy
                                                   )
+    total_loss = total_loss.to(device=get_device())
 
     # Store values for stats function in model (tower), such that for
     # multi-GPU, we do not override them during the parallel loss phase.

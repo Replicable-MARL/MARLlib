@@ -167,9 +167,10 @@ class TrustRegionUpdator:
         expected_improve = pol_grad.dot(full_step).item()
         linear_search_updated = False
         fraction = 1
-
+        print('')
         if expected_improve >= self.atol:
             for i in range(self.ls_step):
+                print(i, end=' ')
                 new_params = params + fraction * full_step
                 self.set_actor_params(new_params)
                 new_loss = self.loss.data.cpu().numpy()
