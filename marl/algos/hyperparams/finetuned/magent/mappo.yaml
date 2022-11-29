@@ -1,17 +1,18 @@
 # MAPPO parameters
 
+# Detailed explanation for each hyper parameter can be found in ray/rllib/agents/ppo/ppo.py
+
 algo_args:
-  batch_episode:  10
-  batch_mode: "complete_episodes"
+  use_gae: True
+  lambda: 1.0
+  kl_coeff: 0.2
+  batch_episode: 10
+  num_sgd_iter: 5
+  vf_loss_coeff: 1.0
   lr: 0.0005
-  grad_clip: 10
-  iteration: 4
-  use_critic: True
-  gamma: 0.99
-  entropy_coeff: 0.01
-  clip_param: 0.2
+  entropy_coeff: 0.001
+  clip_param: 0.3
   vf_clip_param: 20.0
-  lr_sh_min: 0
-  lr_sh_max: 0.0005
-  lr_sh_step: 999999
-  lr_min: 0.000000001
+  batch_mode: "complete_episodes"
+
+
