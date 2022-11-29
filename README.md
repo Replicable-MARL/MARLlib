@@ -21,10 +21,6 @@ There are four core features of **MARLlib**.
 <img src=image/overview.png width=100% />
 </div>
 
-## News
-
-- 09/11/2022 MARLlib is now available on [docker](https://github.com/ICLR2023Paper4242/MARLlib#docker)!!
-
 ## Overview
 
 ### Environments
@@ -122,7 +118,7 @@ Y for available, N for not suitable, P for partially available on some scenarios
 | GRF             | Y    | Y    | Y    | N    | Y    | Y    | Y    | N      | Y    | Y      | Y     | Y      | Y     | Y    | Y    | Y      | Y    | Y     |
 | Hanabi          | Y    | Y    | Y    | N    | Y    | Y    | Y    | N      | Y    | Y      | Y     | Y      | Y     | N    | N    | N      | N    | N     |
 
-You can find a comprehensive list of existing MARL algorithms in different environments  [here](https://github.com/ICLR2023Paper4242/MARLlib/tree/main/envs).
+You can find a comprehensive list of existing MARL algorithms in different environments  [here](https://github.com/Replicable-MARL/MARLlib/tree/main/envs).
 
 
 
@@ -138,7 +134,7 @@ Here we provide a table for the comparison of MARLlib and existing work.
 |    [EPyMARL](https://github.com/uoe-agents/epymarl)| [![GitHub stars](https://img.shields.io/github/stars/uoe-agents/epymarl)](https://github.com/hijkzzz/uoe-agents/epymarl/stargazers)    |       cooperative      |       4       |    Independent Learning(3) + Value Decomposition(4) + Centralized Critic(2)    |        full-sharing + non-sharing       |                   |           PyMARL            | 
 | [MAlib](https://github.com/sjtu-marl/malib) | [![GitHub stars](https://img.shields.io/github/stars/sjtu-marl/malib)](https://github.com/hijkzzz/sjtu-marl/malib/stargazers) | self-play | 2 +  [PettingZoo](https://www.pettingzoo.ml/) + [OpenSpiel](https://github.com/deepmind/open_spiel) | Population-based | full-sharing + group-sharing + non-sharing | :heavy_check_mark: | *
 | [MAPPO Benchmark](https://github.com/marlbenchmark/on-policy)| [![GitHub stars](https://img.shields.io/github/stars/marlbenchmark/on-policy)](https://github.com/marlbenchmark/on-policy/stargazers) |     cooperative     |       4       |      MAPPO(1)     |         full-sharing + non-sharing        |         :heavy_check_mark:         |         pytorch-a2c-ppo-acktr-gail              |
-|    [MARLlib](https://github.com/ICLR2023Paper4242/MARLlib)| |  cooperative collaborative competitive mixed  |       10 + [PettingZoo](https://www.pettingzoo.ml/)      |    Independent Learning(6) + Centralized Critic(7) + Value Decomposition(5)     |        full-sharing + group-sharing + non-sharing        |         :heavy_check_mark:         |           Ray/Rllib           |
+|    [MARLlib](https://github.com/Replicable-MARL/MARLlib)| |  cooperative collaborative competitive mixed  |       10 + [PettingZoo](https://www.pettingzoo.ml/)      |    Independent Learning(6) + Centralized Critic(7) + Value Decomposition(5)     |        full-sharing + group-sharing + non-sharing        |         :heavy_check_mark:         |           Ray/Rllib           |
 
 
 ## Installation
@@ -158,7 +154,7 @@ pip install ray==1.8.0
 pip install ray[tune]
 pip install ray[rllib]
 
-git clone https://github.com/ICLR2023Paper4242/MARLlib.git
+git clone https://github.com/Replicable-MARL/MARLlib.git
 cd MARLlib
 pip install -e .
 pip install icecream && pip install supersuit && pip install gym==0.21.0 && pip install importlib-metadata==4.13.0 
@@ -243,17 +239,17 @@ Available algorithms (case sensitive):
 Available env-map pairs (case sensitive):
 
 - smac: [smac maps](https://github.com/oxwhirl/smac/blob/master/smac/env/starcraft2/maps/smac_maps.py)
-- mpe: [mpe map](https://github.com/ICLR2023Paper4242/MARLlib/blob/main/envs/base_env/mpe.py)
-- mamujoco: [mamujoco map](https://github.com/ICLR2023Paper4242/MARLlib/blob/main/envs/base_env/mamujoco.py)
-- football: [football map](https://github.com/ICLR2023Paper4242/MARLlib/blob/main/envs/base_env/mamujoco.py)
-- magent: [magent map](https://github.com/ICLR2023Paper4242/MARLlib/blob/main/envs/base_env/magent.py)
-- lbf: use [lbf config](https://github.com/ICLR2023Paper4242/MARLlib/blob/main/envs/base_env/config/lbf.yaml) to generate the map. Details can be found https://github.com/semitable/lb-foraging#usage
-- rware: use [rware config](https://github.com/ICLR2023Paper4242/MARLlib/blob/main/envs/base_env/config/rware.yaml) to generate the map. Details can be found https://github.com/semitable/robotic-warehouse#naming-scheme
+- mpe: [mpe map](https://github.com/Replicable-MARL/MARLlib/blob/main/envs/base_env/mpe.py)
+- mamujoco: [mamujoco map](https://github.com/Replicable-MARL/MARLlib/blob/main/envs/base_env/mamujoco.py)
+- football: [football map](https://github.com/Replicable-MARL/MARLlib/blob/main/envs/base_env/mamujoco.py)
+- magent: [magent map](https://github.com/Replicable-MARL/MARLlib/blob/main/envs/base_env/magent.py)
+- lbf: use [lbf config](https://github.com/Replicable-MARL/MARLlib/blob/main/envs/base_env/config/lbf.yaml) to generate the map. Details can be found https://github.com/semitable/lb-foraging#usage
+- rware: use [rware config](https://github.com/Replicable-MARL/MARLlib/blob/main/envs/base_env/config/rware.yaml) to generate the map. Details can be found https://github.com/semitable/robotic-warehouse#naming-scheme
 - pommerman: OneVsOne-v0, PommeFFACompetition-v0, PommeTeamCompetition-v0
 - metadrive: Bottleneck, ParkingLot, Intersection, Roundabout, Tollgate
 - hanabi: Hanabi-Very-Small, Hanabi-Full, Hanabi-Full-Minimal, Hanabi-Small
 
---finetuned is optional, force using the finetuned hyperparameter if available in [this directory](https://github.com/ICLR2023Paper4242/MARLlib/tree/main/marl/algos/hyperparams/finetuned)
+--finetuned is optional, force using the finetuned hyperparameter if available in [this directory](https://github.com/Replicable-MARL/MARLlib/tree/main/marl/algos/hyperparams/finetuned)
 
 
 Example on SMAC (you need install SMAC environment follow the guide [here](https://marllib.readthedocs.io/en/latest/handbook/env.html#smac)):
@@ -263,68 +259,6 @@ python marl/main.py --algo_config=mappo [--finetuned] --env_config=smac with env
 ```
 --finetuned is optional, force using the finetuned hyperparameter if available.
 
-
-## Docker
-We also provide docker-based usage for MARLlib. 
-Before use, make sure [docker](https://docs.docker.com/desktop/install/linux-install/) is installed on your machine.
-
-Note: You need root access to use docker.
-
-### Ready to Go Image
-
-We prepare a docker image ready for MARLlib to run. [link](https://hub.docker.com/repository/docker/iclr2023paper4242/marllib)
-```bash
-docker pull iclr2023paper4242/marllib:1.0
-docker run -d -it --rm --gpus all iclr2023paper4242/marllib:1.0
-docker exec -it [container_name] # you can get container_name by this command: docker ps
-# launch the training
-python marl/main.py --algo_config=mappo --env_config=lbf with env_args.map_name=lbf-8x8-2p-2f-3s-c
-```
-
-### Alternatively, you can build your image on your local machine with two options: GPU or CPU only
-
-#### Use GPU in docker
-
-To use CUDA in MARLlib docker container, please first install [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html).
-
-To build MARLlib docker image, use the following command:
-
-```bash
-git clone https://github.com/ICLR2023Paper4242/MARLlib.git
-cd MARLlib
-bash docker/build.sh
-```
-
-Run `docker run --itd --rm --gpus all marllib:1.0` to create a new container and make GPU visible inside the container. Then attach into the container and run experiments:
-
-```bash
-docker attach [your_container_name] # you can get container_name by this command: docker ps
-# now we are in docker /workspace/MARLlib
-# modify config file ray.yaml to enable GPU use
-# launch the training
-python marl/main.py --algo_config=mappo --env_config=lbf with env_args.map_name=lbf-8x8-2p-2f-3s-c
-```
-
-#### Only use CPU in docker
-
-To build MARLlib docker image, use the following command:
-
-```bash
-git clone https://github.com/ICLR2023Paper4242/MARLlib.git
-cd MARLlib
-bash docker/build.sh
-```
-
-Run `docker run -d -it marllib:1.0` to create a new container. Then attach into the container and run experiments:
-
-```bash
-docker attach [your_container_name] # you can get container_name by this command: docker ps
-# now we are in docker /workspace/MARLlib
-# launch the training
-python marl/main.py --algo_config=mappo --env_config=lbf with env_args.map_name=lbf-8x8-2p-2f-3s-c
-```
-
-Note we only pre-install [LBF](https://marllib.readthedocs.io/en/latest/handbook/env.html#lbf) in the target container marllib:1.0 as a fast example. All running/algorithm/task configurations are kept unchanged.
 
 ## Navigation
 
@@ -351,7 +285,7 @@ We provide an introduction to the code directory to help you get familiar with t
 
 ## Experiment Results
 
-All results are listed [here](https://github.com/ICLR2023Paper4242/MARLlib/tree/main/results).
+All results are listed [here](https://github.com/Replicable-MARL/MARLlib/tree/main/results).
 
 ## Bug Shooting
 
@@ -365,26 +299,5 @@ All results are listed [here](https://github.com/ICLR2023Paper4242/MARLlib/tree/
     - Cause of bug: miss installing package or incorrect Python Path
     - Solution: install the package and check you current PYTHONPATH
     
-
-## Contribute
-
-MARLlib is friendly to incorporating a new environment. Besides the ten we already implemented, we support almost all kinds of MARL environments.
-Before contributing new environment, you must know:
-
-Things you ought to cover:
-
-- provide a new environment interface python file, follow the style of [MARLlib/envs/base_env](https://github.com/ICLR2023Paper4242/MARLlib/tree/main/envs/base_env)
-- provide a corresponding config yaml file, follow the style of [MARLlib/envs/base_env/config](https://github.com/ICLR2023Paper4242/MARLlib/tree/main/envs/base_env/config)
-- provide a corresponding instruction readme file, follow the style of [MARLlib/envs/base_env/install](https://github.com/ICLR2023Paper4242/MARLlib/tree/main/envs/base_env/install)
-
-Things not essential:
-
-- change the MARLlib data processing pipeline
-- provide a unique runner or controller specific to the environment 
-- concern about the data logging 
-
-The ten environments we already contained have covered great diversity in action space,  observation space, agent-env interaction style, task mode, additional information like action mask, etc. 
-The best practice to incorporate your environment is to find an existing similar one and provide the same interface.
-
-
+  
     
