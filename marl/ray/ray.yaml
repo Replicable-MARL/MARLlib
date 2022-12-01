@@ -16,4 +16,4 @@ num_gpus_per_worker: 0
 stop_iters: 9999999
 stop_timesteps: 2000000
 stop_reward: 999999
-seed: 123
+seed: 123 # random seed used

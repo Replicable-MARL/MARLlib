@@ -115,17 +115,23 @@ class IterTrainBatch(SampleBatch):
             return self.main_train_batch[item]
         elif get_global_name(item, self.policy_name) in self.main_train_batch:
             return self.main_train_batch[get_global_name(item, self.policy_name)]
-        elif state_index := self.get_state_index(item):
-            return self.main_train_batch[global_state_name(state_index, self.policy_name)]
+        # elif state_index := self.get_state_index(item):
+        else:
+            state_index = self.get_state_index(item)
+            if state_index:
+                return self.main_train_batch[global_state_name(state_index, self.policy_name)]
 
     def __contains__(self, item):
         if item in self.keys() or get_global_name(item, self.policy_name) in self.keys():
             return True
-        elif state_index := self.get_state_index(item):
-            if global_state_name(state_index, self.policy_name) in self.keys():
-                return True
+        else:
+            state_index = self.get_state_index(item)
+            return state_index and global_state_name(state_index, self.policy_name) in self.keys()
+        # elif state_index := self.get_state_index(item):
+        #     if global_state_name(state_index, self.policy_name) in self.keys():
+        #         return True
 
-        return False
+        # return False
 
 
 def get_each_agent_train(model, policy, dist_class, train_batch):

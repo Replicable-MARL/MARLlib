@@ -8,7 +8,7 @@
 
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)]()
 
-**Multi-Agent RLlib ([MARLlib](https://arxiv.org/abs/2210.13708))** is ***a comprehensive Multi-Agent Reinforcement Learning algorithm library*** based on [**Ray**](https://github.com/ray-project/ray) and one of its toolkits [**RLlib**](https://github.com/ray-project/ray/tree/master/rllib). It provides MARL research community with a unified platform for building, training, and evaluating MARL algorithms.
+**Multi-Agent RLlib (MARLlib)** is ***a comprehensive Multi-Agent Reinforcement Learning algorithm library*** based on [**Ray**](https://github.com/ray-project/ray) and one of its toolkits [**RLlib**](https://github.com/ray-project/ray/tree/master/rllib). It provides MARL research community with a unified platform for building, training, and evaluating MARL algorithms.
 
 There are four core features of **MARLlib**.
 
@@ -20,7 +20,6 @@ There are four core features of **MARLlib**.
 <div align="center">
 <img src=image/overview.png width=100% />
 </div>
-
 
 ## Overview
 
@@ -147,17 +146,18 @@ To use MARLlib, first install MARLlib, then install desired environments followi
 ### Install MARLlib
 
 ```bash
-    conda create -n marllib python==3.8
-    conda activate marllib
-    # please install pytorch <= 1.9.1 compatible with your hardware.
+conda create -n marllib python==3.8
+conda activate marllib
+# please install pytorch <= 1.9.1 compatible with your hardware.
 
-    pip install ray==1.8.0
-    pip install ray[tune]
-    pip install ray[rllib]
+pip install ray==1.8.0
+pip install ray[tune]
+pip install ray[rllib]
 
-    git clone https://github.com/Replicable-MARL/MARLlib.git
-    cd MARLlib
-    pip install -e .
+git clone https://github.com/Replicable-MARL/MARLlib.git
+cd MARLlib
+pip install -e .
+pip install icecream && pip install supersuit && pip install gym==0.21.0 && pip install importlib-metadata==4.13.0 
 ```
 
 
@@ -169,18 +169,18 @@ Please follow [this guide](https://marllib.readthedocs.io/en/latest/handbook/env
 
 We fix bugs of RLlib by providing patches. After installing Ray, run the following command:
 
-```
+```bash
 cd /Path/To/MARLlib/patch
 python add_patch.py -y
 ```
 
-For pommerman users, run
+If pommerman is installed and used as your testing bed, run
 
-```
+```bash
 cd /Path/To/MARLlib/patch
 python add_patch.py -y -p
 ```
-
+follow the guide [here](https://marllib.readthedocs.io/en/latest/handbook/env.html#pommerman) before you starting training.
 
 
 ## Usage
@@ -201,16 +201,16 @@ There are four configuration files you need to ensure correctness for your train
 ### Step 2. Making sure all the dependency are installed for your environment.
 
 You can refer to [here](https://marllib.readthedocs.io/en/latest/handbook/env.html) to install the environment.
-After everything settled, make sure to change back you Gym version to 1.21.0.
+After everything settled, make sure to change back you Gym version to 0.21.0.
 All environment MARLlib supported should work fine with this version.
 
-```
+```bash
 pip install gym==0.21.0
 ```
 
 ### Step 3. Start training
 
-```
+```bash
 cd /Path/To/MARLlib
 python marl/main.py --algo_config=$algo [--finetuned] --env_config=$env with env_args.map_name=$map
 ```
@@ -252,14 +252,13 @@ Available env-map pairs (case sensitive):
 --finetuned is optional, force using the finetuned hyperparameter if available in [this directory](https://github.com/Replicable-MARL/MARLlib/tree/main/marl/algos/hyperparams/finetuned)
 
 
-Example on SMAC:
+Example on SMAC (you need install SMAC environment follow the guide [here](https://marllib.readthedocs.io/en/latest/handbook/env.html#smac)):
 
-```
+```bash
 python marl/main.py --algo_config=mappo [--finetuned] --env_config=smac with env_args.map_name=3m
 ```
 
 --finetuned is optional, force using the finetuned hyperparameter if available.
-
 
 
 ## Navigation
@@ -289,44 +288,17 @@ We provide an introduction to the code directory to help you get familiar with t
 
 All results are listed [here](https://github.com/Replicable-MARL/MARLlib/tree/main/results).
 
+## Bug Shooting
 
-
-## Documentation
-
-See [MARLlib Docs](https://marllib.readthedocs.io/en/latest/)
-
-## Contribute
-
-MARLlib is friendly to incorporating a new environment. Besides the ten we already implemented, we support almost all kinds of MARL environments.
-Before contributing new environment, you must know:
-
-Things you ought to cover:
-
-- provide a new environment interface python file, follow the style of [MARLlib/envs/base_env](https://github.com/Replicable-MARL/MARLlib/tree/main/envs/base_env)
-- provide a corresponding config yaml file, follow the style of [MARLlib/envs/base_env/config](https://github.com/Replicable-MARL/MARLlib/tree/main/envs/base_env/config)
-- provide a corresponding instruction readme file, follow the style of [MARLlib/envs/base_env/install](https://github.com/Replicable-MARL/MARLlib/tree/main/envs/base_env/install)
-
-Things not essential:
-
-- change the MARLlib data processing pipeline
-- provide a unique runner or controller specific to the environment 
-- concern about the data logging 
-
-The ten environments we already contained have covered great diversity in action space,  observation space, agent-env interaction style, task mode, additional information like action mask, etc. 
-The best practice to incorporate your environment is to find an existing similar one and provide the same interface.
-
-## Citing MARLlib
-
-
-If you use MARLlib in your work, please cite the accompanying [paper](https://arxiv.org/abs/2210.13708).
-
-```bibtex
-@misc{hu2022marllib,  
-  title = {MARLlib: Extending RLlib for Multi-agent Reinforcement Learning},
-  author = {Hu, Siyi and Zhong, Yifan and Gao, Minquan and Wang, Weixun and Dong, Hao and Li, Zhihui and Liang, Xiaodan and Chang, Xiaojun and Yang, Yaodong},  
-  year = {2022},
-  eprint = {2210.13708},
-  archivePrefix={arXiv},
-}
-
-```
+- Environment side bug: e.g., SMAC is not installed properly.
+    - Cause of bug: environment not installed properly (dependency, version, ...)
+    - Solution: find the bug description in the log printed, especailly the table status at the initial part.
+- Gym related bug:
+    - Cause of bug: gym version required by RLlib and Environment has conflict
+    - Solution: always change gym version back to 0.21.0 after new package installation.
+- Package missing:
+    - Cause of bug: miss installing package or incorrect Python Path
+    - Solution: install the package and check you current PYTHONPATH
+    
+  
+    

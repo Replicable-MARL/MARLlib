@@ -10,9 +10,19 @@ from marl.algos.run_cc import run_cc
 if __name__ == '__main__':
     params = deepcopy(sys.argv)
 
-    with open(os.path.join(os.path.dirname(__file__), "ray.yaml"), "r") as f:
-        config_dict = yaml.load(f, Loader=yaml.FullLoader)
-        f.close()
+    # convenient training
+    webvis_flag = False
+    for param in params:
+        if param.startswith("--webvis"):
+            webvis_flag = True
+            ray_file_name = param.split("=")[1] + '.yaml'
+            with open(os.path.join(os.path.dirname(__file__), "ray", ray_file_name), "r") as f:
+                config_dict = yaml.load(f, Loader=yaml.FullLoader)
+                f.close()
+    if not webvis_flag:
+        with open(os.path.join(os.path.dirname(__file__), "ray/ray.yaml"), "r") as f:
+            config_dict = yaml.load(f, Loader=yaml.FullLoader)
+            f.close()
 
     # env
     env_config = _get_config(params, "--env_config")
@@ -32,6 +42,9 @@ if __name__ == '__main__':
             algo_type = check_algo_type(algo_name)
 
     algo_config = _get_config(params, "--algo_config", env_config)
+
+
+
     config_dict = recursive_dict_update(config_dict, algo_config)
 
     if algo_type == "IL":
