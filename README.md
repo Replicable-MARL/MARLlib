@@ -257,6 +257,7 @@ Example on SMAC (you need install SMAC environment follow the guide [here](https
 ```bash
 python marl/main.py --algo_config=mappo [--finetuned] --env_config=smac with env_args.map_name=3m
 ```
+
 --finetuned is optional, force using the finetuned hyperparameter if available.
 
 
