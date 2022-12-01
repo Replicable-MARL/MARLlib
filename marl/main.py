@@ -10,13 +10,17 @@ from marl.algos.run_cc import run_cc
 if __name__ == '__main__':
     params = deepcopy(sys.argv)
 
-    # web visualization
-    if "--webvis" in params:
-        with open(os.path.join(os.path.dirname(__file__), "ray_cust.yaml"), "r") as f:
-            config_dict = yaml.load(f, Loader=yaml.FullLoader)
-            f.close()
-    else:
-        with open(os.path.join(os.path.dirname(__file__), "ray.yaml"), "r") as f:
+    # convenient training
+    webvis_flag = False
+    for param in params:
+        if param.startswith("--webvis"):
+            webvis_flag = True
+            ray_file_name = param.split("=")[1] + '.yaml'
+            with open(os.path.join(os.path.dirname(__file__), "ray", ray_file_name), "r") as f:
+                config_dict = yaml.load(f, Loader=yaml.FullLoader)
+                f.close()
+    if not webvis_flag:
+        with open(os.path.join(os.path.dirname(__file__), "ray/ray.yaml"), "r") as f:
             config_dict = yaml.load(f, Loader=yaml.FullLoader)
             f.close()
 
