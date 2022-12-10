@@ -10,7 +10,7 @@ RUN apt-get update -y && apt-get install -y curl libssl-dev openssl libopenblas-
 
 RUN pip install ray==1.8.0 && pip install ray[tune] && pip install ray[rllib]
 
-RUN git clone https://github.com/ICLR2023Paper4242/MARLlib.git
+RUN git clone https://github.com/Replicable-MARL/MARLlib.git
 
 WORKDIR /workspace/MARLlib
 
