@@ -241,7 +241,7 @@ Available env-map pairs (case sensitive):
 - smac: [smac maps](https://github.com/oxwhirl/smac/blob/master/smac/env/starcraft2/maps/smac_maps.py)
 - mpe: [mpe map](https://github.com/Replicable-MARL/MARLlib/blob/main/envs/base_env/mpe.py)
 - mamujoco: [mamujoco map](https://github.com/Replicable-MARL/MARLlib/blob/main/envs/base_env/mamujoco.py)
-- football: [football map](https://github.com/Replicable-MARL/MARLlib/blob/main/envs/base_env/mamujoco.py)
+- football: [football map](https://github.com/Replicable-MARL/MARLlib/blob/main/envs/base_env/football.py)
 - magent: [magent map](https://github.com/Replicable-MARL/MARLlib/blob/main/envs/base_env/magent.py)
 - lbf: use [lbf config](https://github.com/Replicable-MARL/MARLlib/blob/main/envs/base_env/config/lbf.yaml) to generate the map. Details can be found https://github.com/semitable/lb-foraging#usage
 - rware: use [rware config](https://github.com/Replicable-MARL/MARLlib/blob/main/envs/base_env/config/rware.yaml) to generate the map. Details can be found https://github.com/semitable/robotic-warehouse#naming-scheme
