@@ -13,14 +13,14 @@ from marl.models.base.base_rnn import Base_RNN
 from marl.models.zoo.ddpg_rnn import DDPG_RNN
 from envs.base_env import ENV_REGISTRY
 from marl.algos.scripts import POlICY_REGISTRY
-from marl.common import _get_model_config, recursive_dict_update
+from marl.common import _get_model_config, recursive_dict_update, merge_default_and_customer
 from tabulate import tabulate
 
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
 
 
-def run_il(config_dict):
+def run_il(config_dict, customer_config=None, customer_stop=None):
     ray.init(local_mode=config_dict["local_mode"])
 
     ###################
@@ -159,11 +159,15 @@ def run_il(config_dict):
         "simple_optimizer": False  # force using better optimizer
     }
 
+    common_config = merge_default_and_customer(common_config, customer_config)
+
     stop = {
         "episode_reward_mean": config_dict["stop_reward"],
         "timesteps_total": config_dict["stop_timesteps"],
         "training_iteration": config_dict["stop_iters"],
     }
+
+    stop = merge_default_and_customer(stop, customer_stop)
 
     ##################
     ### run script ###
