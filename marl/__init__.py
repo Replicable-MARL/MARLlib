@@ -83,10 +83,10 @@ class _Algo:
         # test_env.close()
 
         # need split to IL, CC, VD ...
-        self.config_dict['algorithm'] = self.name
 
         self.config_dict = recursive_dict_update(CONFIG_DICT, env_config_dict)
         self.config_dict = recursive_dict_update(self.config_dict, self.algo_parameters)
+        self.config_dict['algorithm'] = self.name
 
         if self.algo_type == "IL":
             run_il(self.config_dict, customer_config=running_parameters, customer_stop=stop)
