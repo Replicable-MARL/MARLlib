@@ -200,6 +200,7 @@ We provide solutions (may work) for potential bugs
 
 * `Compiler error on /usr/lib/x86_64-linux-gnu/libGL.so <https://github.com/RobotLocomotion/drake/issues/2087>`_
 * `apt-get, unmet dependencies, ... "but it is not going to be installed" <https://askubuntu.com/questions/564282/apt-get-unmet-dependencies-but-it-is-not-going-to-be-installed>`_
+* `Errors related to Could NOT find Boost <https://github.com/google-research/football/issues/317>`_
 
 .. _MPE:
 

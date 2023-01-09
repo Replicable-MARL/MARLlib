@@ -127,7 +127,7 @@ class CC_RNN(Base_RNN):
         B = state.shape[0]
 
         if "conv_layer" in self.custom_config["model_arch_args"]:
-            x = state.reshape(-1, self.state_dim[0], self.state_dim[1], self.state_dim[2]).permute(0, 3, 1, 2)
+            x = state.reshape(-1, self.state_dim[0], self.state_dim[1], self.state_dim_last).permute(0, 3, 1, 2)
             x = self.cc_encoder(x)
             x = torch.mean(x, (2, 3))
         else:
