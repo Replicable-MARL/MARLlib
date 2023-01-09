@@ -1,4 +1,3 @@
-
 import marl
 
 env = marl.make_env(environment_name='smac', map_name='3m', mask_flag=True, global_state_flag=True,

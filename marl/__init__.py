@@ -71,6 +71,8 @@ class _Algo:
 
         self.algo_parameters['algo_args'] = algo_parameters
 
+        return self
+
     def fit_online(self, env_config_dict, stop=None, **running_parameters):
         # env_config, env_dict = env
         # self.common_config['env'] = env_config
