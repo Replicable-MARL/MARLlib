@@ -10,6 +10,15 @@ algo_type_dict = {
 }
 
 
+def merge_default_and_customer(default_dict, customer_dict):
+    if customer_dict and isinstance(customer_dict, dict):
+        for key, value in customer_dict.items():
+            if key in default_dict:
+                default_dict[key] = value
+
+    return default_dict
+
+
 def check_algo_type(algo_name):
     for key in algo_type_dict.keys():
         if algo_name in algo_type_dict[key]:
