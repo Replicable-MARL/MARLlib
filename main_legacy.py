@@ -7,7 +7,14 @@ from marl.algos.run_il import run_il
 from marl.algos.run_vd import run_vd
 from marl.algos.run_cc import run_cc
 
+
+'''
+legacy version
+python main_legacy.py --algo_config=mappo --finetuned --env_config=smac with env_args.map_name=3m
+'''
+
 if __name__ == '__main__':
+
     params = deepcopy(sys.argv)
 
     # convenient training
@@ -20,7 +27,7 @@ if __name__ == '__main__':
                 config_dict = yaml.load(f, Loader=yaml.FullLoader)
                 f.close()
     if not webvis_flag:
-        with open(os.path.join(os.path.dirname(__file__), "ray/ray.yaml"), "r") as f:
+        with open(os.path.join(os.path.dirname(__file__), "marl/ray/ray.yaml"), "r") as f:
             config_dict = yaml.load(f, Loader=yaml.FullLoader)
             f.close()
 
