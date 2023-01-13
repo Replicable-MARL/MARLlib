@@ -4,6 +4,7 @@ from ray.tune.utils import merge_dicts
 from ray.tune import CLIReporter
 from marl.algos.core.VD.iql_vdn_qmix import JointQTrainer
 from marl.algos.utils.setup_utils import AlgVar
+from marl.algos.utils.log_dir_util import available_local_dir
 
 """
 This version is based on but different from that rllib built-in qmix_policy
@@ -16,7 +17,6 @@ This version is based on but different from that rllib built-in qmix_policy
 
 
 def run_joint_q(config_dict, common_config, env_dict, stop):
-
     _param = AlgVar(config_dict)
 
     algorithm = config_dict["algorithm"]
@@ -66,7 +66,7 @@ def run_joint_q(config_dict, common_config, env_dict, stop):
     JointQ_Config["optimizer"] = optimizer
     JointQ_Config["training_intensity"] = None
 
-    Trainer = JointQTrainer.with_updates(
+    JQTrainer = JointQTrainer.with_updates(
         name=algorithm.upper(),
         default_config=JointQ_Config
     )
@@ -75,11 +75,20 @@ def run_joint_q(config_dict, common_config, env_dict, stop):
     arch = config_dict["model_arch_args"]["core_arch"]
     RUNNING_NAME = '_'.join([algorithm, arch, map_name])
 
-    results = tune.run(Trainer,
+    if config_dict['restore_path'] == '':
+        restore = None
+    else:
+        restore = config_dict['restore_path']
+
+    results = tune.run(JQTrainer,
                        name=RUNNING_NAME,
+                       checkpoint_at_end=config_dict['checkpoint_end'],
+                       checkpoint_freq=config_dict['checkpoint_freq'],
+                       restore=restore,
                        stop=stop,
                        config=config,
                        verbose=1,
-                       progress_reporter=CLIReporter())
+                       progress_reporter=CLIReporter(),
+                       local_dir=available_local_dir)
 
     return results

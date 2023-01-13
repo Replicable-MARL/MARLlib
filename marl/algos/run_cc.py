@@ -15,7 +15,7 @@ tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
 
 
-def run_cc(config_dict, customer_config=None, customer_stop=None):
+def run_cc(config_dict, customer_stop=None):
     ray.init(local_mode=config_dict["local_mode"])
 
     ###################
@@ -155,7 +155,7 @@ def run_cc(config_dict, customer_config=None, customer_stop=None):
     #####################
 
     common_config = {
-        # "seed": config_dict["seed"],
+        "seed": config_dict["seed"],
         "env": env_reg_name,
         "num_gpus_per_worker": config_dict["num_gpus_per_worker"],
         "num_gpus": config_dict["num_gpus"],
@@ -168,8 +168,6 @@ def run_cc(config_dict, customer_config=None, customer_stop=None):
         "evaluation_interval": config_dict["evaluation_interval"],
         "simple_optimizer": False  # force using better optimizer
     }
-
-    common_config = merge_default_and_customer(common_config, customer_config)
 
     stop = {
         "episode_reward_mean": config_dict["stop_reward"],

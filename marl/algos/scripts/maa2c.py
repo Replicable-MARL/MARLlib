@@ -42,8 +42,16 @@ def run_maa2c(config_dict, common_config, env_dict, stop):
     arch = config_dict["model_arch_args"]["core_arch"]
     RUNNING_NAME = '_'.join([algorithm, arch, map_name])
 
+    if config_dict['restore_path'] == '':
+        restore = None
+    else:
+        restore = config_dict['restore_path']
+
     results = tune.run(MAA2CTrainer,
                        name=RUNNING_NAME,
+                       checkpoint_at_end=config_dict['checkpoint_end'],
+                       checkpoint_freq=config_dict['checkpoint_freq'],
+                       restore=restore,
                        stop=stop,
                        config=config,
                        verbose=1,

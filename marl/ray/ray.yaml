@@ -8,6 +8,11 @@ num_workers: 1
 num_gpus: 1
 num_cpus_per_worker: 1
 num_gpus_per_worker: 0
+checkpoint_freq: 100
+checkpoint_end: True
+# restore_path: '/home/hsy/ray_results/mappo_gru_2AgentAnt/MAPPOTrainer_mamujoco_2AgentAnt_6644e_00000_0_2023-01-13_22-41-44/checkpoint_000010/checkpoint-10'
+restore_path: ''
 stop_iters: 9999999
 stop_timesteps: 2000000
 stop_reward: 999999
+seed: 321 # ray seed

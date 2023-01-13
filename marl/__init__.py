@@ -144,14 +144,16 @@ class _Algo:
 
         self.config_dict = recursive_dict_update(CONFIG_DICT, env_config_dict)
         self.config_dict = recursive_dict_update(self.config_dict, self.algo_parameters)
+        self.config_dict = recursive_dict_update(self.config_dict, running_params)
+
         self.config_dict['algorithm'] = self.name
 
         if self.algo_type == "IL":
-            run_il(self.config_dict, customer_config=running_params, customer_stop=stop)
+            run_il(self.config_dict, customer_stop=stop)
         elif self.algo_type == "VD":
-            run_vd(self.config_dict, customer_config=running_params, customer_stop=stop)
+            run_vd(self.config_dict, customer_stop=stop)
         elif self.algo_type == "CC":
-            run_cc(self.config_dict, customer_config=running_params, customer_stop=stop)
+            run_cc(self.config_dict, customer_stop=stop)
         else:
             raise ValueError("algo not in supported algo_type")
 
@@ -162,7 +164,7 @@ class _AlgoManager:
         # could get :
         # happo = marlib.algos.HAPPO()
         for algo_name in POlICY_REGISTRY:
-            setattr(_AlgoManager, algo_name.upper(), _Algo(algo_name))
+            setattr(_AlgoManager, algo_name, _Algo(algo_name))
             # set set algos.HAPPO = _Algo(run_happo)
 
 
