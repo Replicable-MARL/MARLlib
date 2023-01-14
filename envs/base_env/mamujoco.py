@@ -133,6 +133,10 @@ class RllibMAMujoco(MultiAgentEnv):
     def close(self):
         pass
 
+    def render(self, mode='human'):
+        self.env.render()
+        return True
+
     def get_env_info(self):
         env_info = {
             "space_obs": self.observation_space,

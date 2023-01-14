@@ -9,6 +9,8 @@ from ray.tune import register_env
 from marl.algos.run_il import run_il
 from marl.algos.run_vd import run_vd
 from marl.algos.run_cc import run_cc
+from marl.render.render_cc import render_cc
+
 from marl.common import merge_default_and_customer_and_check
 import yaml
 import os
@@ -154,6 +156,32 @@ class _Algo:
             run_vd(self.config_dict, customer_stop=stop)
         elif self.algo_type == "CC":
             run_cc(self.config_dict, customer_stop=stop)
+        else:
+            raise ValueError("algo not in supported algo_type")
+
+    def render(self, env_config_dict, stop=None, **running_params):
+        # env_config, env_dict = env
+        # self.common_config['env'] = env_config
+
+        # test_env = ENV_REGISTRY[env_config_dict["env"]](env_config_dict["env_args"])
+        # env_info_dict = test_env.get_env_info()
+
+        # test_env.close()
+
+        # need split to IL, CC, VD ...
+
+        self.config_dict = recursive_dict_update(CONFIG_DICT, env_config_dict)
+        self.config_dict = recursive_dict_update(self.config_dict, self.algo_parameters)
+        self.config_dict = recursive_dict_update(self.config_dict, running_params)
+
+        self.config_dict['algorithm'] = self.name
+
+        if self.algo_type == "IL":
+            raise NotImplementedError()
+        elif self.algo_type == "VD":
+            raise NotImplementedError()
+        elif self.algo_type == "CC":
+            render_cc(self.config_dict, customer_stop=stop)
         else:
             raise ValueError("algo not in supported algo_type")
 
