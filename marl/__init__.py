@@ -10,6 +10,8 @@ from marl.algos.run_il import run_il
 from marl.algos.run_vd import run_vd
 from marl.algos.run_cc import run_cc
 from marl.render.render_cc import render_cc
+from marl.render.render_il import render_il
+from marl.render.render_vd import render_vd
 
 from marl.common import merge_default_and_customer_and_check
 import yaml
@@ -177,9 +179,9 @@ class _Algo:
         self.config_dict['algorithm'] = self.name
 
         if self.algo_type == "IL":
-            raise NotImplementedError()
+            render_il(self.config_dict, customer_stop=stop)
         elif self.algo_type == "VD":
-            raise NotImplementedError()
+            render_vd(self.config_dict, customer_stop=stop)
         elif self.algo_type == "CC":
             render_cc(self.config_dict, customer_stop=stop)
         else:

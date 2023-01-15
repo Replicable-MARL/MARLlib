@@ -83,8 +83,11 @@ if __name__ == "__main__":
             packagent=ray)
     do_link("rllib/policy/torch_policy.py", force=args.yes, local_path="./rllib/policy/torch_policy.py", packagent=ray)
 
-    if args.pommerman:
+    # utils
+    do_link("rllib/utils/exploration/ornstein_uhlenbeck_noise.py", force=args.yes,
+            local_path="./rllib/utils/exploration/ornstein_uhlenbeck_noise.py", packagent=ray)
 
+    if args.pommerman:
         import pommerman
 
         do_link('graphics.py', force=args.yes, local_path='./pommerman_patch/graphics.py', packagent=pommerman)
