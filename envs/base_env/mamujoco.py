@@ -2,7 +2,7 @@ from ray.rllib.env.multi_agent_env import MultiAgentEnv
 from multiagent_mujoco.mujoco_multi import MujocoMulti
 from gym.spaces import Dict as GymDict, Discrete, Box
 import numpy as np
-
+import time
 env_args_dict = {
     "2AgentAnt": {"scenario": "Ant-v2",
                   "agent_conf": "2x4",
@@ -135,6 +135,7 @@ class RllibMAMujoco(MultiAgentEnv):
 
     def render(self, mode='human'):
         self.env.render()
+        time.sleep(0.05)
         return True
 
     def get_env_info(self):

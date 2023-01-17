@@ -4,6 +4,7 @@ import supersuit as ss
 from ray.rllib.env import PettingZooEnv, ParallelPettingZooEnv
 from pettingzoo.mpe import simple_adversary_v2, simple_crypto_v2, simple_v2, simple_push_v2, simple_tag_v2, \
     simple_spread_v2, simple_reference_v2, simple_world_comm_v2, simple_speaker_listener_v3
+import time
 
 REGISTRY = {}
 REGISTRY["simple_adversary"] = simple_adversary_v2.parallel_env
@@ -112,6 +113,11 @@ class RllibMPE(MultiAgentEnv):
 
     def close(self):
         self.env.close()
+
+    def render(self, mode=None):
+        self.env.render()
+        time.sleep(0.05)
+        return True
 
     def get_env_info(self):
         env_info = {
