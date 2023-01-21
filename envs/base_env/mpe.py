@@ -55,7 +55,7 @@ policy_mapping_dict = {
     },
     "simple_world_comm": {
         "description": "two team cooperate and attack, one team survive",
-        "team_prefix": ("adversary_", "leaderadversary_", "agent_"),
+        "team_prefix": ("adversary_", "leadadversary_", "agent_"),
         "all_agents_one_policy": False,
         "one_agent_one_policy": True,
     },
