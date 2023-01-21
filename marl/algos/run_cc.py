@@ -155,7 +155,7 @@ def run_cc(config_dict, customer_stop=None):
     #####################
 
     common_config = {
-        "seed": config_dict["seed"],
+        "seed": int(config_dict["seed"]),
         "env": env_reg_name,
         "num_gpus_per_worker": config_dict["num_gpus_per_worker"],
         "num_gpus": config_dict["num_gpus"],
