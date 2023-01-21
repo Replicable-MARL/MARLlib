@@ -125,7 +125,7 @@ class _Algo:
         for param in SYSPARAMs:
             if param.startswith("--algo_args"):
                 value = param.split("=")[1]
-                key = param.split("=")[0].split(".")
+                key = param.split("=")[0].split(".")[1]
                 user_algo_args[key] = value
 
         # update commandline config
