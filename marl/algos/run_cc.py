@@ -8,6 +8,7 @@ from marl.models.zoo.cc_rnn import CC_RNN
 from marl.models.zoo.ddpg_rnn import DDPG_RNN
 from marl.algos.scripts import POlICY_REGISTRY
 from envs.base_env import ENV_REGISTRY
+from envs.global_reward_env import COOP_ENV_REGISTRY
 from marl.common import _get_model_config, recursive_dict_update, merge_default_and_customer
 from tabulate import tabulate
 
@@ -46,14 +47,21 @@ def run_cc(config_dict, customer_stop=None):
                 config_dict["env"]))
 
     map_name = config_dict["env_args"]["map_name"]
-    test_env = ENV_REGISTRY[config_dict["env"]](config_dict["env_args"])
+    if config_dict["force_coop"]:
+        test_env = COOP_ENV_REGISTRY[config_dict["env"]](config_dict["env_args"])
+    else:
+        test_env = ENV_REGISTRY[config_dict["env"]](config_dict["env_args"])
     agent_name_ls = test_env.agents
     env_info_dict = test_env.get_env_info()
     test_env.close()
 
     env_reg_name = config_dict["env"] + "_" + config_dict["env_args"]["map_name"]
-    register_env(env_reg_name,
-                 lambda _: ENV_REGISTRY[config_dict["env"]](config_dict["env_args"]))
+    if config_dict["force_coop"]:
+        register_env(env_reg_name,
+                     lambda _: COOP_ENV_REGISTRY[config_dict["env"]](config_dict["env_args"]))
+    else:
+        register_env(env_reg_name,
+                     lambda _: ENV_REGISTRY[config_dict["env"]](config_dict["env_args"]))
 
     #############
     ### model ###

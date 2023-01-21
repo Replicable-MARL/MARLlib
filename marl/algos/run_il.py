@@ -12,6 +12,7 @@ from ray.rllib.utils.framework import try_import_tf, try_import_torch
 from marl.models.base.base_rnn import Base_RNN
 from marl.models.zoo.ddpg_rnn import DDPG_RNN
 from envs.base_env import ENV_REGISTRY
+from envs.global_reward_env import COOP_ENV_REGISTRY
 from marl.algos.scripts import POlICY_REGISTRY
 from marl.common import _get_model_config, recursive_dict_update, merge_default_and_customer
 from tabulate import tabulate
@@ -50,11 +51,19 @@ def run_il(config_dict, customer_stop=None):
             "environment \"{}\" not installed properly or not registered yet, please see the Error_Log below".format(
                 config_dict["env"]))
 
-    register_env(config_dict["env"] + "_" + config_dict["env_args"]["map_name"],
-                 lambda _: ENV_REGISTRY[config_dict["env"]](config_dict["env_args"]))
+    env_reg_name = config_dict["env"] + "_" + config_dict["env_args"]["map_name"]
+    if config_dict["force_coop"]:
+        register_env(env_reg_name,
+                     lambda _: COOP_ENV_REGISTRY[config_dict["env"]](config_dict["env_args"]))
+    else:
+        register_env(env_reg_name,
+                     lambda _: ENV_REGISTRY[config_dict["env"]](config_dict["env_args"]))
 
     map_name = config_dict["env_args"]["map_name"]
-    test_env = ENV_REGISTRY[config_dict["env"]](config_dict["env_args"])
+    if config_dict["force_coop"]:
+        test_env = COOP_ENV_REGISTRY[config_dict["env"]](config_dict["env_args"])
+    else:
+        test_env = ENV_REGISTRY[config_dict["env"]](config_dict["env_args"])
     env_info_dict = test_env.get_env_info()
     agent_name_ls = test_env.agents
     test_env.close()

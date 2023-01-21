@@ -55,6 +55,7 @@ class Env(dict):
 
 def make_env(environment_name,
              map_name,
+             force_coop=False,
              **env_params
              ):
     """
@@ -81,6 +82,7 @@ def make_env(environment_name,
     env_config_dict["env_args"] = merge_default_and_customer_and_check(env_config_dict["env_args"], user_env_args)
 
     env_config_dict["env_args"]["map_name"] = map_name
+    env_config_dict["force_coop"] = force_coop
     env_config = Env(env_config_dict)
 
     # set ray config
