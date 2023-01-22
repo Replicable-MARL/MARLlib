@@ -74,10 +74,19 @@ def centralized_critic_postprocessing(policy,
             if global_state_flag:  # include self obs and global state
                 sample_batch["state"] = sample_batch['obs'][:, action_mask_dim:]
             else:
-                sample_batch["state"] = np.stack(
-                    [sample_batch['obs'][:, action_mask_dim:action_mask_dim + obs_dim]] + [
-                        opponent_batch[i]["obs"][:, action_mask_dim:action_mask_dim + obs_dim] for i in
-                        range(opponent_agents_num)], 1)
+                # must stack in order for the consistency
+                state_batch_list = []
+                for agent_name in custom_config['agent_name_ls']:
+                    if agent_name in other_agent_batches:
+                        index = list(other_agent_batches).index(agent_name)
+                        state_batch_list.append(opponent_batch[index]["obs"][:, action_mask_dim:action_mask_dim + obs_dim])
+                    else:
+                        state_batch_list.append(sample_batch['obs'][:, action_mask_dim:action_mask_dim + obs_dim])
+                sample_batch["state"] = np.stack(state_batch_list, 1)
+                # sample_batch["state"] = np.stack(
+                #     [sample_batch['obs'][:, action_mask_dim:action_mask_dim + obs_dim]] + [
+                #         opponent_batch[i]["obs"][:, action_mask_dim:action_mask_dim + obs_dim] for i in
+                #         range(opponent_agents_num)], 1)
 
             sample_batch["opponent_actions"] = np.stack(
                 [opponent_batch[i]["actions"] for i in range(opponent_agents_num)],

@@ -53,6 +53,7 @@ def run_cc(config_dict, customer_stop=None):
         test_env = ENV_REGISTRY[config_dict["env"]](config_dict["env_args"])
     agent_name_ls = test_env.agents
     env_info_dict = test_env.get_env_info()
+    env_info_dict['agent_name_ls'] = agent_name_ls
     test_env.close()
 
     env_reg_name = config_dict["env"] + "_" + config_dict["env_args"]["map_name"]
@@ -187,7 +188,7 @@ def run_cc(config_dict, customer_stop=None):
 
     ##################
     ### run script ###
-    ###################
+    ##################
 
     results = POlICY_REGISTRY[config_dict["algorithm"]](config_dict, common_config, env_info_dict, stop)
 
