@@ -4,7 +4,6 @@ env_args:
   map_name: "simple_adversary" # others can be found in mpe.py
   continuous_actions: False
   max_cycles: 25
-  local_ratio: 0.5
 
 mask_flag: False
 global_state_flag: False
