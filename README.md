@@ -136,8 +136,8 @@ After installation, training can be launched by following the usage section belo
 ### Install MARLlib
 
 ```bash
-conda create -n marllib python==3.8
-conda activate marllib
+conda create -n marl python==3.8
+conda activate marl
 # please install pytorch <= 1.9.1 compatible with your hardware.
 
 pip install ray==1.8.0
@@ -238,8 +238,8 @@ We prepare a docker image ready for MARLlib to
 run. [link](https://hub.docker.com/repository/docker/iclr2023paper4242/marllib)
 
 ```bash
-docker pull iclr2023paper4242/marllib:1.0
-docker run -d -it --rm --gpus all iclr2023paper4242/marllib:1.0
+docker pull iclr2023paper4242/marl:1.0
+docker run -d -it --rm --gpus all iclr2023paper4242/marl:1.0
 docker exec -it [container_name] # you can get container_name by this command: docker ps
 # launch the training
 python main.py

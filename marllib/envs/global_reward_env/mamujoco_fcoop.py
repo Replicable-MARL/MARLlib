@@ -1,0 +1,1 @@
+from marllib.envs.base_env.mamujoco import RllibMAMujoco as RllibMAMujoco_FCOOP

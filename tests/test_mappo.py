@@ -1,6 +1,6 @@
 import unittest
-import marl
-from envs.base_env.mpe import REGISTRY as MPE_REGISTRY, policy_mapping_dict as mpe_policy_mapping_dict
+from marllib import marl
+from marllib.envs.base_env.mpe import REGISTRY as MPE_REGISTRY, policy_mapping_dict as mpe_policy_mapping_dict
 
 '''
 MAPPO test case
@@ -18,7 +18,7 @@ class TestMPEEnv(unittest.TestCase):
             print(scenario)
             env = marl.make_env(environment_name=ENV, map_name=scenario)
             mappo.fit(env, stop={'training_iteration': 5}, local_mode=True, num_gpus=0,
-                      num_workers=1, share_policy='group', checkpoint_end=True)
+                      num_workers=1, share_policy='group', checkpoint_end=False)
 
     # def test_all_scenarios_from_pymarl_cmdline(self):
     #     mappo = marl.algos.mappo(hyperparam_source=ENV)

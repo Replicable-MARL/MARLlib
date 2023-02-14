@@ -1,1 +1,0 @@
-from envs.base_env.smac import RLlibSMAC as RLlibSMAC_FCOOP
