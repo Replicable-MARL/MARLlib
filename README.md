@@ -5,24 +5,28 @@
 <h1 align="center"> MARLlib: The MARL Extension for RLlib </h1>
 
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)]()
+![test](https://github.com/Replicable-MARL/MARLlib/workflows/test/badge.svg)
+[![Documentation Status](https://readthedocs.org/projects/marllib/badge/?version=latest)](https://marllib.readthedocs.io/en/latest/)
+[![GitHub issues](https://img.shields.io/github/issues/Replicable-MARL/MARLlib)](https://github.com/Replicable-MARL/MARLlib/issues) 
+[![GitHub stars](https://img.shields.io/github/stars/Replicable-MARL/MARLlib)](https://github.com/Replicable-MARL/MARLlib/stargazers) 
+[![GitHub forks](https://img.shields.io/github/forks/Replicable-MARL/MARLlib)](https://github.com/Replicable-MARL/MARLlib/network) [![GitHub license](https://img.shields.io/github/license/thu-ml/tianshou)](https://github.com/thu-ml/tianshou/blob/master/LICENSE)
 
 **Multi-Agent RLlib (MARLlib)** is ***a comprehensive Multi-Agent Reinforcement Learning algorithm library*** based
-on [**Ray**](https://github.com/ray-project/ray) and one of its toolkits [**
-RLlib**](https://github.com/ray-project/ray/tree/master/rllib). It provides MARL research community with a unified
+on [**Ray**](https://github.com/ray-project/ray) and one of its toolkits [**RLlib**](https://github.com/ray-project/ray/tree/master/rllib). It provides MARL research community with a unified
 platform for building, training, and evaluating MARL algorithms.
 
-There are four core features of **MARLlib**.
+## key features
 
-- It unifies diverse algorithm pipeline with a newly proposed agent-level distributed dataflow. Currently, MARLlib
+- MARLlib unifies diverse algorithm pipeline with a newly proposed agent-level distributed dataflow. Currently, MARLlib
   delivers 18 algorithms and is able to handle cooperative (team-reward-only cooperation), collaborative (
   individual-reward-accessible cooperation), competitive (individual competition), and mixed (teamwork-based
   competition) tasks.
-- It unifies multi-agent environment interfaces with a new interface following Gym standard and supports both
+- MARLlib unifies multi-agent environment interfaces with a new interface following Gym standard and supports both
   synchronous and asynchronous agent-environment interaction. Currently, MARLlib provides support to ten environments.
-- It provides three parameter sharing strategies, namely full-sharing, non-sharing, and group-sharing, by implementing
+- MARLlib provides three parameter sharing strategies, namely full-sharing, non-sharing, and group-sharing, by implementing
   the policy mapping API of RLlib. This is implemented to be fully decoupled from algorithms and environments, and is
   completely controlled by configuration files.
-- It provides standard 2 or 20 millions timesteps learning curve in the form of CSV of each task-algorithm for
+- MARLlib provides standard 2 or 20 millions timesteps learning curve in the form of CSV of each task-algorithm for
   reference. These results are reproducible as configuration files for each experiment are provided along. In total,
   more than a thousand experiments are conducted and released.
 
@@ -92,40 +96,6 @@ Here is a chart describing the characteristics of each algorithm:
 *MAA2C* and *MATRPO* are the centralized version of A2C and TRPO.
 *VDPPO* is the value decomposition version of PPO.
 
-### Environment-Algorithm Combination
-
-Y for available, N for not suitable, P for partially available on some scenarios.
-(Note: in our code, independent algorithms may not have **I** as prefix. For instance, PPO = IPPO)
-
-| Env w Algorithm | IQL  | PG   | A2C  | DDPG | TRPO | PPO  | COMA | MADDPG | MAAC | MATRPO | MAPPO | HATRPO | HAPPO | VDN  | QMIX | FACMAC | VDAC | VDPPO |
-| --------------- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ------ | ---- | ------ | ----- | ------ | ----- | ---- | ---- | ------ | ---- | ----- |
-| LBF             | Y    | Y    | Y    | N    | Y    | Y    | Y    | N      | Y    | Y      | Y     | Y      | Y     | P    | P    | P      | P    | P     |
-| RWARE           | Y    | Y    | Y    | N    | Y    | Y    | Y    | N      | Y    | Y      | Y     | Y      | Y     | Y    | Y    | Y      | Y    | Y     |
-| MPE             | P    | Y    | Y    | P    | Y    | Y    | P    | P      | Y    | Y      | Y     | Y      | Y     | Y    | Y    | Y      | Y    | Y     |
-| SMAC            | Y    | Y    | Y    | N    | Y    | Y    | Y    | N      | Y    | Y      | Y     | Y      | Y     | Y    | Y    | Y      | Y    | Y     |
-| MetaDrive       | N    | Y    | Y    | Y    | Y    | Y    | N    | N      | N    | N      | N     | N      | N     | N    | N    | N      | N    | N     |
-| MAgent          | Y    | Y    | Y    | N    | Y    | Y    | Y    | N      | Y    | Y      | Y     | Y      | Y     | N    | N    | N      | N    | N     |
-| Pommerman       | Y    | Y    | Y    | N    | Y    | Y    | P    | N      | Y    | Y      | Y     | Y      | Y     | P    | P    | P      | P    | P     |
-| MAMuJoCo        | N    | Y    | Y    | Y    | Y    | Y    | N    | Y      | Y    | Y      | Y     | Y      | Y     | N    | N    | Y      | Y    | Y     |
-| GRF             | Y    | Y    | Y    | N    | Y    | Y    | Y    | N      | Y    | Y      | Y     | Y      | Y     | Y    | Y    | Y      | Y    | Y     |
-| Hanabi          | Y    | Y    | Y    | N    | Y    | Y    | Y    | N      | Y    | Y      | Y     | Y      | Y     | N    | N    | N      | N    | N     |
-
-You can find a comprehensive list of existing MARL algorithms in different
-environments  [here](https://github.com/Replicable-MARL/MARLlib/tree/main/envs).
-
-### Why MARLlib?
-
-Here we provide a table for the comparison of MARLlib and existing work.
-
-|   Library   | Github Stars | Task Mode | Supported Env | Algorithm | Parameter Sharing  | Asynchronous Interact | Framework
-|:-------------:|:-------------:|:-------------:|:-------------:|:--------------:|:----------------:|:-----------------:|:---------------------:
-|     [PyMARL](https://github.com/oxwhirl/pymarl) | [![GitHub stars](https://img.shields.io/github/stars/oxwhirl/pymarl)](https://github.com/oxwhirl/pymarl/stargazers)    |       cooperative      |       1       |       Independent Learning(1) + Centralized Critic(1) + Value Decomposition(3)       |         full-sharing        |                   | *
-|    [PyMARL2](https://github.com/hijkzzz/pymarl2) | [![GitHub stars](https://img.shields.io/github/stars/hijkzzz/pymarl2)](https://github.com/hijkzzz/pymarl2/stargazers)    |       cooperative      |       1       |       Independent Learning(1) + Centralized Critic(1) + Value Decomposition(9)     |         full-sharing        |                   |   PyMARL
-|   [MARL-Algorithms](https://github.com/starry-sky6688/MARL-Algorithms)| [![GitHub stars](https://img.shields.io/github/stars/starry-sky6688/MARL-Algorithms)](https://github.com/starry-sky6688/MARL-Algorithms/stargazers)  |       cooperative      |       1       |     CTDE(6) + Communication(1) + Graph(1) + Multi-task(1)   |         full-sharing        |  | *
-|    [EPyMARL](https://github.com/uoe-agents/epymarl)| [![GitHub stars](https://img.shields.io/github/stars/uoe-agents/epymarl)](https://github.com/hijkzzz/uoe-agents/epymarl/stargazers)    |       cooperative      |       4       |    Independent Learning(3) + Value Decomposition(4) + Centralized Critic(2)    |        full-sharing + non-sharing       |                   |           PyMARL            | 
-| [MAlib](https://github.com/sjtu-marl/malib) | [![GitHub stars](https://img.shields.io/github/stars/sjtu-marl/malib)](https://github.com/hijkzzz/sjtu-marl/malib/stargazers) | self-play | 2 +  [PettingZoo](https://www.pettingzoo.ml/) + [OpenSpiel](https://github.com/deepmind/open_spiel) | Population-based | full-sharing + group-sharing + non-sharing | :heavy_check_mark: | *
-| [MAPPO Benchmark](https://github.com/marlbenchmark/on-policy)| [![GitHub stars](https://img.shields.io/github/stars/marlbenchmark/on-policy)](https://github.com/marlbenchmark/on-policy/stargazers) |     cooperative     |       4       |      MAPPO(1)     |         full-sharing + non-sharing        |         :heavy_check_mark:         |         pytorch-a2c-ppo-acktr-gail              |
-|    [MARLlib](https://github.com/Replicable-MARL/MARLlib)| |  cooperative collaborative competitive mixed  |       10 + [PettingZoo](https://www.pettingzoo.ml/)      |    Independent Learning(6) + Centralized Critic(7) + Value Decomposition(5)     |        full-sharing + group-sharing + non-sharing        |         :heavy_check_mark:         |           Ray/Rllib           |
 
 ## Installation
 
@@ -201,7 +171,7 @@ pip install gym==0.21.0
 ### Step 3. Start training with MARLlib API
 
 ```python
-import marl
+from marllib import marl
 
 env = marl.make_env(environment_name="smac", map_name="5m_vs_6m")
 mappo = marl.algos.mappo(hyperparam_source='smac')
@@ -215,7 +185,7 @@ or refer to **main.py** for detailed instruction.
 Here we provide a mamujoco example.
 
 ```python
-import marl
+from marllib import marl
 
 env = marl.make_env(environment_name="mamujoco", map_name="2AgentAnt")
 mappo = marl.algos.mappo(hyperparam_source='common')
