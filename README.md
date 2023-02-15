@@ -15,6 +15,23 @@
 on [**Ray**](https://github.com/ray-project/ray) and one of its toolkits [**RLlib**](https://github.com/ray-project/ray/tree/master/rllib). It provides MARL research community with a unified
 platform for building, training, and evaluating MARL algorithms.
 
+```py
+from marllib import marl
+
+# prepare env
+env = marl.make_env(environment_name="mpe", map_name="simple_spread")
+
+# initialize algorithm
+mappo = marl.algos.mappo(hyperparam_source='mpe')
+
+# start training
+mappo.fit(env, stop={'timesteps_total': 10000})
+
+# ready to control
+mappo.render(env, restore_path='path_to_checkpoint')
+```
+
+
 ## key features
 
 - MARLlib unifies diverse algorithm pipeline with a newly proposed agent-level distributed dataflow. Currently, MARLlib
@@ -191,8 +208,14 @@ env = marl.make_env(environment_name="mamujoco", map_name="2AgentAnt")
 mappo = marl.algos.mappo(hyperparam_source='common')
 mappo.render(env, stop={'training_iteration': 1}, local_mode=True, num_gpus=1, num_workers=2, share_policy='all',
           restore_path='mappo_2AgentAnt_checkpoint_000015/checkpoint-15', checkpoint_end=False)
-
 ```
+
+
+## Tutorials
+
+Try MPE+MAPPO examples on Google Colaboratory! [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/takuseno/d3rlpy/blob/master/tutorials/cartpole.ipyn
+
+
 
 
 ## Docker
