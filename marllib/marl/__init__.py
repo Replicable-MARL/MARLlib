@@ -1,7 +1,3 @@
-# --algo_config=happo
-# --finetuned
-# --env-config=mamujoco with env_args.map_name=2AgentWalker
-
 from marllib.marl.algos.scripts import POlICY_REGISTRY
 from marllib.marl.common import _get_config, recursive_dict_update, check_algo_type
 from marllib.envs.base_env import ENV_REGISTRY
@@ -12,12 +8,14 @@ from marllib.marl.algos.run_cc import run_cc
 from marllib.marl.render.render_cc import render_cc
 from marllib.marl.render.render_il import render_il
 from marllib.marl.render.render_vd import render_vd
-
+from marllib.envs.base_env import ENV_REGISTRY
+from marllib.envs.global_reward_env import COOP_ENV_REGISTRY
 from marllib.marl.common import merge_default_and_customer_and_check
 import yaml
 import os
 import sys
 from copy import deepcopy
+from tabulate import tabulate
 
 with open(os.path.join(os.path.dirname(__file__), "ray/ray.yaml"), "r") as f:
     CONFIG_DICT = yaml.load(f, Loader=yaml.FullLoader)
@@ -88,7 +86,40 @@ def make_env(environment_name,
     # set ray config
     env_config = env_config.set_ray()
 
-    return env_config
+    # initialize env
+    env_reg_ls = []
+    check_current_used_env_flag = False
+    for env_n in ENV_REGISTRY.keys():
+        if isinstance(ENV_REGISTRY[env_n], str):  # error
+            info = [env_n, "Error", ENV_REGISTRY[env_n], "envs/base_env/config/{}.yaml".format(env_n),
+                    "envs/base_env/{}.py".format(env_n)]
+            env_reg_ls.append(info)
+        else:
+            info = [env_n, "Ready", "Null", "envs/base_env/config/{}.yaml".format(env_n),
+                    "envs/base_env/{}.py".format(env_n)]
+            env_reg_ls.append(info)
+            if env_n == env_config["env"]:
+                check_current_used_env_flag = True
+
+    print(tabulate(env_reg_ls,
+                   headers=['Env_Name', 'Check_Status', "Error_Log", "Config_File_Location", "Env_File_Location"],
+                   tablefmt='grid'))
+
+    if not check_current_used_env_flag:
+        raise ValueError(
+            "environment \"{}\" not installed properly or not registered yet, please see the Error_Log below".format(
+                env_config["env"]))
+
+    env_reg_name = env_config["env"] + "_" + env_config["env_args"]["map_name"]
+
+    if env_config["force_coop"]:
+        env = COOP_ENV_REGISTRY[env_config["env"]](env_config["env_args"])
+    else:
+        env = ENV_REGISTRY[env_config["env"]](env_config["env_args"])
+
+    register_env(env_reg_name, lambda _: env)
+
+    return env, env_config
 
 
 class _Algo:
@@ -138,31 +169,24 @@ class _Algo:
 
         return self
 
-    def fit(self, env_config_dict, stop=None, **running_params):
-        # env_config, env_dict = env
-        # self.common_config['env'] = env_config
+    def fit(self, env, stop=None, **running_params):
 
-        # test_env = ENV_REGISTRY[env_config_dict["env"]](env_config_dict["env_args"])
-        # env_info_dict = test_env.get_env_info()
+        env_instance, info = env
 
-        # test_env.close()
-
-        # need split to IL, CC, VD ...
-
-        self.config_dict = recursive_dict_update(CONFIG_DICT, env_config_dict)
+        self.config_dict = info
         self.config_dict = recursive_dict_update(self.config_dict, self.algo_parameters)
         self.config_dict = recursive_dict_update(self.config_dict, running_params)
 
         self.config_dict['algorithm'] = self.name
 
         if self.algo_type == "IL":
-            run_il(self.config_dict, customer_stop=stop)
+            run_il(self.config_dict, env_instance, stop=stop)
         elif self.algo_type == "VD":
-            run_vd(self.config_dict, customer_stop=stop)
+            run_vd(self.config_dict, env_instance, stop=stop)
         elif self.algo_type == "CC":
-            run_cc(self.config_dict, customer_stop=stop)
+            run_cc(self.config_dict, env_instance, stop=stop)
         else:
-            raise ValueError("algo not in supported algo_type")
+            raise ValueError("algo_config not in supported algo_type")
 
     def render(self, env_config_dict, stop=None, **running_params):
         # env_config, env_dict = env
@@ -188,7 +212,7 @@ class _Algo:
         elif self.algo_type == "CC":
             render_cc(self.config_dict, customer_stop=stop)
         else:
-            raise ValueError("algo not in supported algo_type")
+            raise ValueError("algo_config not in supported algo_type")
 
 
 class _AlgoManager:
