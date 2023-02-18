@@ -1,5 +1,5 @@
 from ray.rllib.env.multi_agent_env import MultiAgentEnv
-from patch.hanabi.Hanabi_Env import HanabiEnv
+from marllib.patch.hanabi.Hanabi_Env import HanabiEnv
 import numpy as np
 from gym.spaces import Dict as GymDict, Discrete, Box
 
