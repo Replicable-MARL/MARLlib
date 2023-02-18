@@ -1,0 +1,5 @@
+# mlp parameters
+
+model_arch_args:
+  hidden_state_size: 256
+  core_arch: "mlp"

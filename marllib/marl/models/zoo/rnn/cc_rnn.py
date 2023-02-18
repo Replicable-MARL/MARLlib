@@ -1,7 +1,7 @@
 import numpy as np
 from gym.spaces import Box
 from ray.rllib.utils.framework import try_import_tf, try_import_torch
-from marllib.marl.models.base.base_rnn import Base_RNN
+from marllib.marl.models.zoo.rnn.base_rnn import Base_RNN
 import copy
 from ray.rllib.utils.annotations import override
 from functools import reduce

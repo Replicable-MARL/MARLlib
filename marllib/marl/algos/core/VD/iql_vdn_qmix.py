@@ -21,7 +21,7 @@ from ray.rllib.agents.dqn.dqn import GenericOffPolicyTrainer
 from ray.rllib.agents.qmix.qmix import DEFAULT_CONFIG
 from ray.rllib.policy.rnn_sequencing import chop_into_sequences
 
-from marllib.marl.models.zoo.jointQ_rnn import JointQ_RNN
+from marllib.marl.models.zoo.rnn.jointQ_rnn import JointQ_RNN
 from marllib.marl.models.zoo.mixers import QMixer, VDNMixer
 from marllib.marl.algos.utils.episode_execution_plan import episode_execution_plan
 

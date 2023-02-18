@@ -9,8 +9,8 @@ from ray.tune import register_env
 from ray import tune
 from ray.rllib.utils.test_utils import check_learning_achieved
 from ray.rllib.utils.framework import try_import_tf, try_import_torch
-from marllib.marl.models.base.base_rnn import Base_RNN
-from marllib.marl.models.zoo.ddpg_rnn import DDPG_RNN
+from marllib.marl.models.zoo.rnn.base_rnn import Base_RNN
+from marllib.marl.models.zoo.rnn.ddpg_rnn import DDPG_RNN
 from marllib.envs.base_env import ENV_REGISTRY
 from marllib.marl.algos.scripts import POlICY_REGISTRY
 from marllib.marl.common import _get_model_config, recursive_dict_update, merge_default_and_customer

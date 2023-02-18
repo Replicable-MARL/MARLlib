@@ -4,8 +4,9 @@ from ray.tune import register_env
 from ray import tune
 from ray.rllib.utils.test_utils import check_learning_achieved
 from ray.rllib.utils.framework import try_import_tf, try_import_torch
-from marllib.marl.models.zoo.cc_rnn import CC_RNN
-from marllib.marl.models.zoo.ddpg_rnn import DDPG_RNN
+from marllib.marl.models.zoo.rnn.cc_rnn import CC_RNN
+from marllib.marl.models.zoo.mlp.cc_mlp import CC_MLP
+from marllib.marl.models.zoo.rnn.ddpg_rnn import DDPG_RNN
 from marllib.marl.algos.scripts import POlICY_REGISTRY
 from marllib.envs.base_env import ENV_REGISTRY
 from marllib.envs.global_reward_env import COOP_ENV_REGISTRY
@@ -23,7 +24,7 @@ def run_cc(algo_config, env, stop=None):
     ###################
 
     env_info_dict = env.get_env_info()
-    map_name = env.env_config["map_name"]
+    map_name = algo_config['env_args']['map_name']
     agent_name_ls = env.agents
     env_info_dict["agent_name_ls"] = agent_name_ls
     env.close()
@@ -45,15 +46,26 @@ def run_cc(algo_config, env, stop=None):
     encoder_arch_config = _get_model_config(encoder)
     algo_config = recursive_dict_update(algo_config, encoder_arch_config)
 
-    # core rnn config
-    rnn_arch_config = _get_model_config("rnn")
-    algo_config = recursive_dict_update(algo_config, rnn_arch_config)
+    use_rnn = False
 
-    ModelCatalog.register_custom_model(
-        "Centralized_Critic_Model", CC_RNN)
+    if use_rnn:  # rnn config
+        rnn_arch_config = _get_model_config("rnn")
+        algo_config = recursive_dict_update(algo_config, rnn_arch_config)
 
-    ModelCatalog.register_custom_model(
-        "DDPG_Model", DDPG_RNN)
+        ModelCatalog.register_custom_model(
+            "Centralized_Critic_Model", CC_RNN)
+
+        ModelCatalog.register_custom_model(
+            "DDPG_Model", DDPG_RNN)
+    else:  # mlp config
+        mlp_arch_config = _get_model_config("mlp")
+        algo_config = recursive_dict_update(algo_config, mlp_arch_config)
+
+        ModelCatalog.register_custom_model(
+            "Centralized_Critic_Model", CC_MLP)
+
+        ModelCatalog.register_custom_model(
+            "DDPG_Model", DDPG_RNN)
 
     ##############
     ### policy ###
@@ -70,9 +82,9 @@ def run_cc(algo_config, env, stop=None):
         if not policy_mapping_info["all_agents_one_policy"]:
             raise ValueError("in {}, policy can not be shared, change it to 1. group 2. individual".format(map_name))
 
-        policies = {"shared_policy"}
+        policies = {"av"}
         policy_mapping_fn = (
-            lambda agent_id, episode, **kwargs: "shared_policy")
+            lambda agent_id, episode, **kwargs: "av")
 
     elif algo_config["share_policy"] == "group":
         groups = policy_mapping_info["team_prefix"]
