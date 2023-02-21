@@ -1,7 +1,7 @@
 from ray import tune
 from ray.tune.utils import merge_dicts
 from ray.tune import CLIReporter
-from marllib.marl.algos.core.CC.maddpg import MADDPGRNNTrainer as MADDPGTrainer
+from marllib.marl.algos.core.CC.maddpg import MADDPGTrainer
 from marllib.marl.algos.utils.setup_utils import AlgVar
 from marllib.marl.algos.utils.log_dir_util import available_local_dir
 

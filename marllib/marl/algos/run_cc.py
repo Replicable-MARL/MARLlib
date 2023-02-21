@@ -7,6 +7,7 @@ from ray.rllib.utils.framework import try_import_tf, try_import_torch
 from marllib.marl.models.zoo.rnn.cc_rnn import CC_RNN
 from marllib.marl.models.zoo.mlp.cc_mlp import CC_MLP
 from marllib.marl.models.zoo.rnn.ddpg_rnn import DDPG_RNN
+from marllib.marl.models.zoo.mlp.ddpg_mlp import DDPG_MLP
 from marllib.marl.algos.scripts import POlICY_REGISTRY
 from marllib.envs.base_env import ENV_REGISTRY
 from marllib.envs.global_reward_env import COOP_ENV_REGISTRY
@@ -65,7 +66,7 @@ def run_cc(algo_config, env, stop=None):
             "Centralized_Critic_Model", CC_MLP)
 
         ModelCatalog.register_custom_model(
-            "DDPG_Model", DDPG_RNN)
+            "DDPG_Model", DDPG_MLP)
 
     ##############
     ### policy ###

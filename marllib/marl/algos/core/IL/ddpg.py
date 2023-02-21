@@ -33,7 +33,7 @@ from marllib.marl.algos.utils.episode_execution_plan import episode_execution_pl
 torch, nn = try_import_torch()
 
 
-def build_rnnddpg_models(policy, observation_space, action_space, config):
+def build_iddpg_models(policy, observation_space, action_space, config):
     num_outputs = int(np.product(observation_space.shape))
 
     policy_model_config = MODEL_DEFAULTS.copy()
@@ -47,8 +47,8 @@ def build_rnnddpg_models(policy, observation_space, action_space, config):
         num_outputs=num_outputs,
         model_config=config["model"],
         framework=config["framework"],
-        default_model=DDPG_RNN_TorchModel,
-        name="rnnddpg_model",
+        default_model=IDDPG_TorchModel,
+        name="iddpg_model",
         policy_model_config=policy_model_config,
         q_model_config=q_model_config,
         twin_q=config["twin_q"],
@@ -62,8 +62,8 @@ def build_rnnddpg_models(policy, observation_space, action_space, config):
         num_outputs=num_outputs,
         model_config=config["model"],
         framework=config["framework"],
-        default_model=DDPG_RNN_TorchModel,
-        name="rnnddpg_model",
+        default_model=IDDPG_TorchModel,
+        name="iddpg_model",
         policy_model_config=policy_model_config,
         q_model_config=q_model_config,
         twin_q=config["twin_q"],
@@ -74,14 +74,14 @@ def build_rnnddpg_models(policy, observation_space, action_space, config):
     return policy.model
 
 
-def build_rnnddpg_models_and_action_dist(
+def build_iddpg_models_and_action_dist(
         policy: Policy, obs_space: gym.spaces.Space,
         action_space: gym.spaces.Space,
         config: TrainerConfigDict) -> Tuple[ModelV2, ActionDistribution]:
-    model = build_rnnddpg_models(policy, obs_space, action_space, config)
+    model = build_iddpg_models(policy, obs_space, action_space, config)
 
     assert model.get_initial_state() != [], \
-        "RNNDDPG requires its model to be a recurrent one!"
+        "IDDPG requires its model to be a recurrent one!"
 
     if isinstance(action_space, Simplex):
         return model, TorchDirichlet
@@ -308,8 +308,8 @@ def ddpg_actor_critic_loss(policy: Policy, model: ModelV2, _,
     return actor_loss, critic_loss
 
 
-class DDPG_RNN_TorchModel(DDPGTorchModel):
-    """Extension of standard DDPGTorchModel for RNNDDPG.
+class IDDPG_TorchModel(DDPGTorchModel):
+    """Extension of standard DDPGTorchModel for IDDPG.
 
     Data flow:
         obs -> forward() -> model_out
@@ -555,7 +555,7 @@ class DDPG_RNN_TorchModel(DDPGTorchModel):
 
 logger = logging.getLogger(__name__)
 
-DDPG_RNN_DEFAULT_CONFIG = DDPGTrainer.merge_trainer_configs(
+IDDPG_DEFAULT_CONFIG = DDPGTrainer.merge_trainer_configs(
     DDPG_DEFAULT_CONFIG,
     {
         "batch_mode": "complete_episodes",
@@ -578,23 +578,23 @@ def validate_config(config: TrainerConfigDict) -> None:
         config["burn_in"] + config["model"]["max_seq_len"]
 
 
-DDPGRNNTorchPolicy = DDPGTorchPolicy.with_updates(
-    name="RNNDDPGTorchPolicy",
-    get_default_config=lambda: DDPG_RNN_DEFAULT_CONFIG,
+IDDPGTorchPolicy = DDPGTorchPolicy.with_updates(
+    name="IDDPGTorchPolicy",
+    get_default_config=lambda: IDDPG_DEFAULT_CONFIG,
     action_distribution_fn=action_distribution_fn,
-    make_model_and_action_dist=build_rnnddpg_models_and_action_dist,
+    make_model_and_action_dist=build_iddpg_models_and_action_dist,
     loss_fn=ddpg_actor_critic_loss,
 )
 
 
 def get_policy_class(config: TrainerConfigDict) -> Optional[Type[Policy]]:
     if config["framework"] == "torch":
-        return DDPGRNNTorchPolicy
+        return IDDPGTorchPolicy
 
-DDPGRNNTrainer = DDPGTrainer.with_updates(
+IDDPGTrainer = DDPGTrainer.with_updates(
     name="IDDPGTrainer",
-    default_config=DDPG_RNN_DEFAULT_CONFIG,
-    default_policy=DDPGRNNTorchPolicy,
+    default_config=IDDPG_DEFAULT_CONFIG,
+    default_policy=None,
     get_policy_class=get_policy_class,
     validate_config=validate_config,
     allow_unknown_subkeys=["Q_model", "policy_model"],

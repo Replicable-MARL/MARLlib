@@ -7,7 +7,10 @@ from ray.rllib.utils.test_utils import check_learning_achieved
 from ray.rllib.utils.framework import try_import_tf, try_import_torch
 from marllib.marl.models.zoo.rnn.jointQ_rnn import JointQ_RNN
 from marllib.marl.models.zoo.rnn.vd_rnn import VD_RNN
+from marllib.marl.models.zoo.mlp.vd_mlp import VD_MLP
+from marllib.marl.models.zoo.mlp.jointQ_mlp import JointQ_MLP
 from marllib.marl.models.zoo.rnn.ddpg_rnn import DDPG_RNN
+from marllib.marl.models.zoo.mlp.ddpg_mlp import DDPG_MLP
 from marllib.marl.algos.scripts import POlICY_REGISTRY
 from marllib.envs.global_reward_env import COOP_ENV_REGISTRY as ENV_REGISTRY
 from marllib.marl.common import _get_model_config, recursive_dict_update, merge_default_and_customer
@@ -25,7 +28,7 @@ def run_vd(algo_config, env, stop=None):
     ###################
 
     env_info_dict = env.get_env_info()
-    map_name = env.env_config["map_name"]
+    map_name = algo_config['env_args']['map_name']
     agent_name_ls = env.agents
     env_info_dict["agent_name_ls"] = agent_name_ls
     env.close()
@@ -104,20 +107,32 @@ def run_vd(algo_config, env, stop=None):
     mixer_arch_config = _get_model_config("mixer")
     algo_config = recursive_dict_update(algo_config, mixer_arch_config)
 
-    ModelCatalog.register_custom_model(
-        "Joint_Q_Model", JointQ_RNN)
+    use_rnn = False
 
-    ModelCatalog.register_custom_model(
-        "Value_Decomposition_Model", VD_RNN)
-
-    ModelCatalog.register_custom_model(
-        "DDPG_Model", DDPG_RNN)
+    if use_rnn:  # rnn config
+        rnn_arch_config = _get_model_config("rnn")
+        algo_config = recursive_dict_update(algo_config, rnn_arch_config)
+        ModelCatalog.register_custom_model(
+            "Value_Decomposition_Model", VD_RNN)
+        ModelCatalog.register_custom_model(
+            "Joint_Q_Model", JointQ_RNN)
+        ModelCatalog.register_custom_model(
+            "DDPG_Model", DDPG_RNN)
+    else:
+        mlp_arch_config = _get_model_config("mlp")
+        algo_config = recursive_dict_update(algo_config, mlp_arch_config)
+        ModelCatalog.register_custom_model(
+            "Value_Decomposition_Model", VD_MLP)
+        ModelCatalog.register_custom_model(
+            "Joint_Q_Model", JointQ_MLP)
+        ModelCatalog.register_custom_model(
+            "DDPG_Model", DDPG_MLP)
 
     ##############
     ### policy ###
     ##############
 
-    if algo_config["algorithm"] in ["qmix", "vdn", "iql"]:  # the policy mapping is done in script part
+    if algo_config["algorithm"] in ["qmix", "vdn", "iql"]:
         policies = None
         policy_mapping_fn = None
 
@@ -197,7 +212,6 @@ def run_vd(algo_config, env, stop=None):
     results = POlICY_REGISTRY[algo_config["algorithm"]](algo_config, common_config, env_info_dict, stop_config)
 
     ray.shutdown()
-
 
 # def run_vd_legacy(algo_config, customer_stop=None):
 #     ray.init(local_mode=algo_config["local_mode"])

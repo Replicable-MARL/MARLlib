@@ -13,6 +13,7 @@ from marllib.envs.global_reward_env import COOP_ENV_REGISTRY
 from marllib.marl.common import merge_default_and_customer_and_check
 import yaml
 import os
+import ray
 import sys
 from copy import deepcopy
 from tabulate import tabulate
@@ -113,11 +114,11 @@ def make_env(environment_name,
     env_reg_name = env_config["env"] + "_" + env_config["env_args"]["map_name"]
 
     if env_config["force_coop"]:
+        register_env(env_reg_name, lambda _: COOP_ENV_REGISTRY[env_config["env"]](env_config["env_args"]))
         env = COOP_ENV_REGISTRY[env_config["env"]](env_config["env_args"])
     else:
+        register_env(env_reg_name, lambda _: ENV_REGISTRY[env_config["env"]](env_config["env_args"]))
         env = ENV_REGISTRY[env_config["env"]](env_config["env_args"])
-
-    register_env(env_reg_name, lambda _: env)
 
     return env, env_config
 

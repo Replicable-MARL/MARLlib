@@ -21,8 +21,8 @@ def build_facmac_models(policy, observation_space, action_space, config):
         num_outputs=num_outputs,
         model_config=config["model"],
         framework=config["framework"],
-        default_model=FACMAC_RNN_TorchModel,
-        name="rnnddpg_model",
+        default_model=FACMAC_TorchModel,
+        name="iddpg_model",
         policy_model_config=policy_model_config,
         q_model_config=q_model_config,
         twin_q=config["twin_q"],
@@ -36,8 +36,8 @@ def build_facmac_models(policy, observation_space, action_space, config):
         num_outputs=num_outputs,
         model_config=config["model"],
         framework=config["framework"],
-        default_model=FACMAC_RNN_TorchModel,
-        name="rnnddpg_model",
+        default_model=FACMAC_TorchModel,
+        name="iddpg_model",
         policy_model_config=policy_model_config,
         q_model_config=q_model_config,
         twin_q=config["twin_q"],
@@ -63,7 +63,7 @@ def build_facmac_models_and_action_dist(
         return model, TorchDeterministic
 
 
-class FACMAC_RNN_TorchModel(DDPG_RNN_TorchModel):
+class FACMAC_TorchModel(IDDPG_TorchModel):
     """
     Data flow:
         obs -> forward() -> model_out
@@ -330,8 +330,8 @@ def value_mixing_ddpg_loss(policy, model, dist_class, train_batch):
     return actor_loss, critic_loss
 
 
-FACMACRNNTorchPolicy = DDPGRNNTorchPolicy.with_updates(
-    name="FACMACRNNTorchPolicy",
+FACMACTorchPolicy = IDDPGTorchPolicy.with_updates(
+    name="FACMACTorchPolicy",
     postprocess_fn=q_value_mixing,
     make_model_and_action_dist=build_facmac_models_and_action_dist,
     loss_fn=value_mixing_ddpg_loss,
@@ -345,7 +345,7 @@ FACMACRNNTorchPolicy = DDPGRNNTorchPolicy.with_updates(
 
 def get_policy_class(config: TrainerConfigDict) -> Optional[Type[Policy]]:
     if config["framework"] == "torch":
-        return FACMACRNNTorchPolicy
+        return FACMACTorchPolicy
 
 
 def validate_config(config: TrainerConfigDict) -> None:
@@ -363,10 +363,10 @@ def validate_config(config: TrainerConfigDict) -> None:
     config["before_learn_on_batch"] = f
 
 
-FACMACRNNTrainer = DDPGRNNTrainer.with_updates(
+FACMACTrainer = IDDPGTrainer.with_updates(
     name="FACMACTrainer",
-    default_config=DDPG_RNN_DEFAULT_CONFIG,
-    default_policy=FACMACRNNTorchPolicy,
+    default_config=IDDPG_DEFAULT_CONFIG,
+    default_policy=FACMACTorchPolicy,
     get_policy_class=get_policy_class,
     validate_config=validate_config,
     allow_unknown_subkeys=["Q_model", "policy_model"]

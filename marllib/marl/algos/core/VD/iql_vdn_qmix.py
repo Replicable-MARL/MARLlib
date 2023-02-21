@@ -22,6 +22,8 @@ from ray.rllib.agents.qmix.qmix import DEFAULT_CONFIG
 from ray.rllib.policy.rnn_sequencing import chop_into_sequences
 
 from marllib.marl.models.zoo.rnn.jointQ_rnn import JointQ_RNN
+from marllib.marl.models.zoo.mlp.jointQ_mlp import JointQ_MLP
+
 from marllib.marl.models.zoo.mixers import QMixer, VDNMixer
 from marllib.marl.algos.utils.episode_execution_plan import episode_execution_plan
 
@@ -194,6 +196,7 @@ class JointQPolicy(Policy):
             self.obs_size = _get_size(agent_obs_space)
             self.env_global_state_shape = (self.obs_size, self.n_agents)
 
+        core_arch = config["model"]["custom_model_config"]["model_arch_args"]["core_arch"]
         self.model = ModelCatalog.get_model_v2(
             agent_obs_space,
             action_space.spaces[0],
@@ -201,7 +204,7 @@ class JointQPolicy(Policy):
             config["model"],
             framework="torch",
             name="model",
-            default_model=JointQ_RNN).to(self.device)
+            default_model=JointQ_MLP if core_arch == "mlp" else JointQ_RNN).to(self.device)
 
         self.target_model = ModelCatalog.get_model_v2(
             agent_obs_space,
@@ -210,7 +213,7 @@ class JointQPolicy(Policy):
             config["model"],
             framework="torch",
             name="target_model",
-            default_model=JointQ_RNN).to(self.device)
+            default_model=JointQ_MLP if core_arch == "mlp" else JointQ_RNN).to(self.device)
 
         self.exploration = self._create_exploration()
 
@@ -219,7 +222,7 @@ class JointQPolicy(Policy):
         if custom_config["global_state_flag"]:
             state_dim = custom_config["space_obs"]["state"].shape
         else:
-            state_dim = custom_config["space_obs"]["obs"].shape + (custom_config["num_agents"], )
+            state_dim = custom_config["space_obs"]["obs"].shape + (custom_config["num_agents"],)
         if config["mixer"] is None:  # "iql"
             self.mixer = None
             self.target_mixer = None
@@ -512,7 +515,6 @@ class JointQPolicy(Policy):
         else:
             state = None
         return obs, action_mask, state
-
 
 
 JointQTrainer = GenericOffPolicyTrainer.with_updates(

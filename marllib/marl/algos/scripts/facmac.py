@@ -1,7 +1,7 @@
 from ray import tune
 from ray.tune.utils import merge_dicts
 from ray.tune import CLIReporter
-from marllib.marl.algos.core.VD.facmac import FACMACRNNTrainer as FACMACTrainer
+from marllib.marl.algos.core.VD.facmac import FACMACTrainer
 from marllib.marl.algos.utils.setup_utils import AlgVar
 from marllib.marl.algos.utils.log_dir_util import available_local_dir
 

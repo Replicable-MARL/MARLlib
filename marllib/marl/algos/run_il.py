@@ -12,6 +12,8 @@ from ray.rllib.utils.framework import try_import_tf, try_import_torch
 from marllib.marl.models.zoo.rnn.base_rnn import Base_RNN
 from marllib.marl.models.zoo.mlp.base_mlp import Base_MLP
 from marllib.marl.models.zoo.rnn.ddpg_rnn import DDPG_RNN
+from marllib.marl.models.zoo.mlp.ddpg_mlp import DDPG_MLP
+
 from marllib.envs.base_env import ENV_REGISTRY
 from marllib.envs.global_reward_env import COOP_ENV_REGISTRY
 from marllib.marl.algos.scripts import POlICY_REGISTRY
@@ -52,7 +54,7 @@ def run_il(algo_config, env, stop=None):
     encoder_arch_config = _get_model_config(encoder)
     algo_config = recursive_dict_update(algo_config, encoder_arch_config)
 
-    use_rnn = False
+    use_rnn = True
 
     if use_rnn:  # rnn config
         rnn_arch_config = _get_model_config("rnn")
@@ -71,7 +73,7 @@ def run_il(algo_config, env, stop=None):
             "Base_Model", Base_MLP)
 
         ModelCatalog.register_custom_model(
-            "DDPG_Model", DDPG_RNN)
+            "DDPG_Model", DDPG_MLP)
 
     ##############
     ### policy ###

@@ -19,8 +19,8 @@ def build_maddpg_models(policy, observation_space, action_space, config):
         num_outputs=num_outputs,
         model_config=config["model"],
         framework=config["framework"],
-        default_model=MADDPG_RNN_TorchModel,
-        name="rnnddpg_model",
+        default_model=MADDPG_TorchModel,
+        name="iddpg_model",
         policy_model_config=policy_model_config,
         q_model_config=q_model_config,
         twin_q=config["twin_q"],
@@ -34,8 +34,8 @@ def build_maddpg_models(policy, observation_space, action_space, config):
         num_outputs=num_outputs,
         model_config=config["model"],
         framework=config["framework"],
-        default_model=MADDPG_RNN_TorchModel,
-        name="rnnddpg_model",
+        default_model=MADDPG_TorchModel,
+        name="iddpg_model",
         policy_model_config=policy_model_config,
         q_model_config=q_model_config,
         twin_q=config["twin_q"],
@@ -61,7 +61,7 @@ def build_maddpg_models_and_action_dist(
         return model, TorchDeterministic
 
 
-class MADDPG_RNN_TorchModel(DDPG_RNN_TorchModel):
+class MADDPG_TorchModel(IDDPG_TorchModel):
     """
     Data flow:
         obs -> forward() -> model_out
@@ -73,7 +73,7 @@ class MADDPG_RNN_TorchModel(DDPG_RNN_TorchModel):
     implement forward() in a subclass.
     """
 
-    @override(DDPG_RNN_TorchModel)
+    @override(IDDPG_TorchModel)
     def forward(self, input_dict: Dict[str, TensorType],
                 state: List[TensorType],
                 seq_lens: TensorType):
@@ -143,7 +143,7 @@ class MADDPG_RNN_TorchModel(DDPG_RNN_TorchModel):
                                     seq_lens)
 
 
-# Copied from rnnddpg but optimizing the central q function.
+# Copied from iddpg but optimizing the central q function.
 def central_critic_ddpg_loss(policy, model, dist_class, train_batch):
     CentralizedQValueMixin.__init__(policy)
     target_model = policy.target_models[model]
@@ -340,8 +340,8 @@ def vf_preds_fetches(policy, input_dict, state_batches, model, action_dist):
     return dict()
 
 
-MADDPGRNNTorchPolicy = DDPGRNNTorchPolicy.with_updates(
-    name="MADDPGRNNTorchPolicy",
+MADDPGTorchPolicy = IDDPGTorchPolicy.with_updates(
+    name="MADDPGTorchPolicy",
     postprocess_fn=centralized_critic_q,
     extra_action_out_fn=vf_preds_fetches,
     make_model_and_action_dist=build_maddpg_models_and_action_dist,
@@ -356,7 +356,7 @@ MADDPGRNNTorchPolicy = DDPGRNNTorchPolicy.with_updates(
 
 def get_policy_class(config: TrainerConfigDict) -> Optional[Type[Policy]]:
     if config["framework"] == "torch":
-        return MADDPGRNNTorchPolicy
+        return MADDPGTorchPolicy
 
 
 
@@ -375,10 +375,10 @@ def validate_config(config: TrainerConfigDict) -> None:
     config["before_learn_on_batch"] = f
 
 
-MADDPGRNNTrainer = DDPGRNNTrainer.with_updates(
+MADDPGTrainer = IDDPGTrainer.with_updates(
     name="MADDPGTrainer",
-    default_config=DDPG_RNN_DEFAULT_CONFIG,
-    default_policy=MADDPGRNNTorchPolicy,
+    default_config=IDDPG_DEFAULT_CONFIG,
+    default_policy=MADDPGTorchPolicy,
     get_policy_class=get_policy_class,
     validate_config=validate_config,
     allow_unknown_subkeys=["Q_model", "policy_model"]

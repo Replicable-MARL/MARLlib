@@ -7,8 +7,8 @@ from ray.rllib.models.preprocessors import get_preprocessor
 torch, nn = try_import_torch()
 
 
-class JointQ_RNN(TorchModelV2, nn.Module):
-    """The default GRU model for Joint Q."""
+class JointQ_MLP(TorchModelV2, nn.Module):
+    """sneaky gru-like mlp"""
 
     def __init__(self, obs_space, action_space, num_outputs, model_config,
                  name):
@@ -18,7 +18,7 @@ class JointQ_RNN(TorchModelV2, nn.Module):
         custom_config = model_config["custom_model_config"]
 
         # currently only support gru cell
-        if custom_config["model_arch_args"]["core_arch"] != "gru":
+        if custom_config["model_arch_args"]["core_arch"] != "mlp":
             raise ValueError()
 
         self.obs_size = _get_size(obs_space)
@@ -59,7 +59,7 @@ class JointQ_RNN(TorchModelV2, nn.Module):
         )
 
         self.hidden_state_size = custom_config["model_arch_args"]["hidden_state_size"]
-        self.rnn = nn.GRUCell(input_dim, self.hidden_state_size)
+        self.mlp = nn.Linear(input_dim, self.hidden_state_size)
         self.q_value = nn.Linear(self.hidden_state_size, num_outputs)
 
         self.n_agents = custom_config["num_agents"]
@@ -71,9 +71,10 @@ class JointQ_RNN(TorchModelV2, nn.Module):
             state_dim = custom_config["space_obs"]["obs"].shape
         self.raw_state_dim = state_dim
 
+
     @override(ModelV2)
     def get_initial_state(self):
-        # Place hidden states on same device as model.
+        # fake a hidden ste
         return [
             self.q_value.weight.new(self.n_agents,
                                     self.hidden_state_size).zero_().squeeze(0)
@@ -83,16 +84,15 @@ class JointQ_RNN(TorchModelV2, nn.Module):
     def forward(self, input_dict, hidden_state, seq_lens):
         inputs = input_dict["obs_flat"].float()
         if "conv_layer" in self.custom_config["model_arch_args"]:
-            x = inputs.reshape(-1, self.raw_state_dim[0], self.raw_state_dim[1], self.raw_state_dim[2]).permute(0, 3, 1,
-                                                                                                                2)
+            x = inputs.reshape(-1, self.raw_state_dim[0], self.raw_state_dim[1], self.raw_state_dim[2]).permute(0, 3, 1, 2)
             x = self.encoder(x)
             x = torch.mean(x, (2, 3))
             x = x.reshape(inputs.shape[0], -1)
         else:
             x = self.encoder(inputs)
-        h_in = hidden_state[0].reshape(-1, self.hidden_state_size)
-        h = self.rnn(x, h_in)
-        q = self.q_value(h)
+        h = hidden_state[0].reshape(-1, self.hidden_state_size) # fake a hidden state no use
+        x = self.mlp(x)
+        q = self.q_value(x)
         return q, [h]
 
 
