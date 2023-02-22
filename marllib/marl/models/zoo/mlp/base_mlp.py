@@ -83,6 +83,9 @@ class Base_MLP(TorchModelV2, nn.Module):
         # Holds the last input, in case value branch is separate.
         self._last_obs = None
 
+        self.actors = [self.action_encoder, self.action_branch]
+        self.actor_initialized_parameters = self.actor_parameters()
+
     @override(TorchModelV2)
     def forward(self, input_dict: Dict[str, TensorType],
                 state: List[TensorType],
@@ -111,3 +114,10 @@ class Base_MLP(TorchModelV2, nn.Module):
         assert self._features is not None, "must call forward() first"
         return self.value_branch(
             self.value_encoder(self._last_obs)).squeeze(1)
+
+
+    def actor_parameters(self):
+        return reduce(lambda x, y: x + y, map(lambda p: list(p.parameters()), self.actors))
+
+    def critic_parameters(self):
+        return list(self.value_branch.parameters())

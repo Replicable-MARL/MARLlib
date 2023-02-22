@@ -120,7 +120,7 @@ def _add_returns(sample_batch, last_r, gamma):
 
 
 def trpo_post_process(policy, sample_batch, other_agent_batches=None, episode=None):
-    sample_batch = add_all_agents_gae(policy, sample_batch, other_agent_batches, episode)
+    sample_batch = compute_gae_for_sample_batch(policy, sample_batch, other_agent_batches, episode)
 
     last_r = _get_last_r(policy, sample_batch)
     gamma = policy.config["gamma"]
@@ -131,8 +131,14 @@ def trpo_post_process(policy, sample_batch, other_agent_batches=None, episode=No
     return sample_batch
 
 
-def hatrpo_post_process(policy, sample_batch, other_agent_batches=None, epsisode=None):
-    sample_batch = trpo_post_process(policy, sample_batch, other_agent_batches, epsisode)
+def hatrpo_post_process(policy, sample_batch, other_agent_batches=None, episode=None):
+    sample_batch = add_all_agents_gae(policy, sample_batch, other_agent_batches, episode)
+
+    last_r = _get_last_r(policy, sample_batch)
+    gamma = policy.config["gamma"]
+
+    sample_batch = _add_returns(sample_batch=sample_batch, last_r=last_r, gamma=gamma)
+    sample_batch = _add_deltas(sample_batch=sample_batch, last_r=last_r, gamma=gamma)
 
     n_agents = get_agent_num(policy)
 

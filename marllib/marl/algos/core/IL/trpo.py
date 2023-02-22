@@ -147,9 +147,6 @@ def trpo_loss_fn(
     return total_loss
 
 
-# def extra_gradients(policy, gradients) -> None:
-#     policy.trpo_updator.update()
-
 def apply_gradients(policy, gradients) -> None:
     # print('\nstep into apply updater!')
     policy.trpo_updator.update()
@@ -161,10 +158,7 @@ TRPOTorchPolicy = PPOTorchPolicy.with_updates(
         postprocess_fn=trpo_post_process,
         loss_fn=trpo_loss_fn,
         before_init=setup_torch_mixins,
-        # optimizer_fn=make_happo_optimizers,
-        # extra_grad_process_fn=apply_grad_clipping,
         apply_gradients_fn=apply_gradients,
-        # extra_grad_process_fn=extra_gradients,
         mixins=[
             EntropyCoeffSchedule, KLCoeffMixin,
             CentralizedValueMixin, LearningRateSchedule,
