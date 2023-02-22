@@ -1,6 +1,7 @@
 from ray import tune
 from ray.tune.utils import merge_dicts
 from ray.tune import CLIReporter
+from ray.rllib.models import ModelCatalog
 from marllib.marl.algos.core.IL.trpo import TRPOTrainer
 from ray.rllib.utils.framework import try_import_tf, try_import_torch, get_variable
 from marllib.marl.algos.utils.setup_utils import AlgVar
@@ -10,11 +11,14 @@ from marllib.marl.algos.utils.trust_regions import TrustRegionUpdator
 torch, nn = try_import_torch()
 
 
-def run_trpo(config_dict, common_config, env_dict, stop):
+def run_trpo(model_class, config_dict, common_config, env_dict, stop):
     """
     for bug mentioned https://github.com/ray-project/ray/pull/20743
     make sure sgd_minibatch_size > max_seq_len
     """
+    ModelCatalog.register_custom_model(
+        "Base_Model", model_class)
+
     _param = AlgVar(config_dict)
 
     kl_threshold = _param['kl_threshold']

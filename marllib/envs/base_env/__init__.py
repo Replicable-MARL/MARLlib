@@ -1,10 +1,10 @@
 ENV_REGISTRY = {}
 
-# try:
-from marllib.envs.base_env.mpe import RllibMPE
-ENV_REGISTRY["mpe"] = RllibMPE
-# except Exception as e:
-#     ENV_REGISTRY["mpe"] = str(e)
+try:
+    from marllib.envs.base_env.mpe import RllibMPE
+    ENV_REGISTRY["mpe"] = RllibMPE
+except Exception as e:
+    ENV_REGISTRY["mpe"] = str(e)
 
 try:
     from marllib.envs.base_env.mamujoco import RllibMAMujoco

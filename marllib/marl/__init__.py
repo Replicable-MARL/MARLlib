@@ -2,6 +2,8 @@ from marllib.marl.algos.scripts import POlICY_REGISTRY
 from marllib.marl.common import _get_config, recursive_dict_update, check_algo_type
 from marllib.envs.base_env import ENV_REGISTRY
 from ray.tune import register_env
+from ray.rllib.models import ModelCatalog
+from marllib.marl.common import _get_model_config, recursive_dict_update, merge_default_and_customer
 from marllib.marl.algos.run_il import run_il
 from marllib.marl.algos.run_vd import run_vd
 from marllib.marl.algos.run_cc import run_cc
@@ -11,6 +13,24 @@ from marllib.marl.render.render_vd import render_vd
 from marllib.envs.base_env import ENV_REGISTRY
 from marllib.envs.global_reward_env import COOP_ENV_REGISTRY
 from marllib.marl.common import merge_default_and_customer_and_check
+
+from marllib.marl.models.zoo.rnn.base_rnn import Base_RNN
+from marllib.marl.models.zoo.mlp.base_mlp import Base_MLP
+from marllib.marl.models.zoo.rnn.ddpg_rnn import DDPG_RNN
+from marllib.marl.models.zoo.mlp.ddpg_mlp import DDPG_MLP
+
+from marllib.marl.models.zoo.rnn.jointQ_rnn import JointQ_RNN
+from marllib.marl.models.zoo.rnn.vd_rnn import VD_RNN
+from marllib.marl.models.zoo.mlp.vd_mlp import VD_MLP
+from marllib.marl.models.zoo.mlp.jointQ_mlp import JointQ_MLP
+from marllib.marl.models.zoo.rnn.ddpg_rnn import DDPG_RNN
+from marllib.marl.models.zoo.mlp.ddpg_mlp import DDPG_MLP
+
+from marllib.marl.models.zoo.rnn.cc_rnn import CC_RNN
+from marllib.marl.models.zoo.mlp.cc_mlp import CC_MLP
+from marllib.marl.models.zoo.rnn.ddpg_rnn import DDPG_RNN
+from marllib.marl.models.zoo.mlp.ddpg_mlp import DDPG_MLP
+
 import yaml
 import os
 import ray
@@ -122,6 +142,47 @@ def make_env(environment_name,
 
     return env, env_config
 
+def build_model(environment, algorithm, model_preference):
+
+
+    obs_D = len(environment[0].observation_space.spaces["obs"].shape)
+
+    if obs_D == 1:
+        print("use fc encoder")
+        encoder = "fc_encoder"
+    else:
+        print("use cnn encoder")
+        encoder = "cnn_encoder"
+
+    # load model config according to env_info:
+    # encoder config
+    encoder_arch_config = _get_model_config(encoder)
+    if model_preference["core_arch"] in ["gru", "lstm"]:
+        model_config = _get_model_config("rnn")
+    elif model_preference["core_arch"] in ["mlp"]:
+        model_config = _get_model_config("mlp")
+    else:
+        raise NotImplementedError("{} not supported agent model arch".format(model_preference["core_arch"]))
+
+    model_config = recursive_dict_update(model_config, encoder_arch_config)
+    model_config = recursive_dict_update(model_config, {"model_arch_args": model_preference})
+
+    if algorithm.algo_type == "IL":
+        if "ddpg" in algorithm.name:
+            if model_preference["core_arch"] in ["gru", "lstm"]:
+                agent_class = DDPG_RNN
+            else:
+                agent_class = DDPG_MLP
+        else:
+            if model_preference["core_arch"] in ["gru", "lstm"]:
+                agent_class = Base_RNN
+            else:
+                agent_class = Base_MLP
+    else:
+        raise ValueError()
+
+    return agent_class, model_config
+
 
 class _Algo:
     def __init__(self, algo_name):
@@ -170,18 +231,21 @@ class _Algo:
 
         return self
 
-    def fit(self, env, stop=None, **running_params):
+    def fit(self, env, model, stop=None, **running_params):
 
         env_instance, info = env
+        model_class, model_info = model
 
         self.config_dict = info
+        self.config_dict = recursive_dict_update(self.config_dict, model_info)
+
         self.config_dict = recursive_dict_update(self.config_dict, self.algo_parameters)
         self.config_dict = recursive_dict_update(self.config_dict, running_params)
 
         self.config_dict['algorithm'] = self.name
 
         if self.algo_type == "IL":
-            run_il(self.config_dict, env_instance, stop=stop)
+            run_il(self.config_dict, env_instance, model_class, stop=stop)
         elif self.algo_type == "VD":
             run_vd(self.config_dict, env_instance, stop=stop)
         elif self.algo_type == "CC":
