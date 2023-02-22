@@ -76,10 +76,16 @@ class CC_MLP(Base_MLP):
         self.q_flag = False
         if self.custom_config["algorithm"] in ["coma"]:
             self.q_flag = True
-            self.value_branch = nn.Linear(self.input_dim, num_outputs)
-            self.central_vf = nn.Sequential(
-                nn.Linear(cc_input_dim, num_outputs),
-            )
+            # self.value_branch = SlimFC(
+            #     in_size=cc_input_dim,
+            #     out_size=num_outputs,
+            #     initializer=normc_initializer(0.01),
+            #     activation_fn=None)
+            self.cc_value_branch = SlimFC(
+                in_size=cc_input_dim,
+                out_size=num_outputs,
+                initializer=normc_initializer(0.01),
+                activation_fn=None)
 
     def central_value_function(self, state, opponent_actions=None) -> TensorType:
         assert self._features is not None, "must call forward() first"
@@ -111,4 +117,3 @@ class CC_MLP(Base_MLP):
             return torch.reshape(self.cc_value_branch(x), [-1, self.num_outputs])
         else:
             return torch.reshape(self.cc_value_branch(x), [-1])
-

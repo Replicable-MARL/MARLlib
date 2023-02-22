@@ -39,7 +39,7 @@ def central_critic_coma_loss(policy: Policy, model: ModelV2,
                                   max_seq_len)
         valid_mask = torch.reshape(mask_orig, [-1])
     else:
-        valid_mask = torch.ones_like(values, dtype=torch.bool)
+        valid_mask = torch.ones_like(values.mean(dim=1), dtype=torch.bool)
 
     dist = dist_class(logits, model)
     log_probs = dist.logp(train_batch[SampleBatch.ACTIONS]).reshape(-1)
