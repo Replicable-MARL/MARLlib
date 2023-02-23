@@ -1,12 +1,12 @@
-from ray.rllib.utils.torch_ops import FLOAT_MIN
-import numpy as np
 from typing import Dict, List, Any, Union
 from ray.rllib.models.modelv2 import ModelV2
 from ray.rllib.models.torch.torch_modelv2 import TorchModelV2
-from ray.rllib.models.torch.recurrent_net import RecurrentNetwork as TorchRNN
 from ray.rllib.utils.annotations import override
 from ray.rllib.utils.framework import try_import_tf, try_import_torch, \
     TensorType
+from ray.rllib.models.preprocessors import get_preprocessor
+from ray.rllib.models.torch.misc import SlimFC, AppendBiasLayer, \
+    normc_initializer
 from marllib.marl.models.zoo.mixers import QMixer, VDNMixer
 
 tf1, tf, tfv = try_import_tf()
@@ -34,16 +34,35 @@ class DDPG_MLP(TorchModelV2, nn.Module):
         # judge the model arch
         self.custom_config = model_config["custom_model_config"]
         self.full_obs_space = getattr(obs_space, "original_space", obs_space)
+        self.n_agents = self.custom_config["num_agents"]
 
-        # encoder
-        layers = []
-        if "fc_layer" in self.custom_config["model_arch_args"]:
-            self.obs_size = self.full_obs_space['obs'].shape[0]
-            input_dim = self.obs_size
+        # currently only support gru cell
+        if self.custom_config["model_arch_args"]["core_arch"] != "mlp":
+            raise ValueError()
+
+        if "encode_layer" in self.custom_config["model_arch_args"]:
+            encode_layer = self.custom_config["model_arch_args"]["encode_layer"]
+            encoder_layer_dim = encode_layer.split("-")
+            encoder_layer_dim = [int(i) for i in encoder_layer_dim]
+        else:  # default config
+            encoder_layer_dim = []
             for i in range(self.custom_config["model_arch_args"]["fc_layer"]):
                 out_dim = self.custom_config["model_arch_args"]["out_dim_fc_{}".format(i)]
-                fc_layer = nn.Linear(input_dim, out_dim)
-                layers.append(fc_layer)
+                encoder_layer_dim.append(out_dim)
+
+        self.encoder_layer_dim = encoder_layer_dim
+        self.activation = model_config.get("fcnet_activation")
+
+        layers = []
+        if "fc_layer" in self.custom_config["model_arch_args"]:
+            self.obs_size = self.full_obs_space["obs"].shape[0]
+            input_dim = self.obs_size
+            for out_dim in self.encoder_layer_dim:
+                layers.append(
+                    SlimFC(in_size=input_dim,
+                           out_size=out_dim,
+                           initializer=normc_initializer(1.0),
+                           activation_fn=self.activation))
                 input_dim = out_dim
         elif "conv_layer" in self.custom_config["model_arch_args"]:
             self.obs_size = self.full_obs_space['obs'].shape
@@ -202,3 +221,6 @@ class DDPG_MLP(TorchModelV2, nn.Module):
 
         # shape to [B]
         return q_tot.flatten(start_dim=0)
+
+def _get_size(obs_space):
+    return get_preprocessor(obs_space)(obs_space).size
