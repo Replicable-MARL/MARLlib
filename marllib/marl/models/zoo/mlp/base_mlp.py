@@ -1,18 +1,6 @@
 from ray.rllib.utils.torch_ops import FLOAT_MIN
-import numpy as np
-from typing import Dict, List, Any, Union
-from ray.rllib.models.modelv2 import ModelV2
-from ray.rllib.models.torch.recurrent_net import RecurrentNetwork as TorchRNN
-from ray.rllib.utils.annotations import override
-from ray.rllib.utils.framework import try_import_tf, try_import_torch, \
-    TensorType
-from ray.rllib.policy.rnn_sequencing import add_time_dimension
 from functools import reduce
-import logging
-import gym
 import copy
-from ray.rllib.models.torch.misc import SlimFC, AppendBiasLayer, \
-    normc_initializer
 from ray.rllib.models.torch.torch_modelv2 import TorchModelV2
 from ray.rllib.models.torch.misc import SlimFC, AppendBiasLayer, \
     normc_initializer
@@ -44,10 +32,15 @@ class Base_MLP(TorchModelV2, nn.Module):
         self.full_obs_space = getattr(obs_space, "original_space", obs_space)
         self.n_agents = self.custom_config["num_agents"]
 
-        encoder_layer_dim = []
-        for i in range(self.custom_config["model_arch_args"]["fc_layer"]):
-            out_dim = self.custom_config["model_arch_args"]["out_dim_fc_{}".format(i)]
-            encoder_layer_dim.append(out_dim)
+        if "encode_layer" in self.custom_config["model_arch_args"]:
+            encode_layer = self.custom_config["model_arch_args"]["encode_layer"]
+            encoder_layer_dim = encode_layer.split("-")
+            encoder_layer_dim = [int(i) for i in encoder_layer_dim]
+        else:  # default config
+            encoder_layer_dim = []
+            for i in range(self.custom_config["model_arch_args"]["fc_layer"]):
+                out_dim = self.custom_config["model_arch_args"]["out_dim_fc_{}".format(i)]
+                encoder_layer_dim.append(out_dim)
 
         self.encoder_layer_dim = encoder_layer_dim
         self.activation = model_config.get("fcnet_activation")
@@ -114,7 +107,6 @@ class Base_MLP(TorchModelV2, nn.Module):
         assert self._features is not None, "must call forward() first"
         return self.value_branch(
             self.value_encoder(self._last_obs)).squeeze(1)
-
 
     def actor_parameters(self):
         return reduce(lambda x, y: x + y, map(lambda p: list(p.parameters()), self.actors))

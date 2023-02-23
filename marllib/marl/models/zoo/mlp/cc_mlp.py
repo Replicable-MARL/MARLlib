@@ -2,20 +2,9 @@ from ray.rllib.utils.torch_ops import FLOAT_MIN
 import numpy as np
 from typing import Dict, List, Any, Union
 from gym.spaces import Box
-from ray.rllib.models.modelv2 import ModelV2
-from ray.rllib.models.torch.recurrent_net import RecurrentNetwork as TorchRNN
-from ray.rllib.utils.annotations import override
-from ray.rllib.utils.framework import try_import_tf, try_import_torch, \
-    TensorType
-from ray.rllib.policy.rnn_sequencing import add_time_dimension
 from functools import reduce
 from torch.nn.utils import parameters_to_vector, vector_to_parameters
-import logging
-import gym
 import copy
-from ray.rllib.models.torch.misc import SlimFC, AppendBiasLayer, \
-    normc_initializer
-from ray.rllib.models.torch.torch_modelv2 import TorchModelV2
 from ray.rllib.models.torch.misc import SlimFC, AppendBiasLayer, \
     normc_initializer
 from ray.rllib.utils.annotations import override
@@ -77,11 +66,6 @@ class CC_MLP(Base_MLP):
         self.q_flag = False
         if self.custom_config["algorithm"] in ["coma"]:
             self.q_flag = True
-            # self.value_branch = SlimFC(
-            #     in_size=cc_input_dim,
-            #     out_size=num_outputs,
-            #     initializer=normc_initializer(0.01),
-            #     activation_fn=None)
             self.cc_value_branch = SlimFC(
                 in_size=cc_input_dim,
                 out_size=num_outputs,
