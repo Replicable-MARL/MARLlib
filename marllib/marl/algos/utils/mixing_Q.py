@@ -153,8 +153,12 @@ def before_learn_on_batch(multi_agent_batch, policies, train_batch_size):
 
         obs = policy_batch["obs"]
         next_obs = policy_batch["new_obs"]
-        state_in_p = policy_batch["state_in_0"]
-        state_in_q = policy_batch["state_in_1"]
+        if "state_in_2" not in policy_batch:
+            state_in_p = [policy_batch["state_in_0"]]
+            state_in_q = [policy_batch["state_in_1"]]
+        else:
+            state_in_p = [policy_batch["state_in_0"], policy_batch["state_in_1"]]
+            state_in_q = [policy_batch["state_in_2"], policy_batch["state_in_3"]]
         seq_lens = policy_batch["seq_lens"]
 
         input_dict = {"obs": {}}
@@ -175,13 +179,13 @@ def before_learn_on_batch(multi_agent_batch, policies, train_batch_size):
         seq_lens = convert_to_torch_tensor(seq_lens, policy.device)
 
         input_dict = convert_to_torch_tensor(input_dict, policy.device)
-        state_in_q = convert_to_torch_tensor(state_in_q, policy.device).unsqueeze(0)
+        state_in_q = [convert_to_torch_tensor(state_rnn, policy.device) for state_rnn in state_in_q]
         q, _ = q_model.forward(input_dict, state_in_q, seq_lens)
         q = convert_to_numpy(q)
 
         # get next action & Q value from target model
         target_input_dict = convert_to_torch_tensor(target_input_dict, policy.device)
-        state_in_p = convert_to_torch_tensor(state_in_p, policy.device).unsqueeze(0)
+        state_in_p = [convert_to_torch_tensor(state_rnn, policy.device) for state_rnn in state_in_p]
         next_action_out, _ = target_policy_model.forward(target_input_dict, state_in_p, seq_lens)
         next_action = target_policy_model.action_out_squashed(next_action_out)
         target_input_dict["actions"] = next_action
