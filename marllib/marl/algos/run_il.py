@@ -2,8 +2,8 @@ import ray
 from ray import tune
 from ray.rllib.utils.framework import try_import_tf, try_import_torch
 from marllib.marl.algos.scripts import POlICY_REGISTRY
-from marllib.marl.common import _get_model_config, recursive_dict_update, merge_default_and_customer
-from tabulate import tabulate
+from marllib.marl.common import merge_default_and_customer
+
 
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()

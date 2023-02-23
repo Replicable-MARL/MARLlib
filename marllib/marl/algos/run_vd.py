@@ -1,20 +1,12 @@
 import ray
 from gym.spaces import Dict as GymDict, Discrete, Box, Tuple
-from ray.rllib.models import ModelCatalog
 from ray.tune import register_env
 from ray import tune
-from ray.rllib.utils.test_utils import check_learning_achieved
 from ray.rllib.utils.framework import try_import_tf, try_import_torch
-from marllib.marl.models.zoo.rnn.jointQ_rnn import JointQ_RNN
-from marllib.marl.models.zoo.rnn.vd_rnn import VD_RNN
-from marllib.marl.models.zoo.mlp.vd_mlp import VD_MLP
-from marllib.marl.models.zoo.mlp.jointQ_mlp import JointQ_MLP
-from marllib.marl.models.zoo.rnn.ddpg_rnn import DDPG_RNN
-from marllib.marl.models.zoo.mlp.ddpg_mlp import DDPG_MLP
 from marllib.marl.algos.scripts import POlICY_REGISTRY
 from marllib.envs.global_reward_env import COOP_ENV_REGISTRY as ENV_REGISTRY
-from marllib.marl.common import _get_model_config, recursive_dict_update, merge_default_and_customer
-from tabulate import tabulate
+from marllib.marl.common import merge_default_and_customer
+
 
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
@@ -32,6 +24,11 @@ def run_vd(algo_config, env, model, stop=None):
     agent_name_ls = env.agents
     env_info_dict["agent_name_ls"] = agent_name_ls
     env.close()
+
+
+    ##############
+    ### policy ###
+    ##############
 
     # grab the policy mapping info here to use in grouping environment
     policy_mapping_info = env_info_dict["policy_mapping_info"]
@@ -81,10 +78,6 @@ def run_vd(algo_config, env, model, stop=None):
         register_env(env_reg_name,
                      lambda _: ENV_REGISTRY[algo_config["env"]](algo_config["env_args"]))
 
-
-    ##############
-    ### policy ###
-    ##############
 
     if algo_config["algorithm"] in ["qmix", "vdn", "iql"]:
         policies = None
