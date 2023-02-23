@@ -264,9 +264,9 @@ class _Algo:
         elif self.algo_type == "VD":
             run_vd(self.config_dict, env_instance, model_class, stop=stop)
         elif self.algo_type == "CC":
-            run_cc(self.config_dict, env_instance, stop=stop)
+            run_cc(self.config_dict, env_instance, model_class, stop=stop)
         else:
-            raise ValueError("algo_config not in supported algo_type")
+            raise ValueError("not supported type {}".format(self.algo_type))
 
     def render(self, env_config_dict, stop=None, **running_params):
         # env_config, env_dict = env

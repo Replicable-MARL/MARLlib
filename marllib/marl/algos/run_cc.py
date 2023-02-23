@@ -17,7 +17,7 @@ from tabulate import tabulate
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
 
-def run_cc(algo_config, env, stop=None):
+def run_cc(algo_config, env, model, stop=None):
     ray.init(local_mode=algo_config["local_mode"])
 
     ###################
@@ -167,7 +167,7 @@ def run_cc(algo_config, env, stop=None):
     ### run script ###
     ##################
 
-    results = POlICY_REGISTRY[algo_config["algorithm"]](algo_config, common_config, env_info_dict, stop_config)
+    results = POlICY_REGISTRY[algo_config["algorithm"]](model, algo_config, common_config, env_info_dict, stop_config)
 
     ray.shutdown()
 

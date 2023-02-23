@@ -1,12 +1,17 @@
 from ray import tune
 from ray.tune.utils import merge_dicts
 from ray.tune import CLIReporter
+from ray.rllib.models import ModelCatalog
 from marllib.marl.algos.core.CC.maa2c import MAA2CTrainer
 from marllib.marl.algos.utils.log_dir_util import available_local_dir
 from marllib.marl.algos.utils.setup_utils import AlgVar
 
 
-def run_maa2c(config_dict, common_config, env_dict, stop):
+def run_maa2c(model_class, config_dict, common_config, env_dict, stop):
+
+    ModelCatalog.register_custom_model(
+        "Centralized_Critic_Model", model_class)
+
     _param = AlgVar(config_dict)
 
     train_batch_size = _param["batch_episode"] * env_dict["episode_limit"]
