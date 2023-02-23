@@ -1,6 +1,6 @@
 import unittest
 from marllib import marl
-from marllib.envs.base_env.mpe import REGISTRY as MPE_REGISTRY, policy_mapping_dict as mpe_policy_mapping_dict
+from marllib.envs.base_env.mpe import REGISTRY as MPE_REGISTRY
 
 '''
 MAPPO test case
@@ -17,7 +17,8 @@ class TestMPEEnv(unittest.TestCase):
         for scenario in MPE_REGISTRY.keys():
             print(scenario)
             env = marl.make_env(environment_name=ENV, map_name=scenario)
-            mappo.fit(env, stop={'training_iteration': 5}, local_mode=True, num_gpus=0,
+            model = marl.build_model(env, mappo, {"core_arch": "mlp", "encode_layer": "256-256"})
+            mappo.fit(env, model, stop={'training_iteration': 5}, local_mode=True, num_gpus=1,
                       num_workers=1, share_policy='group', checkpoint_end=False)
 
 
