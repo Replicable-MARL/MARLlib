@@ -1,12 +1,16 @@
 from ray import tune
 from ray.tune.utils import merge_dicts
 from ray.tune import CLIReporter
+from ray.rllib.models import ModelCatalog
 from marllib.marl.algos.core.VD.vda2c import VDA2CTrainer
 from marllib.marl.algos.utils.setup_utils import AlgVar
 from marllib.marl.algos.utils.log_dir_util import available_local_dir
 
 
-def run_vda2c(config_dict, common_config, env_dict, stop):
+def run_vda2c(model_class, config_dict, common_config, env_dict, stop):
+
+    ModelCatalog.register_custom_model(
+        "Value_Decomposition_Model", model_class)
 
     _param = AlgVar(config_dict)
 

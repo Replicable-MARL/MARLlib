@@ -2,6 +2,7 @@ from ray import tune
 from ray.rllib.agents.qmix.qmix import DEFAULT_CONFIG as JointQ_Config
 from ray.tune.utils import merge_dicts
 from ray.tune import CLIReporter
+from ray.rllib.models import ModelCatalog
 from marllib.marl.algos.core.VD.iql_vdn_qmix import JointQTrainer
 from marllib.marl.algos.utils.setup_utils import AlgVar
 from marllib.marl.algos.utils.log_dir_util import available_local_dir
@@ -16,7 +17,11 @@ This version is based on but different from that rllib built-in qmix_policy
 """
 
 
-def run_joint_q(config_dict, common_config, env_dict, stop):
+def run_joint_q(model_class, config_dict, common_config, env_dict, stop):
+
+    ModelCatalog.register_custom_model(
+        "Joint_Q_Model", model_class)
+
     _param = AlgVar(config_dict)
 
     algorithm = config_dict["algorithm"]

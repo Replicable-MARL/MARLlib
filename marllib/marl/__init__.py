@@ -142,21 +142,37 @@ def make_env(environment_name,
 
     return env, env_config
 
+
 def build_model(environment, algorithm, model_preference):
+    if algorithm.name in ["ddpg", "facmac", "maddpg"]:
+        if model_preference["core_arch"] in ["gru", "lstm"]:
+            model_class = DDPG_RNN
+        else:
+            model_class = DDPG_MLP
 
+    elif algorithm.name in ["qmix", "vdn", "iql"]:
+        if model_preference["core_arch"] in ["gru", "lstm"]:
+            model_class = JointQ_RNN
+        else:
+            model_class = JointQ_MLP
 
-    obs_D = len(environment[0].observation_space.spaces["obs"].shape)
-
-    if obs_D == 1:
-        print("use fc encoder")
-        encoder = "fc_encoder"
     else:
-        print("use cnn encoder")
-        encoder = "cnn_encoder"
+        if algorithm.algo_type == "IL":
+            if model_preference["core_arch"] in ["gru", "lstm"]:
+                model_class = Base_RNN
+            else:
+                model_class = Base_MLP
+        elif algorithm.algo_type == "CC":
+            if model_preference["core_arch"] in ["gru", "lstm"]:
+                model_class = CC_RNN
+            else:
+                model_class = CC_MLP
+        else:  # VD
+            if model_preference["core_arch"] in ["gru", "lstm"]:
+                model_class = VD_RNN
+            else:
+                model_class = VD_MLP
 
-    # load model config according to env_info:
-    # encoder config
-    encoder_arch_config = _get_model_config(encoder)
     if model_preference["core_arch"] in ["gru", "lstm"]:
         model_config = _get_model_config("rnn")
     elif model_preference["core_arch"] in ["mlp"]:
@@ -164,24 +180,23 @@ def build_model(environment, algorithm, model_preference):
     else:
         raise NotImplementedError("{} not supported agent model arch".format(model_preference["core_arch"]))
 
+    if len(environment[0].observation_space.spaces["obs"].shape) == 1:
+        print("use fc encoder")
+        encoder = "fc_encoder"
+    else:
+        print("use cnn encoder")
+        encoder = "cnn_encoder"
+
+    # encoder config
+    encoder_arch_config = _get_model_config(encoder)
     model_config = recursive_dict_update(model_config, encoder_arch_config)
     model_config = recursive_dict_update(model_config, {"model_arch_args": model_preference})
 
-    if algorithm.algo_type == "IL":
-        if "ddpg" in algorithm.name:
-            if model_preference["core_arch"] in ["gru", "lstm"]:
-                agent_class = DDPG_RNN
-            else:
-                agent_class = DDPG_MLP
-        else:
-            if model_preference["core_arch"] in ["gru", "lstm"]:
-                agent_class = Base_RNN
-            else:
-                agent_class = Base_MLP
-    else:
-        raise ValueError()
+    if algorithm.algo_type == "VD":
+        mixer_arch_config = _get_model_config("mixer")
+        model_config = recursive_dict_update(model_config, mixer_arch_config)
 
-    return agent_class, model_config
+    return model_class, model_config
 
 
 class _Algo:
@@ -247,7 +262,7 @@ class _Algo:
         if self.algo_type == "IL":
             run_il(self.config_dict, env_instance, model_class, stop=stop)
         elif self.algo_type == "VD":
-            run_vd(self.config_dict, env_instance, stop=stop)
+            run_vd(self.config_dict, env_instance, model_class, stop=stop)
         elif self.algo_type == "CC":
             run_cc(self.config_dict, env_instance, stop=stop)
         else:
