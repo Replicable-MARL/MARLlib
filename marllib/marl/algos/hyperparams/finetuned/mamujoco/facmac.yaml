@@ -3,8 +3,8 @@
 # Detailed explanation for each hyper parameter can be found in ray/rllib/agents/ddpg/ddpg.py
 
 algo_args:
-  batch_episode:  8
-  learning_starts_episode: 8
+  batch_episode:  10
+  learning_starts_episode: 10
   twin_q: False
   prioritized_replay: False
   smooth_target_policy: False
