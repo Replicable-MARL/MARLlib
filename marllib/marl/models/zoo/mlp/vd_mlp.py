@@ -5,7 +5,7 @@ from ray.rllib.utils.annotations import override
 from ray.rllib.utils.framework import try_import_torch
 from ray.rllib.utils.typing import Dict, TensorType, List, ModelConfigDict
 from marllib.marl.models.zoo.mlp.base_mlp import Base_MLP
-from marllib.marl.models.zoo.mixers import QMixer, VDNMixer
+from marllib.marl.models.zoo.mixer import QMixer, VDNMixer
 
 torch, nn = try_import_torch()
 

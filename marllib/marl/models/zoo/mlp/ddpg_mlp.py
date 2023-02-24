@@ -7,7 +7,7 @@ from ray.rllib.utils.framework import try_import_tf, try_import_torch, \
 from ray.rllib.models.preprocessors import get_preprocessor
 from ray.rllib.models.torch.misc import SlimFC, AppendBiasLayer, \
     normc_initializer
-from marllib.marl.models.zoo.mixers import QMixer, VDNMixer
+from marllib.marl.models.zoo.mixer import QMixer, VDNMixer
 
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
