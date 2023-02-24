@@ -10,7 +10,7 @@ from marllib.marl.algos.utils.log_dir_util import available_local_dir
 def run_maddpg(model_class, config_dict, common_config, env_dict, stop):
 
     ModelCatalog.register_custom_model(
-        "DDPG_model", model_class)
+        "DDPG_Model", model_class)
 
     _param = AlgVar(config_dict)
 

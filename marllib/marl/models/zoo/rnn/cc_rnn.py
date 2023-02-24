@@ -1,8 +1,10 @@
 import numpy as np
+import copy
 from gym.spaces import Box
 from ray.rllib.utils.framework import try_import_tf, try_import_torch
 from marllib.marl.models.zoo.rnn.base_rnn import Base_RNN
-import copy
+from ray.rllib.models.torch.misc import SlimFC, AppendBiasLayer, \
+    normc_initializer
 from ray.rllib.utils.annotations import override
 from functools import reduce
 from icecream import ic
@@ -62,13 +64,14 @@ class CC_RNN(Base_RNN):
             else:
                 cc_layers = []
                 cc_input_dim = self.full_obs_space["state"].shape[0] + self.full_obs_space["obs"].shape[0]
-                for i in range(self.custom_config["model_arch_args"]["fc_layer"]):
-                    cc_out_dim = self.custom_config["model_arch_args"]["out_dim_fc_{}".format(i)]
-                    cc_fc_layer = nn.Linear(cc_input_dim, cc_out_dim)
-                    cc_layers.append(cc_fc_layer)
+                for cc_out_dim in self.encoder_layer_dim:
+                    cc_layers.append(
+                        SlimFC(in_size=cc_input_dim,
+                               out_size=cc_out_dim,
+                               initializer=normc_initializer(1.0),
+                               activation_fn=self.activation))
                     cc_input_dim = cc_out_dim
 
-            cc_layers.append(nn.Tanh())
             self.cc_encoder = nn.Sequential(
                 *cc_layers
             )
@@ -90,10 +93,6 @@ class CC_RNN(Base_RNN):
             # set actor
             def init_(m, value):
                 return init(m, nn.init.orthogonal_, lambda x: nn.init.constant_(x, 0), value)
-
-            # self.encoder = MLPBase(
-            #     obs_space.shape
-            # )
 
             self.action_branch = init_(nn.Linear(self.hidden_state_size, num_outputs), value=self.custom_config['gain'])
 
@@ -187,12 +186,6 @@ class CC_RNN(Base_RNN):
         return self(self._train_batch_)
 
     def update_actor(self, loss, lr, grad_clip):
-        # self.__t_actor = self.__update_adam(
-        #     loss=loss, parameters=self.actor_parameters(),
-        #     adam_info=self.actor_adam_update_info,
-        #     lr=lr, grad_clip=grad_clip, step=self.__t_actor,
-        #     maximum=maximum,
-        # )
         CC_RNN.update_use_torch_adam(
             loss=(-1 * loss),
             optimizer=self.actor_optimizer,

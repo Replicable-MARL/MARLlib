@@ -1,5 +1,7 @@
 from ray.rllib.models.modelv2 import ModelV2
 from ray.rllib.models.torch.torch_modelv2 import TorchModelV2
+from ray.rllib.models.torch.misc import SlimFC, AppendBiasLayer, \
+    normc_initializer
 from ray.rllib.utils.annotations import override
 from ray.rllib.utils.framework import try_import_torch
 from ray.rllib.models.preprocessors import get_preprocessor
@@ -15,41 +17,58 @@ class JointQ_RNN(TorchModelV2, nn.Module):
         TorchModelV2.__init__(self, obs_space, action_space, num_outputs,
                               model_config, name)
         nn.Module.__init__(self)
-        custom_config = model_config["custom_model_config"]
+        self.custom_config = model_config["custom_model_config"]
+        self.full_obs_space = getattr(obs_space, "original_space", obs_space)
+        self.n_agents = self.custom_config["num_agents"]
 
-        # currently only support gru cell
-        if custom_config["model_arch_args"]["core_arch"] != "gru":
-            raise ValueError()
+        # only support gru cell
+        if self.custom_config["model_arch_args"]["core_arch"] != "gru":
+            raise ValueError(
+                "core arch should be gru, got {}".format(self.custom_config["model_arch_args"]["core_arch"]))
 
+        if "encode_layer" in self.custom_config["model_arch_args"]:
+            encode_layer = self.custom_config["model_arch_args"]["encode_layer"]
+            encoder_layer_dim = encode_layer.split("-")
+            encoder_layer_dim = [int(i) for i in encoder_layer_dim]
+        else:  # default config
+            encoder_layer_dim = []
+            for i in range(self.custom_config["model_arch_args"]["fc_layer"]):
+                out_dim = self.custom_config["model_arch_args"]["out_dim_fc_{}".format(i)]
+                encoder_layer_dim.append(out_dim)
+
+        self.encoder_layer_dim = encoder_layer_dim
+        self.activation = model_config.get("fcnet_activation")
         self.obs_size = _get_size(obs_space)
 
         # encoder
         layers = []
-        if "fc_layer" in custom_config["model_arch_args"]:
+        if "fc_layer" in self.custom_config["model_arch_args"]:
             input_dim = self.obs_size
-            for i in range(custom_config["model_arch_args"]["fc_layer"]):
-                out_dim = custom_config["model_arch_args"]["out_dim_fc_{}".format(i)]
-                fc_layer = nn.Linear(input_dim, out_dim)
-                layers.append(fc_layer)
+            for out_dim in self.encoder_layer_dim:
+                layers.append(
+                    SlimFC(in_size=input_dim,
+                           out_size=out_dim,
+                           initializer=normc_initializer(1.0),
+                           activation_fn=self.activation))
                 input_dim = out_dim
-        elif "conv_layer" in custom_config["model_arch_args"]:
+        elif "conv_layer" in self.custom_config["model_arch_args"]:
             input_dim = obs_space.shape[2]
-            for i in range(custom_config["model_arch_args"]["conv_layer"]):
+            for i in range(self.custom_config["model_arch_args"]["conv_layer"]):
                 conv_f = nn.Conv2d(
                     in_channels=input_dim,
-                    out_channels=custom_config["model_arch_args"]["out_channel_layer_{}".format(i)],
-                    kernel_size=custom_config["model_arch_args"]["kernel_size_layer_{}".format(i)],
-                    stride=custom_config["model_arch_args"]["stride_layer_{}".format(i)],
-                    padding=custom_config["model_arch_args"]["padding_layer_{}".format(i)],
+                    out_channels=self.custom_config["model_arch_args"]["out_channel_layer_{}".format(i)],
+                    kernel_size=self.custom_config["model_arch_args"]["kernel_size_layer_{}".format(i)],
+                    stride=self.custom_config["model_arch_args"]["stride_layer_{}".format(i)],
+                    padding=self.custom_config["model_arch_args"]["padding_layer_{}".format(i)],
                 )
                 relu_f = nn.ReLU()
-                pool_f = nn.MaxPool2d(kernel_size=custom_config["model_arch_args"]["pool_size_layer_{}".format(i)])
+                pool_f = nn.MaxPool2d(kernel_size=self.custom_config["model_arch_args"]["pool_size_layer_{}".format(i)])
 
                 layers.append(conv_f)
                 layers.append(relu_f)
                 layers.append(pool_f)
 
-                input_dim = custom_config["model_arch_args"]["out_channel_layer_{}".format(i)]
+                input_dim = self.custom_config["model_arch_args"]["out_channel_layer_{}".format(i)]
 
         else:
             raise ValueError()
@@ -58,17 +77,15 @@ class JointQ_RNN(TorchModelV2, nn.Module):
             *layers
         )
 
-        self.hidden_state_size = custom_config["model_arch_args"]["hidden_state_size"]
+        self.hidden_state_size = self.custom_config["model_arch_args"]["hidden_state_size"]
         self.rnn = nn.GRUCell(input_dim, self.hidden_state_size)
         self.q_value = nn.Linear(self.hidden_state_size, num_outputs)
 
-        self.n_agents = custom_config["num_agents"]
         # record the custom config
-        self.custom_config = custom_config
-        if custom_config["global_state_flag"]:
-            state_dim = custom_config["space_obs"]["state"].shape
+        if self.custom_config["global_state_flag"]:
+            state_dim = self.custom_config["space_obs"]["state"].shape
         else:
-            state_dim = custom_config["space_obs"]["obs"].shape
+            state_dim = self.custom_config["space_obs"]["obs"].shape
         self.raw_state_dim = state_dim
 
     @override(ModelV2)
