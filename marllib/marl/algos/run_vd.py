@@ -19,10 +19,10 @@ def run_vd(algo_config, env, model, stop=None):
     ### environment ###
     ###################
 
-    env_info_dict = env.get_env_info()
+    env_config = env.get_env_info()
     map_name = algo_config['env_args']['map_name']
     agent_name_ls = env.agents
-    env_info_dict["agent_name_ls"] = agent_name_ls
+    env_config["agent_name_ls"] = agent_name_ls
     env.close()
 
 
@@ -31,7 +31,7 @@ def run_vd(algo_config, env, model, stop=None):
     ##############
 
     # grab the policy mapping info here to use in grouping environment
-    policy_mapping_info = env_info_dict["policy_mapping_info"]
+    policy_mapping_info = env_config["policy_mapping_info"]
 
     if "all_scenario" in policy_mapping_info:
         policy_mapping_info = policy_mapping_info["all_scenario"]
@@ -39,13 +39,13 @@ def run_vd(algo_config, env, model, stop=None):
         policy_mapping_info = policy_mapping_info[map_name]
 
     if algo_config["algorithm"] in ["qmix", "vdn", "iql"]:
-        space_obs = env_info_dict["space_obs"].spaces
-        space_act = env_info_dict["space_act"]
+        space_obs = env_config["space_obs"].spaces
+        space_act = env_config["space_act"]
         # check the action space condition:
         if not isinstance(space_act, Discrete):
             raise ValueError("illegal action space")
 
-        n_agents = env_info_dict["num_agents"]
+        n_agents = env_config["num_agents"]
 
         if algo_config["share_policy"] == "all":
             obs_space = Tuple([GymDict(space_obs)] * n_agents)
@@ -103,7 +103,7 @@ def run_vd(algo_config, env, model, stop=None):
                     lambda agent_id, episode, **kwargs: "shared_policy")
             else:
                 policies = {
-                    "policy_{}".format(i): (None, env_info_dict["space_obs"], env_info_dict["space_act"], {}) for i in
+                    "policy_{}".format(i): (None, env_config["space_obs"], env_config["space_act"], {}) for i in
                     groups
                 }
                 policy_ids = list(policies.keys())
@@ -115,8 +115,8 @@ def run_vd(algo_config, env, model, stop=None):
                 raise ValueError("in {}, agent number too large, we disable no sharing function".format(map_name))
 
             policies = {
-                "policy_{}".format(i): (None, env_info_dict["space_obs"], env_info_dict["space_act"], {}) for i in
-                range(env_info_dict["num_agents"])
+                "policy_{}".format(i): (None, env_config["space_obs"], env_config["space_act"], {}) for i in
+                range(env_config["num_agents"])
             }
             policy_ids = list(policies.keys())
             policy_mapping_fn = tune.function(
@@ -156,6 +156,6 @@ def run_vd(algo_config, env, model, stop=None):
     ### run script ###
     ###################
 
-    results = POlICY_REGISTRY[algo_config["algorithm"]](model, algo_config, common_config, env_info_dict, stop_config)
+    results = POlICY_REGISTRY[algo_config["algorithm"]](model, algo_config, common_config, env_config, stop_config)
 
     ray.shutdown()
