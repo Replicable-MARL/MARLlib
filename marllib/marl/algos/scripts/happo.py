@@ -1,5 +1,4 @@
 import random
-
 from ray import tune
 from ray.tune.utils import merge_dicts
 from ray.tune import CLIReporter

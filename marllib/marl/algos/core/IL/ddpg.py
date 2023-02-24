@@ -1,11 +1,7 @@
-from typing import Optional, Type
+from typing import Type
 from ray.rllib.agents.ddpg.ddpg import DDPGTrainer, DEFAULT_CONFIG as DDPG_DEFAULT_CONFIG
 from ray.rllib.agents.ddpg.ddpg_torch_policy import DDPGTorchPolicy
-import numpy as np
 import copy
-from typing import List, Dict, Optional
-from gym.spaces import Box
-import logging
 import gym
 from typing import Tuple
 from ray.rllib.agents.dqn.dqn_tf_policy import PRIO_WEIGHTS
@@ -19,8 +15,6 @@ from ray.rllib.utils.torch_ops import huber_loss, l2_loss, sequence_mask
 from ray.rllib.utils.typing import TrainerConfigDict, TensorType, ModelInputDict
 from ray.rllib.models.modelv2 import ModelV2
 from ray.rllib.agents.ddpg.ddpg_torch_model import DDPGTorchModel
-from ray.rllib.utils import override, force_list
-from ray.rllib.policy.sample_batch import SampleBatch
 from ray.rllib.policy.view_requirement import ViewRequirement
 from ray.rllib.utils.framework import try_import_torch
 from ray.rllib.utils.typing import ModelConfigDict, TensorType

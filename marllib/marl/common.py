@@ -1,6 +1,5 @@
 import yaml
 import os
-import sys
 import collections
 
 algo_type_dict = {
@@ -37,7 +36,7 @@ def check_algo_type(algo_name):
     raise ValueError("{} current not supported".format(algo_name))
 
 
-def _get_model_config(arg_name):
+def get_model_config(arg_name):
     with open(os.path.join(os.path.dirname(__file__), "models/configs", "{}.yaml".format(arg_name)),
               "r") as f:
         try:
@@ -47,7 +46,7 @@ def _get_model_config(arg_name):
     return config_dict
 
 
-def _get_config(params, arg_name, info=None):
+def get_config(params, arg_name, info=None):
     config_name = None
 
     for _i, _v in enumerate(params):

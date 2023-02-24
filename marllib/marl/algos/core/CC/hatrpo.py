@@ -5,33 +5,23 @@ __data__: May-15
 """
 
 import logging
-import re
-from typing import Dict, List, Type, Union, Tuple
+from typing import List, Type, Union
 from ray.rllib.models.torch.torch_action_dist import TorchDistributionWrapper
 from ray.rllib.policy.policy import Policy
 from ray.rllib.models.modelv2 import ModelV2
-from ray.rllib.utils.torch_ops import apply_grad_clipping, \
-    explained_variance, sequence_mask
-import numpy as np
-from ray.rllib.evaluation.postprocessing import discount_cumsum, Postprocessing
+from ray.rllib.utils.torch_ops import explained_variance
+from ray.rllib.evaluation.postprocessing import Postprocessing
 from ray.rllib.policy.sample_batch import SampleBatch
-from ray.rllib.utils.framework import try_import_tf, try_import_torch, get_variable
-from ray.rllib.utils.typing import TrainerConfigDict, TensorType, \
-    LocalOptimizer
+from ray.rllib.utils.framework import try_import_tf, try_import_torch
+from ray.rllib.utils.typing import TensorType
 from ray.rllib.agents.ppo.ppo import PPOTrainer, DEFAULT_CONFIG as PPO_CONFIG
-from ray.rllib.agents.ppo.ppo_torch_policy import PPOTorchPolicy, ValueNetworkMixin, KLCoeffMixin
+from ray.rllib.agents.ppo.ppo_torch_policy import PPOTorchPolicy, KLCoeffMixin
 from ray.rllib.utils.torch_ops import apply_grad_clipping
 from ray.rllib.policy.torch_policy import LearningRateSchedule, EntropyCoeffSchedule
-from marllib.marl.algos.utils.setup_utils import setup_torch_mixins, get_agent_num
+from marllib.marl.algos.utils.setup_utils import setup_torch_mixins
 from marllib.marl.algos.utils.centralized_critic_hetero import (
-    get_global_name,
     contain_global_obs,
     hatrpo_post_process,
-    # value_normalizer,
-    MODEL,
-    STATE,
-    TRAINING,
-    state_name,
 )
 
 from marllib.marl.algos.utils.trust_regions import TrustRegionUpdator
@@ -39,7 +29,6 @@ from marllib.marl.algos.utils.heterogeneous_updateing import update_m_advantage,
 
 from ray.rllib.examples.centralized_critic import CentralizedValueMixin
 from marllib.marl.algos.utils.setup_utils import get_device
-import ctypes
 
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()

@@ -1,19 +1,14 @@
 import tree  # pip install dm_tree
 import torch
 import torch.nn as nn
-from gym.spaces import Tuple as Gym_Tuple, Discrete, Dict as Gym_Dict
-
+from gym.spaces import Dict as Gym_Dict
 from ray.rllib.policy.torch_policy import TorchPolicy
 from ray.rllib.policy.policy import Policy
 from ray.rllib.models.modelv2 import _unpack_obs
 from ray.rllib.agents.qmix.model import RNNModel, _get_size
 from ray.rllib.execution.replay_buffer import *
-from ray.rllib.agents.trainer import Trainer
-from ray.rllib.evaluation.worker_set import WorkerSet
 from ray.rllib.models.torch.torch_action_dist import TorchCategorical
 from ray.rllib.utils.metrics.learner_info import LEARNER_STATS_KEY
-from ray.rllib.utils.typing import TrainerConfigDict
-from ray.util.iter import LocalIterator
 from ray.rllib.models.catalog import ModelCatalog
 from ray.rllib.policy.sample_batch import SampleBatch
 from ray.rllib.agents.qmix.qmix_policy import _mac, _validate, _unroll_mac
@@ -26,7 +21,6 @@ from marllib.marl.models.zoo.mlp.jointQ_mlp import JointQ_MLP
 
 from marllib.marl.models.zoo.mixer import QMixer, VDNMixer
 from marllib.marl.algos.utils.episode_execution_plan import episode_execution_plan
-
 
 # original _unroll_mac for next observation is different from Pymarl.
 # thus we provide a new JointQLoss here

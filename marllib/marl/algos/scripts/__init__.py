@@ -1,19 +1,19 @@
-from marllib.marl.algos.scripts.vda2c import run_vda2c
-from marllib.marl.algos.scripts.vdppo import run_vdppo
-from marllib.marl.algos.scripts.vdn_qmix_iql import run_joint_q
-from marllib.marl.algos.scripts.maa2c import run_maa2c
-from marllib.marl.algos.scripts.mappo import run_mappo
-from marllib.marl.algos.scripts.coma import run_coma
-from marllib.marl.algos.scripts.a2c import run_a2c
-from marllib.marl.algos.scripts.pg import run_pg
-from marllib.marl.algos.scripts.ppo import run_ppo
-from marllib.marl.algos.scripts.ddpg import run_ddpg
-from marllib.marl.algos.scripts.maddpg import run_maddpg
-from marllib.marl.algos.scripts.facmac import run_facmac
-from marllib.marl.algos.scripts.happo import run_happo
-from marllib.marl.algos.scripts.trpo import run_trpo
-from marllib.marl.algos.scripts.hatrpo import run_hatrpo
-from marllib.marl.algos.scripts.matrpo import run_matrpo
+from .vda2c import run_vda2c
+from .vdppo import run_vdppo
+from .vdn_qmix_iql import run_joint_q
+from .maa2c import run_maa2c
+from .mappo import run_mappo
+from .coma import run_coma
+from .a2c import run_a2c
+from .pg import run_pg
+from .ppo import run_ppo
+from .ddpg import run_ddpg
+from .maddpg import run_maddpg
+from .facmac import run_facmac
+from .happo import run_happo
+from .trpo import run_trpo
+from .hatrpo import run_hatrpo
+from .matrpo import run_matrpo
 
 
 POlICY_REGISTRY = {

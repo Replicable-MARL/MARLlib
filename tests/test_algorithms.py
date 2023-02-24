@@ -1,13 +1,5 @@
 import unittest
 from marllib import marl
-from marllib.envs.base_env.mpe import REGISTRY as MPE_REGISTRY
-
-'''
-MAPPO test case
-available scenario train 
-one per iteration
-'''
-
 
 class TestMPEEnv(unittest.TestCase):
 

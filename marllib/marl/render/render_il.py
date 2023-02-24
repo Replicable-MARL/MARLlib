@@ -1,19 +1,13 @@
-import yaml
-import os
-import sys
-import collections
 import ray
-from copy import deepcopy
 from ray.rllib.models import ModelCatalog
 from ray.tune import register_env
 from ray import tune
-from ray.rllib.utils.test_utils import check_learning_achieved
 from ray.rllib.utils.framework import try_import_tf, try_import_torch
 from marllib.marl.models.zoo.rnn.base_rnn import Base_RNN
 from marllib.marl.models.zoo.rnn.ddpg_rnn import DDPG_RNN
 from marllib.envs.base_env import ENV_REGISTRY
 from marllib.marl.algos.scripts import POlICY_REGISTRY
-from marllib.marl.common import _get_model_config, recursive_dict_update, merge_default_and_customer
+from marllib.marl.common import get_model_config, recursive_dict_update, merge_default_and_customer
 from tabulate import tabulate
 
 tf1, tf, tfv = try_import_tf()
@@ -74,11 +68,11 @@ def render_il(config_dict, customer_stop=None):
 
     # load model config according to env_info:
     # encoder config
-    encoder_arch_config = _get_model_config(encoder)
+    encoder_arch_config = get_model_config(encoder)
     config_dict = recursive_dict_update(config_dict, encoder_arch_config)
 
     # core rnn config
-    rnn_arch_config = _get_model_config("rnn")
+    rnn_arch_config = get_model_config("rnn")
     config_dict = recursive_dict_update(config_dict, rnn_arch_config)
 
     ModelCatalog.register_custom_model(

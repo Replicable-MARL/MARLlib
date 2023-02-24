@@ -2,7 +2,7 @@ import yaml
 import os
 import sys
 from copy import deepcopy
-from marllib.marl.common import _get_config, recursive_dict_update, check_algo_type
+from marllib.marl.common import get_config, recursive_dict_update, check_algo_type
 from marllib.marl.algos.run_il import run_il
 from marllib.marl.algos.run_vd import run_vd
 from marllib.marl.algos.run_cc import run_cc
@@ -32,7 +32,7 @@ if __name__ == '__main__':
             f.close()
 
     # env
-    env_config = _get_config(params, "--env_config")
+    env_config = get_config(params, "--env_config")
     config_dict = recursive_dict_update(config_dict, env_config)
 
     for param in params:
@@ -48,7 +48,7 @@ if __name__ == '__main__':
             config_dict["algorithm"] = algo_name
             algo_type = check_algo_type(algo_name)
 
-    algo_config = _get_config(params, "--algo_config", env_config)
+    algo_config = get_config(params, "--algo_config", env_config)
 
 
 

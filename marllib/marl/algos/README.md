@@ -1,4 +1,4 @@
-Currently, 10 environments are available for Independent Learning
+10 environments are available for Independent Learning
 
 - Football
 - MPE 
@@ -11,11 +11,8 @@ Currently, 10 environments are available for Independent Learning
 - MetaDrive
 - Hanabi
 
-```
-python marl/main.py --algo_config=a2c --env_config=smac with env_args.map_name=3m
-```
 
-Currently, 7 environments are available for Value Decomposition
+7 environments are available for Value Decomposition
 
 - Football
 - MPE 
@@ -25,12 +22,7 @@ Currently, 7 environments are available for Value Decomposition
 - LBF 
 - Pommerman
 
-```
-python marl/main.py --algo_config=qmix --env_config=smac with env_args.map_name=3m
-```
-
-
-Currently, 9 environments are available for Centralized Critic
+9 environments are available for Centralized Critic
 
 - Football
 - MPE 
@@ -42,7 +34,4 @@ Currently, 9 environments are available for Centralized Critic
 - Magent
 - Hanabi
 
-```
-python marl/main.py --algo_config=mappo --env_config=smac with env_args.map_name=3m
-```
 

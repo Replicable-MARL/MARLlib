@@ -1,8 +1,6 @@
 from marllib.marl.algos.core.IL.ddpg import *
 from marllib.marl.algos.utils.mixing_Q import q_value_mixing, MixingQValueMixin, before_learn_on_batch
 from ray.rllib.agents.ddpg.ddpg_torch_policy import TargetNetworkMixin, ComputeTDErrorMixin
-from ray.rllib.utils.torch_ops import convert_to_torch_tensor
-from ray.rllib.utils.numpy import convert_to_numpy
 
 torch, nn = try_import_torch()
 

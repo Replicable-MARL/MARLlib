@@ -1,15 +1,12 @@
-from ray.rllib.utils.torch_ops import FLOAT_MIN
 import numpy as np
-from typing import Dict, List, Any, Union
 from gym.spaces import Box
 from functools import reduce
 from torch.nn.utils import parameters_to_vector, vector_to_parameters
 import copy
-from ray.rllib.models.torch.misc import SlimFC, AppendBiasLayer, \
-    normc_initializer
+from ray.rllib.models.torch.misc import SlimFC, normc_initializer
 from ray.rllib.utils.annotations import override
 from ray.rllib.utils.framework import try_import_torch
-from ray.rllib.utils.typing import Dict, TensorType, List, ModelConfigDict
+from ray.rllib.utils.typing import TensorType
 from marllib.marl.models.zoo.mlp.base_mlp import Base_MLP
 
 torch, nn = try_import_torch()

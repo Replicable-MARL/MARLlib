@@ -1,39 +1,14 @@
+from marllib.marl.common import *
+from marllib.marl.algos import run_il, run_vd, run_cc
+from marllib.marl.render import render_cc, render_il, render_vd
 from marllib.marl.algos.scripts import POlICY_REGISTRY
-from marllib.marl.common import _get_config, recursive_dict_update, check_algo_type
-from marllib.envs.base_env import ENV_REGISTRY
-from ray.tune import register_env
-from ray.rllib.models import ModelCatalog
-from marllib.marl.common import _get_model_config, recursive_dict_update, merge_default_and_customer
-from marllib.marl.algos.run_il import run_il
-from marllib.marl.algos.run_vd import run_vd
-from marllib.marl.algos.run_cc import run_cc
-from marllib.marl.render.render_cc import render_cc
-from marllib.marl.render.render_il import render_il
-from marllib.marl.render.render_vd import render_vd
 from marllib.envs.base_env import ENV_REGISTRY
 from marllib.envs.global_reward_env import COOP_ENV_REGISTRY
-from marllib.marl.common import merge_default_and_customer_and_check
+from marllib.marl.models import *
 
-from marllib.marl.models.zoo.rnn.base_rnn import Base_RNN
-from marllib.marl.models.zoo.mlp.base_mlp import Base_MLP
-from marllib.marl.models.zoo.rnn.ddpg_rnn import DDPG_RNN
-from marllib.marl.models.zoo.mlp.ddpg_mlp import DDPG_MLP
-
-from marllib.marl.models.zoo.rnn.jointQ_rnn import JointQ_RNN
-from marllib.marl.models.zoo.rnn.vd_rnn import VD_RNN
-from marllib.marl.models.zoo.mlp.vd_mlp import VD_MLP
-from marllib.marl.models.zoo.mlp.jointQ_mlp import JointQ_MLP
-from marllib.marl.models.zoo.rnn.ddpg_rnn import DDPG_RNN
-from marllib.marl.models.zoo.mlp.ddpg_mlp import DDPG_MLP
-
-from marllib.marl.models.zoo.rnn.cc_rnn import CC_RNN
-from marllib.marl.models.zoo.mlp.cc_mlp import CC_MLP
-from marllib.marl.models.zoo.rnn.ddpg_rnn import DDPG_RNN
-from marllib.marl.models.zoo.mlp.ddpg_mlp import DDPG_MLP
-
+from ray.tune import register_env
 import yaml
 import os
-import ray
 import sys
 from copy import deepcopy
 from tabulate import tabulate
@@ -174,9 +149,9 @@ def build_model(environment, algorithm, model_preference):
                 model_class = VD_MLP
 
     if model_preference["core_arch"] in ["gru", "lstm"]:
-        model_config = _get_model_config("rnn")
+        model_config = get_model_config("rnn")
     elif model_preference["core_arch"] in ["mlp"]:
-        model_config = _get_model_config("mlp")
+        model_config = get_model_config("mlp")
     else:
         raise NotImplementedError("{} not supported agent model arch".format(model_preference["core_arch"]))
 
@@ -188,12 +163,12 @@ def build_model(environment, algorithm, model_preference):
         encoder = "cnn_encoder"
 
     # encoder config
-    encoder_arch_config = _get_model_config(encoder)
+    encoder_arch_config = get_model_config(encoder)
     model_config = recursive_dict_update(model_config, encoder_arch_config)
     model_config = recursive_dict_update(model_config, {"model_arch_args": model_preference})
 
     if algorithm.algo_type == "VD":
-        mixer_arch_config = _get_model_config("mixer")
+        mixer_arch_config = get_model_config("mixer")
         model_config = recursive_dict_update(model_config, mixer_arch_config)
 
     return model_class, model_config

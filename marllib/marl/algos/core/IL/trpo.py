@@ -16,13 +16,10 @@ from ray.rllib.utils.framework import try_import_tf, try_import_torch
 from ray.rllib.utils.typing import TensorType
 from ray.rllib.agents.ppo.ppo import PPOTrainer, DEFAULT_CONFIG as PPO_CONFIG
 from ray.rllib.agents.ppo.ppo_torch_policy import PPOTorchPolicy, KLCoeffMixin
-from ray.rllib.utils.torch_ops import apply_grad_clipping
 from ray.rllib.policy.torch_policy import LearningRateSchedule, EntropyCoeffSchedule
 from marllib.marl.algos.utils.setup_utils import setup_torch_mixins
-from marllib.marl.algos.utils.centralized_critic_hetero import (
-    trpo_post_process,
-    # value_normalizer,
-)
+from marllib.marl.algos.utils.centralized_critic_hetero import trpo_post_process
+
 
 from marllib.marl.algos.utils.trust_regions import TrustRegionUpdator
 
@@ -107,11 +104,6 @@ def trpo_loss_fn(
     # Ignore the value function.
     else:
         vf_loss = mean_vf_loss = 0.0
-
-    # if loss.isnan() or mean_vf_loss.isnan():
-    #     print('loss error, find nan')
-    #     ic(loss)
-    #     ic(mean_vf_loss)
 
     trust_region_updator = TrustRegionUpdator(
         model=model,

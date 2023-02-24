@@ -1,5 +1,5 @@
 import ray
-from gym.spaces import Dict as GymDict, Discrete, Box, Tuple
+from gym.spaces import Dict as GymDict, Discrete, Tuple
 from ray.tune import register_env
 from ray import tune
 from ray.rllib.utils.framework import try_import_tf, try_import_torch

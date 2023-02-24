@@ -1,16 +1,15 @@
-from ray.rllib.utils.torch_ops import apply_grad_clipping, sequence_mask
+from ray.rllib.utils.torch_ops import sequence_mask
 from ray.rllib.models.action_dist import ActionDistribution
 from ray.rllib.models.modelv2 import ModelV2
 from ray.rllib.policy.policy import Policy
-from ray.rllib.utils.typing import TrainerConfigDict, TensorType, \
-    LocalOptimizer, GradInfoDict
+from ray.rllib.utils.typing import TensorType
 from ray.rllib.utils.framework import try_import_torch
-from ray.rllib.agents.a3c.a3c_torch_policy import A3CTorchPolicy, actor_critic_loss
+from ray.rllib.agents.a3c.a3c_torch_policy import A3CTorchPolicy
 from ray.rllib.agents.a3c.a2c import A2C_DEFAULT_CONFIG as A2C_CONFIG, A2CTrainer
-from ray.rllib.evaluation.postprocessing import compute_advantages, Postprocessing
+from ray.rllib.evaluation.postprocessing import Postprocessing
 from ray.rllib.policy.sample_batch import SampleBatch
 from ray.rllib.utils.torch_ops import convert_to_torch_tensor
-from typing import Dict, Tuple
+from typing import Dict
 from marllib.marl.algos.utils.centralized_critic import CentralizedValueMixin, centralized_critic_postprocessing
 
 torch, nn = try_import_torch()

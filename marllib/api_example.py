@@ -36,17 +36,17 @@ from marllib import marl
 
 # prepare the environment
 #env = marl.make_env(environment_name="hanabi", map_name="Hanabi-Very-Small")
-env = marl.make_env(environment_name="mpe", map_name="simple_spread")
+env = marl.make_env(environment_name="mpe", map_name="simple_spread", force_coop=True, continuous_actions=True)
 # can add extra env params. remember to check env configuration before use
-# env = marl.make_env(environment_name='sma c', map_name='3m', difficulty="6", reward_scale_rate=15)
+# env = marl.make_env(environment_name='smac', map_name='3m', difficulty="6", reward_scale_rate=15)
 
 # initialize algorithm and load hyperparameters
-mappo = marl.algos.facmac(hyperparam_source='common')
+mappo = marl.algos.ppo(hyperparam_source="common")
 # can add extra algorithm params. remember to check algo_config hyperparams before use
 # mappo = marl.algos.MAPPO(hyperparam_source='common', use_gae=True,  batch_episode=10, kl_coeff=0.2, num_sgd_iter=3)
 
 # build agent model based on env + algorithms + user preference if checked available
-model = marl.build_model(env, mappo, {"core_arch": "mlp", "encode_layer": "256-256"})
+model = marl.build_model(env, mappo, {"core_arch": "gru", "encode_layer": "128-64"})
 
 
 # start learning + extra experiment settings if needed. remember to check ray.yaml before use

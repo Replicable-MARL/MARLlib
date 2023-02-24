@@ -1,4 +1,4 @@
-from ray.rllib.agents.ppo.ppo_torch_policy import PPOTorchPolicy, ValueNetworkMixin, KLCoeffMixin
+from ray.rllib.agents.ppo.ppo_torch_policy import KLCoeffMixin
 from ray.rllib.policy.torch_policy import LearningRateSchedule, EntropyCoeffSchedule
 import re
 import torch

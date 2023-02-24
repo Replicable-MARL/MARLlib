@@ -3,15 +3,12 @@ import copy
 from gym.spaces import Box
 from ray.rllib.utils.framework import try_import_tf, try_import_torch
 from marllib.marl.models.zoo.rnn.base_rnn import Base_RNN
-from ray.rllib.models.torch.misc import SlimFC, AppendBiasLayer, \
-    normc_initializer
+from ray.rllib.models.torch.misc import SlimFC, normc_initializer
 from ray.rllib.utils.annotations import override
 from functools import reduce
-from icecream import ic
-from torch.optim import RMSprop, Adam
+from torch.optim import Adam
 from torch.nn.utils import parameters_to_vector, vector_to_parameters
 from marllib.marl.algos.utils.distributions import init
-from marllib.marl.algos.utils.mlp import MLPBase
 
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()

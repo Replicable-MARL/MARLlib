@@ -3,8 +3,7 @@ from ray.rllib.models.torch.torch_modelv2 import TorchModelV2
 from ray.rllib.utils.annotations import override
 from ray.rllib.utils.framework import try_import_torch
 from ray.rllib.models.preprocessors import get_preprocessor
-from ray.rllib.models.torch.misc import SlimFC, AppendBiasLayer, \
-    normc_initializer
+from ray.rllib.models.torch.misc import SlimFC, normc_initializer
 torch, nn = try_import_torch()
 
 

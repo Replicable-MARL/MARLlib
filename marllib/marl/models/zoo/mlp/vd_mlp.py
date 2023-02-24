@@ -1,9 +1,4 @@
-from gym.spaces import Box
-from ray.rllib.models.torch.misc import SlimFC, AppendBiasLayer, \
-    normc_initializer
-from ray.rllib.utils.annotations import override
 from ray.rllib.utils.framework import try_import_torch
-from ray.rllib.utils.typing import Dict, TensorType, List, ModelConfigDict
 from marllib.marl.models.zoo.mlp.base_mlp import Base_MLP
 from marllib.marl.models.zoo.mixer import QMixer, VDNMixer
 
