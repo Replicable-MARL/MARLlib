@@ -3,7 +3,7 @@ import copy
 from gym.spaces import Box
 from ray.rllib.utils.framework import try_import_tf, try_import_torch
 from marllib.marl.models.zoo.rnn.base_rnn import Base_RNN
-from ray.rllib.models.torch.misc import SlimFC, normc_initializer
+from ray.rllib.models.torch.misc import SlimFC, SlimConv2d, normc_initializer
 from ray.rllib.utils.annotations import override
 from functools import reduce
 from torch.optim import Adam
@@ -32,6 +32,7 @@ class CC_RNN(Base_RNN):
         input_dim = self.input_dim
         if "state" not in self.full_obs_space.spaces:
             self.state_dim = self.full_obs_space["obs"].shape
+            self.state_dim_last = self.state_dim[-1]
             self.cc_encoder = copy.deepcopy(self.encoder)
             cc_input_dim = input_dim * self.custom_config["num_agents"]
         else:
@@ -41,21 +42,18 @@ class CC_RNN(Base_RNN):
                 self.state_dim_last = self.full_obs_space["state"].shape[2] + self.full_obs_space["obs"].shape[2]
                 cc_input_dim = self.state_dim_last
                 for i in range(self.custom_config["model_arch_args"]["conv_layer"]):
-                    cc_conv_f = nn.Conv2d(
-                        in_channels=cc_input_dim,
-                        out_channels=self.custom_config["model_arch_args"]["out_channel_layer_{}".format(i)],
-                        kernel_size=self.custom_config["model_arch_args"]["kernel_size_layer_{}".format(i)],
-                        stride=self.custom_config["model_arch_args"]["stride_layer_{}".format(i)],
-                        padding=self.custom_config["model_arch_args"]["padding_layer_{}".format(i)],
+                    cc_layers.append(
+                        SlimConv2d(
+                            in_channels=cc_input_dim,
+                            out_channels=self.custom_config["model_arch_args"]["out_channel_layer_{}".format(i)],
+                            kernel=self.custom_config["model_arch_args"]["kernel_size_layer_{}".format(i)],
+                            stride=self.custom_config["model_arch_args"]["stride_layer_{}".format(i)],
+                            padding=self.custom_config["model_arch_args"]["padding_layer_{}".format(i)],
+                            activation_fn=self.activation)
                     )
-                    cc_relu_f = nn.ReLU()
                     cc_pool_f = nn.MaxPool2d(
                         kernel_size=self.custom_config["model_arch_args"]["pool_size_layer_{}".format(i)])
-
-                    cc_layers.append(cc_conv_f)
-                    cc_layers.append(cc_relu_f)
                     cc_layers.append(cc_pool_f)
-
                     cc_input_dim = self.custom_config["model_arch_args"]["out_channel_layer_{}".format(i)]
 
             else:
@@ -273,7 +271,8 @@ class CC_RNN(Base_RNN):
             v_t_bar = vt / (1 - beta2 ** step)
 
             vector_to_parameters(
-                parameters_to_vector([parameters[i]]) - parameters_to_vector(lr * m_t_bar / (torch.sqrt(v_t_bar) + eps)),
+                parameters_to_vector([parameters[i]]) - parameters_to_vector(
+                    lr * m_t_bar / (torch.sqrt(v_t_bar) + eps)),
                 [parameters[i]],
             )
 

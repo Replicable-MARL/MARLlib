@@ -15,9 +15,9 @@ torch, nn = try_import_torch()
 def run_vd(algo_config, env, model, stop=None):
     ray.init(local_mode=algo_config["local_mode"])
 
-    ###################
-    ### environment ###
-    ###################
+    ########################
+    ### environment info ###
+    ########################
 
     env_config = env.get_env_info()
     map_name = algo_config['env_args']['map_name']
@@ -26,9 +26,9 @@ def run_vd(algo_config, env, model, stop=None):
     env.close()
 
 
-    ##############
-    ### policy ###
-    ##############
+    ######################
+    ### policy sharing ###
+    ######################
 
     # grab the policy mapping info here to use in grouping environment
     policy_mapping_info = env_config["policy_mapping_info"]
@@ -125,9 +125,9 @@ def run_vd(algo_config, env, model, stop=None):
         else:
             raise ValueError("wrong share_policy {}".format(algo_config["share_policy"]))
 
-    #####################
-    ### common config ###
-    #####################
+    #########################
+    ### experiment config ###
+    #########################
 
     common_config = {
         "seed": int(algo_config["seed"]),

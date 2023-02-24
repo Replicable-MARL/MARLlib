@@ -12,9 +12,9 @@ torch, nn = try_import_torch()
 def run_il(algo_config, env, model, stop=None):
     ray.init(local_mode=algo_config["local_mode"])
 
-    ###################
-    ### environment ###
-    ###################
+    ########################
+    ### environment info ###
+    ########################
 
     env_config = env.get_env_info()
     map_name = algo_config['env_args']['map_name']
@@ -22,9 +22,9 @@ def run_il(algo_config, env, model, stop=None):
     env_config["agent_name_ls"] = agent_name_ls
     env.close()
 
-    ##############
-    ### policy ###
-    ##############
+    ######################
+    ### policy sharing ###
+    ######################
 
     policy_mapping_info = env_config["policy_mapping_info"]
 
@@ -75,9 +75,9 @@ def run_il(algo_config, env, model, stop=None):
     else:
         raise ValueError("wrong share_policy {}".format(algo_config["share_policy"]))
 
-    #####################
-    ### common config ###
-    #####################
+    #########################
+    ### experiment config ###
+    #########################
 
     common_config = {
         "seed": int(algo_config["seed"]),
@@ -104,7 +104,7 @@ def run_il(algo_config, env, model, stop=None):
 
     ##################
     ### run script ###
-    ###################
+    ##################
 
     results = POlICY_REGISTRY[algo_config["algorithm"]](model, algo_config, common_config, env_config, stop_config)
 

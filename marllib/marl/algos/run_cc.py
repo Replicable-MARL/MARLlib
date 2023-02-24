@@ -10,9 +10,9 @@ torch, nn = try_import_torch()
 def run_cc(algo_config, env, model, stop=None):
     ray.init(local_mode=algo_config["local_mode"])
 
-    ###################
-    ### environment ###
-    ###################
+    ########################
+    ### environment info ###
+    ########################
 
     env_config = env.get_env_info()
     map_name = algo_config['env_args']['map_name']
@@ -20,9 +20,9 @@ def run_cc(algo_config, env, model, stop=None):
     env_config["agent_name_ls"] = agent_name_ls
     env.close()
 
-    ##############
-    ### policy ###
-    ##############
+    ######################
+    ### policy sharing ###
+    ######################
 
     policy_mapping_info = env_config["policy_mapping_info"]
 
@@ -88,9 +88,9 @@ def run_cc(algo_config, env, model, stop=None):
         policy_mapping_fn = tune.function(
             lambda agent_id: policy_ids[agent_name_ls.index(agent_id)])
 
-    #####################
-    ### common config ###
-    #####################
+    #########################
+    ### experiment config ###
+    #########################
 
     common_config = {
         "seed": int(algo_config["seed"]),

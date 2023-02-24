@@ -3,7 +3,7 @@ import numpy as np
 from typing import Dict, List
 from ray.rllib.models.modelv2 import ModelV2
 from ray.rllib.models.torch.recurrent_net import RecurrentNetwork as TorchRNN
-from ray.rllib.models.torch.misc import SlimFC, normc_initializer
+from ray.rllib.models.torch.misc import SlimFC, SlimConv2d, normc_initializer
 from ray.rllib.utils.annotations import override
 from ray.rllib.utils.framework import try_import_tf, try_import_torch, \
     TensorType
@@ -63,24 +63,23 @@ class Base_RNN(TorchRNN, nn.Module):
             self.obs_size = self.full_obs_space['obs'].shape
             input_dim = self.obs_size[2]
             for i in range(self.custom_config["model_arch_args"]["conv_layer"]):
-                conv_f = nn.Conv2d(
-                    in_channels=input_dim,
-                    out_channels=self.custom_config["model_arch_args"]["out_channel_layer_{}".format(i)],
-                    kernel_size=self.custom_config["model_arch_args"]["kernel_size_layer_{}".format(i)],
-                    stride=self.custom_config["model_arch_args"]["stride_layer_{}".format(i)],
-                    padding=self.custom_config["model_arch_args"]["padding_layer_{}".format(i)],
+                layers.append(
+                    SlimConv2d(
+                        in_channels=input_dim,
+                        out_channels=self.custom_config["model_arch_args"]["out_channel_layer_{}".format(i)],
+                        kernel=self.custom_config["model_arch_args"]["kernel_size_layer_{}".format(i)],
+                        stride=self.custom_config["model_arch_args"]["stride_layer_{}".format(i)],
+                        padding=self.custom_config["model_arch_args"]["padding_layer_{}".format(i)],
+                        activation_fn=self.activation
+                    )
                 )
-                relu_f = nn.ReLU()
                 pool_f = nn.MaxPool2d(kernel_size=self.custom_config["model_arch_args"]["pool_size_layer_{}".format(i)])
-
-                layers.append(conv_f)
-                layers.append(relu_f)
                 layers.append(pool_f)
 
                 input_dim = self.custom_config["model_arch_args"]["out_channel_layer_{}".format(i)]
 
         else:
-            raise ValueError()
+            raise ValueError("fc_layer/conv layer not in model arch args")
 
         self.input_dim = input_dim
 
@@ -198,8 +197,6 @@ class Base_RNN(TorchRNN, nn.Module):
             x = x.reshape(inputs.shape[0], inputs.shape[1], -1)
         else:
             x = self.encoder(inputs)
-
-        x = nn.functional.relu(x)
 
         if self.custom_config["model_arch_args"]["core_arch"] == "gru":
             self._features, h = self.rnn(x, torch.unsqueeze(state[0], 0))
