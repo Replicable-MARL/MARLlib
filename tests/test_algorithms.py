@@ -10,7 +10,7 @@ class TestMPEEnv(unittest.TestCase):
                 if algo in ["ddpg", "maddpg", "facmac"]:
                     env = marl.make_env(environment_name="mpe", map_name="simple_spread", force_coop=True,
                                         continuous_actions=True)
-                    one_algo = getattr(marl.algos, algo)(hyperparam_source="common")
+                    one_algo = getattr(marl.algos, algo)(hyperparam_source="test")
                     model = marl.build_model(env, one_algo, {"core_arch": "mlp", "encode_layer": "64-64"})
                     one_algo.fit(env, model, stop={'training_iteration': 3}, local_mode=False, num_gpus=0,
                                  num_workers=3, share_policy='all', checkpoint_end=False)
@@ -18,7 +18,7 @@ class TestMPEEnv(unittest.TestCase):
                     pass
                 else:
                     env = marl.make_env(environment_name="mpe", map_name="simple_spread", force_coop=True)
-                    one_algo = getattr(marl.algos, algo)(hyperparam_source="common")
+                    one_algo = getattr(marl.algos, algo)(hyperparam_source="test")
                     model = marl.build_model(env, one_algo, {"core_arch": "mlp", "encode_layer": "64-64"})
                     one_algo.fit(env, model, stop={'training_iteration': 3}, local_mode=False, num_gpus=0,
                                  num_workers=3, share_policy='all', checkpoint_end=False)

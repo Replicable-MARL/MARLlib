@@ -187,11 +187,14 @@ class _Algo:
         @param: hyperparam_source:
         1. 'common'             use marl/algos/hyperparams/common
         2. $environment_name    use marl/algos/hyperparams/finetuned/$environment_name
+        3. 'test'               use marl/algos/hyperparams/test
         """
         # if '_lambda' in algo_parameters:
         #     algo_parameters['lambda'] = algo_parameters['_lambda']
         #     del algo_parameters['_lambda']
         if hyperparam_source == 'common':
+            rel_path = "algos/hyperparams/common/{}.yaml".format(self.name)
+        elif hyperparam_source == 'test':
             rel_path = "algos/hyperparams/common/{}.yaml".format(self.name)
         else:
             rel_path = "algos/hyperparams/finetuned/{}/{}.yaml".format(hyperparam_source, self.name)
