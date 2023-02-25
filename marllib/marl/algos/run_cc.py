@@ -7,6 +7,7 @@ from marllib.marl.common import merge_default_and_customer
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
 
+
 def run_cc(algo_config, env, model, stop=None):
     ray.init(local_mode=algo_config["local_mode"])
 

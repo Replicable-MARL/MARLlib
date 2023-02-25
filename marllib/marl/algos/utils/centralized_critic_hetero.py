@@ -212,14 +212,14 @@ def link_with_other_agents(current_policy, agent_num, sample_batches, other_agen
             _p, _b = other_agent_info[name]
 
             if any([
-                _p.model.cc_encoder is not current_policy.model.cc_encoder,
-                _p.model.central_vf is not current_policy.model.central_vf,
+                _p.model.cc_vf_encoder is not current_policy.model.cc_vf_encoder,
+                _p.model.cc_vf_branch is not current_policy.model.cc_vf_branch,
                 _p.model.vf_encoder is not current_policy.model.vf_encoder,
-                _p.model.value_branch is not current_policy.model.value_branch]):
-                    _p.model.cc_encoder = current_policy.model.cc_encoder
-                    _p.model.central_vf = current_policy.model.central_vf
+                _p.model.vf_branch is not current_policy.model.vf_branch]):
+                    _p.model.cc_vf_encoder = current_policy.model.cc_vf_encoder
+                    _p.model.cc_vf_branch = current_policy.model.cc_vf_branch
                     _p.model.vf_encoder = current_policy.model.vf_encoder
-                    _p.model.value_branch = current_policy.model.value_branch
+                    _p.model.vf_branch = current_policy.model.vf_branch
 
             current_policy.model.link_other_agent_policy(name, _p)
 
