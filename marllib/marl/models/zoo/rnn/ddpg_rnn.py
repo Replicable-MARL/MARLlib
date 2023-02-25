@@ -6,7 +6,7 @@ from ray.rllib.utils.annotations import override
 from ray.rllib.utils.framework import try_import_tf, try_import_torch, \
     TensorType
 from ray.rllib.policy.rnn_sequencing import add_time_dimension
-from ray.rllib.models.torch.misc import SlimFC, normc_initializer
+from ray.rllib.models.torch.misc import SlimFC, SlimConv2d, normc_initializer
 from marllib.marl.models.zoo.mixer import QMixer, VDNMixer
 
 tf1, tf, tfv = try_import_tf()
@@ -35,26 +35,25 @@ class DDPG_RNN(TorchRNN, nn.Module):
         self.custom_config = model_config["custom_model_config"]
         self.full_obs_space = getattr(obs_space, "original_space", obs_space)
         self.n_agents = self.custom_config["num_agents"]
+        self.activation = model_config.get("fcnet_activation")
 
-        # currently only support gru cell
         if self.custom_config["model_arch_args"]["core_arch"] not in ["gru", "lstm"]:
             raise ValueError()
 
-        if "encode_layer" in self.custom_config["model_arch_args"]:
-            encode_layer = self.custom_config["model_arch_args"]["encode_layer"]
-            encoder_layer_dim = encode_layer.split("-")
-            encoder_layer_dim = [int(i) for i in encoder_layer_dim]
-        else:  # default config
-            encoder_layer_dim = []
-            for i in range(self.custom_config["model_arch_args"]["fc_layer"]):
-                out_dim = self.custom_config["model_arch_args"]["out_dim_fc_{}".format(i)]
-                encoder_layer_dim.append(out_dim)
-
-        self.encoder_layer_dim = encoder_layer_dim
-        self.activation = model_config.get("fcnet_activation")
-
+        # encoder
         layers = []
         if "fc_layer" in self.custom_config["model_arch_args"]:
+            if "encode_layer" in self.custom_config["model_arch_args"]:
+                encode_layer = self.custom_config["model_arch_args"]["encode_layer"]
+                encoder_layer_dim = encode_layer.split("-")
+                encoder_layer_dim = [int(i) for i in encoder_layer_dim]
+            else:  # default config
+                encoder_layer_dim = []
+                for i in range(self.custom_config["model_arch_args"]["fc_layer"]):
+                    out_dim = self.custom_config["model_arch_args"]["out_dim_fc_{}".format(i)]
+                    encoder_layer_dim.append(out_dim)
+
+            self.encoder_layer_dim = encoder_layer_dim
             self.obs_size = self.full_obs_space["obs"].shape[0]
             input_dim = self.obs_size
             for out_dim in self.encoder_layer_dim:
@@ -68,18 +67,17 @@ class DDPG_RNN(TorchRNN, nn.Module):
             self.obs_size = self.full_obs_space['obs'].shape
             input_dim = self.obs_size[2]
             for i in range(self.custom_config["model_arch_args"]["conv_layer"]):
-                conv_f = nn.Conv2d(
-                    in_channels=input_dim,
-                    out_channels=self.custom_config["model_arch_args"]["out_channel_layer_{}".format(i)],
-                    kernel_size=self.custom_config["model_arch_args"]["kernel_size_layer_{}".format(i)],
-                    stride=self.custom_config["model_arch_args"]["stride_layer_{}".format(i)],
-                    padding=self.custom_config["model_arch_args"]["padding_layer_{}".format(i)],
+                layers.append(
+                    SlimConv2d(
+                        in_channels=input_dim,
+                        out_channels=self.custom_config["model_arch_args"]["out_channel_layer_{}".format(i)],
+                        kernel=self.custom_config["model_arch_args"]["kernel_size_layer_{}".format(i)],
+                        stride=self.custom_config["model_arch_args"]["stride_layer_{}".format(i)],
+                        padding=self.custom_config["model_arch_args"]["padding_layer_{}".format(i)],
+                        activation_fn=self.activation
+                    )
                 )
-                relu_f = nn.ReLU()
                 pool_f = nn.MaxPool2d(kernel_size=self.custom_config["model_arch_args"]["pool_size_layer_{}".format(i)])
-
-                layers.append(conv_f)
-                layers.append(relu_f)
                 layers.append(pool_f)
 
                 input_dim = self.custom_config["model_arch_args"]["out_channel_layer_{}".format(i)]
@@ -117,8 +115,11 @@ class DDPG_RNN(TorchRNN, nn.Module):
         else:
             raise ValueError()
         # action branch and value branch
-        self.action_branch = nn.Linear(self.hidden_state_size, num_outputs)
-        self.value_branch = nn.Linear(self.hidden_state_size, 1)
+        self.action_branch = SlimFC(
+            in_size=self.hidden_state_size,
+            out_size=num_outputs,
+            initializer=normc_initializer(0.01),
+            activation_fn=None)
 
         if self.custom_config["algorithm"] in ["facmac"]:
             # mixer:
@@ -145,12 +146,12 @@ class DDPG_RNN(TorchRNN, nn.Module):
         # Place hidden states on same device as model.
         if self.custom_config["model_arch_args"]["core_arch"] == "gru":
             h = [
-                self.value_branch.weight.new(1, self.hidden_state_size).zero_().squeeze(0),
+                self.action_branch._model._modules["0"].weight.new(1, self.hidden_state_size).zero_().squeeze(0),
             ]
         else:  # lstm
             h = [
-                self.value_branch.weight.new(1, self.hidden_state_size).zero_().squeeze(0),
-                self.value_branch.weight.new(1, self.hidden_state_size).zero_().squeeze(0)
+                self.action_branch._model._modules["0"].weight.new(1, self.hidden_state_size).zero_().squeeze(0),
+                self.action_branch._model._modules["0"].weight.new(1, self.hidden_state_size).zero_().squeeze(0)
             ]
         return h
 
