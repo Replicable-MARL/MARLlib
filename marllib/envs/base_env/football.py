@@ -4,8 +4,8 @@ from gym.spaces import Dict as GymDict, Box
 from ray.rllib.env.multi_agent_env import MultiAgentEnv
 from ray.tune.utils import merge_dicts
 
-SMM_WIDTH = 42
-SMM_HEIGHT = 42
+SMM_WIDTH = 32
+SMM_HEIGHT = 32
 
 # only cooperative scenario
 ally_num_dict = {
