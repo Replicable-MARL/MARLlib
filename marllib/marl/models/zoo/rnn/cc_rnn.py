@@ -33,7 +33,7 @@ class CC_RNN(Base_RNN):
         if "state" not in self.full_obs_space.spaces:
             self.state_dim = self.full_obs_space["obs"].shape
             self.state_dim_last = self.state_dim[-1]
-            self.cc_encoder = copy.deepcopy(self.encoder)
+            self.cc_vf_encoder = copy.deepcopy(self.p_encoder)
             cc_input_dim = input_dim * self.custom_config["num_agents"]
         else:
             self.state_dim = self.full_obs_space["state"].shape
@@ -67,7 +67,7 @@ class CC_RNN(Base_RNN):
                                activation_fn=self.activation))
                     cc_input_dim = cc_out_dim
 
-            self.cc_encoder = nn.Sequential(
+            self.cc_vf_encoder = nn.Sequential(
                 *cc_layers
             )
 
@@ -80,7 +80,7 @@ class CC_RNN(Base_RNN):
         else:
             input_size = cc_input_dim
 
-        self.central_vf = nn.Sequential(
+        self.cc_vf_branch = nn.Sequential(
             nn.Linear(input_size, 1),
         )
 
@@ -89,13 +89,13 @@ class CC_RNN(Base_RNN):
             def init_(m, value):
                 return init(m, nn.init.orthogonal_, lambda x: nn.init.constant_(x, 0), value)
 
-            self.action_branch = init_(nn.Linear(self.hidden_state_size, num_outputs), value=self.custom_config['gain'])
+            self.p_branch = init_(nn.Linear(self.hidden_state_size, num_outputs), value=self.custom_config['gain'])
 
-            self.central_vf = nn.Sequential(
+            self.cc_vf_branch = nn.Sequential(
                 init_(nn.Linear(input_size, 1), value=1)
             )
 
-            self.actors = [self.encoder, self.rnn, self.action_branch]
+            self.actors = [self.p_encoder, self.rnn, self.p_branch]
 
             # self.actor_optimizer = Adam(params=self.actor_parameters(), lr=self.custom_config['actor_lr'])
             self.actor_optimizer = Adam(params=self.parameters(), lr=self.custom_config['actor_lr'])
@@ -103,8 +103,8 @@ class CC_RNN(Base_RNN):
 
         if self.custom_config["algorithm"] in ["coma"]:
             self.q_flag = True
-            self.value_branch = nn.Linear(self.input_dim, num_outputs)
-            self.central_vf = nn.Sequential(
+            self.vf_branch = nn.Linear(self.input_dim, num_outputs)
+            self.cc_vf_branch = nn.Sequential(
                 nn.Linear(input_size, num_outputs),
             )
 
@@ -118,14 +118,15 @@ class CC_RNN(Base_RNN):
         self._train_batch_ = None
 
     def central_value_function(self, state, opponent_actions=None):
+        assert self._features is not None, "must call forward() first"
         B = state.shape[0]
 
         if "conv_layer" in self.custom_config["model_arch_args"]:
             x = state.reshape(-1, self.state_dim[0], self.state_dim[1], self.state_dim_last).permute(0, 3, 1, 2)
-            x = self.cc_encoder(x)
+            x = self.cc_vf_encoder(x)
             x = torch.mean(x, (2, 3))
         else:
-            x = self.cc_encoder(state)
+            x = self.cc_vf_encoder(state)
 
         if opponent_actions is not None:
             if isinstance(self.custom_config["space_act"], Box):  # continuous
@@ -144,15 +145,15 @@ class CC_RNN(Base_RNN):
             x = torch.cat([x.reshape(B, -1)], 1)
 
         if self.q_flag:
-            return torch.reshape(self.central_vf(x), [-1, self.num_outputs])
+            return torch.reshape(self.cc_vf_branch(x), [-1, self.num_outputs])
         else:
-            return torch.reshape(self.central_vf(x), [-1])
+            return torch.reshape(self.cc_vf_branch(x), [-1])
 
     @override(Base_RNN)
     def critic_parameters(self):
         critics = [
-            self.cc_encoder,
-            self.central_vf,
+            self.cc_vf_encoder,
+            self.cc_vf_branch,
         ]
         return reduce(lambda x, y: x + y, map(lambda p: list(p.parameters()), critics))
 
@@ -189,11 +190,6 @@ class CC_RNN(Base_RNN):
         )
 
     def update_critic(self, loss, lr, grad_clip):
-        # self.__t_critic = self.__update_adam(
-        #     loss=loss, parameters=self.critic_parameters(),
-        #     adam_info=self.critic_adam_update_info,
-        #     lr=lr, grad_clip=grad_clip, step=self.__t_critic,
-        # )
         CC_RNN.update_use_torch_adam(
             loss=loss,
             optimizer=self.critic_optimizer,
