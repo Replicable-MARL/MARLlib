@@ -7,6 +7,12 @@ except Exception as e:
     COOP_ENV_REGISTRY["mpe"] = str(e)
 
 try:
+    from marllib.envs.global_reward_env.magent_fcoop import RllibMAgent_FCOOP
+    COOP_ENV_REGISTRY["magent"] = RllibMAgent_FCOOP
+except Exception as e:
+    COOP_ENV_REGISTRY["magent"] = str(e)
+
+try:
     from marllib.envs.global_reward_env.mamujoco_fcoop import RllibMAMujoco_FCOOP
     COOP_ENV_REGISTRY["mamujoco"] = RllibMAMujoco_FCOOP
 except Exception as e:
