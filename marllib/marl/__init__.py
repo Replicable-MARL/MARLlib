@@ -192,10 +192,8 @@ class _Algo:
         # if '_lambda' in algo_parameters:
         #     algo_parameters['lambda'] = algo_parameters['_lambda']
         #     del algo_parameters['_lambda']
-        if hyperparam_source == 'common':
-            rel_path = "algos/hyperparams/common/{}.yaml".format(self.name)
-        elif hyperparam_source == 'test':
-            rel_path = "algos/hyperparams/common/{}.yaml".format(self.name)
+        if hyperparam_source in ["common", "test"]:
+            rel_path = "algos/hyperparams/{}/{}.yaml".format(hyperparam_source, self.name)
         else:
             rel_path = "algos/hyperparams/finetuned/{}/{}.yaml".format(hyperparam_source, self.name)
 
