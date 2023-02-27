@@ -32,9 +32,13 @@ class CC_RNN(Base_RNN):
         input_dim = self.input_dim
         if "state" not in self.full_obs_space.spaces:
             self.state_dim = self.full_obs_space["obs"].shape
-            self.state_dim_last = self.state_dim[-1]
             self.cc_vf_encoder = copy.deepcopy(self.p_encoder)
-            cc_input_dim = input_dim * self.custom_config["num_agents"]
+            if len(self.state_dim) > 1:  # env return a 3D obs
+                cc_input_dim = self.input_dim * self.n_agents
+                self.state_dim_last = self.state_dim[-1]
+            else:
+                self.state_dim_last = self.state_dim[-1]
+                cc_input_dim = input_dim * self.n_agents
         else:
             self.state_dim = self.full_obs_space["state"].shape
             if len(self.state_dim) > 1:  # env return a 3D global state
@@ -74,15 +78,17 @@ class CC_RNN(Base_RNN):
         # Central VF
         if self.custom_config["opp_action_in_cc"]:
             if isinstance(self.custom_config["space_act"], Box):  # continuous
-                input_size = cc_input_dim + num_outputs * (self.custom_config["num_agents"] - 1) // 2
+                input_size = cc_input_dim + num_outputs * (self.n_agents - 1) // 2
             else:
-                input_size = cc_input_dim + num_outputs * (self.custom_config["num_agents"] - 1)
+                input_size = cc_input_dim + num_outputs * (self.n_agents - 1)
         else:
             input_size = cc_input_dim
 
-        self.cc_vf_branch = nn.Sequential(
-            nn.Linear(input_size, 1),
-        )
+        self.cc_vf_branch = SlimFC(
+            in_size=input_size,
+            out_size=1,
+            initializer=normc_initializer(0.01),
+            activation_fn=None)
 
         if self.custom_config['algorithm'].lower() in ['happo']:
             # set actor
@@ -103,10 +109,11 @@ class CC_RNN(Base_RNN):
 
         if self.custom_config["algorithm"] in ["coma"]:
             self.q_flag = True
-            self.vf_branch = nn.Linear(self.input_dim, num_outputs)
-            self.cc_vf_branch = nn.Sequential(
-                nn.Linear(input_size, num_outputs),
-            )
+            self.cc_vf_branch = SlimFC(
+                in_size=input_size,
+                out_size=num_outputs,
+                initializer=normc_initializer(0.01),
+                activation_fn=None)
 
         self.other_policies = {}
 
@@ -122,9 +129,15 @@ class CC_RNN(Base_RNN):
         B = state.shape[0]
 
         if "conv_layer" in self.custom_config["model_arch_args"]:
-            x = state.reshape(-1, self.state_dim[0], self.state_dim[1], self.state_dim_last).permute(0, 3, 1, 2)
-            x = self.cc_vf_encoder(x)
-            x = torch.mean(x, (2, 3))
+            if "state" in self.full_obs_space.spaces:
+                x = state.reshape(-1, self.state_dim[0], self.state_dim[1], self.state_dim_last).permute(0, 3, 1, 2)
+                x = self.cc_vf_encoder(x)
+                x = torch.mean(x, (2, 3))
+            else:
+                x = state.reshape(-1, self.state_dim[0], self.state_dim[1], self.state_dim_last).permute(
+                    0, 3, 1, 2)
+                x = self.cc_vf_encoder(x)
+                x = torch.mean(x, (2, 3)).reshape(B, -1)
         else:
             x = self.cc_vf_encoder(state)
 
