@@ -1,12 +1,5 @@
 import unittest
 from marllib import marl
-from marllib.envs.global_reward_env.mpe_fcoop import REGISTRY as MPE_REGISTRY
-
-'''
-MAPPO test case
-available scenario train 
-one per iteration
-'''
 
 
 class TestAlgo(unittest.TestCase):
@@ -22,8 +15,8 @@ class TestAlgo(unittest.TestCase):
                     env = marl.make_env(environment_name="smac", map_name="3m")
                 one_algo = getattr(marl.algos, algo_name)(hyperparam_source="test")
                 model = marl.build_model(env, one_algo, {"core_arch": "mlp", "encode_layer": "64-64"})
-                one_algo.fit(env, model, stop={'training_iteration': 3}, local_mode=False, num_gpus=1,
-                             num_workers=2, share_policy='all', checkpoint_end=False)
+                one_algo.fit(env, model, stop={"training_iteration": 3}, local_mode=False, num_gpus=1,
+                             num_workers=2, share_policy="all", checkpoint_end=False)
 
 
 if __name__ == "__main__":

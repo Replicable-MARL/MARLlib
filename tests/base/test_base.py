@@ -11,16 +11,16 @@ class TestMPEEnv(unittest.TestCase):
                                         continuous_actions=True)
                     algo = getattr(marl.algos, algo_name)(hyperparam_source="test")
                     model = marl.build_model(env, algo, {"core_arch": "mlp", "encode_layer": "64-64"})
-                    algo.fit(env, model, stop={'training_iteration': 3}, local_mode=False, num_gpus=0,
-                                 num_workers=3, share_policy='all', checkpoint_end=False)
+                    algo.fit(env, model, stop={"training_iteration": 3}, local_mode=False, num_gpus=0,
+                                 num_workers=2, share_policy="all", checkpoint_end=False)
                 elif algo_name in ["happo", "hatrpo"]:
                     continue
                 else:
                     env = marl.make_env(environment_name="mpe", map_name="simple_spread", force_coop=True)
                     algo = getattr(marl.algos, algo_name)(hyperparam_source="test")
                     model = marl.build_model(env, algo, {"core_arch": "mlp", "encode_layer": "64-64"})
-                    algo.fit(env, model, stop={'training_iteration': 3}, local_mode=False, num_gpus=0,
-                                 num_workers=3, share_policy='all', checkpoint_end=False)
+                    algo.fit(env, model, stop={"training_iteration": 3}, local_mode=False, num_gpus=0,
+                                 num_workers=2, share_policy="all", checkpoint_end=False)
 
 
 
