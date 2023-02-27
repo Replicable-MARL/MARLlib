@@ -31,9 +31,13 @@ class CC_MLP(Base_MLP):
         input_dim = self.input_dim
         if "state" not in self.full_obs_space.spaces:
             self.state_dim = self.full_obs_space["obs"].shape
-            self.state_dim_last = self.state_dim[-1]
-            self.cc_vf_encoder = copy.deepcopy(self.vf_encoder)
-            cc_input_dim = input_dim * self.custom_config["num_agents"]
+            self.cc_vf_encoder = copy.deepcopy(self.p_encoder)
+            if len(self.state_dim) > 1:  # env return a 3D obs
+                cc_input_dim = self.input_dim * self.n_agents
+                self.state_dim_last = self.state_dim[-1]
+            else:
+                self.state_dim_last = self.state_dim[-1]
+                cc_input_dim = input_dim * self.n_agents
         else:
             self.state_dim = self.full_obs_space["state"].shape
             if len(self.state_dim) > 1:  # env return a 3D global state
@@ -70,14 +74,17 @@ class CC_MLP(Base_MLP):
                 *cc_layers
             )
 
+        # Central VF
         if self.custom_config["opp_action_in_cc"]:
             if isinstance(self.custom_config["space_act"], Box):  # continuous
-                cc_input_dim = cc_input_dim + num_outputs * (self.custom_config["num_agents"] - 1) // 2
+                input_size = cc_input_dim + num_outputs * (self.n_agents - 1) // 2
             else:
-                cc_input_dim = cc_input_dim + num_outputs * (self.custom_config["num_agents"] - 1)
+                input_size = cc_input_dim + num_outputs * (self.n_agents - 1)
+        else:
+            input_size = cc_input_dim
 
         self.cc_vf_branch = SlimFC(
-            in_size=cc_input_dim,
+            in_size=input_size,
             out_size=1,
             initializer=normc_initializer(0.01),
             activation_fn=None)
@@ -86,7 +93,7 @@ class CC_MLP(Base_MLP):
         if self.custom_config["algorithm"] in ["coma"]:
             self.q_flag = True
             self.cc_vf_branch = SlimFC(
-                in_size=cc_input_dim,
+                in_size=input_size,
                 out_size=num_outputs,
                 initializer=normc_initializer(0.01),
                 activation_fn=None)
