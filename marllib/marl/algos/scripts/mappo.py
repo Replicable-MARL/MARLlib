@@ -7,7 +7,7 @@ from marllib.marl.algos.utils.log_dir_util import available_local_dir
 from marllib.marl.algos.utils.setup_utils import AlgVar
 
 
-def run_mappo(model_class, config_dict, common_config, env_dict, stop):
+def run_mappo(model_class, config_dict, common_config, env_dict, stop, restore):
     """
     for bug mentioned https://github.com/ray-project/ray/pull/20743
     make sure sgd_minibatch_size > max_seq_len
@@ -44,7 +44,7 @@ def run_mappo(model_class, config_dict, common_config, env_dict, stop):
         "batch_mode": batch_mode,
         "train_batch_size": train_batch_size,
         "sgd_minibatch_size": sgd_minibatch_size,
-        "lr": lr,
+        "lr": lr if restore is None else 1e-10,
         "entropy_coeff": entropy_coeff,
         "num_sgd_iter": num_sgd_iter,
         "clip_param": clip_param,
@@ -64,11 +64,6 @@ def run_mappo(model_class, config_dict, common_config, env_dict, stop):
     map_name = config_dict["env_args"]["map_name"]
     arch = config_dict["model_arch_args"]["core_arch"]
     RUNNING_NAME = '_'.join([algorithm, arch, map_name])
-
-    if config_dict['restore_path'] == '':
-        restore = None
-    else:
-        restore = config_dict['restore_path']
 
     results = tune.run(MAPPOTrainer,
                        name=RUNNING_NAME,

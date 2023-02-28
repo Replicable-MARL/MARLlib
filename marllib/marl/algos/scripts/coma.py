@@ -7,7 +7,7 @@ from marllib.marl.algos.utils.setup_utils import AlgVar
 from marllib.marl.algos.utils.log_dir_util import available_local_dir
 
 
-def run_coma(model_class, config_dict, common_config, env_dict, stop):
+def run_coma(model_class, config_dict, common_config, env_dict, stop, restore):
 
     ModelCatalog.register_custom_model(
         "Centralized_Critic_Model", model_class)
@@ -33,7 +33,7 @@ def run_coma(model_class, config_dict, common_config, env_dict, stop):
         "lambda": gae_lambda,
         "vf_loss_coeff": vf_loss_coeff,
         "entropy_coeff": entropy_coeff,
-        "lr": lr,
+        "lr": lr if restore is None else 1e-10,
         "model": {
             "custom_model": "Centralized_Critic_Model",
             "max_seq_len": episode_limit,
@@ -47,11 +47,6 @@ def run_coma(model_class, config_dict, common_config, env_dict, stop):
     map_name = config_dict["env_args"]["map_name"]
     arch = config_dict["model_arch_args"]["core_arch"]
     RUNNING_NAME = '_'.join([algorithm, arch, map_name])
-
-    if config_dict['restore_path'] == '':
-        restore = None
-    else:
-        restore = config_dict['restore_path']
 
     results = tune.run(COMATrainer,
                        name=RUNNING_NAME,

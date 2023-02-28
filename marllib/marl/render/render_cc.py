@@ -7,14 +7,14 @@ from marllib.marl.models.zoo.rnn.cc_rnn import CC_RNN
 from marllib.marl.models.zoo.rnn.ddpg_rnn import DDPG_RNN
 from marllib.marl.algos.scripts import POlICY_REGISTRY
 from marllib.envs.base_env import ENV_REGISTRY
-from marllib.marl.common import get_model_config, recursive_dict_update, merge_default_and_customer
+from marllib.marl.common import get_model_config, recursive_dict_update, merge_default_and_customized
 from tabulate import tabulate
 
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
 
 
-def render_cc(config_dict, customer_config=None, customer_stop=None):
+def render_cc(config_dict, customized_config=None, customized_stop=None):
     ray.init(local_mode=config_dict["local_mode"])
 
     ###################
@@ -191,7 +191,7 @@ def render_cc(config_dict, customer_config=None, customer_stop=None):
         },
     }
 
-    common_config = merge_default_and_customer(common_config, customer_config)
+    common_config = merge_default_and_customized(common_config, customized_config)
 
     stop = {
         "episode_reward_mean": config_dict["stop_reward"],
@@ -199,7 +199,7 @@ def render_cc(config_dict, customer_config=None, customer_stop=None):
         "training_iteration": config_dict["stop_iters"],
     }
 
-    stop = merge_default_and_customer(stop, customer_stop)
+    stop = merge_default_and_customized(stop, customized_stop)
 
     ##################
     ### run script ###

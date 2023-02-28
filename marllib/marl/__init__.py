@@ -1,6 +1,6 @@
 from marllib.marl.common import *
 from marllib.marl.algos import run_il, run_vd, run_cc
-from marllib.marl.render import render_cc, render_il, render_vd
+# from marllib.marl.render import render_cc, render_il, render_vd
 from marllib.marl.algos.scripts import POlICY_REGISTRY
 from marllib.envs.base_env import ENV_REGISTRY
 from marllib.envs.global_reward_env import COOP_ENV_REGISTRY
@@ -39,7 +39,7 @@ class Env(dict):
                     user_ray_args[param.split(".")[1]] = True
 
         # update config
-        ray_config_dict = merge_default_and_customer_and_check(ray_config_dict, user_ray_args)
+        ray_config_dict = merge_default_and_customized_and_check(ray_config_dict, user_ray_args)
 
         for key, value in ray_config_dict.items():
             self[key] = value
@@ -61,14 +61,14 @@ def make_env(environment_name,
                                         "../envs/base_env/config/{}.yaml".format(environment_name))
     if not os.path.exists(env_config_file_path):
         env_config_file_path = os.path.join(os.path.dirname(__file__),
-                                            "../../examples/customize_config/{}.yaml".format(environment_name))
+                                            "../../examples/customize_env/{}.yaml".format(environment_name))
 
     with open(env_config_file_path, "r") as f:
         env_config_dict = yaml.load(f, Loader=yaml.FullLoader)
         f.close()
 
     # update function-fixed config
-    env_config_dict["env_args"] = merge_default_and_customer_and_check(env_config_dict["env_args"], env_params)
+    env_config_dict["env_args"] = merge_default_and_customized_and_check(env_config_dict["env_args"], env_params)
 
     # user commandline config
     user_env_args = {}
@@ -78,7 +78,7 @@ def make_env(environment_name,
             user_env_args[key] = value
 
     # update commandline config
-    env_config_dict["env_args"] = merge_default_and_customer_and_check(env_config_dict["env_args"], user_env_args)
+    env_config_dict["env_args"] = merge_default_and_customized_and_check(env_config_dict["env_args"], user_env_args)
 
     env_config_dict["env_args"]["map_name"] = map_name
     env_config_dict["force_coop"] = force_coop
@@ -208,7 +208,7 @@ class _Algo:
             f.close()
 
         # update function-fixed config
-        algo_config_dict['algo_args'] = merge_default_and_customer_and_check(algo_config_dict['algo_args'],
+        algo_config_dict['algo_args'] = merge_default_and_customized_and_check(algo_config_dict['algo_args'],
                                                                              algo_params)
 
         # user config
@@ -220,7 +220,7 @@ class _Algo:
                 user_algo_args[key] = value
 
         # update commandline config
-        algo_config_dict['algo_args'] = merge_default_and_customer_and_check(algo_config_dict['algo_args'],
+        algo_config_dict['algo_args'] = merge_default_and_customized_and_check(algo_config_dict['algo_args'],
                                                                              user_algo_args)
 
         self.algo_parameters = algo_config_dict
@@ -249,31 +249,9 @@ class _Algo:
         else:
             raise ValueError("not supported type {}".format(self.algo_type))
 
-    def render(self, env_config_dict, stop=None, **running_params):
-        # env_config, env_dict = env
-        # self.common_config['env'] = env_config
-
-        # test_env = ENV_REGISTRY[env_config_dict["env"]](env_config_dict["env_args"])
-        # env_info_dict = test_env.get_env_info()
-
-        # test_env.close()
-
-        # need split to IL, CC, VD ...
-
-        self.config_dict = recursive_dict_update(CONFIG_DICT, env_config_dict)
-        self.config_dict = recursive_dict_update(self.config_dict, self.algo_parameters)
-        self.config_dict = recursive_dict_update(self.config_dict, running_params)
-
-        self.config_dict['algorithm'] = self.name
-
-        if self.algo_type == "IL":
-            render_il(self.config_dict, customer_stop=stop)
-        elif self.algo_type == "VD":
-            render_vd(self.config_dict, customer_stop=stop)
-        elif self.algo_type == "CC":
-            render_cc(self.config_dict, customer_stop=stop)
-        else:
-            raise ValueError("algo_config not in supported algo_type")
+    def render(self, env, model, stop=None, **running_params):
+        # current reuse the fit function
+        self.fit(env, model, stop, **running_params)
 
 
 class _AlgoManager:

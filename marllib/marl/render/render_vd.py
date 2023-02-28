@@ -9,14 +9,14 @@ from marllib.marl.models.zoo.rnn.vd_rnn import VD_RNN
 from marllib.marl.models.zoo.rnn.ddpg_rnn import DDPG_RNN
 from marllib.marl.algos.scripts import POlICY_REGISTRY
 from marllib.envs.global_reward_env import COOP_ENV_REGISTRY as ENV_REGISTRY
-from marllib.marl.common import get_model_config, recursive_dict_update, merge_default_and_customer
+from marllib.marl.common import get_model_config, recursive_dict_update, merge_default_and_customized
 from tabulate import tabulate
 
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
 
 
-def render_vd(config_dict, customer_stop=None):
+def render_vd(config_dict, customized_stop=None):
     ray.init(local_mode=config_dict["local_mode"])
 
     ###################
@@ -233,7 +233,7 @@ def render_vd(config_dict, customer_stop=None):
         "training_iteration": config_dict["stop_iters"],
     }
 
-    stop = merge_default_and_customer(stop, customer_stop)
+    stop = merge_default_and_customized(stop, customized_stop)
 
     ##################
     ### run script ###

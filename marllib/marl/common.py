@@ -9,20 +9,20 @@ algo_type_dict = {
 }
 
 
-def merge_default_and_customer_and_check(default_dict, customer_dict):
-    if customer_dict and isinstance(customer_dict, dict):
-        for k in customer_dict.keys():
+def merge_default_and_customized_and_check(default_dict, customized_dict):
+    if customized_dict and isinstance(customized_dict, dict):
+        for k in customized_dict.keys():
             if k not in default_dict:
                 raise ValueError("{} illegal, not in default config".format(k))
             else:  # update
-                default_dict[k] = customer_dict[k]
+                default_dict[k] = customized_dict[k]
 
     return default_dict
 
 
-def merge_default_and_customer(default_dict, customer_dict):
-    if customer_dict and isinstance(customer_dict, dict):
-        for key, value in customer_dict.items():
+def merge_default_and_customized(default_dict, customized_dict):
+    if customized_dict and isinstance(customized_dict, dict):
+        for key, value in customized_dict.items():
             if key in default_dict:
                 default_dict[key] = value
 

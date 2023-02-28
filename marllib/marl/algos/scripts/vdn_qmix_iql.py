@@ -17,7 +17,7 @@ This version is based on but different from that rllib built-in qmix_policy
 """
 
 
-def run_joint_q(model_class, config_dict, common_config, env_dict, stop):
+def run_joint_q(model_class, config_dict, common_config, env_dict, stop, restore):
 
     ModelCatalog.register_custom_model(
         "Joint_Q_Model", model_class)
@@ -57,7 +57,7 @@ def run_joint_q(model_class, config_dict, common_config, env_dict, stop):
             "train_batch_size": train_batch_episode,  # in sequence
             "target_network_update_freq": episode_limit * target_network_update_frequency,  # in timesteps
             "learning_starts": episode_limit * train_batch_episode,
-            "lr": lr,  # default
+            "lr": lr if restore is None else 1e-10,
             "exploration_config": {
                 "type": "EpsilonGreedy",
                 "initial_epsilon": 1.0,
@@ -79,11 +79,6 @@ def run_joint_q(model_class, config_dict, common_config, env_dict, stop):
     map_name = config_dict["env_args"]["map_name"]
     arch = config_dict["model_arch_args"]["core_arch"]
     RUNNING_NAME = '_'.join([algorithm, arch, map_name])
-
-    if config_dict['restore_path'] == '':
-        restore = None
-    else:
-        restore = config_dict['restore_path']
 
     results = tune.run(JQTrainer,
                        name=RUNNING_NAME,

@@ -11,7 +11,7 @@ from marllib.marl.algos.utils.trust_regions import TrustRegionUpdator
 torch, nn = try_import_torch()
 
 
-def run_trpo(model_class, config_dict, common_config, env_dict, stop):
+def run_trpo(model_class, config_dict, common_config, env_dict, stop, restore):
     """
     for bug mentioned https://github.com/ray-project/ray/pull/20743
     make sure sgd_minibatch_size > max_seq_len
@@ -74,11 +74,6 @@ def run_trpo(model_class, config_dict, common_config, env_dict, stop):
     arch = config_dict["model_arch_args"]["core_arch"]
     algorithm = config_dict["algorithm"]
     RUNNING_NAME = '_'.join([algorithm, arch, map_name])
-
-    if config_dict['restore_path'] == '':
-        restore = None
-    else:
-        restore = config_dict['restore_path']
 
     results = tune.run(TRPOTrainer,
                        name=RUNNING_NAME,

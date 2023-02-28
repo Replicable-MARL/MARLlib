@@ -5,8 +5,7 @@ from ray import tune
 from ray.rllib.utils.framework import try_import_tf, try_import_torch
 from marllib.marl.algos.scripts import POlICY_REGISTRY
 from marllib.envs.global_reward_env import COOP_ENV_REGISTRY as ENV_REGISTRY
-from marllib.marl.common import merge_default_and_customer
-
+from marllib.marl.common import recursive_dict_update, merge_default_and_customized
 
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
@@ -24,7 +23,6 @@ def run_vd(algo_config, env, model, stop=None):
     agent_name_ls = env.agents
     env_config["agent_name_ls"] = agent_name_ls
     env.close()
-
 
     ######################
     ### policy sharing ###
@@ -77,7 +75,6 @@ def run_vd(algo_config, env, model, stop=None):
         env_reg_name = algo_config["env"] + "_" + algo_config["env_args"]["map_name"]
         register_env(env_reg_name,
                      lambda _: ENV_REGISTRY[algo_config["env"]](algo_config["env_args"]))
-
 
     if algo_config["algorithm"] in ["qmix", "vdn", "iql"]:
         policies = None
@@ -150,12 +147,34 @@ def run_vd(algo_config, env, model, stop=None):
         "training_iteration": algo_config["stop_iters"],
     }
 
-    stop_config = merge_default_and_customer(stop_config, stop)
+    stop_config = merge_default_and_customized(stop_config, stop)
+
+    if algo_config['restore_path'] == '':
+        restore = None
+    else:
+        restore = algo_config['restore_path']
+        render_config = {
+            "evaluation_interval": 1,
+            "evaluation_num_episodes": 100,
+            "evaluation_num_workers": 1,
+            "evaluation_config": {
+                "record_env": False,
+                "render_env": True,
+            }
+        }
+
+        common_config = recursive_dict_update(common_config, render_config)
+
+        render_stop_config = {
+            "training_iteration": 1,
+        }
+
+        stop_config = recursive_dict_update(stop_config, render_stop_config)
 
     ##################
     ### run script ###
     ###################
 
-    results = POlICY_REGISTRY[algo_config["algorithm"]](model, algo_config, common_config, env_config, stop_config)
-
+    results = POlICY_REGISTRY[algo_config["algorithm"]](model, algo_config, common_config, env_config, stop_config,
+                                                        restore)
     ray.shutdown()

@@ -6,7 +6,7 @@ from marllib.marl.algos.utils.log_dir_util import available_local_dir
 from marllib.marl.algos.utils.setup_utils import AlgVar
 from marllib.marl.algos.core.IL.pg import IPGTrainer
 
-def run_pg(model_class, config_dict, common_config, env_dict, stop):
+def run_pg(model_class, config_dict, common_config, env_dict, stop, restore):
 
     ModelCatalog.register_custom_model(
         "Base_Model", model_class)
@@ -24,7 +24,7 @@ def run_pg(model_class, config_dict, common_config, env_dict, stop):
     config = {
         "train_batch_size": train_batch_size,
         "batch_mode": batch_mode,
-        "lr": lr,
+        "lr": lr if restore is None else 1e-10,
         "model": {
             "custom_model": "Base_Model",
             "max_seq_len": episode_limit,
@@ -38,11 +38,6 @@ def run_pg(model_class, config_dict, common_config, env_dict, stop):
     map_name = config_dict["env_args"]["map_name"]
     arch = config_dict["model_arch_args"]["core_arch"]
     RUNNING_NAME = '_'.join([algorithm, arch, map_name])
-
-    if config_dict['restore_path'] == '':
-        restore = None
-    else:
-        restore = config_dict['restore_path']
 
     results = tune.run(IPGTrainer,
                        name=RUNNING_NAME,

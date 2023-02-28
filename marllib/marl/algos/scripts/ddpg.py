@@ -7,7 +7,7 @@ from marllib.marl.algos.core.IL.ddpg import IDDPGTrainer
 from marllib.marl.algos.utils.log_dir_util import available_local_dir
 
 
-def run_ddpg(model_class, config_dict, common_config, env_dict, stop):
+def run_ddpg(model_class, config_dict, common_config, env_dict, stop, restore):
 
     ModelCatalog.register_custom_model(
         "DDPG_Model", model_class)
@@ -32,8 +32,8 @@ def run_ddpg(model_class, config_dict, common_config, env_dict, stop):
         "batch_mode": batch_mode,
         "buffer_size": buffer_size,
         "train_batch_size": train_batch_size,
-        "critic_lr": critic_lr,
-        "actor_lr": actor_lr,
+        "critic_lr": critic_lr if restore is None else 1e-10,
+        "actor_lr": actor_lr if restore is None else 1e-10,
         "twin_q": twin_q,
         "prioritized_replay": prioritized_replay,
         "smooth_target_policy": smooth_target_policy,
@@ -53,11 +53,6 @@ def run_ddpg(model_class, config_dict, common_config, env_dict, stop):
     map_name = config_dict["env_args"]["map_name"]
     arch = config_dict["model_arch_args"]["core_arch"]
     RUNNING_NAME = '_'.join([algorithm, arch, map_name])
-
-    if config_dict['restore_path'] == '':
-        restore = None
-    else:
-        restore = config_dict['restore_path']
 
     results = tune.run(IDDPGTrainer,
                        name=RUNNING_NAME,
