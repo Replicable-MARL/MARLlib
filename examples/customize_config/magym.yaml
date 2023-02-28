@@ -1,0 +1,10 @@
+env: magym
+
+env_args:
+  map_name: "Switch2" # others can be found in mpe.py
+  step_cost: 0.01
+  max_steps: 100
+
+mask_flag: False
+global_state_flag: False
+opp_action_in_cc: True

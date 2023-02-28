@@ -57,8 +57,13 @@ def make_env(environment_name,
     """
 
     # default config
-    with open(os.path.join(os.path.dirname(__file__), "../envs/base_env/config/{}.yaml".format(environment_name)),
-              "r") as f:
+    env_config_file_path = os.path.join(os.path.dirname(__file__),
+                                        "../envs/base_env/config/{}.yaml".format(environment_name))
+    if not os.path.exists(env_config_file_path):
+        env_config_file_path = os.path.join(os.path.dirname(__file__),
+                                            "../../examples/customize_config/{}.yaml".format(environment_name))
+
+    with open(env_config_file_path, "r") as f:
         env_config_dict = yaml.load(f, Loader=yaml.FullLoader)
         f.close()
 
