@@ -35,4 +35,4 @@ jobs:
     - name: Unit tests
       run: |
         mkdir -p test_data
-        pytest --cov=MARLlib MARLlib/tests/base/ -p no:warnings -v
+        pytest --cov=MARLlib tests/base/ -p no:warnings -v
