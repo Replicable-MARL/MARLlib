@@ -1,7 +1,7 @@
 from marllib import marl
 
 # prepare the environment
-#env = marl.make_env(environment_name="hanabi", map_name="Hanabi-Very-Small")
+# env = marl.make_env(environment_name="hanabi", map_name="Hanabi-Very-Small")
 env = marl.make_env(environment_name="mpe", map_name="simple_spread")
 # can add extra env params. remember to check env configuration before use
 # env = marl.make_env(environment_name='smac', map_name='3m', difficulty="6", reward_scale_rate=15)
@@ -16,4 +16,4 @@ model = marl.build_model(env, mappo, {"core_arch": "mlp", "encode_layer": "128-2
 
 # rendering after 1 training iteration
 mappo.render(env, model, local_mode=True, num_gpus=0, num_workers=0, share_policy='all',
-              restore_path='checkpoint_003050/checkpoint-3050', checkpoint_end=False)
+             restore_path='checkpoint_003050/checkpoint-3050', checkpoint_end=False)

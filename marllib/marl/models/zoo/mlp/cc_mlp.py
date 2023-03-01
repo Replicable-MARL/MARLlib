@@ -8,7 +8,7 @@ from ray.rllib.utils.annotations import override
 from ray.rllib.utils.framework import try_import_torch
 from ray.rllib.utils.typing import TensorType
 from marllib.marl.models.zoo.mlp.base_mlp import Base_MLP
-
+from marllib.marl.models.zoo.encoder.cc_encoder import CC_Encoder
 torch, nn = try_import_torch()
 
 
@@ -28,60 +28,16 @@ class CC_MLP(Base_MLP):
                          name, **kwargs)
 
         # encoder for centralized VF
-        input_dim = self.input_dim
-        if "state" not in self.full_obs_space.spaces:
-            self.state_dim = self.full_obs_space["obs"].shape
-            self.cc_vf_encoder = copy.deepcopy(self.p_encoder)
-            if len(self.state_dim) > 1:  # env return a 3D obs
-                cc_input_dim = self.input_dim * self.n_agents
-                self.state_dim_last = self.state_dim[-1]
-            else:
-                self.state_dim_last = self.state_dim[-1]
-                cc_input_dim = input_dim * self.n_agents
-        else:
-            self.state_dim = self.full_obs_space["state"].shape
-            if len(self.state_dim) > 1:  # env return a 3D global state
-                cc_layers = []
-                self.state_dim_last = self.full_obs_space["state"].shape[2] + self.full_obs_space["obs"].shape[2]
-                cc_input_dim = self.state_dim_last
-                for i in range(self.custom_config["model_arch_args"]["conv_layer"]):
-                    cc_layers.append(
-                        SlimConv2d(
-                            in_channels=cc_input_dim,
-                            out_channels=self.custom_config["model_arch_args"]["out_channel_layer_{}".format(i)],
-                            kernel=self.custom_config["model_arch_args"]["kernel_size_layer_{}".format(i)],
-                            stride=self.custom_config["model_arch_args"]["stride_layer_{}".format(i)],
-                            padding=self.custom_config["model_arch_args"]["padding_layer_{}".format(i)],
-                            activation_fn=self.activation)
-                    )
-                    cc_pool_f = nn.MaxPool2d(
-                        kernel_size=self.custom_config["model_arch_args"]["pool_size_layer_{}".format(i)])
-                    cc_layers.append(cc_pool_f)
-                    cc_input_dim = self.custom_config["model_arch_args"]["out_channel_layer_{}".format(i)]
-
-            else:
-                cc_layers = []
-                cc_input_dim = self.full_obs_space["state"].shape[0] + self.full_obs_space["obs"].shape[0]
-                for cc_out_dim in self.encoder_layer_dim:
-                    cc_layers.append(
-                        SlimFC(in_size=cc_input_dim,
-                               out_size=cc_out_dim,
-                               initializer=normc_initializer(1.0),
-                               activation_fn=self.activation))
-                    cc_input_dim = cc_out_dim
-
-            self.cc_vf_encoder = nn.Sequential(
-                *cc_layers
-            )
+        self.cc_vf_encoder = CC_Encoder(model_config, self.full_obs_space)
 
         # Central VF
         if self.custom_config["opp_action_in_cc"]:
             if isinstance(self.custom_config["space_act"], Box):  # continuous
-                input_size = cc_input_dim + num_outputs * (self.n_agents - 1) // 2
+                input_size = self.cc_vf_encoder.output_dim + num_outputs * (self.n_agents - 1) // 2
             else:
-                input_size = cc_input_dim + num_outputs * (self.n_agents - 1)
+                input_size = self.cc_vf_encoder.output_dim + num_outputs * (self.n_agents - 1)
         else:
-            input_size = cc_input_dim
+            input_size = self.cc_vf_encoder.output_dim
 
         self.cc_vf_branch = SlimFC(
             in_size=input_size,
@@ -102,12 +58,7 @@ class CC_MLP(Base_MLP):
         assert self._features is not None, "must call forward() first"
         B = state.shape[0]
 
-        if "conv_layer" in self.custom_config["model_arch_args"]:
-            x = state.reshape(-1, self.state_dim[0], self.state_dim[1], self.state_dim_last).permute(0, 3, 1, 2)
-            x = self.cc_vf_encoder(x)
-            x = torch.mean(x, (2, 3))
-        else:
-            x = self.cc_vf_encoder(state)
+        x = self.cc_vf_encoder(state)
 
         if opponent_actions is None:
             x = torch.cat([x.reshape(B, -1)], 1)

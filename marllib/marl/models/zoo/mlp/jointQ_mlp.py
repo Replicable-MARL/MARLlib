@@ -4,6 +4,8 @@ from ray.rllib.utils.annotations import override
 from ray.rllib.utils.framework import try_import_torch
 from ray.rllib.models.preprocessors import get_preprocessor
 from ray.rllib.models.torch.misc import SlimFC, SlimConv2d, normc_initializer
+from marllib.marl.models.zoo.encoder.base_encoder import Base_Encoder
+
 torch, nn = try_import_torch()
 
 
@@ -27,56 +29,9 @@ class JointQ_MLP(TorchModelV2, nn.Module):
         self.activation = model_config.get("fcnet_activation")
 
         # encoder
-        layers = []
-        if "fc_layer" in self.custom_config["model_arch_args"]:
-            if "encode_layer" in self.custom_config["model_arch_args"]:
-                encode_layer = self.custom_config["model_arch_args"]["encode_layer"]
-                encoder_layer_dim = encode_layer.split("-")
-                encoder_layer_dim = [int(i) for i in encoder_layer_dim]
-            else:  # default config
-                encoder_layer_dim = []
-                for i in range(self.custom_config["model_arch_args"]["fc_layer"]):
-                    out_dim = self.custom_config["model_arch_args"]["out_dim_fc_{}".format(i)]
-                    encoder_layer_dim.append(out_dim)
-
-            self.encoder_layer_dim = encoder_layer_dim
-            self.obs_size = self.full_obs_space.shape[0]
-            input_dim = self.obs_size
-            for out_dim in self.encoder_layer_dim:
-                layers.append(
-                    SlimFC(in_size=input_dim,
-                           out_size=out_dim,
-                           initializer=normc_initializer(1.0),
-                           activation_fn=self.activation))
-                input_dim = out_dim
-        elif "conv_layer" in self.custom_config["model_arch_args"]:
-            self.obs_size = self.full_obs_space.shape
-            input_dim = self.obs_size[2]
-            for i in range(self.custom_config["model_arch_args"]["conv_layer"]):
-                layers.append(
-                    SlimConv2d(
-                        in_channels=input_dim,
-                        out_channels=self.custom_config["model_arch_args"]["out_channel_layer_{}".format(i)],
-                        kernel=self.custom_config["model_arch_args"]["kernel_size_layer_{}".format(i)],
-                        stride=self.custom_config["model_arch_args"]["stride_layer_{}".format(i)],
-                        padding=self.custom_config["model_arch_args"]["padding_layer_{}".format(i)],
-                        activation_fn=self.activation
-                    )
-                )
-                pool_f = nn.MaxPool2d(kernel_size=self.custom_config["model_arch_args"]["pool_size_layer_{}".format(i)])
-                layers.append(pool_f)
-
-                input_dim = self.custom_config["model_arch_args"]["out_channel_layer_{}".format(i)]
-
-        else:
-            raise ValueError()
-
-        self.encoder = nn.Sequential(
-            *layers
-        )
-
+        self.encoder = Base_Encoder(model_config, {'obs': self.full_obs_space})
         self.hidden_state_size = self.custom_config["model_arch_args"]["hidden_state_size"]
-        self.mlp = nn.Linear(input_dim, self.hidden_state_size)
+        self.mlp = nn.Linear(self.encoder.output_dim, self.hidden_state_size)
         self.q_value = SlimFC(
             in_size=self.hidden_state_size,
             out_size=num_outputs,
@@ -102,13 +57,9 @@ class JointQ_MLP(TorchModelV2, nn.Module):
     @override(ModelV2)
     def forward(self, input_dict, hidden_state, seq_lens):
         inputs = input_dict["obs_flat"].float()
-        if "conv_layer" in self.custom_config["model_arch_args"]:
-            x = inputs.reshape(-1, self.raw_state_dim[0], self.raw_state_dim[1], self.raw_state_dim[2]).permute(0, 3, 1, 2)
-            x = self.encoder(x)
-            x = torch.mean(x, (2, 3))
-            x = x.reshape(inputs.shape[0], -1)
-        else:
-            x = self.encoder(inputs)
+        if len(self.full_obs_space.shape) == 3: # 3D
+            inputs = inputs.reshape((-1,) + self.full_obs_space.shape)
+        x = self.encoder(inputs)
         h = hidden_state[0].reshape(-1, self.hidden_state_size) # fake a hidden state no use
         x = self.mlp(x)
         q = self.q_value(x)

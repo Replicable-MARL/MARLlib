@@ -2,6 +2,8 @@
 An example of integrate new tasks into MARLLib
 About ma-gym: https://github.com/koulanurag/ma-gym
 doc: https://github.com/koulanurag/ma-gym/wiki
+
+Install ma-gym before use
 """
 
 import numpy as np

@@ -9,7 +9,7 @@ from ray.rllib.utils.framework import try_import_tf, try_import_torch, \
     TensorType
 from ray.rllib.policy.rnn_sequencing import add_time_dimension
 from functools import reduce
-import copy
+from marllib.marl.models.zoo.encoder.base_encoder import Base_Encoder
 
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
@@ -37,65 +37,16 @@ class Base_RNN(TorchRNN, nn.Module):
         self.activation = model_config.get("fcnet_activation")
 
         # encoder
-        layers = []
-        if "fc_layer" in self.custom_config["model_arch_args"]:
-            if "encode_layer" in self.custom_config["model_arch_args"]:
-                encode_layer = self.custom_config["model_arch_args"]["encode_layer"]
-                encoder_layer_dim = encode_layer.split("-")
-                encoder_layer_dim = [int(i) for i in encoder_layer_dim]
-            else:  # default config
-                encoder_layer_dim = []
-                for i in range(self.custom_config["model_arch_args"]["fc_layer"]):
-                    out_dim = self.custom_config["model_arch_args"]["out_dim_fc_{}".format(i)]
-                    encoder_layer_dim.append(out_dim)
-
-            self.encoder_layer_dim = encoder_layer_dim
-            self.obs_size = self.full_obs_space['obs'].shape[0]
-            input_dim = self.obs_size
-            for out_dim in self.encoder_layer_dim:
-                layers.append(
-                    SlimFC(in_size=input_dim,
-                           out_size=out_dim,
-                           initializer=normc_initializer(1.0),
-                           activation_fn=self.activation))
-                input_dim = out_dim
-        elif "conv_layer" in self.custom_config["model_arch_args"]:  # not support api based setting
-            self.obs_size = self.full_obs_space['obs'].shape
-            input_dim = self.obs_size[2]
-            for i in range(self.custom_config["model_arch_args"]["conv_layer"]):
-                layers.append(
-                    SlimConv2d(
-                        in_channels=input_dim,
-                        out_channels=self.custom_config["model_arch_args"]["out_channel_layer_{}".format(i)],
-                        kernel=self.custom_config["model_arch_args"]["kernel_size_layer_{}".format(i)],
-                        stride=self.custom_config["model_arch_args"]["stride_layer_{}".format(i)],
-                        padding=self.custom_config["model_arch_args"]["padding_layer_{}".format(i)],
-                        activation_fn=self.activation
-                    )
-                )
-                pool_f = nn.MaxPool2d(kernel_size=self.custom_config["model_arch_args"]["pool_size_layer_{}".format(i)])
-                layers.append(pool_f)
-
-                input_dim = self.custom_config["model_arch_args"]["out_channel_layer_{}".format(i)]
-
-        else:
-            raise ValueError("fc_layer/conv layer not in model arch args")
-
-        self.input_dim = input_dim  # record
-        self.p_encoder = nn.Sequential(
-            *layers
-        )
-        self.vf_encoder = nn.Sequential(
-            *copy.deepcopy(layers)
-        )
+        self.p_encoder = Base_Encoder(model_config, self.full_obs_space)
+        self.vf_encoder = Base_Encoder(model_config, self.full_obs_space)
 
         # core rnn
         self.hidden_state_size = self.custom_config["model_arch_args"]["hidden_state_size"]
 
         if self.custom_config["model_arch_args"]["core_arch"] == "gru":
-            self.rnn = nn.GRU(input_dim, self.hidden_state_size, batch_first=True)
+            self.rnn = nn.GRU(self.p_encoder.output_dim, self.hidden_state_size, batch_first=True)
         elif self.custom_config["model_arch_args"]["core_arch"] == "lstm":
-            self.rnn = nn.LSTM(input_dim, self.hidden_state_size, batch_first=True)
+            self.rnn = nn.LSTM(self.p_encoder.output_dim, self.hidden_state_size, batch_first=True)
         else:
             raise ValueError(
                 "should be either gru or lstm, got {}".format(self.custom_config["model_arch_args"]["core_arch"]))
@@ -107,7 +58,7 @@ class Base_RNN(TorchRNN, nn.Module):
             initializer=normc_initializer(0.01),
             activation_fn=None)
         self.vf_branch = SlimFC(
-            in_size=input_dim,
+            in_size=self.vf_encoder.output_dim,
             out_size=1,
             initializer=normc_initializer(0.01),
             activation_fn=None)
@@ -142,14 +93,7 @@ class Base_RNN(TorchRNN, nn.Module):
         B = self._features.shape[0]
         L = self._features.shape[1]
         # Compute the unmasked logits.
-        if "conv_layer" in self.custom_config["model_arch_args"]:
-            x = self.inputs.reshape(-1, self.inputs.shape[2], self.inputs.shape[3], self.inputs.shape[4]).permute(0, 3,
-                                                                                                                  1, 2)
-            x = self.vf_encoder(x)
-            x = torch.mean(x, (2, 3))
-            x = x.reshape(self.inputs.shape[0], self.inputs.shape[1], -1)
-        else:
-            x = self.vf_encoder(self.inputs)
+        x = self.vf_encoder(self.inputs)
 
         if self.q_flag:
             return torch.reshape(self.vf_branch(x), [B * L, -1])
@@ -195,14 +139,7 @@ class Base_RNN(TorchRNN, nn.Module):
     def forward_rnn(self, inputs, state, seq_lens):
         self.inputs = inputs
 
-        # Compute the unmasked logits.
-        if "conv_layer" in self.custom_config["model_arch_args"]:
-            x = inputs.reshape(-1, inputs.shape[2], inputs.shape[3], inputs.shape[4]).permute(0, 3, 1, 2)
-            x = self.p_encoder(x)
-            x = torch.mean(x, (2, 3))
-            x = x.reshape(inputs.shape[0], inputs.shape[1], -1)
-        else:
-            x = self.p_encoder(inputs)
+        x = self.p_encoder(self.inputs)
 
         if self.custom_config["model_arch_args"]["core_arch"] == "gru":
             self._features, h = self.rnn(x, torch.unsqueeze(state[0], 0))
