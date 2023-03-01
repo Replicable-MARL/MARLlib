@@ -1,5 +1,6 @@
 """
-https://github.com/koulanurag/ma-gym
+An example of integrate new tasks into MARLLib
+About ma-gym: https://github.com/koulanurag/ma-gym
 doc: https://github.com/koulanurag/ma-gym/wiki
 """
 
@@ -12,7 +13,7 @@ from marllib import marl
 from marllib.envs.base_env import ENV_REGISTRY
 import time
 
-# register all env with env class
+# register all scenario with env class
 REGISTRY = {}
 REGISTRY["Checkers"] = Checkers
 REGISTRY["Switch2"] = Switch
