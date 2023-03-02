@@ -1,0 +1,11 @@
+env: two_teams_smac
+
+env_args:
+  map_name: "3m" # others can be found in smac/env/starcraft2/maps/smac_maps.py
+  difficulty: "7"
+  reward_scale_rate: 20
+
+mask_flag: True
+global_state_flag: True
+opp_action_in_cc: True
+fixed_batch_timesteps: 3200 # optional, all scenario will use this batch size, only valid for on-policy algorithms
