@@ -1,6 +1,5 @@
 from marllib.marl.common import *
 from marllib.marl.algos import run_il, run_vd, run_cc
-# from marllib.marl.render import render_cc, render_il, render_vd
 from marllib.marl.algos.scripts import POlICY_REGISTRY
 from marllib.envs.base_env import ENV_REGISTRY
 from marllib.envs.global_reward_env import COOP_ENV_REGISTRY
