@@ -49,15 +49,13 @@ Each algorithm has different hyper-parameters to finetune with.
 Most of the algorithms are sensitive to the environment settings.
 This means you need to give a set of hyper-parameters that fit for current MARL task.
 
-We provide a `commonly used hyper-parameters directory <https://github.com/Replicable-MARL/MARLlib/tree/sy_dev/marl/algos/hyperparams/common>`_.
-And a finetuned hyper-parameters sets for the four most used MARL environments/benchmarks, including
+We provide a `commonly used hyper-parameters directory <https://github.com/Replicable-MARL/MARLlib/tree/sy_dev/marl/algos/hyperparams/common>`_,
+a `test-only hyper-parameters directory <https://github.com/Replicable-MARL/MARLlib/tree/sy_dev/marl/algos/hyperparams/test>`_, and
+And a finetuned hyper-parameters sets for the three most used MARL environments/benchmarks, including
 
-- `GRF  <https://github.com/Replicable-MARL/MARLlib/tree/sy_dev/marl/algos/hyperparams/finetuned/football>`_
 - `SMAC <https://github.com/Replicable-MARL/MARLlib/tree/sy_dev/marl/algos/hyperparams/finetuned/smac>`_
 - `MPE <https://github.com/Replicable-MARL/MARLlib/tree/sy_dev/marl/algos/hyperparams/finetuned/mpe>`_
 - `MAMuJoCo <https://github.com/Replicable-MARL/MARLlib/tree/sy_dev/marl/algos/hyperparams/finetuned/mamujoco>`_
-
-Simply add **--finetuned** when you run from the terminal command to use the finetuned hyper-parameters (if available).
 
 Model Architecture
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -73,6 +71,7 @@ However, we leave space for you to customize your model in `model's config <http
 The supported architecture change includes:
 
 - Observation/Global State Encoder: `CNN <https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/marl/models/configs/cnn_encoder.yaml>`_, `FC <https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/marl/models/configs/fc_encoder.yaml>`_
+- `Multiple Layers Perception <https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/marl/models/configs/mlp.yaml>`_: MLP
 - `Recurrent Neural Network <https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/marl/models/configs/rnn.yaml>`_: GRU, LSTM
 - `Q/Critic Value Mixer <https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/marl/models/configs/mixer.yaml>`_: VDN, QMIX
 
@@ -95,67 +94,274 @@ and switch
 Training
 ----------------------------------
 
-MARLlib has two phases after you launch the whole process.
+.. code-block:: python
 
-Phase 1:  Initialization
+    from marllib import marl
+    # prepare env
+    env = marl.make_env(environment_name="mpe", map_name="simple_spread")
+    # initialize algorithm with appointed hyper-parameters
+    mappo = marl.algos.mappo(hyperparam_source="mpe")
+    # build agent model based on env + algorithms + user preference
+    model = marl.build_model(env, mappo, {"core_arch": "mlp", "encode_layer": "128-256"})
+    # start training
+    mappo.fit(env, model, stop={"timesteps_total": 1000000}, checkpoint_freq=100, share_policy="group")
 
-MARLlib initializes the environment and the agent model, producing a fake batch according to environment attributes and checking the sampling/training pipeline of the chosen algorithm.
+prepare the ``environment``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Phase 2: Sampling & Training
+.. list-table::
+   :header-rows: 1
 
-Real jobs are assigned to workers and learner. Learning starts.
-
-To start training, make sure you are under MARLlib directory and run:
-
-.. code-block:: shell
-
-    python marl/main.py --algo_config=$algo [--finetuned] --env_config=$env with env_args.map_name=$map
-
-Available algorithms (case sensitive):
-
-- iql
-- pg
-- a2c
-- ddpg
-- trpo
-- ppo
-- maa2c
-- coma
-- maddpg
-- matrpo
-- mappo
-- hatrpo
-- happo
-- vdn
-- qmix
-- facmac
-- vda2c
-- vdppo
-
-Available env-map pairs (case sensitive):
-
-- smac: `smac maps <https://github.com/oxwhirl/smac/blob/master/smac/env/starcraft2/maps/smac_maps.py>`_
-- mpe: `mpe map <https://github.com/Replicable-MARL/MARLlib/blob/main/envs/base_env/mpe.py>`_
-- mamujoco: `mamujoco map <https://github.com/Replicable-MARL/MARLlib/blob/main/envs/base_env/mamujoco.py>`_
-- football: `football map <https://github.com/Replicable-MARL/MARLlib/blob/main/envs/base_env/mamujoco.py>`_
-- magent: `magent map <https://github.com/Replicable-MARL/MARLlib/blob/main/envs/base_env/magent.py>`_
-- lbf: use `lbf config <https://github.com/Replicable-MARL/MARLlib/blob/main/envs/base_env/config/lbf.yaml>`_ to generate the map. Details can be found https://github.com/semitable/lb-foraging#usage
-- rware: use `rware config <https://github.com/Replicable-MARL/MARLlib/blob/main/envs/base_env/config/rware.yaml>`_ to generate the map. Details can be found https://github.com/semitable/robotic-warehouse#naming-scheme
-- pommerman: OneVsOne-v0, PommeFFACompetition-v0, PommeTeamCompetition-v0
-- metadrive: Bottleneck, ParkingLot, Intersection, Roundabout, Tollgate
-- hanabi: Hanabi-Very-Small, Hanabi-Full, Hanabi-Full-Minimal, Hanabi-Small
-
---finetuned is optional, force using the finetuned hyperparameter if available in `this directory <https://github.com/Replicable-MARL/MARLlib/tree/sy_dev/marl/algos/hyperparams/finetuned>`_
+   * - task mode
+     - api example
+   * - cooperative
+     - ``marl.make_env(environment_name="mpe", map_name="simple_spread", force_coop=True)``
+   * - collaborative
+     - ``marl.make_env(environment_name="mpe", map_name="simple_spread")``
+   * - competitive
+     - ``marl.make_env(environment_name="mpe", map_name="simple_adversary")``
+   * - mixed
+     - ``marl.make_env(environment_name="mpe", map_name="simple_crypto")``
 
 
-Example on SMAC:
+Most of the popular environments in MARL research are supported by MARLlib:
 
-.. code-block:: shell
+.. list-table::
+   :header-rows: 1
 
-    python marl/main.py --algo_config=mappo --finetuned --env_config=smac with env_args.map_name=3m
+   * - Env Name
+     - Learning Mode
+     - Observability
+     - Action Space
+     - Observations
+   * - :ref:`LBF`
+     - cooperative + collaborative
+     - Both
+     - Discrete
+     - 1D
+   * - :ref:`RWARE`
+     - cooperative
+     - Partial
+     - Discrete
+     - 1D
+   * - :ref:`MPE`
+     - cooperative + collaborative + mixed
+     - Both
+     - Both
+     - 1D
+   * - :ref:`SMAC`
+     - cooperative
+     - Partial
+     - Discrete
+     - 1D
+   * - :ref:`MetaDrive`
+     - collaborative
+     - Partial
+     - Continuous
+     - 1D
+   * - :ref:`MAgent`
+     - collaborative + mixed
+     - Partial
+     - Discrete
+     - 2D
+   * - :ref:`Pommerman`
+     - collaborative + competitive + mixed
+     - Both
+     - Discrete
+     - 2D
+   * - :ref:`MAMuJoCo`
+     - cooperative
+     - Partial
+     - Continuous
+     - 1D
+   * - :ref:`Football`
+     - collaborative + mixed
+     - Full
+     - Discrete
+     - 2D
+   * - :ref:`Hanabi`
+     - cooperative
+     - Partial
+     - Discrete
+     - 1D
 
 
+Each environment has a readme file, standing as the instruction for this task, including env settings, installation,
+and important notes.
 
+initialize the  ``algorithm``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. list-table::
+   :header-rows: 1
+
+   * - running target
+     - api example
+   * - train & finetune
+     - ``marl.algos.mappo(hyperparam_source=$ENV)``
+   * - develop & debug
+     - ``marl.algos.mappo(hyperparam_source="test")``
+   * - 3rd party env
+     - ``marl.algos.mappo(hyperparam_source="common")``
+
+
+Here is a chart describing the characteristics of each algorithm:
+
+.. list-table::
+   :header-rows: 1
+
+   * - algorithm
+     - support task mode
+     - discrete action
+     - continuous action
+     - policy type
+   * - :ref:`IQL`
+     - all four
+     - :heavy_check_mark:
+     -
+     - off-policy
+   * - :ref:`IPG`
+     - all four
+     - :heavy_check_mark:
+     - :heavy_check_mark:
+     - on-policy
+   * - :ref:`IA2C`
+     - all four
+     - :heavy_check_mark:
+     - :heavy_check_mark:
+     - on-policy
+   * - :ref:`IDDPG`
+     - all four
+     -
+     - :heavy_check_mark:
+     - off-policy
+   * - :ref:`ITRPO`
+     - all four
+     - :heavy_check_mark:
+     - :heavy_check_mark:
+     - on-policy
+   * - :ref:`IPPO`
+     - all four
+     - :heavy_check_mark:
+     - :heavy_check_mark:
+     - on-policy
+   * - :ref:`COMA`
+     - all four
+     - :heavy_check_mark:
+     -
+     - on-policy
+   * - :ref:`MADDPG`
+     - all four
+     -
+     - :heavy_check_mark:
+     - off-policy
+   * - :ref:`MAA2C`
+     - all four
+     - :heavy_check_mark:
+     - :heavy_check_mark:
+     - on-policy
+   * - :ref:`MATRPO`
+     - all four
+     - :heavy_check_mark:
+     - :heavy_check_mark:
+     - on-policy
+   * - :ref:`MAPPO`
+     - all four
+     - :heavy_check_mark:
+     - :heavy_check_mark:
+     - on-policy
+   * - :ref:`HATRPO`
+     - cooperative
+     - :heavy_check_mark:
+     - :heavy_check_mark:
+     - on-policy
+   * - :ref:`HAPPO`
+     - cooperative
+     - :heavy_check_mark:
+     - :heavy_check_mark:
+     - on-policy
+   * - :ref:`VDN`
+     - cooperative
+     - :heavy_check_mark:
+     -
+     - off-policy
+   * - :ref:`QMIX`
+     - cooperative
+     - :heavy_check_mark:
+     -
+     - off-policy
+   * - :ref:`FACMAC`
+     - cooperative
+     -
+     - :heavy_check_mark:
+     - off-policy
+   * - :ref:`VDA2C`
+     - cooperative
+     - :heavy_check_mark:
+     - :heavy_check_mark:
+     - on-policy
+   * - :ref:`VDPPO`
+     - cooperative
+     - :heavy_check_mark:
+     - :heavy_check_mark:
+     - on-policy
+
+***all four**\ : cooperative collaborative competitive mixed
+
+construct the agent  ``model``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. list-table::
+   :header-rows: 1
+
+   * - model arch
+     - api example
+   * - MLP
+     - ``marl.build_model(env, algo, {"core_arch": "mlp")``
+   * - GRU
+     - ``marl.build_model(env, algo, {"core_arch": "gru"})``
+   * - LSTM
+     - ``marl.build_model(env, algo, {"core_arch": "lstm"})``
+   * - encoder arch
+     - ``marl.build_model(env, algo, {"core_arch": "gru", "encode_layer": "128-256"})``
+
+
+kick off the training ``algo.fit``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. list-table::
+   :header-rows: 1
+
+   * - setting
+     - api example
+   * - train
+     - ``algo.fit(env, model)``
+   * - debug
+     - ``algo.fit(env, model, local_mode=True)``
+   * - stop condition
+     - ``algo.fit(env, model, stop={'episode_reward_mean': 2000, 'timesteps_total': 10000000})``
+   * - policy sharing
+     - ``algo.fit(env, model, share_policy='all') # or 'group' / 'individual'``
+   * - save model
+     - ``algo.fit(env, model, checkpoint_freq=100, checkpoint_end=True)``
+   * - GPU accelerate
+     - ``algo.fit(env, model, local_mode=False, num_gpus=1)``
+   * - CPU accelerate
+     - ``algo.fit(env, model, local_mode=False, num_workers=5)``
+
+
+policy inference ``algo.render``
+
+.. list-table::
+   :header-rows: 1
+
+   * - setting
+     - api example
+   * - render
+     - ``algo.render(env, model, local_mode=True, restore_path='path_to_model')``
+
+
+By default, all the models will be saved at ``/home/username/ray_results/experiment_name/checkpoint_xxxx``
 
 Logging & Saving
 ----------------------------------
@@ -163,9 +369,3 @@ Logging & Saving
 MARLlib uses the default logger provided by Ray in **ray.tune.CLIReporter**.
 You can change the saved log location `here <https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/marl/algos/utils/log_dir_util.py>`_.
 
-
-Develop & Debug mode
-----------------------------------
-
-Debug mode is designed for easier local debugging. To switch to debug mode, change the **local_mode** in **marl/ray.yaml** to True.
-Debug mode will ignore the GPU settings and only use the CPU by default.

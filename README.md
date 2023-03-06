@@ -60,7 +60,7 @@ Here we provide a table for the comparison of MARLlib and existing work.
 What **MARLlib** brings to MARL community:
 
 - MARLlib unifies diverse algorithm pipeline with agent-level distributed dataflow.
-- MARLlib supports all task modes 
+- MARLlib supports all task modes: cooperative, collaborative, competitive, and mixed.
 - MARLlib unifies multi-agent environment interfaces with a new interface following Gym standard.
 - MARLlib provides flexible and customizable parameter sharing strategies.
 
@@ -144,7 +144,7 @@ There are four parts of configurations that take charge of the whole training pr
 Making sure all the dependency are installed for the environment you are running with.
 Otherwise, please refer to the [doc](https://marllib.readthedocs.io/en/latest/handbook/env.html). 
 
->  **Note: Keep your Gym version to 0.21.0.**
+>  **Note: Always check your `gym` version and keep it to `0.21.0`.**
 
 All environments MARLlib supported should work fine with this version.
 

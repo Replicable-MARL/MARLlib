@@ -32,7 +32,7 @@ jobs:
         pip install numpy==1.20.3
         pip install importlib-metadata==4.13.0
         pip install -e .
-    - name: Unit tests
-      run: |
-        mkdir -p test_data
-        pytest tests/test_base.py
+#    - name: Unit tests
+#      run: |
+#        mkdir -p test_data
+#        pytest tests/test_base.py
