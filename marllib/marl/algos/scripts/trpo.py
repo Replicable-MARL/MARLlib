@@ -7,6 +7,7 @@ from ray.rllib.utils.framework import try_import_tf, try_import_torch, get_varia
 from marllib.marl.algos.utils.setup_utils import AlgVar
 from marllib.marl.algos.utils.log_dir_util import available_local_dir
 from marllib.marl.algos.utils.trust_regions import TrustRegionUpdator
+import json
 
 torch, nn = try_import_torch()
 
@@ -75,11 +76,22 @@ def run_trpo(model_class, config_dict, common_config, env_dict, stop, restore):
     algorithm = config_dict["algorithm"]
     RUNNING_NAME = '_'.join([algorithm, arch, map_name])
 
+    if restore is not None:
+        with open(restore["params_path"], 'r') as JSON:
+            raw_config = json.load(JSON)
+            raw_config = raw_config["model"]["custom_model_config"]['model_arch_args']
+            check_config = config["model"]["custom_model_config"]['model_arch_args']
+            if check_config != raw_config:
+                raise ValueError("is not using the params required by the checkpoint model")
+        model_path = restore["model_path"]
+    else:
+        model_path = None
+
     results = tune.run(TRPOTrainer,
                        name=RUNNING_NAME,
                        checkpoint_at_end=config_dict['checkpoint_end'],
                        checkpoint_freq=config_dict['checkpoint_freq'],
-                       restore=restore,
+                       restore=model_path,
                        stop=stop,
                        config=config,
                        verbose=1,

@@ -5,6 +5,7 @@ from ray.rllib.models import ModelCatalog
 from marllib.marl.algos.core.CC.maa2c import MAA2CTrainer
 from marllib.marl.algos.utils.log_dir_util import available_local_dir
 from marllib.marl.algos.utils.setup_utils import AlgVar
+import json
 
 
 def run_maa2c(model_class, config_dict, common_config, env_dict, stop, restore):
@@ -47,11 +48,22 @@ def run_maa2c(model_class, config_dict, common_config, env_dict, stop, restore):
     arch = config_dict["model_arch_args"]["core_arch"]
     RUNNING_NAME = '_'.join([algorithm, arch, map_name])
 
+    if restore is not None:
+        with open(restore["params_path"], 'r') as JSON:
+            raw_config = json.load(JSON)
+            raw_config = raw_config["model"]["custom_model_config"]['model_arch_args']
+            check_config = config["model"]["custom_model_config"]['model_arch_args']
+            if check_config != raw_config:
+                raise ValueError("is not using the params required by the checkpoint model")
+        model_path = restore["model_path"]
+    else:
+        model_path = None
+
     results = tune.run(MAA2CTrainer,
                        name=RUNNING_NAME,
                        checkpoint_at_end=config_dict['checkpoint_end'],
                        checkpoint_freq=config_dict['checkpoint_freq'],
-                       restore=restore,
+                       restore=model_path,
                        stop=stop,
                        config=config,
                        verbose=1,

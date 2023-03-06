@@ -139,7 +139,7 @@ There are four parts of configurations that take charge of the whole training pr
 *Note: You can modify all the pre-set parameters via MARLLib api.*
 
 
-### pre-training
+### Pre-training
 
 Making sure all the dependency are installed for the environment you are running with.
 Otherwise, please refer to the [doc](https://marllib.readthedocs.io/en/latest/handbook/env.html). 
@@ -148,7 +148,7 @@ Otherwise, please refer to the [doc](https://marllib.readthedocs.io/en/latest/ha
 
 All environments MARLlib supported should work fine with this version.
 
-### 4 steps training
+### MARLlib API
 
 ```py
 from marllib import marl
@@ -162,9 +162,7 @@ model = marl.build_model(env, mappo, {"core_arch": "mlp", "encode_layer": "128-2
 mappo.fit(env, model, stop={"timesteps_total": 1000000}, checkpoint_freq=100, share_policy="group")
 ```
 
-## cheat sheet
-
-prepare the environment ```env```
+### prepare the ```environment```
 
 |   task mode   | api example |
 | :-----------: | ----------- |
@@ -173,7 +171,25 @@ prepare the environment ```env```
 | competitive | ```marl.make_env(environment_name="mpe", map_name="simple_adversary")``` |
 | mixed | ```marl.make_env(environment_name="mpe", map_name="simple_crypto")``` |
 
-initialize the algorithm ```algo```
+Most of the popular environments in MARL research are supported by MARLlib:
+
+| Env Name | Learning Mode | Observability | Action Space | Observations |
+| :-----------: | :-----------: | :-----------: | :-----------: | :-----------: |
+| **[LBF](https://github.com/semitable/lb-foraging)**  | cooperative + collaborative | Both | Discrete | 1D  |
+| **[RWARE](https://github.com/semitable/robotic-warehouse)**  | cooperative | Partial | Discrete | 1D  |
+| **[MPE](https://github.com/openai/multiagent-particle-envs)**  | cooperative + collaborative + mixed | Both | Both | 1D  |
+| **[SMAC](https://github.com/oxwhirl/smac)**  | cooperative | Partial | Discrete | 1D |
+| **[MetaDrive](https://github.com/decisionforce/metadrive)**  | collaborative | Partial | Continuous | 1D |
+| **[MAgent](https://www.pettingzoo.ml/magent)** | collaborative + mixed | Partial | Discrete | 2D |
+| **[Pommerman](https://github.com/MultiAgentLearning/playground)**  | collaborative + competitive + mixed | Both | Discrete | 2D |
+| **[MAMuJoCo](https://github.com/schroederdewitt/multiagent_mujoco)**  | cooperative | Partial | Continuous | 1D |
+| **[GRF](https://github.com/google-research/football)**  | collaborative + mixed | Full | Discrete | 2D |
+| **[Hanabi](https://github.com/deepmind/hanabi-learning-environment)** | cooperative | Partial | Discrete | 1D |
+
+Each environment has a readme file, standing as the instruction for this task, including env settings, installation,
+and important notes.
+
+### initialize the  ```algorithm```
 
 |  running target   | api example |
 | :-----------: | ----------- |
@@ -181,7 +197,50 @@ initialize the algorithm ```algo```
 | develop & debug | ```marl.algos.mappo(hyperparam_source="test")``` |
 | 3rd party env | ```marl.algos.mappo(hyperparam_source="common")``` |
 
-pick the agent model based on the environment and the algorithm ```model```
+Here is a chart describing the characteristics of each algorithm:
+
+| algorithm                                                    | support task mode | discrete action   | continuous action |  policy type        |
+| :------------------------------------------------------------: | :-----------------: | :----------: | :--------------------: | :----------: | 
+| *IQL**                                                         | all four               | :heavy_check_mark:   |    |  off-policy |
+| *[PG](https://papers.nips.cc/paper/1713-policy-gradient-methods-for-reinforcement-learning-with-function-approximation.pdf)* | all four                  | :heavy_check_mark:       | :heavy_check_mark:   |  on-policy  |
+| *[A2C](https://arxiv.org/abs/1602.01783)*                      | all four              | :heavy_check_mark:       | :heavy_check_mark:   |  on-policy  |
+| *[DDPG](https://arxiv.org/abs/1509.02971)*                     | all four             |  | :heavy_check_mark:   |  off-policy |
+| *[TRPO](http://proceedings.mlr.press/v37/schulman15.pdf)*      | all four            | :heavy_check_mark:       | :heavy_check_mark:   |  on-policy  |
+| *[PPO](https://arxiv.org/abs/1707.06347)*                      | all four            | :heavy_check_mark:       | :heavy_check_mark:   |  on-policy  |
+| *[COMA](https://ojs.aaai.org/index.php/AAAI/article/download/11794/11653)* | all four                           | :heavy_check_mark:       |   |  on-policy  |
+| *[MADDPG](https://arxiv.org/abs/1706.02275)*                   | all four                     |  | :heavy_check_mark:   |  off-policy |
+| *MAA2C**                                                       | all four                        | :heavy_check_mark:       | :heavy_check_mark:   |  on-policy  |
+| *MATRPO**                                                      | all four                         | :heavy_check_mark:       | :heavy_check_mark:   |  on-policy  |
+| *[MAPPO](https://arxiv.org/abs/2103.01955)*                    | all four                         | :heavy_check_mark:       | :heavy_check_mark:   |  on-policy  |
+| *[HATRPO](https://arxiv.org/abs/2109.11251)*                   | cooperative                     | :heavy_check_mark:       | :heavy_check_mark:   |  on-policy  |
+| *[HAPPO](https://arxiv.org/abs/2109.11251)*                    | cooperative                     | :heavy_check_mark:       | :heavy_check_mark:   |  on-policy  |
+| *[VDN](https://arxiv.org/abs/1706.05296)*                      | cooperative         | :heavy_check_mark:   |    |  off-policy |
+| *[QMIX](https://arxiv.org/abs/1803.11485)*                     | cooperative                    | :heavy_check_mark:   |   |  off-policy |
+| *[FACMAC](https://arxiv.org/abs/2003.06709)*                   | cooperative                    |  | :heavy_check_mark:   |  off-policy |
+| *[VDAC](https://arxiv.org/abs/2007.12306)*                    | cooperative                    | :heavy_check_mark:       | :heavy_check_mark:   |  on-policy  |
+| *VDPPO**                                                      | cooperative                | :heavy_check_mark:       | :heavy_check_mark:   |  on-policy  |
+
+***all four**: cooperative collaborative competitive mixed
+
+[comment]: <> (18 MARL algorithms are implemented and categorized as follows:)
+
+[comment]: <> (**Independent Learning:**)
+
+[comment]: <> (*IQL DDPG PG A2C TRPO PPO*)
+
+[comment]: <> (**Centralized Critic:**)
+
+[comment]: <> (*COMA MADDPG MAAC MAPPO MATRPO HATRPO HAPPO*)
+
+[comment]: <> (**Value Decomposition:**)
+
+[comment]: <> (*VDN QMIX FACMAC VDAC VDPPO*)
+
+*IQL* is the multi-agent version of Q learning.
+*MAA2C* and *MATRPO* are the centralized version of A2C and TRPO.
+*VDPPO* is the value decomposition version of PPO.
+
+### construct the agent  ```model```
 
 |  model arch   | api example |
 | :-----------: | ----------- |
@@ -190,7 +249,7 @@ pick the agent model based on the environment and the algorithm ```model```
 | LSTM | ```marl.build_model(env, algo, {"core_arch": "lstm"})```  |
 | encoder arch | ```marl.build_model(env, algo, {"core_arch": "gru", "encode_layer": "128-256"})```  |
 
-kick off training ```algo.fit```
+### kick off the training ```algo.fit```
 
 |  setting   | api example |
 | :-----------: | ----------- |
@@ -216,67 +275,7 @@ By default, all the models will be saved at ```/home/username/ray_results/experi
 Try MPE + MAPPO examples on Google Colaboratory!
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Replicable-MARL/MARLlib/blob/sy_dev/marllib.ipynb)
 
-## Algorithm 
 
-18 MARL algorithms are implemented and categorized as follows:
-
-**Independent Learning:**
-*IQL DDPG PG A2C TRPO PPO*
-
-**Centralized Critic:**
-*COMA MADDPG MAAC MAPPO MATRPO HATRPO HAPPO*
-
-**Value Decomposition:**
-*VDN QMIX FACMAC VDAC VDPPO*
-
-Here is a chart describing the characteristics of each algorithm:
-
-| algorithm                                                    | support task mode | discrete action   | continuous action |  policy type        |
-| :------------------------------------------------------------: | :-----------------: | :----------: | :--------------------: | :----------: | 
-| *IQL**                                                         | all four*               | :heavy_check_mark:   |    |  off-policy |
-| *[PG](https://papers.nips.cc/paper/1713-policy-gradient-methods-for-reinforcement-learning-with-function-approximation.pdf)* | all four                  | :heavy_check_mark:       | :heavy_check_mark:   |  on-policy  |
-| *[A2C](https://arxiv.org/abs/1602.01783)*                      | all four              | :heavy_check_mark:       | :heavy_check_mark:   |  on-policy  |
-| *[DDPG](https://arxiv.org/abs/1509.02971)*                     | all four             |  | :heavy_check_mark:   |  off-policy |
-| *[TRPO](http://proceedings.mlr.press/v37/schulman15.pdf)*      | all four            | :heavy_check_mark:       | :heavy_check_mark:   |  on-policy  |
-| *[PPO](https://arxiv.org/abs/1707.06347)*                      | all four            | :heavy_check_mark:       | :heavy_check_mark:   |  on-policy  |
-| *[COMA](https://ojs.aaai.org/index.php/AAAI/article/download/11794/11653)* | all four                           | :heavy_check_mark:       |   |  on-policy  |
-| *[MADDPG](https://arxiv.org/abs/1706.02275)*                   | all four                     |  | :heavy_check_mark:   |  off-policy |
-| *MAA2C**                                                       | all four                        | :heavy_check_mark:       | :heavy_check_mark:   |  on-policy  |
-| *MATRPO**                                                      | all four                         | :heavy_check_mark:       | :heavy_check_mark:   |  on-policy  |
-| *[MAPPO](https://arxiv.org/abs/2103.01955)*                    | all four                         | :heavy_check_mark:       | :heavy_check_mark:   |  on-policy  |
-| *[HATRPO](https://arxiv.org/abs/2109.11251)*                   | cooperative                     | :heavy_check_mark:       | :heavy_check_mark:   |  on-policy  |
-| *[HAPPO](https://arxiv.org/abs/2109.11251)*                    | cooperative                     | :heavy_check_mark:       | :heavy_check_mark:   |  on-policy  |
-| *[VDN](https://arxiv.org/abs/1706.05296)*                      | cooperative         | :heavy_check_mark:   |    |  off-policy |
-| *[QMIX](https://arxiv.org/abs/1803.11485)*                     | cooperative                    | :heavy_check_mark:   |   |  off-policy |
-| *[FACMAC](https://arxiv.org/abs/2003.06709)*                   | cooperative                    |  | :heavy_check_mark:   |  off-policy |
-| *[VDAC](https://arxiv.org/abs/2007.12306)*                    | cooperative                    | :heavy_check_mark:       | :heavy_check_mark:   |  on-policy  |
-| *VDPPO**                                                      | cooperative                | :heavy_check_mark:       | :heavy_check_mark:   |  on-policy  |
-
-*all four: cooperative collaborative competitive mixed
-
-*IQL* is the multi-agent version of Q learning.
-*MAA2C* and *MATRPO* are the centralized version of A2C and TRPO.
-*VDPPO* is the value decomposition version of PPO.
-
-## environment
-
-Most of the popular environments in MARL research are supported by MARLlib:
-
-| Env Name | Learning Mode | Observability | Action Space | Observations |
-| :-----------: | :-----------: | :-----------: | :-----------: | :-----------: |
-| **[LBF](https://github.com/semitable/lb-foraging)**  | cooperative + collaborative | Both | Discrete | 1D  |
-| **[RWARE](https://github.com/semitable/robotic-warehouse)**  | cooperative | Partial | Discrete | 1D  |
-| **[MPE](https://github.com/openai/multiagent-particle-envs)**  | cooperative + collaborative + mixed | Both | Both | 1D  |
-| **[SMAC](https://github.com/oxwhirl/smac)**  | cooperative | Partial | Discrete | 1D |
-| **[MetaDrive](https://github.com/decisionforce/metadrive)**  | collaborative | Partial | Continuous | 1D |
-| **[MAgent](https://www.pettingzoo.ml/magent)** | collaborative + mixed | Partial | Discrete | 2D |
-| **[Pommerman](https://github.com/MultiAgentLearning/playground)**  | collaborative + competitive + mixed | Both | Discrete | 2D |
-| **[MAMuJoCo](https://github.com/schroederdewitt/multiagent_mujoco)**  | cooperative | Partial | Continuous | 1D |
-| **[GRF](https://github.com/google-research/football)**  | collaborative + mixed | Full | Discrete | 2D |
-| **[Hanabi](https://github.com/deepmind/hanabi-learning-environment)** | cooperative | Partial | Discrete | 1D |
-
-Each environment has a readme file, standing as the instruction for this task, including env settings, installation,
-and important notes.
 
 
 [comment]: <> (## Docker)

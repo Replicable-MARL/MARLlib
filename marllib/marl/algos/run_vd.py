@@ -149,7 +149,7 @@ def run_vd(algo_config, env, model, stop=None):
 
     stop_config = merge_default_and_customized(stop_config, stop)
 
-    if algo_config['restore_path'] == '':
+    if algo_config['restore_path']['model_path'] == '':
         restore = None
     else:
         restore = algo_config['restore_path']
