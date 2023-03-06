@@ -148,20 +148,16 @@ Otherwise, please refer to the [doc](https://marllib.readthedocs.io/en/latest/ha
 
 All environments MARLlib supported should work fine with this version.
 
-### training
+### 4 steps training
 
 ```py
 from marllib import marl
-
 # prepare env
 env = marl.make_env(environment_name="mpe", map_name="simple_spread")
-
 # initialize algorithm with appointed hyper-parameters
 mappo = marl.algos.mappo(hyperparam_source="mpe")
-
 # build agent model based on env + algorithms + user preference
 model = marl.build_model(env, mappo, {"core_arch": "mlp", "encode_layer": "128-256"})
-
 # start training
 mappo.fit(env, model, stop={"timesteps_total": 1000000}, checkpoint_freq=100, share_policy="group")
 ```
@@ -171,7 +167,7 @@ mappo.fit(env, model, stop={"timesteps_total": 1000000}, checkpoint_freq=100, sh
 prepare the environment ```env```
 
 |   task mode   | api example |
-| :-----------: | :-----------: |
+| :-----------: | ----------- |
 | cooperative | ```marl.make_env(environment_name="mpe", map_name="simple_spread", force_coop=True)``` |
 | collaborative | ```marl.make_env(environment_name="mpe", map_name="simple_spread")``` |
 | competitive | ```marl.make_env(environment_name="mpe", map_name="simple_adversary")``` |
@@ -180,7 +176,7 @@ prepare the environment ```env```
 initialize the algorithm ```algo```
 
 |  running target   | api example |
-| :-----------: | :-----------: |
+| :-----------: | ----------- |
 | train & finetune  | ```marl.algos.mappo(hyperparam_source=$ENV)``` |
 | develop & debug | ```marl.algos.mappo(hyperparam_source="test")``` |
 | 3rd party env | ```marl.algos.mappo(hyperparam_source="common")``` |
@@ -188,7 +184,7 @@ initialize the algorithm ```algo```
 pick the agent model based on the environment and the algorithm ```model```
 
 |  model arch   | api example |
-| :-----------: | :-----------: |
+| :-----------: | ----------- |
 | MLP  | ```marl.build_model(env, algo, {"core_arch": "mlp")``` |
 | GRU | ```marl.build_model(env, algo, {"core_arch": "gru"})```  |
 | LSTM | ```marl.build_model(env, algo, {"core_arch": "lstm"})```  |
@@ -197,7 +193,7 @@ pick the agent model based on the environment and the algorithm ```model```
 kick off training ```algo.fit```
 
 |  setting   | api example |
-| :-----------: | :-----------: |
+| :-----------: | ----------- |
 | train  | ```algo.fit(env, model)``` |
 | debug  | ```algo.fit(env, model, local_mode=True)``` |
 | stop condition | ```algo.fit(env, model, stop={'episode_reward_mean': 2000, 'timesteps_total': 10000000})```  |
@@ -209,7 +205,7 @@ kick off training ```algo.fit```
 policy inference ```algo.render```
 
 |  setting   | api example |
-| :-----------: | :-----------: |
+| :-----------: | ----------- |
 | render  | `algo.render(env, model, local_mode=True, restore_path='path_to_model')` |
 
 By default, all the models will be saved at ```/home/username/ray_results/experiment_name/checkpoint_xxxx```
@@ -268,16 +264,16 @@ Most of the popular environments in MARL research are supported by MARLlib:
 
 | Env Name | Learning Mode | Observability | Action Space | Observations |
 | :-----------: | :-----------: | :-----------: | :-----------: | :-----------: |
-| **[LBF](https://github.com/semitable/lb-foraging)**  | cooperative + collaborative | Both | Discrete | Discrete  |
-| **[RWARE](https://github.com/semitable/robotic-warehouse)**  | cooperative | Partial | Discrete | Discrete  |
-| **[MPE](https://github.com/openai/multiagent-particle-envs)**  | cooperative + collaborative + mixed | Both | Both | Continuous  |
-| **[SMAC](https://github.com/oxwhirl/smac)**  | cooperative | Partial | Discrete | Continuous |
-| **[MetaDrive](https://github.com/decisionforce/metadrive)**  | collaborative | Partial | Continuous | Continuous |
-| **[MAgent](https://www.pettingzoo.ml/magent)** | collaborative + mixed | Partial | Discrete | Discrete |
-| **[Pommerman](https://github.com/MultiAgentLearning/playground)**  | collaborative + competitive + mixed | Both | Discrete | Discrete |
-| **[MAMuJoCo](https://github.com/schroederdewitt/multiagent_mujoco)**  | cooperative | Partial | Continuous | Continuous |
-| **[GRF](https://github.com/google-research/football)**  | collaborative + mixed | Full | Discrete | Continuous |
-| **[Hanabi](https://github.com/deepmind/hanabi-learning-environment)** | cooperative | Partial | Discrete | Discrete |
+| **[LBF](https://github.com/semitable/lb-foraging)**  | cooperative + collaborative | Both | Discrete | 1D  |
+| **[RWARE](https://github.com/semitable/robotic-warehouse)**  | cooperative | Partial | Discrete | 1D  |
+| **[MPE](https://github.com/openai/multiagent-particle-envs)**  | cooperative + collaborative + mixed | Both | Both | 1D  |
+| **[SMAC](https://github.com/oxwhirl/smac)**  | cooperative | Partial | Discrete | 1D |
+| **[MetaDrive](https://github.com/decisionforce/metadrive)**  | collaborative | Partial | Continuous | 1D |
+| **[MAgent](https://www.pettingzoo.ml/magent)** | collaborative + mixed | Partial | Discrete | 2D |
+| **[Pommerman](https://github.com/MultiAgentLearning/playground)**  | collaborative + competitive + mixed | Both | Discrete | 2D |
+| **[MAMuJoCo](https://github.com/schroederdewitt/multiagent_mujoco)**  | cooperative | Partial | Continuous | 1D |
+| **[GRF](https://github.com/google-research/football)**  | collaborative + mixed | Full | Discrete | 2D |
+| **[Hanabi](https://github.com/deepmind/hanabi-learning-environment)** | cooperative | Partial | Discrete | 1D |
 
 Each environment has a readme file, standing as the instruction for this task, including env settings, installation,
 and important notes.

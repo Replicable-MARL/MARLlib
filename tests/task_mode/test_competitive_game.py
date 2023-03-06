@@ -13,7 +13,7 @@ class TestAlgo(unittest.TestCase):
                 else:
                     env = marl.make_env(environment_name="mpe", map_name="simple_adversary", continuous_actions=False)
                 algo = getattr(marl.algos, algo_name)(hyperparam_source="test")
-                model = marl.build_model(env, algo, {"core_arch": "mlp", "encode_layer": "64-64"})
+                model = marl.build_model(env, algo, {"core_arch": "mlp", "encode_layer": "16-16"})
                 algo.fit(env, model, stop={"training_iteration": 3}, local_mode=False, num_gpus=1,
                              num_workers=2, share_policy="individual", checkpoint_end=False)
 

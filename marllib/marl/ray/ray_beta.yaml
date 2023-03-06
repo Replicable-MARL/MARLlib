@@ -15,4 +15,4 @@ stop_iters: 9999999 # stop training at this iteration
 stop_timesteps: 2000000 # stop training at this timesteps
 stop_reward: 999999 # stop training at this reward
 seed: 321 # ray seed
-local_dir: "" #  all results placed
+local_dir: "" #  working directory by default

@@ -14,7 +14,7 @@ class TestAlgo(unittest.TestCase):
                 else:
                     env = marl.make_env(environment_name="smac", map_name="3m")
                 one_algo = getattr(marl.algos, algo_name)(hyperparam_source="test")
-                model = marl.build_model(env, one_algo, {"core_arch": "mlp", "encode_layer": "64-64"})
+                model = marl.build_model(env, one_algo, {"core_arch": "mlp", "encode_layer": "16-16"})
                 one_algo.fit(env, model, stop={"training_iteration": 3}, local_mode=False, num_gpus=1,
                              num_workers=2, share_policy="all", checkpoint_end=False)
 

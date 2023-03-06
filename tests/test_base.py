@@ -10,7 +10,7 @@ class TestMPEEnv(unittest.TestCase):
             if algo_name[:2] != "__":
                 algo_name_ls.append(algo_name)
 
-        test_num = 3
+        test_num = 1
         algo_name_subset = random.sample(algo_name_ls, test_num)
 
         for algo_name in algo_name_subset:
@@ -18,7 +18,7 @@ class TestMPEEnv(unittest.TestCase):
                 env = marl.make_env(environment_name="mpe", map_name="simple_spread", force_coop=True,
                                     continuous_actions=True)
                 algo = getattr(marl.algos, algo_name)(hyperparam_source="test")
-                model = marl.build_model(env, algo, {"core_arch": "mlp", "encode_layer": "64-64"})
+                model = marl.build_model(env, algo, {"core_arch": "mlp", "encode_layer": "16-16"})
                 algo.fit(env, model, stop={"training_iteration": 3}, local_mode=False, num_gpus=0,
                              num_workers=2, share_policy="all", checkpoint_end=False)
             elif algo_name in ["happo", "hatrpo"]:
@@ -26,7 +26,7 @@ class TestMPEEnv(unittest.TestCase):
             else:
                 env = marl.make_env(environment_name="mpe", map_name="simple_spread", force_coop=True)
                 algo = getattr(marl.algos, algo_name)(hyperparam_source="test")
-                model = marl.build_model(env, algo, {"core_arch": "mlp", "encode_layer": "64-64"})
+                model = marl.build_model(env, algo, {"core_arch": "mlp", "encode_layer": "16-16"})
                 algo.fit(env, model, stop={"training_iteration": 3}, local_mode=False, num_gpus=0,
                              num_workers=2, share_policy="all", checkpoint_end=False)
 

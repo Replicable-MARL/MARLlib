@@ -72,6 +72,6 @@ def run_vdppo(model_class, config_dict, common_config, env_dict, stop, restore):
                        config=config,
                        verbose=1,
                        progress_reporter=CLIReporter(),
-                       local_dir=available_local_dir)
+                       local_dir=available_local_dir if config_dict["local_dir"] == "" else config_dict["local_dir"])
 
     return results
