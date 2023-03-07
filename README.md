@@ -11,6 +11,7 @@
 [![GitHub stars](https://img.shields.io/github/stars/Replicable-MARL/MARLlib)](https://github.com/Replicable-MARL/MARLlib/stargazers) 
 [![GitHub forks](https://img.shields.io/github/forks/Replicable-MARL/MARLlib)](https://github.com/Replicable-MARL/MARLlib/network)
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Replicable-MARL/MARLlib/blob/sy_dev/marllib.ipynb)
+[![PyPI version](https://badge.fury.io/py/marllib.svg)](https://badge.fury.io/py/marllib)
 
 **Multi-agent Reinforcement Learning Library ([MARLlib](https://arxiv.org/abs/2210.13708))** is ***a comprehensive MARL algorithm library*** based
 on [**Ray**](https://github.com/ray-project/ray) and one of its toolkits [**RLlib**](https://github.com/ray-project/ray/tree/master/rllib). It provides MARL research community with a unified
@@ -44,11 +45,11 @@ Here we provide a table for the comparison of MARLlib and existing work.
 |   Library   | Github Stars | Supported Env | Algorithm | Parameter Sharing  | Model | Framework
 |:-------------:|:-------------:|:-------------:|:-------------:|:--------------:|:----------------:|:-----------------:|
 |     [PyMARL](https://github.com/oxwhirl/pymarl) | [![GitHub stars](https://img.shields.io/github/stars/oxwhirl/pymarl)](https://github.com/oxwhirl/pymarl/stargazers)    |       1 cooperative       |       5       |         share        |      GRU           | *
-|   [MARL-Algorithms](https://github.com/starry-sky6688/MARL-Algorithms)| [![GitHub stars](https://img.shields.io/github/stars/starry-sky6688/MARL-Algorithms)](https://github.com/starry-sky6688/MARL-Algorithms/stargazers)       |       1 cooperative       |     9   |         share        |  RNN  | *
+|   [PyMARL2](https://github.com/hijkzzz/pymarl2)| [![GitHub stars](https://img.shields.io/github/stars/hijkzzz/pymarl2)](https://github.com/hijkzzz/pymarl2)       |       2 cooperative       |     11   |         share        |  MLP / GRU  | PyMARL
 | [MAPPO Benchmark](https://github.com/marlbenchmark/on-policy)| [![GitHub stars](https://img.shields.io/github/stars/marlbenchmark/on-policy)](https://github.com/marlbenchmark/on-policy/stargazers)    |       4 cooperative       |      1     |          share + separate        |          MLP / GRU        |         pytorch-a2c-ppo-acktr-gail              |
 | [MAlib](https://github.com/sjtu-marl/malib) | [![GitHub stars](https://img.shields.io/github/stars/sjtu-marl/malib)](https://github.com/hijkzzz/sjtu-marl/malib/stargazers) | 4 self-play  | 10 | share + group + separate | MLP / LSTM | *
 |    [EPyMARL](https://github.com/uoe-agents/epymarl)| [![GitHub stars](https://img.shields.io/github/stars/uoe-agents/epymarl)](https://github.com/hijkzzz/uoe-agents/epymarl/stargazers)         |       4 cooperative      |    9    |        share + separate       |      GRU             |           PyMARL            |
-|    [MARLlib](https://github.com/Replicable-MARL/MARLlib)|  [![GitHub stars](https://img.shields.io/github/stars/Replicable-MARL/MARLlib)](https://github.com/Replicable-MARL/MARLlib/stargazers)  |       any task with **no task mode restriction**     |    18     |   share + group + separate + customizable         |         MLP / CNN / GRU / LSTM          |           Ray/Rllib           |
+|    [MARLlib](https://github.com/Replicable-MARL/MARLlib)|  [![GitHub stars](https://img.shields.io/github/stars/Replicable-MARL/MARLlib)](https://github.com/Replicable-MARL/MARLlib/stargazers)  |       10 **no task mode restriction**     |    18     |   share + group + separate + **customizable**         |         MLP / CNN / GRU / LSTM          |           Ray/Rllib           |
 
 
 [comment]: <> (<div align="center">)
@@ -74,48 +75,45 @@ Here we provide a table for the comparison of MARLlib and existing work.
 - **customizable policy sharing**: grouped by MARLlib or build your own!
 - more than a thousand experiments are conducted and released!
 
+## Installation
 
-## Step-by-step installation (recommended)
+> __Note__
+> MARLlib supports Linux only.
+
+### Step-by-step  (recommended)
 
 - install dependencies
 - install environments
 - install patches
 
-> __Note__
-> MARLlib supports Linux only.
-
-### install dependencies (basic)
+#### 1. install dependencies (basic)
 
 First install MARLlib dependencies to guarantee basic usage.
 following [this guide](https://marllib.readthedocs.io/en/latest/handbook/env.html), finally install patches for RLlib.
-After installation, training can be launched by following the usage section below.
 
 ```bash
-conda create -n marllib python=3.8
-conda activate marllib
-git clone https://github.com/Replicable-MARL/MARLlib.git
-cd MARLlib
-pip install --upgrade pip
-pip install -r requirements.txt
+$ conda create -n marllib python=3.8
+$ conda activate marllib
+$ git clone https://github.com/Replicable-MARL/MARLlib.git && cd MARLlib
+$ pip install -r requirements.txt
 ```
-> __Note__
-> **MPE** is included in basic installation.
 
-### install environments (optional)
+#### 2. install environments (optional)
 
 Please follow [this guide](https://marllib.readthedocs.io/en/latest/handbook/env.html).
 
-### install patches (basic)
+#### 3. install patches (basic)
 
 Fix bugs of RLlib using patches by run the following command:
 
 ```bash
-cd /Path/To/MARLlib/marl/patch
-python add_patch.py -y
+$ cd /Path/To/MARLlib/marl/patch
+$ python add_patch.py -y
 ```
-## PyPI (API only)
-[![PyPI version](https://badge.fury.io/py/marllib.svg)](https://badge.fury.io/py/marllib)
-```
+### PyPI
+
+```bash
+$ pip install --upgrade pip
 $ pip install marllib
 ```
 
@@ -279,15 +277,23 @@ More tutorial documentations are available [here](https://marllib.readthedocs.io
 | :----------- | :----------- |
 | Issues | [GitHub Issues](https://github.com/Replicable-MARL/MARLlib/issues) |
 
-## Paper
-If you use MARLlib in your research, please cite the [MARLlib paper](https://arxiv.org/abs/2210.13708).
+[comment]: <> (## Paper)
 
-```tex
-@article{hu2022marllib,
-  title={MARLlib: Extending RLlib for Multi-agent Reinforcement Learning},
-  author={Hu, Siyi and Zhong, Yifan and Gao, Minquan and Wang, Weixun and Dong, Hao and Li, Zhihui and Liang, Xiaodan and Chang, Xiaojun and Yang, Yaodong},
-  journal={arXiv preprint arXiv:2210.13708},
-  year={2022}
-}
-```
+[comment]: <> (If you use MARLlib in your research, please cite the [MARLlib paper]&#40;https://arxiv.org/abs/2210.13708&#41;.)
+
+[comment]: <> (```tex)
+
+[comment]: <> (@article{hu2022marllib,)
+
+[comment]: <> (  title={MARLlib: Extending RLlib for Multi-agent Reinforcement Learning},)
+
+[comment]: <> (  author={Hu, Siyi and Zhong, Yifan and Gao, Minquan and Wang, Weixun and Dong, Hao and Li, Zhihui and Liang, Xiaodan and Chang, Xiaojun and Yang, Yaodong},)
+
+[comment]: <> (  journal={arXiv preprint arXiv:2210.13708},)
+
+[comment]: <> (  year={2022})
+
+[comment]: <> (})
+
+[comment]: <> (```)
 
