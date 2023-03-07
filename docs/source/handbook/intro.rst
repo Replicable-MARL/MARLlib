@@ -29,11 +29,10 @@ If you use MARLlib in your work, please cite the accompanying `paper <https://ar
 
 .. code-block:: bibtex
 
-    @misc{hu2022marllib,
-      title = {MARLlib: Extending RLlib for Multi-agent Reinforcement Learning},
-      author = {Hu, Siyi and Zhong, Yifan and Gao, Minquan and Wang, Weixun and Dong, Hao and Li, Zhihui and Liang, Xiaodan and Chang, Xiaojun and Yang, Yaodong},
-      year = {2022},
-      eprint = {2210.13708},
-      archivePrefix={arXiv},
+    @article{hu2022marllib,
+      title={MARLlib: Extending RLlib for Multi-agent Reinforcement Learning},
+      author={Hu, Siyi and Zhong, Yifan and Gao, Minquan and Wang, Weixun and Dong, Hao and Li, Zhihui and Liang, Xiaodan and Chang, Xiaojun and Yang, Yaodong},
+      journal={arXiv preprint arXiv:2210.13708},
+      year={2022}
     }
 

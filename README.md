@@ -12,7 +12,7 @@
 [![GitHub forks](https://img.shields.io/github/forks/Replicable-MARL/MARLlib)](https://github.com/Replicable-MARL/MARLlib/network)
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Replicable-MARL/MARLlib/blob/sy_dev/marllib.ipynb)
 
-**Multi-agent Reinforcement Learning Library (MARLlib)** is ***a comprehensive MARL algorithm library*** based
+**Multi-agent Reinforcement Learning Library ([MARLlib](https://arxiv.org/abs/2210.13708))** is ***a comprehensive MARL algorithm library*** based
 on [**Ray**](https://github.com/ray-project/ray) and one of its toolkits [**RLlib**](https://github.com/ray-project/ray/tree/master/rllib). It provides MARL research community with a unified
 platform for building, training, and evaluating MARL algorithms on almosty all kinds of diverse tasks and environments.
 
@@ -57,30 +57,34 @@ Here we provide a table for the comparison of MARLlib and existing work.
 
 [comment]: <> (</div>)
 
-What **MARLlib** brings to MARL community:
+## key features
 
-- MARLlib unifies diverse algorithm pipeline with agent-level distributed dataflow.
-- MARLlib supports all task modes: cooperative, collaborative, competitive, and mixed.
-- MARLlib unifies multi-agent environment interfaces with a new interface following Gym standard.
-- MARLlib provides flexible and customizable parameter sharing strategies.
+:beginner: What **MARLlib** brings to MARL community:
 
-With MARLlib, you can exploit the advantages not limited to:
+- it unifies diverse algorithm pipeline with agent-level distributed dataflow.
+- it supports all task modes: cooperative, collaborative, competitive, and mixed.
+- it unifies multi-agent environment interfaces with a new interface following Gym standard.
+- it provides flexible and customizable parameter sharing strategies.
 
-- out of the box **18 algorithms** including common baselines and recent state of the arts!
-- **all task modes** available! cooperative, collaborative, competitive, and mixed (team-based
-  competition)
-- easy to incorporate new multi-agent environment!
-- **customizable model arch**! or pick your favorite one from MARLlib
-- **customizable policy sharing** among agents! or grouped by MARLlib automatically
+:rocket: With MARLlib, you can exploit the advantages not limited to:
+
+- **zero knowledge of MARL**: out of the box 18 algorithms with intuitive api!
+- **all task modes available**: support almost all multi-agent environment!
+- **customizable model arch**: pick your favorite one from model zoo!
+- **customizable policy sharing**: grouped by MARLlib or build your own!
 - more than a thousand experiments are conducted and released!
 
-## Installation
+
+## Step-by-step installation (recommended)
 
 - install dependencies
 - install environments
 - install patches
 
-### Install dependencies (basic)
+> __Note__
+> MARLlib supports Linux only.
+
+### install dependencies (basic)
 
 First install MARLlib dependencies to guarantee basic usage.
 following [this guide](https://marllib.readthedocs.io/en/latest/handbook/env.html), finally install patches for RLlib.
@@ -94,13 +98,14 @@ cd MARLlib
 pip install --upgrade pip
 pip install -r requirements.txt
 ```
-Note: **MPE** is included in basic installation.
+> __Note__
+> **MPE** is included in basic installation.
 
-### Install environments (optional)
+### install environments (optional)
 
 Please follow [this guide](https://marllib.readthedocs.io/en/latest/handbook/env.html).
 
-### Install patches (basic)
+### install patches (basic)
 
 Fix bugs of RLlib using patches by run the following command:
 
@@ -108,20 +113,12 @@ Fix bugs of RLlib using patches by run the following command:
 cd /Path/To/MARLlib/marl/patch
 python add_patch.py -y
 ```
+## PyPI (API only)
+[![PyPI version](https://badge.fury.io/py/marllib.svg)](https://badge.fury.io/py/marllib)
+```
+$ pip install marllib
+```
 
-[comment]: <> (If pommerman is installed and used as your testing bed, run)
-
-[comment]: <> (```bash)
-
-[comment]: <> (cd /Path/To/MARLlib/marl/patch)
-
-[comment]: <> (python add_patch.py -y -p)
-
-[comment]: <> (```)
-
-[comment]: <> (follow the guide [here]&#40;https://marllib.readthedocs.io/en/latest/handbook/env.html#pommerman&#41; before you starting)
-
-[comment]: <> (training.)
 
 ## Learning with MARLlib
 
@@ -136,19 +133,22 @@ There are four parts of configurations that take charge of the whole training pr
 <img src=docs/source/images/configurations.png width=100% />
 </div>
 
-*Note: You can modify all the pre-set parameters via MARLLib api.*
+> __Note__
+> You can modify all the pre-set parameters via MARLLib api.*
 
 
 ### Pre-training
 
 Making sure all the dependency are installed for the environment you are running with.
-Otherwise, please refer to the [doc](https://marllib.readthedocs.io/en/latest/handbook/env.html). 
+Otherwise, please refer to the [doc](https://marllib.readthedocs.io/en/latest/handbook/env.html).
 
->  **Note: Always check your `gym` version and keep it to `0.21.0`.**
+### MARLlib 4-step API
 
-All environments MARLlib supported should work fine with this version.
+- prepare the ```environment```
+- initialize the  ```algorithm```
+- construct the agent  ```model```
+- kick off the training ```algo.fit```
 
-### MARLlib API
 
 ```py
 from marllib import marl
@@ -222,20 +222,6 @@ Here is a chart describing the characteristics of each algorithm:
 
 ***all four**: cooperative collaborative competitive mixed
 
-[comment]: <> (18 MARL algorithms are implemented and categorized as follows:)
-
-[comment]: <> (**Independent Learning:**)
-
-[comment]: <> (*IQL DDPG PG A2C TRPO PPO*)
-
-[comment]: <> (**Centralized Critic:**)
-
-[comment]: <> (*COMA MADDPG MAAC MAPPO MATRPO HATRPO HAPPO*)
-
-[comment]: <> (**Value Decomposition:**)
-
-[comment]: <> (*VDN QMIX FACMAC VDAC VDPPO*)
-
 *IQL* is the multi-agent version of Q learning.
 *MAA2C* and *MATRPO* are the centralized version of A2C and TRPO.
 *VDPPO* is the value decomposition version of PPO.
@@ -269,138 +255,39 @@ policy inference ```algo.render```
 
 By default, all the models will be saved at ```/home/username/ray_results/experiment_name/checkpoint_xxxx```
 
+## Benchmark Results
+
+All results are listed [here](https://github.com/Replicable-MARL/MARLlib/tree/main/results).
+
+## Examples
+
+- detailed API usage
+- customize policy sharing
+- load model and rendering
+- add new environment
 
 ## Tutorials
 
 Try MPE + MAPPO examples on Google Colaboratory!
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Replicable-MARL/MARLlib/blob/sy_dev/marllib.ipynb)
 
+More tutorial documentations are available [here](https://marllib.readthedocs.io/).
 
+## Community
 
+|  Channel   | Link |
+| :----------- | :----------- |
+| Issues | [GitHub Issues](https://github.com/Replicable-MARL/MARLlib/issues) |
 
-[comment]: <> (## Docker)
+## Paper
+If you use MARLlib in your research, please cite the [MARLlib paper](https://arxiv.org/abs/2210.13708).
 
-[comment]: <> (We also provide docker-based usage for MARLlib. Before use, make)
+```tex
+@article{hu2022marllib,
+  title={MARLlib: Extending RLlib for Multi-agent Reinforcement Learning},
+  author={Hu, Siyi and Zhong, Yifan and Gao, Minquan and Wang, Weixun and Dong, Hao and Li, Zhihui and Liang, Xiaodan and Chang, Xiaojun and Yang, Yaodong},
+  journal={arXiv preprint arXiv:2210.13708},
+  year={2022}
+}
+```
 
-[comment]: <> (sure [docker]&#40;https://docs.docker.com/desktop/install/linux-install/&#41; is installed on your machine.)
-
-[comment]: <> (Note: You need root access to use docker.)
-
-[comment]: <> (### Ready to Go Image)
-
-[comment]: <> (We prepare a docker image ready for MARLlib to)
-
-[comment]: <> (run. [link]&#40;https://hub.docker.com/repository/docker/iclr2023paper4242/marllib&#41;)
-
-[comment]: <> (```bash)
-
-[comment]: <> (docker pull iclr2023paper4242/marl:1.0)
-
-[comment]: <> (docker run -d -it --rm --gpus all iclr2023paper4242/marl:1.0)
-
-[comment]: <> (docker exec -it [container_name] # you can get container_name by this command: docker ps)
-
-[comment]: <> (# launch the training)
-
-[comment]: <> (python main.py)
-
-[comment]: <> (```)
-
-[comment]: <> (### Alternatively, you can build your image on your local machine with two options: GPU or CPU only)
-
-[comment]: <> (#### Use GPU in docker)
-
-[comment]: <> (To use CUDA in MARLlib docker container, please first)
-
-[comment]: <> (install [NVIDIA Container Toolkit]&#40;https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html&#41;)
-
-[comment]: <> (.)
-
-[comment]: <> (To build MARLlib docker image, use the following command:)
-
-[comment]: <> (```bash)
-
-[comment]: <> (git clone https://github.com/Replicable-MARL/MARLlib.git)
-
-[comment]: <> (cd MARLlib)
-
-[comment]: <> (bash docker/build.sh)
-
-[comment]: <> (```)
-
-[comment]: <> (Run `docker run --itd --rm --gpus all marllib:1.0` to create a new container and make GPU visible inside the container.)
-
-[comment]: <> (Then attach into the container and run experiments:)
-
-[comment]: <> (```bash)
-
-[comment]: <> (docker attach [your_container_name] # you can get container_name by this command: docker ps)
-
-[comment]: <> (# now we are in docker /workspace/MARLlib)
-
-[comment]: <> (# modify config file ray.yaml to enable GPU use)
-
-[comment]: <> (# launch the training)
-
-[comment]: <> (python main.py)
-
-[comment]: <> (```)
-
-[comment]: <> (#### Only use CPU in docker)
-
-[comment]: <> (To build MARLlib docker image, use the following command:)
-
-[comment]: <> (```bash)
-
-[comment]: <> (git clone https://github.com/Replicable-MARL/MARLlib.git)
-
-[comment]: <> (cd MARLlib)
-
-[comment]: <> (bash docker/build.sh)
-
-[comment]: <> (```)
-
-[comment]: <> (Run `docker run -d -it marllib:1.0` to create a new container. Then attach into the container and run experiments:)
-
-[comment]: <> (```bash)
-
-[comment]: <> (docker attach [your_container_name] # you can get container_name by this command: docker ps)
-
-[comment]: <> (# now we are in docker /workspace/MARLlib)
-
-[comment]: <> (# launch the training)
-
-[comment]: <> (python main.py)
-
-[comment]: <> (```)
-
-[comment]: <> (Note we only pre-install [LBF]&#40;https://iclr2023marllib.readthedocs.io/en/latest/handbook/env.html#lbf&#41; in the target)
-
-[comment]: <> (container marllib:1.0 as a fast example. All running/algorithm/task configurations are kept unchanged.)
-
-## Experiment Results
-
-All results are listed [here](https://github.com/Replicable-MARL/MARLlib/tree/main/results).
-
-
-[comment]: <> (## Bug Shooting)
-
-[comment]: <> (- Environment side bug: e.g., SMAC is not installed properly.)
-
-[comment]: <> (    - Cause of bug: environment not installed properly &#40;dependency, version, ...&#41;)
-
-[comment]: <> (    - Solution: find the bug description in the log printed, especailly the table status at the initial part.)
-
-[comment]: <> (- Gym related bug:)
-
-[comment]: <> (    - Cause of bug: gym version required by RLlib and Environment has conflict)
-
-[comment]: <> (    - Solution: always change gym version back to 0.21.0 after new package installation.)
-
-[comment]: <> (- Package missing:)
-
-[comment]: <> (    - Cause of bug: miss installing package or incorrect Python Path)
-
-[comment]: <> (    - Solution: install the package and check you current PYTHONPATH)
-    
-    
