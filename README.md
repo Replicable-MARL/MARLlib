@@ -2,7 +2,7 @@
 <img src=docs/source/images/logo1.png width=65% />
 </div>
 
-<h1 align="center"> MARLlib: The Multi-agent Reinforcement Learning Library </h1>
+<h1 align="center"> MARLlib: A General Multi-agent Reinforcement Learning Library </h1>
 
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)]()
 ![test](https://github.com/Replicable-MARL/MARLlib/workflows/test/badge.svg)
@@ -13,9 +13,9 @@
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Replicable-MARL/MARLlib/blob/sy_dev/marllib.ipynb)
 [![PyPI version](https://badge.fury.io/py/marllib.svg)](https://badge.fury.io/py/marllib)
 
-**Multi-agent Reinforcement Learning Library ([MARLlib](https://arxiv.org/abs/2210.13708))** is ***a comprehensive MARL algorithm library*** based
-on [**Ray**](https://github.com/ray-project/ray) and one of its toolkits [**RLlib**](https://github.com/ray-project/ray/tree/master/rllib). It provides MARL research community with a unified
-platform for building, training, and evaluating MARL algorithms on almosty all kinds of diverse tasks and environments.
+**Multi-agent Reinforcement Learning Library ([MARLlib](https://arxiv.org/abs/2210.13708))** is ***a MARL library*** based
+on [**Ray**](https://github.com/ray-project/ray) and one of its toolkits [**RLlib**](https://github.com/ray-project/ray/tree/master/rllib). It provides the MARL research community a unified
+platform for building, training, and evaluating MARL algorithms on almost all diverse tasks and environments.
 
 A simple case of MARLlib usage:
 
@@ -42,14 +42,14 @@ mappo.render(env, model, share_policy='group', restore_path='path_to_checkpoint'
 
 Here we provide a table for the comparison of MARLlib and existing work.
 
-|   Library   | Github Stars | Supported Env | Algorithm | Parameter Sharing  | Model | Framework
+|   Library   | Github Stars | Supported Env | Algorithm | Parameter Sharing  | Model | Documentation
 |:-------------:|:-------------:|:-------------:|:-------------:|:--------------:|:----------------:|:-----------------:|
-|     [PyMARL](https://github.com/oxwhirl/pymarl) | [![GitHub stars](https://img.shields.io/github/stars/oxwhirl/pymarl)](https://github.com/oxwhirl/pymarl/stargazers)    |       1 cooperative       |       5       |         share        |      GRU           | *
-|   [PyMARL2](https://github.com/hijkzzz/pymarl2)| [![GitHub stars](https://img.shields.io/github/stars/hijkzzz/pymarl2)](https://github.com/hijkzzz/pymarl2)       |       2 cooperative       |     11   |         share        |  MLP / GRU  | PyMARL
-| [MAPPO Benchmark](https://github.com/marlbenchmark/on-policy)| [![GitHub stars](https://img.shields.io/github/stars/marlbenchmark/on-policy)](https://github.com/marlbenchmark/on-policy/stargazers)    |       4 cooperative       |      1     |          share + separate        |          MLP / GRU        |         pytorch-a2c-ppo-acktr-gail              |
-| [MAlib](https://github.com/sjtu-marl/malib) | [![GitHub stars](https://img.shields.io/github/stars/sjtu-marl/malib)](https://github.com/hijkzzz/sjtu-marl/malib/stargazers) | 4 self-play  | 10 | share + group + separate | MLP / LSTM | *
-|    [EPyMARL](https://github.com/uoe-agents/epymarl)| [![GitHub stars](https://img.shields.io/github/stars/uoe-agents/epymarl)](https://github.com/hijkzzz/uoe-agents/epymarl/stargazers)         |       4 cooperative      |    9    |        share + separate       |      GRU             |           PyMARL            |
-|    [MARLlib](https://github.com/Replicable-MARL/MARLlib)|  [![GitHub stars](https://img.shields.io/github/stars/Replicable-MARL/MARLlib)](https://github.com/Replicable-MARL/MARLlib/stargazers)  |       10 **no task mode restriction**     |    18     |   share + group + separate + **customizable**         |         MLP / CNN / GRU / LSTM          |           Ray/Rllib           |
+|     [PyMARL](https://github.com/oxwhirl/pymarl) | [![GitHub stars](https://img.shields.io/github/stars/oxwhirl/pymarl)](https://github.com/oxwhirl/pymarl/stargazers)    |       1 cooperative       |       5       |         share        |      GRU           | :x:
+|   [PyMARL2](https://github.com/hijkzzz/pymarl2)| [![GitHub stars](https://img.shields.io/github/stars/hijkzzz/pymarl2)](https://github.com/hijkzzz/pymarl2)       |       2 cooperative       |     11   |         share        |  MLP + GRU  | :x:
+| [MAPPO Benchmark](https://github.com/marlbenchmark/on-policy)| [![GitHub stars](https://img.shields.io/github/stars/marlbenchmark/on-policy)](https://github.com/marlbenchmark/on-policy/stargazers)    |       4 cooperative       |      1     |          share + separate        |          MLP + GRU        |         :x:              |
+| [MAlib](https://github.com/sjtu-marl/malib) | [![GitHub stars](https://img.shields.io/github/stars/sjtu-marl/malib)](https://github.com/hijkzzz/sjtu-marl/malib/stargazers) | 4 self-play  | 10 | share + group + separate | MLP + LSTM | [![Documentation Status](https://readthedocs.org/projects/malib/badge/?version=latest)](https://malib.readthedocs.io/en/latest/?badge=latest)
+|    [EPyMARL](https://github.com/uoe-agents/epymarl)| [![GitHub stars](https://img.shields.io/github/stars/uoe-agents/epymarl)](https://github.com/hijkzzz/uoe-agents/epymarl/stargazers)         |       4 cooperative      |    9    |        share + separate       |      GRU             |           :x:            |
+|    [MARLlib](https://github.com/Replicable-MARL/MARLlib)|  [![GitHub stars](https://img.shields.io/github/stars/Replicable-MARL/MARLlib)](https://github.com/Replicable-MARL/MARLlib/stargazers)  |       10 **no task mode restriction**     |    18     |   share + group + separate + **customizable**         |         MLP + CNN + GRU + LSTM          |           [![Documentation Status](https://readthedocs.org/projects/marllib/badge/?version=latest)](https://marllib.readthedocs.io/en/latest/) |
 
 
 [comment]: <> (<div align="center">)
@@ -62,22 +62,22 @@ Here we provide a table for the comparison of MARLlib and existing work.
 
 :beginner: What **MARLlib** brings to MARL community:
 
-- it unifies diverse algorithm pipeline with agent-level distributed dataflow.
+- it unifies diverse algorithm pipelines with agent-level distributed dataflow.
 - it supports all task modes: cooperative, collaborative, competitive, and mixed.
-- it unifies multi-agent environment interfaces with a new interface following Gym standard.
-- it provides flexible and customizable parameter sharing strategies.
+- it unifies multi-agent environment interfaces with a new interface following Gym.
+- it provides flexible and customizable parameter-sharing strategies.
 
 :rocket: With MARLlib, you can exploit the advantages not limited to:
 
-- **zero knowledge of MARL**: out of the box 18 algorithms with intuitive api!
+- **zero knowledge of MARL**: out of the box 18 algorithms with intuitive API!
 - **all task modes available**: support almost all multi-agent environment!
-- **customizable model arch**: pick your favorite one from model zoo!
+- **customizable model arch**: pick your favorite one from the model zoo!
 - **customizable policy sharing**: grouped by MARLlib or build your own!
 - more than a thousand experiments are conducted and released!
 
 ## Installation
 
-> __Note__
+> __Note__:
 > MARLlib supports Linux only.
 
 ### Step-by-step  (recommended)
@@ -88,7 +88,7 @@ Here we provide a table for the comparison of MARLlib and existing work.
 
 #### 1. install dependencies (basic)
 
-First install MARLlib dependencies to guarantee basic usage.
+First, install MARLlib dependencies to guarantee basic usage.
 following [this guide](https://marllib.readthedocs.io/en/latest/handbook/env.html), finally install patches for RLlib.
 
 ```bash
@@ -104,7 +104,7 @@ Please follow [this guide](https://marllib.readthedocs.io/en/latest/handbook/env
 
 #### 3. install patches (basic)
 
-Fix bugs of RLlib using patches by run the following command:
+Fix bugs of RLlib using patches by running the following command:
 
 ```bash
 $ cd /Path/To/MARLlib/marl/patch
@@ -134,16 +134,16 @@ There are four parts of configurations that take charge of the whole training pr
 <img src=docs/source/images/configurations.png width=100% />
 </div>
 
-Before training, make sure all the parameters are set correctly, especially those you don't want to change.
-> __Note__
-> You can also modify all the pre-set parameters via MARLLib api.*
+Before training, ensure all the parameters are set correctly, especially those you don't want to change.
+> __Note__:
+> You can also modify all the pre-set parameters via MARLLib API.*
 
 </details>
 
 <details>
 <summary><b><big>Register the environment</big></b></summary>
 
-Making sure all the dependency are installed for the environment you are running with. Otherwise, please refer to
+Ensure all the dependencies are installed for the environment you are running with. Otherwise, please refer to
 [MARLlib documentation](https://marllib.readthedocs.io/en/latest/handbook/env.html).
 
 
@@ -271,15 +271,15 @@ All results are listed [here](https://github.com/Replicable-MARL/MARLlib/tree/ma
 
 ## Quick examples
 
-MARLlib provides some useful examples for you to refer.
+MARLlib provides some practical examples for you to refer to.
 
-- [Detailed API Usage](https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/examples/api_basic_usage.py): show how to use MARLlib api in
+- [Detailed API usage](https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/examples/api_basic_usage.py): show how to use MARLlib api in
   detail, e.g. cmd + api combined running.
-- [Policy Sharing Cutomization](https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/examples/customize_policy_sharing.py):
-  define your group policy sharing strategy as you like based on current tasks.
-- [Loading Model and Rendering](https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/examples/load_and_render_model.py):
-  render the environment based on the pretrained model.
-- [Incorporating New Environment to MARLlib](https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/examples/add_new_env.py):
+- [Policy sharing cutomization](https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/examples/customize_policy_sharing.py):
+  define your group policy-sharing strategy as you like based on current tasks.
+- [Loading model and rendering](https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/examples/load_and_render_model.py):
+  render the environment based on the pre-trained model.
+- [Incorporating new environment to MARLlib](https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/examples/add_new_env.py):
   add your new environment following MARLlib's env-agent interaction interface.
 
 ## Tutorials
