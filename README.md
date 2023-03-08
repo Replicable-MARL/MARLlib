@@ -7,8 +7,8 @@
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)]()
 ![test](https://github.com/Replicable-MARL/MARLlib/workflows/test/badge.svg)
 [![Documentation Status](https://readthedocs.org/projects/marllib/badge/?version=latest)](https://marllib.readthedocs.io/en/latest/)
-[![GitHub issues](https://img.shields.io/github/issues/Replicable-MARL/MARLlib)](https://github.com/Replicable-MARL/MARLlib/issues) 
-[![GitHub stars](https://img.shields.io/github/stars/Replicable-MARL/MARLlib)](https://github.com/Replicable-MARL/MARLlib/stargazers) 
+[![GitHub issues](https://img.shields.io/github/issues/Replicable-MARL/MARLlib)](https://github.com/Replicable-MARL/MARLlib/issues)
+[![GitHub stars](https://img.shields.io/github/stars/Replicable-MARL/MARLlib)](https://github.com/Replicable-MARL/MARLlib/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/Replicable-MARL/MARLlib)](https://github.com/Replicable-MARL/MARLlib/network)
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Replicable-MARL/MARLlib/blob/sy_dev/marllib.ipynb)
 [![PyPI version](https://badge.fury.io/py/marllib.svg)](https://badge.fury.io/py/marllib)
@@ -18,6 +18,7 @@ on [**Ray**](https://github.com/ray-project/ray) and one of its toolkits [**RLli
 platform for building, training, and evaluating MARL algorithms on almosty all kinds of diverse tasks and environments.
 
 A simple case of MARLlib usage:
+
 ```py
 from marllib import marl
 
@@ -36,7 +37,6 @@ mappo.fit(env, model, stop={'timesteps_total': 1000000}, share_policy='group')
 # ready to control
 mappo.render(env, model, share_policy='group', restore_path='path_to_checkpoint')
 ```
-
 
 ## Why MARLlib?
 
@@ -110,6 +110,7 @@ Fix bugs of RLlib using patches by run the following command:
 $ cd /Path/To/MARLlib/marl/patch
 $ python add_patch.py -y
 ```
+
 ### PyPI
 
 ```bash
@@ -117,13 +118,15 @@ $ pip install --upgrade pip
 $ pip install marllib
 ```
 
+## Getting started
 
-## Learning with MARLlib
+<details>
+<summary><b><big>Prepare the configuration</big></b></summary>
 
 There are four parts of configurations that take charge of the whole training process.
 
 - scenario: specify the environment/task settings
-- algorithm: choose the hyperparameters of the algorithm 
+- algorithm: choose the hyperparameters of the algorithm
 - model: customize the model architecture
 - ray/rllib: change the basic training settings
 
@@ -131,36 +134,18 @@ There are four parts of configurations that take charge of the whole training pr
 <img src=docs/source/images/configurations.png width=100% />
 </div>
 
+Before training, make sure all the parameters are set correctly, especially those you don't want to change.
 > __Note__
-> You can modify all the pre-set parameters via MARLLib api.*
+> You can also modify all the pre-set parameters via MARLLib api.*
 
+</details>
 
-### Pre-training
+<details>
+<summary><b><big>Register the environment</big></b></summary>
 
-Making sure all the dependency are installed for the environment you are running with.
-Otherwise, please refer to the [doc](https://marllib.readthedocs.io/en/latest/handbook/env.html).
+Making sure all the dependency are installed for the environment you are running with. Otherwise, please refer to
+[MARLlib documentation](https://marllib.readthedocs.io/en/latest/handbook/env.html).
 
-### MARLlib 4-step API
-
-- prepare the ```environment```
-- initialize the  ```algorithm```
-- construct the agent  ```model```
-- kick off the training ```algo.fit```
-
-
-```py
-from marllib import marl
-# prepare env
-env = marl.make_env(environment_name="mpe", map_name="simple_spread")
-# initialize algorithm with appointed hyper-parameters
-mappo = marl.algos.mappo(hyperparam_source="mpe")
-# build agent model based on env + algorithms + user preference
-model = marl.build_model(env, mappo, {"core_arch": "mlp", "encode_layer": "128-256"})
-# start training
-mappo.fit(env, model, stop={"timesteps_total": 1000000}, checkpoint_freq=100, share_policy="group")
-```
-
-### prepare the ```environment```
 
 |   task mode   | api example |
 | :-----------: | ----------- |
@@ -184,10 +169,13 @@ Most of the popular environments in MARL research are supported by MARLlib:
 | **[GRF](https://github.com/google-research/football)**  | collaborative + mixed | Full | Discrete | 2D |
 | **[Hanabi](https://github.com/deepmind/hanabi-learning-environment)** | cooperative | Partial | Discrete | 1D |
 
-Each environment has a readme file, standing as the instruction for this task, including env settings, installation,
-and important notes.
+Each environment has a readme file, standing as the instruction for this task, including env settings, installation, and
+important notes.
+</details>
 
-### initialize the  ```algorithm```
+<details>
+<summary><b><big>Initialize the algorithm</big></b></summary>
+
 
 |  running target   | api example |
 | :-----------: | ----------- |
@@ -224,7 +212,14 @@ Here is a chart describing the characteristics of each algorithm:
 *MAA2C* and *MATRPO* are the centralized version of A2C and TRPO.
 *VDPPO* is the value decomposition version of PPO.
 
-### construct the agent  ```model```
+</details>
+
+<details>
+<summary><b><big>Build the agent model</big></b></summary>
+
+An agent model consists of two parts, `encoder` and `core arch`. 
+`encoder` will be constructed by MARLlib according to the observation space.
+Choose `mlp`, `gru`, or `lstm` as you like to build the complete model.
 
 |  model arch   | api example |
 | :-----------: | ----------- |
@@ -233,7 +228,11 @@ Here is a chart describing the characteristics of each algorithm:
 | LSTM | ```marl.build_model(env, algo, {"core_arch": "lstm"})```  |
 | encoder arch | ```marl.build_model(env, algo, {"core_arch": "gru", "encode_layer": "128-256"})```  |
 
-### kick off the training ```algo.fit```
+
+</details>
+
+<details>
+<summary><b><big>Kick off the training</big></b></summary>
 
 |  setting   | api example |
 | :-----------: | ----------- |
@@ -245,24 +244,43 @@ Here is a chart describing the characteristics of each algorithm:
 | GPU accelerate  | ```algo.fit(env, model, local_mode=False, num_gpus=1)``` |
 | CPU accelerate | ```algo.fit(env, model, local_mode=False, num_workers=5)```  |
 
-policy inference ```algo.render```
+</details>
 
-|  setting   | api example |
-| :-----------: | ----------- |
-| render  | `algo.render(env, model, local_mode=True, restore_path='path_to_model')` |
+<details>
+<summary><b><big>Training & rendering API</big></b></summary>
 
-By default, all the models will be saved at ```/home/username/ray_results/experiment_name/checkpoint_xxxx```
+```py
+from marllib import marl
 
-## Benchmark Results
+# prepare env
+env = marl.make_env(environment_name="mpe", map_name="simple_spread")
+# initialize algorithm with appointed hyper-parameters
+mappo = marl.algos.mappo(hyperparam_source="mpe")
+# build agent model based on env + algorithms + user preference
+model = marl.build_model(env, mappo, {"core_arch": "mlp", "encode_layer": "128-256"})
+# start training
+mappo.fit(env, model, stop={"timesteps_total": 1000000}, checkpoint_freq=100, share_policy="group")
+# rendering(optional)
+mappo.render(env, model, local_mode=True, restore_path='path_to_model')
+```
+</details>
+
+## Benchmark results
 
 All results are listed [here](https://github.com/Replicable-MARL/MARLlib/tree/main/results).
 
-## Examples
+## Quick examples
 
-- detailed API usage
-- customize policy sharing
-- load model and rendering
-- add new environment
+MARLlib provides some useful examples for you to refer.
+
+- [Detailed API Usage](https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/examples/api_basic_usage.py): show how to use MARLlib api in
+  detail, e.g. cmd + api combined running.
+- [Policy Sharing Cutomization](https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/examples/customize_policy_sharing.py):
+  define your group policy sharing strategy as you like based on current tasks.
+- [Loading Model and Rendering](https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/examples/load_and_render_model.py):
+  render the environment based on the pretrained model.
+- [Incorporating New Environment to MARLlib](https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/examples/add_new_env.py):
+  add your new environment following MARLlib's env-agent interaction interface.
 
 ## Tutorials
 
@@ -276,6 +294,14 @@ More tutorial documentations are available [here](https://marllib.readthedocs.io
 |  Channel   | Link |
 | :----------- | :----------- |
 | Issues | [GitHub Issues](https://github.com/Replicable-MARL/MARLlib/issues) |
+
+
+## Contributing
+
+We are a small team on multi-agent reinforcement learning, and we will take all the help we can get! 
+If you would like to get involved, here is information on [contribution guidelines and how to test the code locally](https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/CONTRIBUTING.md).
+
+You can contribute in multiple ways, e.g., reporting bugs, writing or translating documentation, reviewing or refactoring code, requesting or implementing new features, etc.
 
 [comment]: <> (## Paper)
 
