@@ -6,7 +6,7 @@ class TestMAgentEnv(unittest.TestCase):
 
     def test_group_sharing(self):
         for algo_name in dir(marl.algos):
-            if algo_name[:2] != "__":
+            if "_" not in algo_name:
                 if algo_name in ["ddpg", "maddpg", "facmac"]:
                     env = marl.make_env(environment_name="mpe", map_name="simple_spread",
                                         continuous_actions=True)

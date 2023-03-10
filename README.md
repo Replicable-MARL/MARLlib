@@ -226,7 +226,7 @@ Choose `mlp`, `gru`, or `lstm` as you like to build the complete model.
 | MLP  | ```marl.build_model(env, algo, {"core_arch": "mlp")``` |
 | GRU | ```marl.build_model(env, algo, {"core_arch": "gru"})```  |
 | LSTM | ```marl.build_model(env, algo, {"core_arch": "lstm"})```  |
-| encoder arch | ```marl.build_model(env, algo, {"core_arch": "gru", "encode_layer": "128-256"})```  |
+| Encoder Arch | ```marl.build_model(env, algo, {"core_arch": "gru", "encode_layer": "128-256"})```  |
 
 
 </details>
@@ -259,9 +259,19 @@ mappo = marl.algos.mappo(hyperparam_source="mpe")
 # build agent model based on env + algorithms + user preference
 model = marl.build_model(env, mappo, {"core_arch": "mlp", "encode_layer": "128-256"})
 # start training
-mappo.fit(env, model, stop={"timesteps_total": 1000000}, checkpoint_freq=100, share_policy="group")
-# rendering(optional)
-mappo.render(env, model, local_mode=True, restore_path='path_to_model')
+mappo.fit(
+  env, model, 
+  stop={"timesteps_total": 1000000}, 
+  checkpoint_freq=100, 
+  share_policy="group"
+)
+# rendering
+mappo.render(
+  env, model, 
+  local_mode=True, 
+  restore_path={'params_path': "checkpoint_000010/params.json",
+                'model_path': "checkpoint_000010/checkpoint-10"}
+)
 ```
 </details>
 
@@ -279,8 +289,10 @@ MARLlib provides some practical examples for you to refer to.
   define your group policy-sharing strategy as you like based on current tasks.
 - [Loading model and rendering](https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/examples/load_and_render_model.py):
   render the environment based on the pre-trained model.
-- [Incorporating new environment to MARLlib](https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/examples/add_new_env.py):
+- [Incorporating new environment](https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/examples/add_new_env.py):
   add your new environment following MARLlib's env-agent interaction interface.
+- [Incorporating new algorithm](https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/examples/add_new_algorithm.py):
+  add your new algorithm following MARLlib learning pipeline.
 
 ## Tutorials
 
