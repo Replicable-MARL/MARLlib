@@ -180,11 +180,17 @@ def build_model(environment, algorithm, model_preference):
 
 class _Algo:
     def __init__(self, algo_name):
-        self.name = algo_name
+
+        if "_" in algo_name:
+            self.name = algo_name.split("_")[0].lower()
+            self.algo_type = algo_name.split("_")[1].upper()
+        else:
+            self.name = algo_name
+            self.algo_type = check_algo_type(self.name.lower())
         self.algo_parameters = {}
         self.config_dict = None
         self.common_config = None
-        self.algo_type = check_algo_type(self.name.lower())
+
 
     def __call__(self, hyperparam_source='common', **algo_params):
         """
@@ -201,14 +207,16 @@ class _Algo:
         else:
             rel_path = "algos/hyperparams/finetuned/{}/{}.yaml".format(hyperparam_source, self.name)
 
-        # default config
+        if not os.path.exists(os.path.join(os.path.dirname(__file__), rel_path)):
+            rel_path = "../../examples/config/algo_config/{}.yaml".format(self.name)
+
         with open(os.path.join(os.path.dirname(__file__), rel_path), "r") as f:
             algo_config_dict = yaml.load(f, Loader=yaml.FullLoader)
             f.close()
 
         # update function-fixed config
         algo_config_dict['algo_args'] = merge_default_and_customized_and_check(algo_config_dict['algo_args'],
-                                                                             algo_params)
+                                                                               algo_params)
 
         # user config
         user_algo_args = {}
@@ -220,7 +228,7 @@ class _Algo:
 
         # update commandline config
         algo_config_dict['algo_args'] = merge_default_and_customized_and_check(algo_config_dict['algo_args'],
-                                                                             user_algo_args)
+                                                                               user_algo_args)
 
         self.algo_parameters = algo_config_dict
 
@@ -261,6 +269,10 @@ class _AlgoManager:
         for algo_name in POlICY_REGISTRY:
             setattr(_AlgoManager, algo_name, _Algo(algo_name))
             # set set algos.HAPPO = _Algo(run_happo)
+
+    def register_algo(self, algo_name, style, script):
+        setattr(_AlgoManager, algo_name, _Algo(algo_name + "_" + style))
+        POlICY_REGISTRY[algo_name] = script
 
 
 algos = _AlgoManager()

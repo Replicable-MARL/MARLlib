@@ -1,7 +1,10 @@
 """
-An example of integrate new tasks into MARLLib
+An example of integrating new tasks into MARLLib
 About ma-gym: https://github.com/koulanurag/ma-gym
 doc: https://github.com/koulanurag/ma-gym/wiki
+
+Learn how to transform the environment to be compatible with MARLlib:
+please refer to the paper: https://arxiv.org/abs/2210.13708
 
 Install ma-gym before use
 """
