@@ -1,3 +1,7 @@
+"""
+example of how to render a pre-trained model
+"""
+
 from marllib import marl
 
 # prepare the environment
@@ -11,8 +15,8 @@ model = marl.build_model(env, mappo, {"core_arch": "gru", "encode_layer": "128-2
 
 # rendering
 mappo.render(env, model,
-             restore_path={'params_path': "checkpoint_000010/params.json",
-                           'model_path': "checkpoint_000010/checkpoint-10"},
+             restore_path={'params_path': "checkpoint_000010/params.json",  # experiment configuration
+                           'model_path': "checkpoint_000010/checkpoint-10"},  # checkpoint path
              local_mode=True,
              share_policy="all",
              checkpoint_end=False)

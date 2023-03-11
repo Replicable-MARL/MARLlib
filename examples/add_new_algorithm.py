@@ -1,14 +1,45 @@
+"""
+example of add new algorithm to MARLlib
+"""
+
+from ray.rllib.utils.framework import try_import_torch
+from ray.rllib.agents.pg.pg_torch_policy import PGTorchPolicy
+from ray.rllib.agents.pg.pg import DEFAULT_CONFIG as PG_CONFIG, PGTrainer
 from ray import tune
 from ray.tune.utils import merge_dicts
 from ray.tune import CLIReporter
 from ray.rllib.models import ModelCatalog
 from marllib.marl.algos.utils.log_dir_util import available_local_dir
 from marllib.marl.algos.utils.setup_utils import AlgVar
-from marllib.marl.algos.core.IL.pg import IPGTrainer
+from marllib import marl
 import json
 
-def run_pg(model_class, config_dict, common_config, env_dict, stop, restore):
+torch, nn = try_import_torch()
 
+###########
+### IPG ###
+###########
+
+
+IPGTorchPolicy = PGTorchPolicy.with_updates(
+    name="IPGTorchPolicy",
+    get_default_config=lambda: PG_CONFIG,
+)
+
+
+def get_policy_class_ipg(config_):
+    if config_["framework"] == "torch":
+        return IPGTorchPolicy
+
+
+IPGTrainer = PGTrainer.with_updates(
+    name="IPGTrainer",
+    default_policy=None,
+    get_policy_class=get_policy_class_ipg,
+)
+
+
+def run_pg(model_class, config_dict, common_config, env_dict, stop, restore):
     ModelCatalog.register_custom_model(
         "Base_Model", model_class)
 
@@ -63,3 +94,21 @@ def run_pg(model_class, config_dict, common_config, env_dict, stop, restore):
                        local_dir=available_local_dir if config_dict["local_dir"] == "" else config_dict["local_dir"])
 
     return results
+
+
+if __name__ == '__main__':
+    # choose environment + scenario
+    env = marl.make_env(environment_name="mpe", map_name="simple_spread", force_coop=True)
+
+    # register new algorithm
+    marl.algos.register_algo(algo_name="pg", style="il", script=run_pg)
+
+    # initialize algorithm
+    pg = marl.algos.pg(hyperparam_source="mpe")
+
+    # build agent model based on env + algorithms + user preference if checked available
+    model = marl.build_model(env, pg, {"core_arch": "mlp", "encode_layer": "128-256"})
+
+    # start learning + extra experiment settings if needed. remember to check ray.yaml before use
+    pg.fit(env, model, stop={'episode_reward_mean': 2000, 'timesteps_total': 10000000}, local_mode=True, num_gpus=1,
+             num_workers=0, share_policy='all', checkpoint_freq=10)

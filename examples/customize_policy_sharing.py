@@ -1,7 +1,5 @@
 """
 example on how to wrap env to customize the group policy sharing
-a.k.a
-how to group as you like
 """
 from marllib.envs.base_env.smac import *
 from marllib import marl

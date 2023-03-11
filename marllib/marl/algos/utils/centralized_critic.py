@@ -78,7 +78,8 @@ def centralized_critic_postprocessing(policy,
                 for agent_name in custom_config['agent_name_ls']:
                     if agent_name in other_agent_batches:
                         index = list(other_agent_batches).index(agent_name)
-                        state_batch_list.append(opponent_batch[index]["obs"][:, action_mask_dim:action_mask_dim + obs_dim])
+                        state_batch_list.append(
+                            opponent_batch[index]["obs"][:, action_mask_dim:action_mask_dim + obs_dim])
                     else:
                         state_batch_list.append(sample_batch['obs'][:, action_mask_dim:action_mask_dim + obs_dim])
                 sample_batch["state"] = np.stack(state_batch_list, 1)
@@ -134,10 +135,18 @@ def centralized_critic_postprocessing(policy,
     else:
         last_r = sample_batch[SampleBatch.VF_PREDS][-1]
 
-    train_batch = compute_advantages(
-        sample_batch,
-        last_r,
-        policy.config["gamma"],
-        policy.config["lambda"],
-        use_gae=policy.config["use_gae"])
+    if "lambda" in policy.config:
+        train_batch = compute_advantages(
+            sample_batch,
+            last_r,
+            policy.config["gamma"],
+            policy.config["lambda"],
+            use_gae=policy.config["use_gae"])
+    else:
+        train_batch = compute_advantages(
+            rollout=sample_batch,
+            last_r=0.0,
+            gamma=policy.config["gamma"],
+            use_gae=False,
+            use_critic=False)
     return train_batch

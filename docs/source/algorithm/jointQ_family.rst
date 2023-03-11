@@ -75,7 +75,7 @@ Here
 
     Navigating from DQN to DRQN, you need to:
 
-    - replace the deep Q net's multi-layer perception(MLP) module with a recurrent module, e.g., GRU, LSTM.
+    - replace the deep Q net's multi-layer perceptron(MLP) module with a recurrent module, e.g., GRU, LSTM.
     - store the data in episode format. (while DQN has no such restriction)
 
 ---------------------

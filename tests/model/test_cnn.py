@@ -6,7 +6,7 @@ class TestMAgentEnv(unittest.TestCase):
 
     def test_cnn_encoder(self):
         for algo_name in dir(marl.algos):
-            if algo_name[:2] != "__":
+            if "_" not in algo_name:
                 if algo_name not in ["ddpg", "maddpg", "facmac", "happo", "hatrpo"]:
                     algo = getattr(marl.algos, algo_name)(hyperparam_source="test")
                     for core_arch in ["mlp", "gru"]:

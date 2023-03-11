@@ -5,7 +5,6 @@ from .maa2c import run_maa2c
 from .mappo import run_mappo
 from .coma import run_coma
 from .a2c import run_a2c
-from .pg import run_pg
 from .ppo import run_ppo
 from .ddpg import run_ddpg
 from .maddpg import run_maddpg
@@ -17,7 +16,6 @@ from .matrpo import run_matrpo
 
 
 POlICY_REGISTRY = {
-    "pg": run_pg,
     "a2c": run_a2c,
     "ppo": run_ppo,
     "iql": run_joint_q,
