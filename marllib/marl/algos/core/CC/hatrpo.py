@@ -112,6 +112,7 @@ def hatrpo_loss_fn(
 
     agent_num = 1
 
+    model.train()
     for i, iter_agent_info in enumerate(get_each_agent_train(model, policy, dist_class, train_batch)):
         iter_model, iter_dist_class, iter_train_batch, iter_mask, \
             iter_reduce_mean, iter_actions, iter_policy, iter_prev_action_logp = iter_agent_info

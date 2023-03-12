@@ -6,6 +6,7 @@ from marllib.marl.algos.core.CC.happo import HAPPOTrainer
 from marllib.marl.algos.utils.setup_utils import AlgVar
 from marllib.marl.algos.utils.log_dir_util import available_local_dir
 from ray.rllib.agents.ppo.ppo import PPOTrainer, DEFAULT_CONFIG as PPO_CONFIG
+from ray.rllib.models import ModelCatalog
 import json
 
 
@@ -16,6 +17,10 @@ def run_happo(model_class, config_dict, common_config, env_dict, stop, restore):
     for bug mentioned https://github.com/ray-project/ray/pull/20743
     make sure sgd_minibatch_size > max_seq_len
     """
+
+    ModelCatalog.register_custom_model(
+        "Centralized_Critic_Model", model_class)
+
     train_batch_size = _param["batch_episode"] * env_dict["episode_limit"]
     if "fixed_batch_timesteps" in config_dict:
         train_batch_size = config_dict["fixed_batch_timesteps"]

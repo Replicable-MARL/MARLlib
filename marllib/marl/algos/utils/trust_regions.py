@@ -107,7 +107,6 @@ class TrustRegionUpdator:
         kl_grad_p = (kl_grads * p).sum()
         kl_hessian_p = torch.autograd.grad(kl_grad_p, self.actor_parameters, allow_unused=True)
         kl_hessian_p = flat_hessian(kl_hessian_p)
-
         return kl_hessian_p + 0.1 * p
 
     def conjugate_gradients(self, b, nsteps, residual_tol=1e-10):
