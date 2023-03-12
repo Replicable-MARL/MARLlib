@@ -54,6 +54,10 @@ class CC_MLP(Base_MLP):
                 initializer=normc_initializer(0.01),
                 activation_fn=None)
 
+        if self.custom_config['algorithm'] in ['hatrpo', 'happo']:
+            self.other_policies = {}
+
+
     def central_value_function(self, state, opponent_actions=None) -> TensorType:
         assert self._features is not None, "must call forward() first"
         B = state.shape[0]
