@@ -99,7 +99,9 @@ def run_happo(model_class, config_dict, common_config, env_dict, stop, restore):
     else:
         model_path = None
 
-    results = tune.run(HAPPOTrainer,
+    _HAPPOTrainer = HAPPOTrainer(PPO_CONFIG)
+
+    results = tune.run(_HAPPOTrainer,
                        name=RUNNING_NAME,
                        checkpoint_at_end=config_dict['checkpoint_end'],
                        checkpoint_freq=config_dict['checkpoint_freq'],

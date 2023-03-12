@@ -9,6 +9,8 @@ from ray.rllib.utils.framework import try_import_torch
 from ray.rllib.utils.typing import TensorType
 from marllib.marl.models.zoo.mlp.base_mlp import Base_MLP
 from marllib.marl.models.zoo.encoder.cc_encoder import CC_Encoder
+from marllib.marl.algos.utils.distributions import init
+from torch.optim import Adam
 torch, nn = try_import_torch()
 
 
@@ -57,6 +59,18 @@ class CC_MLP(Base_MLP):
         if self.custom_config['algorithm'] in ['hatrpo', 'happo']:
             self.other_policies = {}
 
+        if self.custom_config['algorithm'].lower() in ['happo']:
+            # set actor
+            def init_(m, value):
+                return init(m, nn.init.orthogonal_, lambda x: nn.init.constant_(x, 0), value)
+
+            self.cc_vf_branch = nn.Sequential(
+                init_(nn.Linear(input_size, 1), value=1)
+            )
+
+            # self.actor_optimizer = Adam(params=self.actor_parameters(), lr=self.custom_config['actor_lr'])
+            self.actor_optimizer = Adam(params=self.parameters(), lr=self.custom_config['actor_lr'])
+            # self.critic_optimizer = Adam(params=self.critic_parameters(), lr=self.custom_config['critic_lr'])
 
     def central_value_function(self, state, opponent_actions=None) -> TensorType:
         assert self._features is not None, "must call forward() first"
