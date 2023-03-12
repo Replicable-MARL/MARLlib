@@ -14,10 +14,10 @@ class TestMPEEnv(unittest.TestCase):
                     # model = marl.build_model(env, algo, {"core_arch": "gru", "encode_layer": "16-16"})
                     # algo.fit(env, model, stop={"training_iteration": 3}, local_mode=True, num_gpus=0,
                     #              num_workers=0, share_policy="all", checkpoint_end=False)
-                elif algo_name in ["happo", "hatrpo"]:
+                elif algo_name in ["hatrpo"]:
                     env = marl.make_env(environment_name="smac", map_name="3m")
                     algo = getattr(marl.algos, algo_name)(hyperparam_source="test")
-                    model = marl.build_model(env, algo, {"core_arch": "gru", "encode_layer": "16-16"})
+                    model = marl.build_model(env, algo, {"core_arch": "mlp", "encode_layer": "16-16"})
                     algo.fit(env, model, stop={"training_iteration": 3}, local_mode=True, num_gpus=0,
                                  num_workers=2, share_policy="individual", checkpoint_end=False)
                 else:
