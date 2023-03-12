@@ -263,8 +263,6 @@ class DDPG_RNN(TorchRNN, nn.Module):
             return logits, [torch.squeeze(h, 0)]
 
         elif self.custom_config["model_arch_args"]["core_arch"] == "lstm":
-            if len(state) < 2:
-                print(1)
             self._features, [h, c] = self.rnn(
                 x, [torch.unsqueeze(state[0], 0),
                     torch.unsqueeze(state[1], 0)])
