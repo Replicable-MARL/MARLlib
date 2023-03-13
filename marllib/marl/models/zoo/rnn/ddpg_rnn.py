@@ -35,9 +35,9 @@ tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
 
 
-class DDPG_RNN(TorchRNN, nn.Module):
+class DDPGSeriesRNN(TorchRNN, nn.Module):
     """
-    DDOG/MADDPG/FACMAC agent arch in one model
+    DDOG/MADDPG/FACMAC agent rnn arch in one model
     """
 
     def __init__(
@@ -165,17 +165,16 @@ class DDPG_RNN(TorchRNN, nn.Module):
 
     @override(ModelV2)
     def get_initial_state(self):
-        # Place hidden states on same device as model.
         if self.custom_config["model_arch_args"]["core_arch"] == "gru":
-            h = [
+            hidden_state = [
                 self.action_branch._model._modules["0"].weight.new(1, self.hidden_state_size).zero_().squeeze(0),
             ]
         else:  # lstm
-            h = [
+            hidden_state = [
                 self.action_branch._model._modules["0"].weight.new(1, self.hidden_state_size).zero_().squeeze(0),
                 self.action_branch._model._modules["0"].weight.new(1, self.hidden_state_size).zero_().squeeze(0)
             ]
-        return h
+        return hidden_state
 
     @override(ModelV2)
     def forward(self, input_dict: Dict[str, TensorType],
@@ -186,7 +185,6 @@ class DDPG_RNN(TorchRNN, nn.Module):
         """
 
         obs_inputs = input_dict["obs"]["obs"].float()
-
         if isinstance(seq_lens, np.ndarray):
             seq_lens = torch.Tensor(seq_lens).int()
         max_seq_len = obs_inputs.shape[0] // seq_lens.shape[0]
@@ -240,7 +238,7 @@ class DDPG_RNN(TorchRNN, nn.Module):
         return output, new_state
 
     @override(TorchRNN)
-    def forward_rnn(self, obs_inputs, action_inputs, state_inputs, opp_action_inputs, state, seq_lens):
+    def forward_rnn(self, obs_inputs, action_inputs, state_inputs, opp_action_inputs, hidden_state, seq_lens):
         # Extract the available actions tensor from the observation.
         # Compute the unmasked logits.
         if self.custom_config["algorithm"] in ["maddpg"]:
@@ -280,14 +278,14 @@ class DDPG_RNN(TorchRNN, nn.Module):
         x = nn.functional.relu(x)
 
         if self.custom_config["model_arch_args"]["core_arch"] == "gru":
-            self._features, h = self.rnn(x, torch.unsqueeze(state[0], 0))
+            self._features, h = self.rnn(x, torch.unsqueeze(hidden_state[0], 0))
             logits = self.action_branch(self._features)
             return logits, [torch.squeeze(h, 0)]
 
         elif self.custom_config["model_arch_args"]["core_arch"] == "lstm":
             self._features, [h, c] = self.rnn(
-                x, [torch.unsqueeze(state[0], 0),
-                    torch.unsqueeze(state[1], 0)])
+                x, [torch.unsqueeze(hidden_state[0], 0),
+                    torch.unsqueeze(hidden_state[1], 0)])
             logits = self.action_branch(self._features)
             return logits, [torch.squeeze(h, 0), torch.squeeze(c, 0)]
 

@@ -26,12 +26,12 @@ from ray.rllib.utils.annotations import override
 from ray.rllib.utils.framework import try_import_torch
 from ray.rllib.models.preprocessors import get_preprocessor
 from ray.rllib.models.torch.misc import SlimFC, SlimConv2d, normc_initializer
-from marllib.marl.models.zoo.encoder.base_encoder import Base_Encoder
+from marllib.marl.models.zoo.encoder.base_encoder import BaseEncoder
 
 torch, nn = try_import_torch()
 
 
-class JointQ_MLP(TorchModelV2, nn.Module):
+class JointQMLP(TorchModelV2, nn.Module):
     """sneaky gru-like mlp"""
 
     def __init__(self, obs_space, action_space, num_outputs, model_config,
@@ -51,7 +51,7 @@ class JointQ_MLP(TorchModelV2, nn.Module):
         self.activation = model_config.get("fcnet_activation")
 
         # encoder
-        self.encoder = Base_Encoder(model_config, {'obs': self.full_obs_space})
+        self.encoder = BaseEncoder(model_config, {'obs': self.full_obs_space})
         self.hidden_state_size = self.custom_config["model_arch_args"]["hidden_state_size"]
         self.mlp = nn.Linear(self.encoder.output_dim, self.hidden_state_size)
         self.q_value = SlimFC(

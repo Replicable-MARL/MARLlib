@@ -28,12 +28,12 @@ from ray.rllib.models.torch.misc import SlimFC, SlimConv2d, normc_initializer
 from ray.rllib.utils.annotations import override
 from ray.rllib.utils.framework import try_import_torch
 from ray.rllib.utils.typing import Dict, TensorType, List
-from marllib.marl.models.zoo.encoder.base_encoder import Base_Encoder
+from marllib.marl.models.zoo.encoder.base_encoder import BaseEncoder
 
 torch, nn = try_import_torch()
 
 
-class Base_MLP(TorchModelV2, nn.Module):
+class BaseMLP(TorchModelV2, nn.Module):
     """Generic fully connected network."""
 
     def __init__(
@@ -56,8 +56,8 @@ class Base_MLP(TorchModelV2, nn.Module):
         self.activation = model_config.get("fcnet_activation")
 
         # encoder
-        self.p_encoder = Base_Encoder(model_config, self.full_obs_space)
-        self.vf_encoder = Base_Encoder(model_config, self.full_obs_space)
+        self.p_encoder = BaseEncoder(model_config, self.full_obs_space)
+        self.vf_encoder = BaseEncoder(model_config, self.full_obs_space)
 
         self.p_branch = SlimFC(
             in_size=self.p_encoder.output_dim,

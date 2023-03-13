@@ -20,8 +20,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from .base_rnn import Base_RNN
-from .cc_rnn import CC_RNN
-from .ddpg_rnn import DDPG_RNN
-from .jointQ_rnn import JointQ_RNN
-from .vd_rnn import VD_RNN
+from .base_rnn import BaseRNN
+from .cc_rnn import CentralizedCriticRNN
+from .ddpg_rnn import DDPGSeriesRNN
+from .jointQ_rnn import JointQRNN
+from .vd_rnn import ValueDecompRNN

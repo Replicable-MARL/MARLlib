@@ -20,12 +20,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from marllib.marl.common import *
+from marllib.marl.common import merge_default_and_customized_and_check, get_model_config, check_algo_type, \
+    recursive_dict_update
 from marllib.marl.algos import run_il, run_vd, run_cc
 from marllib.marl.algos.scripts import POlICY_REGISTRY
 from marllib.envs.base_env import ENV_REGISTRY
 from marllib.envs.global_reward_env import COOP_ENV_REGISTRY
-from marllib.marl.models import *
+from marllib.marl.models import BaseRNN, BaseMLP, CentralizedCriticRNN, CentralizedCriticMLP, ValueDecompRNN, \
+    ValueDecompMLP, JointQMLP, JointQRNN, DDPGSeriesRNN, DDPGSeriesMLP
 
 from ray.tune import register_env
 import yaml
@@ -147,32 +149,32 @@ def make_env(environment_name,
 def build_model(environment, algorithm, model_preference):
     if algorithm.name in ["ddpg", "facmac", "maddpg"]:
         if model_preference["core_arch"] in ["gru", "lstm"]:
-            model_class = DDPG_RNN
+            model_class = DDPGSeriesRNN
         else:
-            model_class = DDPG_MLP
+            model_class = DDPGSeriesMLP
 
     elif algorithm.name in ["qmix", "vdn", "iql"]:
         if model_preference["core_arch"] in ["gru", "lstm"]:
-            model_class = JointQ_RNN
+            model_class = JointQRNN
         else:
-            model_class = JointQ_MLP
+            model_class = JointQMLP
 
     else:
         if algorithm.algo_type == "IL":
             if model_preference["core_arch"] in ["gru", "lstm"]:
-                model_class = Base_RNN
+                model_class = BaseRNN
             else:
-                model_class = Base_MLP
+                model_class = BaseMLP
         elif algorithm.algo_type == "CC":
             if model_preference["core_arch"] in ["gru", "lstm"]:
-                model_class = CC_RNN
+                model_class = CentralizedCriticRNN
             else:
-                model_class = CC_MLP
+                model_class = CentralizedCriticMLP
         else:  # VD
             if model_preference["core_arch"] in ["gru", "lstm"]:
-                model_class = VD_RNN
+                model_class = ValueDecompRNN
             else:
-                model_class = VD_MLP
+                model_class = ValueDecompMLP
 
     if model_preference["core_arch"] in ["gru", "lstm"]:
         model_config = get_model_config("rnn")
@@ -212,7 +214,6 @@ class _Algo:
         self.algo_parameters = {}
         self.config_dict = None
         self.common_config = None
-
 
     def __call__(self, hyperparam_source='common', **algo_params):
         """

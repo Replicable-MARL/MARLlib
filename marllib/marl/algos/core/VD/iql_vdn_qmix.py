@@ -38,8 +38,8 @@ from ray.rllib.agents.dqn.dqn import GenericOffPolicyTrainer
 from ray.rllib.agents.qmix.qmix import DEFAULT_CONFIG
 from ray.rllib.policy.rnn_sequencing import chop_into_sequences
 
-from marllib.marl.models.zoo.rnn.jointQ_rnn import JointQ_RNN
-from marllib.marl.models.zoo.mlp.jointQ_mlp import JointQ_MLP
+from marllib.marl.models.zoo.rnn.jointQ_rnn import JointQRNN
+from marllib.marl.models.zoo.mlp.jointQ_mlp import JointQMLP
 
 from marllib.marl.models.zoo.mixer import QMixer, VDNMixer
 from marllib.marl.algos.utils.episode_execution_plan import episode_execution_plan
@@ -220,7 +220,7 @@ class JointQPolicy(Policy):
             config["model"],
             framework="torch",
             name="model",
-            default_model=JointQ_MLP if core_arch == "mlp" else JointQ_RNN).to(self.device)
+            default_model=JointQMLP if core_arch == "mlp" else JointQRNN).to(self.device)
 
         self.target_model = ModelCatalog.get_model_v2(
             agent_obs_space,
@@ -229,7 +229,7 @@ class JointQPolicy(Policy):
             config["model"],
             framework="torch",
             name="target_model",
-            default_model=JointQ_MLP if core_arch == "mlp" else JointQ_RNN).to(self.device)
+            default_model=JointQMLP if core_arch == "mlp" else JointQRNN).to(self.device)
 
         self.exploration = self._create_exploration()
 

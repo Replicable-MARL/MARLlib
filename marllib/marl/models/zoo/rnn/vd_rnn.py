@@ -20,14 +20,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from ray.rllib.utils.framework import try_import_tf, try_import_torch
+from ray.rllib.utils.framework import try_import_torch
 from marllib.marl.models.zoo.mixer import QMixer, VDNMixer
-from marllib.marl.models.zoo.rnn.base_rnn import Base_RNN
-tf1, tf, tfv = try_import_tf()
+from marllib.marl.models.zoo.rnn.base_rnn import BaseRNN
+
 torch, nn = try_import_torch()
 
 
-class VD_RNN(Base_RNN):
+class ValueDecompRNN(BaseRNN):
 
     def __init__(
             self,

@@ -25,19 +25,19 @@ import numpy as np
 from typing import Dict, List
 from ray.rllib.models.modelv2 import ModelV2
 from ray.rllib.models.torch.recurrent_net import RecurrentNetwork as TorchRNN
-from ray.rllib.models.torch.misc import SlimFC, SlimConv2d, normc_initializer
+from ray.rllib.models.torch.misc import SlimFC, normc_initializer
 from ray.rllib.utils.annotations import override
 from ray.rllib.utils.framework import try_import_tf, try_import_torch, \
     TensorType
 from ray.rllib.policy.rnn_sequencing import add_time_dimension
 from functools import reduce
-from marllib.marl.models.zoo.encoder.base_encoder import Base_Encoder
+from marllib.marl.models.zoo.encoder.base_encoder import BaseEncoder
 
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
 
 
-class Base_RNN(TorchRNN, nn.Module):
+class BaseRNN(TorchRNN, nn.Module):
 
     def __init__(
             self,
@@ -59,8 +59,8 @@ class Base_RNN(TorchRNN, nn.Module):
         self.activation = model_config.get("fcnet_activation")
 
         # encoder
-        self.p_encoder = Base_Encoder(model_config, self.full_obs_space)
-        self.vf_encoder = Base_Encoder(model_config, self.full_obs_space)
+        self.p_encoder = BaseEncoder(model_config, self.full_obs_space)
+        self.vf_encoder = BaseEncoder(model_config, self.full_obs_space)
 
         # core rnn
         self.hidden_state_size = self.custom_config["model_arch_args"]["hidden_state_size"]
@@ -124,7 +124,7 @@ class Base_RNN(TorchRNN, nn.Module):
 
     @override(ModelV2)
     def forward(self, input_dict: Dict[str, TensorType],
-                state: List[TensorType],
+                hidden_state: List[TensorType],
                 seq_lens: TensorType) -> (TensorType, List[TensorType]):
         """
         Adds time dimension to batch before sending inputs to forward_rnn()
@@ -149,29 +149,29 @@ class Base_RNN(TorchRNN, nn.Module):
             framework="torch",
             time_major=self.time_major,
         )
-        output, new_state = self.forward_rnn(inputs, state, seq_lens)
+        output, hidden_state = self.forward_rnn(inputs, hidden_state, seq_lens)
         output = torch.reshape(output, [-1, self.num_outputs])
 
         if self.custom_config["mask_flag"]:
             output = output + inf_mask
 
-        return output, new_state
+        return output, hidden_state
 
     @override(TorchRNN)
-    def forward_rnn(self, inputs, state, seq_lens):
+    def forward_rnn(self, inputs, hidden_state, seq_lens):
         self.inputs = inputs
 
         x = self.p_encoder(self.inputs)
 
         if self.custom_config["model_arch_args"]["core_arch"] == "gru":
-            self._features, h = self.rnn(x, torch.unsqueeze(state[0], 0))
+            self._features, h = self.rnn(x, torch.unsqueeze(hidden_state[0], 0))
             logits = self.p_branch(self._features)
             return logits, [torch.squeeze(h, 0)]
 
         elif self.custom_config["model_arch_args"]["core_arch"] == "lstm":
             self._features, [h, c] = self.rnn(
-                x, [torch.unsqueeze(state[0], 0),
-                    torch.unsqueeze(state[1], 0)])
+                x, [torch.unsqueeze(hidden_state[0], 0),
+                    torch.unsqueeze(hidden_state[1], 0)])
             logits = self.p_branch(self._features)
             return logits, [torch.squeeze(h, 0), torch.squeeze(c, 0)]
 

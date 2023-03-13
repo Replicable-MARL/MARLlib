@@ -22,15 +22,15 @@
 
 from ray.rllib.models.modelv2 import ModelV2
 from ray.rllib.models.torch.torch_modelv2 import TorchModelV2
-from ray.rllib.models.torch.misc import SlimFC, SlimConv2d, normc_initializer
+from ray.rllib.models.torch.misc import SlimFC, normc_initializer
 from ray.rllib.utils.annotations import override
 from ray.rllib.utils.framework import try_import_torch
-from marllib.marl.models.zoo.encoder.base_encoder import Base_Encoder
+from marllib.marl.models.zoo.encoder.base_encoder import BaseEncoder
 
 torch, nn = try_import_torch()
 
 
-class JointQ_RNN(TorchModelV2, nn.Module):
+class JointQRNN(TorchModelV2, nn.Module):
     """The default GRU model for Joint Q."""
 
     def __init__(self, obs_space, action_space, num_outputs, model_config,
@@ -50,7 +50,7 @@ class JointQ_RNN(TorchModelV2, nn.Module):
         self.activation = model_config.get("fcnet_activation")
 
         # encoder
-        self.encoder = Base_Encoder(model_config, {'obs': self.full_obs_space})
+        self.encoder = BaseEncoder(model_config, {'obs': self.full_obs_space})
         self.hidden_state_size = self.custom_config["model_arch_args"]["hidden_state_size"]
         self.rnn = nn.GRUCell(self.encoder.output_dim, self.hidden_state_size)
         self.q_value = SlimFC(
@@ -69,19 +69,19 @@ class JointQ_RNN(TorchModelV2, nn.Module):
     @override(ModelV2)
     def get_initial_state(self):
         # Place hidden states on same device as model.
-        return [
+        hidden_state = [
             self.q_value._model._modules["0"].weight.new(self.n_agents,
                                                          self.hidden_state_size).zero_().squeeze(0)
         ]
+        return hidden_state
 
     @override(ModelV2)
     def forward(self, input_dict, hidden_state, seq_lens):
         inputs = input_dict["obs_flat"].float()
-        if len(self.full_obs_space.shape) == 3: # 3D
+        if len(self.full_obs_space.shape) == 3:  # 3D
             inputs = inputs.reshape((-1,) + self.full_obs_space.shape)
         x = self.encoder(inputs)
         h_in = hidden_state[0].reshape(-1, self.hidden_state_size)
         h = self.rnn(x, h_in)
         q = self.q_value(h)
         return q, [h]
-

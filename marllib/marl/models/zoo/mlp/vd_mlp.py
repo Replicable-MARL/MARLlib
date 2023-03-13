@@ -21,13 +21,13 @@
 # SOFTWARE.
 
 from ray.rllib.utils.framework import try_import_torch
-from marllib.marl.models.zoo.mlp.base_mlp import Base_MLP
+from marllib.marl.models.zoo.mlp.base_mlp import BaseMLP
 from marllib.marl.models.zoo.mixer import QMixer, VDNMixer
 
 torch, nn = try_import_torch()
 
 
-class VD_MLP(Base_MLP):
+class ValueDecompMLP(BaseMLP):
 
     def __init__(
             self,

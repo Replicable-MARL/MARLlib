@@ -21,23 +21,22 @@
 # SOFTWARE.
 
 import numpy as np
-import copy
 from gym.spaces import Box
 from ray.rllib.utils.framework import try_import_tf, try_import_torch
-from marllib.marl.models.zoo.rnn.base_rnn import Base_RNN
-from ray.rllib.models.torch.misc import SlimFC, SlimConv2d, normc_initializer
+from marllib.marl.models.zoo.rnn.base_rnn import BaseRNN
+from ray.rllib.models.torch.misc import SlimFC, normc_initializer
 from ray.rllib.utils.annotations import override
 from functools import reduce
 from torch.optim import Adam
 from torch.nn.utils import parameters_to_vector, vector_to_parameters
 from marllib.marl.algos.utils.distributions import init
-from marllib.marl.models.zoo.encoder.cc_encoder import CC_Encoder
+from marllib.marl.models.zoo.encoder.cc_encoder import CentralizedEncoder
 
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
 
 
-class CC_RNN(Base_RNN):
+class CentralizedCriticRNN(BaseRNN):
 
     def __init__(
             self,
@@ -52,7 +51,7 @@ class CC_RNN(Base_RNN):
                          name, **kwargs)
 
         # encoder for centralized VF
-        self.cc_vf_encoder = CC_Encoder(model_config, self.full_obs_space)
+        self.cc_vf_encoder = CentralizedEncoder(model_config, self.full_obs_space)
 
         # Central VF
         if self.custom_config["opp_action_in_cc"]:
@@ -106,9 +105,7 @@ class CC_RNN(Base_RNN):
     def central_value_function(self, state, opponent_actions=None):
         assert self._features is not None, "must call forward() first"
         B = state.shape[0]
-
         x = self.cc_vf_encoder(state)
-
         if opponent_actions is not None:
             if isinstance(self.custom_config["space_act"], Box):  # continuous
                 opponent_actions_ls = [opponent_actions[:, i, :]
@@ -119,9 +116,7 @@ class CC_RNN(Base_RNN):
                     torch.nn.functional.one_hot(opponent_actions[:, i].long(), self.num_outputs).float()
                     for i in
                     range(self.n_agents - 1)]
-
             x = torch.cat([x.reshape(B, -1)] + opponent_actions_ls, 1)
-
         else:
             x = torch.cat([x.reshape(B, -1)], 1)
 
@@ -130,7 +125,7 @@ class CC_RNN(Base_RNN):
         else:
             return torch.reshape(self.cc_vf_branch(x), [-1])
 
-    @override(Base_RNN)
+    @override(BaseRNN)
     def critic_parameters(self):
         critics = [
             self.cc_vf_encoder,
@@ -163,7 +158,7 @@ class CC_RNN(Base_RNN):
         return self(self._train_batch_)
 
     def update_actor(self, loss, lr, grad_clip):
-        CC_RNN.update_use_torch_adam(
+        CentralizedCriticRNN.update_use_torch_adam(
             loss=(-1 * loss),
             optimizer=self.actor_optimizer,
             parameters=self.parameters(),
@@ -171,7 +166,7 @@ class CC_RNN(Base_RNN):
         )
 
     def update_critic(self, loss, lr, grad_clip):
-        CC_RNN.update_use_torch_adam(
+        CentralizedCriticRNN.update_use_torch_adam(
             loss=loss,
             optimizer=self.critic_optimizer,
             parameters=self.critic_parameters(),
@@ -180,26 +175,12 @@ class CC_RNN(Base_RNN):
 
     @staticmethod
     def update_use_torch_adam(loss, parameters, optimizer, grad_clip):
-
         optimizer.zero_grad()
-
         loss.backward()
-
-        # total_norm = torch.norm(torch.stack([torch.norm(p.grad) for p in parameters if p.grad is not None]))
         torch.nn.utils.clip_grad_norm_(parameters, grad_clip)
-        # after_norm = torch.nn.utils.clip_grad_norm_(parameters, grad_clip)
-        # after_norm = torch.norm(torch.stack([torch.norm(p.grad) for p in parameters if p.grad is not None]))
-
-        # if before_norm != after_norm:
-        #     print(f'before clip norm: {before_norm}')
-        #     print(f'after clip norm: {after_norm}')
-        # if after_norm - grad_clip > 1:
-        #     raise ValueError(f'grad clip error!, after clip norm: {after_norm}, clip norm threshold: {grad_clip}')
-
         optimizer.step()
 
     def __update_adam(self, loss, parameters, adam_info, lr, grad_clip, step, maximum=False):
-
         for p in self.parameters():
             p.grad = None
 
@@ -221,9 +202,7 @@ class CC_RNN(Base_RNN):
 
         beta1, beta2 = 0.9, 0.999
         eps = 1e-05
-
         real_gradients = []
-
         if maximum:
             # for i, param in enumerate(parameters):
             for grad in gradients:
@@ -235,7 +214,6 @@ class CC_RNN(Base_RNN):
 
         m_v = []
         v_v = []
-
         if len(adam_info['m']) == 0:
             adam_info['m'] = [0] * len(gradients)
             adam_info['v'] = [0] * len(gradients)
@@ -243,28 +221,18 @@ class CC_RNN(Base_RNN):
         for i, g in enumerate(gradients):
             mt = beta1 * adam_info['m'][i] + (1 - beta1) * g
             vt = beta2 * adam_info['v'][i] + (1 - beta2) * (g ** 2)
-
             m_t_bar = mt / (1 - beta1 ** step)
             v_t_bar = vt / (1 - beta2 ** step)
-
             vector_to_parameters(
                 parameters_to_vector([parameters[i]]) - parameters_to_vector(
                     lr * m_t_bar / (torch.sqrt(v_t_bar) + eps)),
                 [parameters[i]],
             )
-
             m_v.append(mt)
             v_v.append(vt)
-
         step += 1
-
         adam_info['m'] = m_v
         adam_info['v'] = v_v
 
         return step
 
-        # m = beta1 * self.adam_update_info['m'] + (1 - beta1) * gradients
-        # v = beta2 * self.adam_update_info['v'] + (1 - beta2) * (gradients**2)
-
-        # self.adam_update_info['m'] = m
-        # self.adam_update_info['v'] = v

@@ -20,8 +20,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from .base_mlp import Base_MLP
-from .cc_mlp import CC_MLP
-from .ddpg_mlp import DDPG_MLP
-from .jointQ_mlp import JointQ_MLP
-from .vd_mlp import VD_MLP
+from .base_mlp import BaseMLP
+from .cc_mlp import CentralizedCriticMLP
+from .ddpg_mlp import DDPGSeriesMLP
+from .jointQ_mlp import JointQMLP
+from .vd_mlp import ValueDecompMLP

@@ -24,19 +24,19 @@ import numpy as np
 from gym.spaces import Box
 from functools import reduce
 from torch.nn.utils import parameters_to_vector, vector_to_parameters
-import copy
-from ray.rllib.models.torch.misc import SlimFC, SlimConv2d, normc_initializer
+from ray.rllib.models.torch.misc import SlimFC, normc_initializer
 from ray.rllib.utils.annotations import override
 from ray.rllib.utils.framework import try_import_torch
 from ray.rllib.utils.typing import TensorType
-from marllib.marl.models.zoo.mlp.base_mlp import Base_MLP
-from marllib.marl.models.zoo.encoder.cc_encoder import CC_Encoder
+from marllib.marl.models.zoo.mlp.base_mlp import BaseMLP
+from marllib.marl.models.zoo.encoder.cc_encoder import CentralizedEncoder
 from marllib.marl.algos.utils.distributions import init
 from torch.optim import Adam
+
 torch, nn = try_import_torch()
 
 
-class CC_MLP(Base_MLP):
+class CentralizedCriticMLP(BaseMLP):
 
     def __init__(
             self,
@@ -52,7 +52,7 @@ class CC_MLP(Base_MLP):
                          name, **kwargs)
 
         # encoder for centralized VF
-        self.cc_vf_encoder = CC_Encoder(model_config, self.full_obs_space)
+        self.cc_vf_encoder = CentralizedEncoder(model_config, self.full_obs_space)
 
         # Central VF
         if self.custom_config["opp_action_in_cc"]:
@@ -120,7 +120,7 @@ class CC_MLP(Base_MLP):
         else:
             return torch.reshape(self.cc_vf_branch(x), [-1])
 
-    @override(Base_MLP)
+    @override(BaseMLP)
     def critic_parameters(self):
         critics = [
             self.cc_vf_encoder,
@@ -153,7 +153,7 @@ class CC_MLP(Base_MLP):
         return self(self._train_batch_)
 
     def update_actor(self, loss, lr, grad_clip):
-        CC_MLP.update_use_torch_adam(
+        CentralizedCriticMLP.update_use_torch_adam(
             loss=(-1 * loss),
             optimizer=self.actor_optimizer,
             parameters=self.parameters(),
@@ -161,7 +161,7 @@ class CC_MLP(Base_MLP):
         )
 
     def update_critic(self, loss, lr, grad_clip):
-        CC_MLP.update_use_torch_adam(
+        CentralizedCriticMLP.update_use_torch_adam(
             loss=loss,
             optimizer=self.critic_optimizer,
             parameters=self.critic_parameters(),
