@@ -36,7 +36,6 @@ from marllib.marl.algos.utils.centralized_critic import CentralizedValueMixin, c
 
 torch, nn = try_import_torch()
 
-
 ############
 ### COMA ###
 ############
@@ -44,6 +43,18 @@ torch, nn = try_import_torch()
 def central_critic_coma_loss(policy: Policy, model: ModelV2,
                              dist_class: ActionDistribution,
                              train_batch: SampleBatch) -> TensorType:
+    """Constructs the loss for Counterfactual A2C Objective.
+    Args:
+        policy (Policy): The Policy to calculate the loss for.
+        model (ModelV2): The Model to calculate the loss for.
+        dist_class (Type[ActionDistribution]: The action distr. class.
+        train_batch (SampleBatch): The training data.
+
+    Returns:
+        Union[TensorType, List[TensorType]]: A single loss tensor or a list
+            of loss tensors.
+    """
+
     CentralizedValueMixin.__init__(policy)
     logits, _ = model.from_batch(train_batch)
     opp_action_in_cc = policy.config["model"]["custom_model_config"]["opp_action_in_cc"]

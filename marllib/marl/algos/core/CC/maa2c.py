@@ -20,20 +20,35 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from ray.rllib.utils.framework import try_import_torch
-from ray.rllib.agents.a3c.a3c_torch_policy import A3CTorchPolicy, actor_critic_loss
+from ray.rllib.agents.a3c.a3c_torch_policy import actor_critic_loss
+from ray.rllib.models.action_dist import ActionDistribution
+from ray.rllib.models.modelv2 import ModelV2
+from ray.rllib.policy.policy import Policy
+from ray.rllib.utils.typing import TensorType
+from ray.rllib.agents.a3c.a3c_torch_policy import A3CTorchPolicy
 from ray.rllib.agents.a3c.a2c import A2C_DEFAULT_CONFIG as A2C_CONFIG, A2CTrainer
+from ray.rllib.policy.sample_batch import SampleBatch
 from marllib.marl.algos.utils.centralized_critic import CentralizedValueMixin, centralized_critic_postprocessing
-
-torch, nn = try_import_torch()
 
 
 #############
 ### MAA2C ###
 #############
 
-# Copied from A2C but optimizing the central value function.
-def central_critic_a2c_loss(policy, model, dist_class, train_batch):
+def central_critic_a2c_loss(policy: Policy, model: ModelV2,
+                            dist_class: ActionDistribution,
+                            train_batch: SampleBatch) -> TensorType:
+    """Constructs the loss for Centralized A2C Objective.
+    Args:
+        policy (Policy): The Policy to calculate the loss for.
+        model (ModelV2): The Model to calculate the loss for.
+        dist_class (Type[ActionDistribution]: The action distr. class.
+        train_batch (SampleBatch): The training data.
+
+    Returns:
+        Union[TensorType, List[TensorType]]: A single loss tensor or a list
+            of loss tensors.
+    """
     CentralizedValueMixin.__init__(policy)
     func = actor_critic_loss
 
@@ -72,5 +87,3 @@ MAA2CTrainer = A2CTrainer.with_updates(
     default_policy=None,
     get_policy_class=get_policy_class_maa2c,
 )
-
-

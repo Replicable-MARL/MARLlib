@@ -83,7 +83,7 @@ def build_facmac_models_and_action_dist(
         return model, TorchDeterministic
 
 
-class FACMAC_TorchModel(IDDPG_TorchModel):
+class FACMAC_TorchModel(IDDPGTorchModel):
     """
     Data flow:
         obs -> forward() -> model_out

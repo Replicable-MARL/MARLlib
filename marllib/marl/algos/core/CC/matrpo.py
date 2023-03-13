@@ -34,23 +34,16 @@ from ray.rllib.policy.sample_batch import SampleBatch
 from ray.rllib.utils.typing import TensorType
 from ray.rllib.evaluation.postprocessing import Postprocessing
 from ray.rllib.utils.torch_ops import explained_variance, sequence_mask
+from marllib.marl.algos.core.CC.common import setup_torch_mixins
 
 torch, nn = try_import_torch()
-
-
-def setup_torch_mixins(policy, obs_space, action_space, config):
-    # Copied from PPOTorchPolicy  (w/o ValueNetworkMixin).
-    KLCoeffMixin.__init__(policy, config)
-    EntropyCoeffSchedule.__init__(policy, config["entropy_coeff"],
-                                  config["entropy_coeff_schedule"])
-    LearningRateSchedule.__init__(policy, config["lr"], config["lr_schedule"])
 
 
 def centre_critic_trpo_loss_fn(
         policy: Policy, model: ModelV2,
         dist_class: Type[TorchDistributionWrapper],
         train_batch: SampleBatch) -> Union[TensorType, List[TensorType]]:
-    """Constructs the loss for TRPO
+    """Constructs the loss for Centralized TRPO
     Args:
         policy (Policy): The Policy to calculate the loss for.
         model (ModelV2): The Model to calculate the loss for.
@@ -104,14 +97,11 @@ def centre_critic_trpo_loss_fn(
     curr_entropy = curr_action_dist.entropy()
 
     # Compute a value function loss.
-
-    # policy_loss = reduce_mean_valid(logp_ratio * advantages)
-
     prev_action_dist = dist_class(train_batch[SampleBatch.ACTION_DIST_INPUTS], model)
     action_kl = prev_action_dist.kl(curr_action_dist)
 
     if policy.config["use_critic"]:
-        prev_value_fn_out = train_batch[SampleBatch.VF_PREDS] #
+        prev_value_fn_out = train_batch[SampleBatch.VF_PREDS]  #
         value_fn_out = model.value_function()  # same as values
         vf_loss1 = torch.pow(
             value_fn_out - train_batch[Postprocessing.VALUE_TARGETS], 2.0)
@@ -125,9 +115,6 @@ def centre_critic_trpo_loss_fn(
     # Ignore the value function.
     else:
         vf_loss = mean_vf_loss = 0.0
-
-    # if loss.isnan() or mean_vf_loss.isnan():
-    #     print('find error!!')
 
     trust_region_updator = TrustRegionUpdator(
         model=model,
@@ -192,4 +179,3 @@ MATRPOTrainer = PPOTrainer.with_updates(
     default_policy=None,
     get_policy_class=get_policy_class_mappo,
 )
-

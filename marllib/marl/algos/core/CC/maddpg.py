@@ -24,149 +24,21 @@ from marllib.marl.algos.core.IL.ddpg import *
 from marllib.marl.algos.utils.centralized_Q import centralized_critic_q, CentralizedQValueMixin, before_learn_on_batch
 from ray.rllib.agents.ddpg.ddpg_torch_policy import TargetNetworkMixin, ComputeTDErrorMixin
 
-torch, nn = try_import_torch()
 
+def central_critic_ddpg_loss(policy: Policy, model: ModelV2,
+                             dist_class: ActionDistribution,
+                             train_batch: SampleBatch) -> TensorType:
+    """Constructs the loss for MADDPG Objective.
+    Args:
+        policy (Policy): The Policy to calculate the loss for.
+        model (ModelV2): The Model to calculate the loss for.
+        dist_class (Type[ActionDistribution]: The action distr. class.
+        train_batch (SampleBatch): The training data.
 
-def build_maddpg_models(policy, observation_space, action_space, config):
-    num_outputs = int(np.product(observation_space.shape))
-
-    policy_model_config = MODEL_DEFAULTS.copy()
-    policy_model_config.update(config["policy_model"])
-    q_model_config = MODEL_DEFAULTS.copy()
-    q_model_config.update(config["Q_model"])
-
-    policy.model = ModelCatalog.get_model_v2(
-        obs_space=observation_space,
-        action_space=action_space,
-        num_outputs=num_outputs,
-        model_config=config["model"],
-        framework=config["framework"],
-        default_model=MADDPG_TorchModel,
-        name="iddpg_model",
-        policy_model_config=policy_model_config,
-        q_model_config=q_model_config,
-        twin_q=config["twin_q"],
-        add_layer_norm=(policy.config["exploration_config"].get("type") ==
-                        "ParameterNoise"),
-    )
-
-    policy.target_model = ModelCatalog.get_model_v2(
-        obs_space=observation_space,
-        action_space=action_space,
-        num_outputs=num_outputs,
-        model_config=config["model"],
-        framework=config["framework"],
-        default_model=MADDPG_TorchModel,
-        name="iddpg_model",
-        policy_model_config=policy_model_config,
-        q_model_config=q_model_config,
-        twin_q=config["twin_q"],
-        add_layer_norm=(policy.config["exploration_config"].get("type") ==
-                        "ParameterNoise"),
-    )
-
-    return policy.model
-
-
-def build_maddpg_models_and_action_dist(
-        policy: Policy, obs_space: gym.spaces.Space,
-        action_space: gym.spaces.Space,
-        config: TrainerConfigDict) -> Tuple[ModelV2, ActionDistribution]:
-    model = build_maddpg_models(policy, obs_space, action_space, config)
-
-    assert model.get_initial_state() != [], \
-        "RNNDDPG requires its model to be a recurrent one!"
-
-    if isinstance(action_space, Simplex):
-        return model, TorchDirichlet
-    else:
-        return model, TorchDeterministic
-
-
-class MADDPG_TorchModel(IDDPG_TorchModel):
+    Returns:
+        Union[TensorType, List[TensorType]]: A single loss tensor or a list
+            of loss tensors.
     """
-    Data flow:
-        obs -> forward() -> model_out
-        model_out -> get_policy_output() -> pi(s)
-        model_out, actions -> get_q_values() -> Q(s, a)
-        model_out, actions -> get_twin_q_values() -> Q_twin(s, a)
-
-    Note that this class by itself is not a valid model unless you
-    implement forward() in a subclass.
-    """
-
-    @override(IDDPG_TorchModel)
-    def forward(self, input_dict: Dict[str, TensorType],
-                state: List[TensorType],
-                seq_lens: TensorType):
-        """The common (Q-net and policy-net) forward pass.
-
-        NOTE: It is not(!) recommended to override this method as it would
-        introduce a shared pre-network, which would be updated by both
-        actor- and critic optimizers.
-
-        For rnn support remove input_dict filter and pass state and seq_lens
-        """
-        model_out = {"obs": input_dict[SampleBatch.OBS]}
-        if "opponent_actions" in input_dict:  # add additional info to model out
-            model_out["state"] = input_dict["state"]
-            model_out["opponent_actions"] = input_dict["opponent_actions"]
-        else:  # haven't gone trough postprocessing
-            o = input_dict["obs"]
-            if self.state_flag:
-                model_out["state"] = torch.zeros_like(o["state"], dtype=o["state"].dtype).to(
-                    input_dict[SampleBatch.OBS]["obs"].device)
-            else:
-                model_out["state"] = torch.zeros((o["obs"].shape[0], self.num_agents, o["obs"].shape[1]),
-                                                 dtype=o["obs"].dtype).to(
-                    input_dict[SampleBatch.OBS]["obs"].device)
-
-            if "actions" not in input_dict:
-                input_dict["actions"] = input_dict["prev_actions"]
-            model_out["opponent_actions"] = torch.stack(
-                [torch.zeros_like(input_dict["actions"], dtype=input_dict["actions"].dtype) for _ in
-                 range(self.num_agents - 1)], axis=1)
-
-        if self.use_prev_action:
-            model_out["prev_actions"] = input_dict[SampleBatch.PREV_ACTIONS]
-            model_out["prev_opponent_actions"] = input_dict["prev_opponent_actions"]
-
-        if self.use_prev_reward:
-            model_out["prev_rewards"] = input_dict[SampleBatch.PREV_REWARDS]
-
-        return model_out, state
-
-    def _get_cc_q_value(self, model_out: TensorType,
-                        state_in: List[TensorType],
-                        net,
-                        actions,
-                        seq_lens: TensorType):
-        # Continuous case -> concat actions to model_out.
-        model_out = copy.deepcopy(model_out)
-        if actions is not None:
-            model_out["actions"] = actions
-        else:
-            actions = torch.zeros(
-                list(model_out[SampleBatch.OBS]["obs"].shape[:-1]) + [self.action_dim])
-            model_out["actions"] = actions.to(state_in[0].device)
-
-        # Switch on training mode (when getting Q-values, we are usually in
-        # training).
-        model_out["is_training"] = True
-        out, state_out = net(model_out, state_in, seq_lens)
-        return out, state_out
-
-    def get_cc_q_values(self,
-                        model_out: TensorType,
-                        state_in: List[TensorType],
-                        seq_lens: TensorType,
-                        actions: Optional[TensorType] = None) -> TensorType:
-        return self._get_cc_q_value(model_out, state_in, self.q_model, actions,
-                                    seq_lens)
-
-
-# Copied from iddpg but optimizing the central q function.
-def central_critic_ddpg_loss(policy, model, dist_class, train_batch):
     CentralizedQValueMixin.__init__(policy)
     target_model = policy.target_models[model]
 
@@ -207,21 +79,14 @@ def central_critic_ddpg_loss(policy, model, dist_class, train_batch):
         "prev_rewards": train_batch[SampleBatch.REWARDS],
     }
 
-    # model_out_tp1, state_in_tp1 = model(
-    #     input_dict_next, state_batches, seq_lens)
-    # states_in_tp1 = model.select_state(state_in_tp1, ["policy", "q", "twin_q"])
-
     target_model_out_tp1, target_state_in_tp1 = target_model(
         input_dict_next, state_batches, seq_lens)
     target_states_in_tp1 = target_model.select_state(target_state_in_tp1,
                                                      ["policy", "q", "twin_q"])
 
     # Policy network evaluation.
-    # prev_update_ops = set(tf1.get_collection(tf.GraphKeys.UPDATE_OPS))
     policy_t = model.get_policy_output(
         model_out_t, states_in_t["policy"], seq_lens)[0]
-    # policy_batchnorm_update_ops = list(
-    #    set(tf1.get_collection(tf.GraphKeys.UPDATE_OPS)) - prev_update_ops)
 
     policy_tp1 = target_model.get_policy_output(
         target_model_out_tp1, target_states_in_tp1["policy"], seq_lens)[0]
@@ -251,7 +116,6 @@ def central_critic_ddpg_loss(policy, model, dist_class, train_batch):
         policy_tp1_smoothed = policy_tp1
 
     # Q-net(s) evaluation.
-    # prev_update_ops = set(tf1.get_collection(tf.GraphKeys.UPDATE_OPS))
     # Q-values for given actions & observations in given current
     q_t = model.get_cc_q_values(
         model_out_t, states_in_t["q"], seq_lens, train_batch[SampleBatch.ACTIONS])[0]
@@ -264,8 +128,6 @@ def central_critic_ddpg_loss(policy, model, dist_class, train_batch):
     if twin_q:
         twin_q_t = model.get_twin_q_values(model_out_t, states_in_t["twin_q"], seq_lens,
                                            train_batch[SampleBatch.ACTIONS])[0]
-    # q_batchnorm_update_ops = list(
-    #     set(tf1.get_collection(tf.GraphKeys.UPDATE_OPS)) - prev_update_ops)
 
     # Target q-net(s) evaluation.
     q_tp1 = target_model.get_cc_q_values(
@@ -358,6 +220,146 @@ def central_critic_ddpg_loss(policy, model, dist_class, train_batch):
     return actor_loss, critic_loss
 
 
+def build_maddpg_models(
+        policy: Policy, obs_space: gym.spaces.Space,
+        action_space: gym.spaces.Space,
+        config: TrainerConfigDict) -> ModelV2:
+    num_outputs = int(np.product(obs_space.shape))
+    policy_model_config = MODEL_DEFAULTS.copy()
+    policy_model_config.update(config["policy_model"])
+    q_model_config = MODEL_DEFAULTS.copy()
+    q_model_config.update(config["Q_model"])
+
+    policy.model = ModelCatalog.get_model_v2(
+        obs_space=obs_space,
+        action_space=action_space,
+        num_outputs=num_outputs,
+        model_config=config["model"],
+        framework=config["framework"],
+        default_model=MADDPGTorchModel,
+        name="iddpg_model",
+        policy_model_config=policy_model_config,
+        q_model_config=q_model_config,
+        twin_q=config["twin_q"],
+        add_layer_norm=(policy.config["exploration_config"].get("type") ==
+                        "ParameterNoise"),
+    )
+
+    policy.target_model = ModelCatalog.get_model_v2(
+        obs_space=obs_space,
+        action_space=action_space,
+        num_outputs=num_outputs,
+        model_config=config["model"],
+        framework=config["framework"],
+        default_model=MADDPGTorchModel,
+        name="iddpg_model",
+        policy_model_config=policy_model_config,
+        q_model_config=q_model_config,
+        twin_q=config["twin_q"],
+        add_layer_norm=(policy.config["exploration_config"].get("type") ==
+                        "ParameterNoise"),
+    )
+
+    return policy.model
+
+
+def build_maddpg_models_and_action_dist(
+        policy: Policy, obs_space: gym.spaces.Space,
+        action_space: gym.spaces.Space,
+        config: TrainerConfigDict) -> Tuple[ModelV2, ActionDistribution]:
+    model = build_maddpg_models(policy, obs_space, action_space, config)
+
+    assert model.get_initial_state() != [], \
+        "RNNDDPG requires its model to be a recurrent one!"
+
+    if isinstance(action_space, Simplex):
+        return model, TorchDirichlet
+    else:
+        return model, TorchDeterministic
+
+
+class MADDPGTorchModel(IDDPGTorchModel):
+    """
+    Data flow:
+        obs -> forward() -> model_out
+        model_out -> get_policy_output() -> pi(s)
+        model_out, actions -> get_q_values() -> Q(s, a)
+        model_out, actions -> get_twin_q_values() -> Q_twin(s, a)
+
+    Note that this class by itself is not a valid model unless you
+    implement forward() in a subclass.
+    """
+
+    @override(IDDPGTorchModel)
+    def forward(self, input_dict: Dict[str, TensorType],
+                state: List[TensorType],
+                seq_lens: TensorType):
+        """The common (Q-net and policy-net) forward pass.
+
+        NOTE: It is not(!) recommended to override this method as it would
+        introduce a shared pre-network, which would be updated by both
+        actor- and critic optimizers.
+
+        For rnn support remove input_dict filter and pass state and seq_lens
+        """
+        model_out = {"obs": input_dict[SampleBatch.OBS]}
+        if "opponent_actions" in input_dict:  # add additional info to model out
+            model_out["state"] = input_dict["state"]
+            model_out["opponent_actions"] = input_dict["opponent_actions"]
+        else:  # haven't gone trough postprocessing
+            o = input_dict["obs"]
+            if self.state_flag:
+                model_out["state"] = torch.zeros_like(o["state"], dtype=o["state"].dtype).to(
+                    input_dict[SampleBatch.OBS]["obs"].device)
+            else:
+                model_out["state"] = torch.zeros((o["obs"].shape[0], self.num_agents, o["obs"].shape[1]),
+                                                 dtype=o["obs"].dtype).to(
+                    input_dict[SampleBatch.OBS]["obs"].device)
+
+            if "actions" not in input_dict:
+                input_dict["actions"] = input_dict["prev_actions"]
+            model_out["opponent_actions"] = torch.stack(
+                [torch.zeros_like(input_dict["actions"], dtype=input_dict["actions"].dtype) for _ in
+                 range(self.num_agents - 1)], axis=1)
+
+        if self.use_prev_action:
+            model_out["prev_actions"] = input_dict[SampleBatch.PREV_ACTIONS]
+            model_out["prev_opponent_actions"] = input_dict["prev_opponent_actions"]
+
+        if self.use_prev_reward:
+            model_out["prev_rewards"] = input_dict[SampleBatch.PREV_REWARDS]
+
+        return model_out, state
+
+    def _get_cc_q_value(self, model_out: TensorType,
+                        state_in: List[TensorType],
+                        net,
+                        actions,
+                        seq_lens: TensorType):
+        # Continuous case -> concat actions to model_out.
+        model_out = copy.deepcopy(model_out)
+        if actions is not None:
+            model_out["actions"] = actions
+        else:
+            actions = torch.zeros(
+                list(model_out[SampleBatch.OBS]["obs"].shape[:-1]) + [self.action_dim])
+            model_out["actions"] = actions.to(state_in[0].device)
+
+        # Switch on training mode (when getting Q-values, we are usually in
+        # training).
+        model_out["is_training"] = True
+        out, state_out = net(model_out, state_in, seq_lens)
+        return out, state_out
+
+    def get_cc_q_values(self,
+                        model_out: TensorType,
+                        state_in: List[TensorType],
+                        seq_lens: TensorType,
+                        actions: Optional[TensorType] = None) -> TensorType:
+        return self._get_cc_q_value(model_out, state_in, self.q_model, actions,
+                                    seq_lens)
+
+
 def vf_preds_fetches(policy, input_dict, state_batches, model, action_dist):
     return dict()
 
@@ -379,7 +381,6 @@ MADDPGTorchPolicy = IDDPGTorchPolicy.with_updates(
 def get_policy_class(config: TrainerConfigDict) -> Optional[Type[Policy]]:
     if config["framework"] == "torch":
         return MADDPGTorchPolicy
-
 
 
 def validate_config(config: TrainerConfigDict) -> None:

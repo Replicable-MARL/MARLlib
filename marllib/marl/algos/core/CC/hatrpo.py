@@ -73,7 +73,7 @@ def hatrpo_loss_fn(
         policy: Policy, model: ModelV2,
         dist_class: Type[TorchDistributionWrapper],
         train_batch: SampleBatch) -> Union[TensorType, List[TensorType]]:
-    """Constructs the loss for TRPO
+    """Constructs the loss for Heterogeneous Agent TRPO
     Args:
         policy (Policy): The Policy to calculate the loss for.
         model (ModelV2): The Model to calculate the loss for.
@@ -105,10 +105,6 @@ def hatrpo_loss_fn(
     curr_entropy = curr_action_dist.entropy()
 
     # Compute a value function loss.
-    # if policy.model.model_config['custom_model_config']['normal_value']:
-    # value_normalizer.update(train_batch[Postprocessing.VALUE_TARGETS])
-    # train_batch[Postprocessing.VALUE_TARGETS] = value_normalizer.normalize(train_batch[Postprocessing.VALUE_TARGETS])
-
     if policy.config["use_critic"]:
         prev_value_fn_out = train_batch[SampleBatch.VF_PREDS] #
         value_fn_out = model.value_function()  # same as values

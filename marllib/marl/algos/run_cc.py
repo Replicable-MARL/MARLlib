@@ -24,7 +24,7 @@ import ray
 from ray import tune
 from ray.rllib.utils.framework import try_import_tf, try_import_torch
 from marllib.marl.algos.scripts import POlICY_REGISTRY
-from marllib.marl.common import recursive_dict_update, merge_default_and_customized
+from marllib.marl.common import recursive_dict_update, dict_update
 
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
@@ -136,7 +136,7 @@ def run_cc(algo_config, env, model, stop=None):
         "training_iteration": algo_config["stop_iters"],
     }
 
-    stop_config = merge_default_and_customized(stop_config, stop)
+    stop_config = dict_update(stop_config, stop)
 
     if algo_config['restore_path']['model_path'] == '':
         restore = None

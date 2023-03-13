@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from marllib.marl.common import merge_default_and_customized_and_check, get_model_config, check_algo_type, \
+from marllib.marl.common import dict_update, get_model_config, check_algo_type, \
     recursive_dict_update
 from marllib.marl.algos import run_il, run_vd, run_cc
 from marllib.marl.algos.scripts import POlICY_REGISTRY
@@ -28,55 +28,64 @@ from marllib.envs.base_env import ENV_REGISTRY
 from marllib.envs.global_reward_env import COOP_ENV_REGISTRY
 from marllib.marl.models import BaseRNN, BaseMLP, CentralizedCriticRNN, CentralizedCriticMLP, ValueDecompRNN, \
     ValueDecompMLP, JointQMLP, JointQRNN, DDPGSeriesRNN, DDPGSeriesMLP
-
+from ray.rllib.models.torch.torch_modelv2 import TorchModelV2
+from ray.rllib.env.multi_agent_env import MultiAgentEnv
 from ray.tune import register_env
+from copy import deepcopy
+from tabulate import tabulate
+from typing import Any, Dict, List, Optional, Sequence, Tuple, Type, Union
 import yaml
 import os
 import sys
-from copy import deepcopy
-from tabulate import tabulate
-
-with open(os.path.join(os.path.dirname(__file__), "ray/ray.yaml"), "r") as f:
-    CONFIG_DICT = yaml.load(f, Loader=yaml.FullLoader)
-    f.close()
 
 SYSPARAMs = deepcopy(sys.argv)
 
 
-class Env(dict):
-    def set_ray(self):
-
-        # default config
-        with open(os.path.join(os.path.dirname(__file__), "ray/ray.yaml"), "r") as f:
-            ray_config_dict = yaml.load(f, Loader=yaml.FullLoader)
-            f.close()
-
-        # user config
-        user_ray_args = {}
-        for param in SYSPARAMs:
-            if param.startswith("--ray_args"):
-                if "=" in param:
-                    key, value = param.split(".")[1].split("=")
-                    user_ray_args[key] = value
-                else:  # local_mode
-                    user_ray_args[param.split(".")[1]] = True
-
-        # update config
-        ray_config_dict = merge_default_and_customized_and_check(ray_config_dict, user_ray_args)
-
-        for key, value in ray_config_dict.items():
-            self[key] = value
-
-        return self
-
-
-def make_env(environment_name,
-             map_name,
-             force_coop=False,
-             **env_params
-             ):
+def set_ray(config: Dict):
     """
-    Gets the environment configuration, which will be given to Ray RLlib.
+    function of combining ray config with other configs
+    :param config: dictionary of config to be combined with
+    """
+    # default config
+    with open(os.path.join(os.path.dirname(__file__), "ray/ray.yaml"), "r") as f:
+        ray_config_dict = yaml.load(f, Loader=yaml.FullLoader)
+        f.close()
+
+    # user config
+    user_ray_args = {}
+    for param in SYSPARAMs:
+        if param.startswith("--ray_args"):
+            if "=" in param:
+                key, value = param.split(".")[1].split("=")
+                user_ray_args[key] = value
+            else:  # local_mode
+                user_ray_args[param.split(".")[1]] = True
+
+    # update config
+    ray_config_dict = dict_update(ray_config_dict, user_ray_args, True)
+
+    for key, value in ray_config_dict.items():
+        config[key] = value
+
+    return config
+
+
+def make_env(
+        environment_name: str,
+        map_name: str,
+        force_coop: bool = False,
+        **env_params
+) -> Tuple[MultiAgentEnv, Dict]:
+    """
+    construct the environment and register.
+    Args:
+        :param environment_name: name of the environment
+        :param map_name: name of the scenario
+        :param force_coop: enforce the reward return of the environment to be global
+        :param env_params: parameters that can be pass to the environment for customizing the environment
+
+    Returns:
+        Tuple[MultiAgentEnv, Dict]: env instance & env configuration dict
     """
 
     # default config
@@ -91,7 +100,7 @@ def make_env(environment_name,
         f.close()
 
     # update function-fixed config
-    env_config_dict["env_args"] = merge_default_and_customized_and_check(env_config_dict["env_args"], env_params)
+    env_config_dict["env_args"] = dict_update(env_config_dict["env_args"], env_params, True)
 
     # user commandline config
     user_env_args = {}
@@ -101,14 +110,12 @@ def make_env(environment_name,
             user_env_args[key] = value
 
     # update commandline config
-    env_config_dict["env_args"] = merge_default_and_customized_and_check(env_config_dict["env_args"], user_env_args)
-
+    env_config_dict["env_args"] = dict_update(env_config_dict["env_args"], user_env_args, True)
     env_config_dict["env_args"]["map_name"] = map_name
     env_config_dict["force_coop"] = force_coop
-    env_config = Env(env_config_dict)
 
-    # set ray config
-    env_config = env_config.set_ray()
+    # combine with exp running config
+    env_config = set_ray(env_config_dict)
 
     # initialize env
     env_reg_ls = []
@@ -146,7 +153,22 @@ def make_env(environment_name,
     return env, env_config
 
 
-def build_model(environment, algorithm, model_preference):
+def build_model(
+        environment: Tuple[MultiAgentEnv, Dict],
+        algorithm: str,
+        model_preference: Dict,
+) -> Tuple[Any, Dict]:
+    """
+    construct the model
+    Args:
+        :param environment: name of the environment
+        :param algorithm: name of the algorithm
+        :param model_preference:  parameters that can be pass to the model for customizing the model
+
+    Returns:
+        Tuple[Any, Dict]: model class & model configuration
+    """
+
     if algorithm.name in ["ddpg", "facmac", "maddpg"]:
         if model_preference["core_arch"] in ["gru", "lstm"]:
             model_class = DDPGSeriesRNN
@@ -203,7 +225,11 @@ def build_model(environment, algorithm, model_preference):
 
 
 class _Algo:
-    def __init__(self, algo_name):
+    """An algorithm tool class
+    :param str algo_name: the algorithm name
+    """
+
+    def __init__(self, algo_name: str):
 
         if "_" in algo_name:
             self.name = algo_name.split("_")[0].lower()
@@ -215,16 +241,17 @@ class _Algo:
         self.config_dict = None
         self.common_config = None
 
-    def __call__(self, hyperparam_source='common', **algo_params):
+    def __call__(self, hyperparam_source: str, **algo_params):
         """
-        @param: hyperparam_source:
-        1. 'common'             use marl/algos/hyperparams/common
-        2. $environment_name    use marl/algos/hyperparams/finetuned/$environment_name
-        3. 'test'               use marl/algos/hyperparams/test
+        Args:
+            :param hyperparam_source: source of the algorithm's hyperparameter
+            options:
+            1. "common" use config under "marl/algos/hyperparams/common"
+            2. $environment use config under "marl/algos/hyperparams/finetuned/$environment"
+            3. "test" use config under "marl/algos/hyperparams/test"
+        Returns:
+            _Algo
         """
-        # if '_lambda' in algo_parameters:
-        #     algo_parameters['lambda'] = algo_parameters['_lambda']
-        #     del algo_parameters['_lambda']
         if hyperparam_source in ["common", "test"]:
             rel_path = "algos/hyperparams/{}/{}.yaml".format(hyperparam_source, self.name)
         else:
@@ -238,8 +265,8 @@ class _Algo:
             f.close()
 
         # update function-fixed config
-        algo_config_dict['algo_args'] = merge_default_and_customized_and_check(algo_config_dict['algo_args'],
-                                                                               algo_params)
+        algo_config_dict["algo_args"] = dict_update(algo_config_dict["algo_args"],
+                                                    algo_params, True)
 
         # user config
         user_algo_args = {}
@@ -250,14 +277,25 @@ class _Algo:
                 user_algo_args[key] = value
 
         # update commandline config
-        algo_config_dict['algo_args'] = merge_default_and_customized_and_check(algo_config_dict['algo_args'],
-                                                                               user_algo_args)
+        algo_config_dict["algo_args"] = dict_update(algo_config_dict["algo_args"],
+                                                    user_algo_args, True)
 
         self.algo_parameters = algo_config_dict
 
         return self
 
-    def fit(self, env, model, stop=None, **running_params):
+    def fit(self, env: Tuple[MultiAgentEnv, Dict], model: Tuple[Any, Dict], stop: Dict = None,
+            **running_params) -> None:
+        """
+        Entering point of the whole training
+        Args:
+            :param env: a tuple of environment instance and environmental configuration
+            :param model: a tuple of model class and model configuration
+            :param stop: dict of running stop condition
+            :param running_params: other configuration to customize the training
+        Returns:
+            None
+        """
 
         env_instance, info = env
         model_class, model_info = model
@@ -279,21 +317,39 @@ class _Algo:
         else:
             raise ValueError("not supported type {}".format(self.algo_type))
 
-    def render(self, env, model, stop=None, **running_params):
-        # current reuse the fit function
+    def render(self, env: Tuple[MultiAgentEnv, Dict], model: Tuple[Any, Dict], stop: Dict = None,
+               **running_params) -> None:
+        """
+        Entering point of the rendering, running a one iteration fit instead
+        Args:
+            :param env: a tuple of environment instance and environmental configuration
+            :param model: a tuple of model class and model configuration
+            :param stop: dict of running stop condition
+            :param running_params: other configuration to customize the rendering
+        Returns:
+            None
+        """
+
         self.fit(env, model, stop, **running_params)
 
 
 class _AlgoManager:
     def __init__(self):
-        # set each algorithm to AlgoManager.
-        # could get :
-        # happo = marlib.algos.HAPPO()
+        """An algorithm pool class
+        """
         for algo_name in POlICY_REGISTRY:
             setattr(_AlgoManager, algo_name, _Algo(algo_name))
-            # set set algos.HAPPO = _Algo(run_happo)
 
-    def register_algo(self, algo_name, style, script):
+    def register_algo(self, algo_name: str, style: str, script: Any):
+        """
+        Algorithm registration
+        Args:
+            :param algo_name: algorithm name
+            :param style: algorithm learning style from ["il", "vd", "cc"]
+            :param script: a running script to start training
+        Returns:
+            None
+        """
         setattr(_AlgoManager, algo_name, _Algo(algo_name + "_" + style))
         POlICY_REGISTRY[algo_name] = script
 

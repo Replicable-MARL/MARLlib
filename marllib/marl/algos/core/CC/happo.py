@@ -52,7 +52,7 @@ def happo_surrogate_loss(
         policy: Policy, model: ModelV2,
         dist_class: Type[TorchDistributionWrapper],
         train_batch: SampleBatch) -> Union[TensorType, List[TensorType]]:
-    """Constructs the loss for Proximal Policy Objective.
+    """Constructs the loss for Heterogeneous Agent PPO Objective.
     Args:
         policy (Policy): The Policy to calculate the loss for.
         model (ModelV2): The Model to calculate the loss for.

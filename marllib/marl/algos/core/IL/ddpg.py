@@ -45,97 +45,7 @@ from ray.rllib.execution.replay_buffer import *
 
 from marllib.marl.algos.utils.episode_execution_plan import episode_execution_plan
 
-
 torch, nn = try_import_torch()
-
-
-def build_iddpg_models(policy, observation_space, action_space, config):
-    num_outputs = int(np.product(observation_space.shape))
-
-    policy_model_config = MODEL_DEFAULTS.copy()
-    policy_model_config.update(config["policy_model"])
-    q_model_config = MODEL_DEFAULTS.copy()
-    q_model_config.update(config["Q_model"])
-
-    policy.model = ModelCatalog.get_model_v2(
-        obs_space=observation_space,
-        action_space=action_space,
-        num_outputs=num_outputs,
-        model_config=config["model"],
-        framework=config["framework"],
-        default_model=IDDPG_TorchModel,
-        name="iddpg_model",
-        policy_model_config=policy_model_config,
-        q_model_config=q_model_config,
-        twin_q=config["twin_q"],
-        add_layer_norm=(policy.config["exploration_config"].get("type") ==
-                        "ParameterNoise"),
-    )
-
-    policy.target_model = ModelCatalog.get_model_v2(
-        obs_space=observation_space,
-        action_space=action_space,
-        num_outputs=num_outputs,
-        model_config=config["model"],
-        framework=config["framework"],
-        default_model=IDDPG_TorchModel,
-        name="iddpg_model",
-        policy_model_config=policy_model_config,
-        q_model_config=q_model_config,
-        twin_q=config["twin_q"],
-        add_layer_norm=(policy.config["exploration_config"].get("type") ==
-                        "ParameterNoise"),
-    )
-
-    return policy.model
-
-
-def build_iddpg_models_and_action_dist(
-        policy: Policy, obs_space: gym.spaces.Space,
-        action_space: gym.spaces.Space,
-        config: TrainerConfigDict) -> Tuple[ModelV2, ActionDistribution]:
-    model = build_iddpg_models(policy, obs_space, action_space, config)
-
-    assert model.get_initial_state() != [], \
-        "IDDPG requires its model to be a recurrent one!"
-
-    if isinstance(action_space, Simplex):
-        return model, TorchDirichlet
-    else:
-        return model, TorchDeterministic
-
-
-def action_distribution_fn(policy: Policy,
-                           model: ModelV2,
-                           input_dict: ModelInputDict,
-                           *,
-                           explore=True,
-                           is_training=False,
-                           state_batches=None,
-                           seq_lens=None,
-                           prev_action_batch=None,
-                           prev_reward_batch=None,
-                           timestep=None,
-                           **kwargs):
-    # modify input output change
-    model_out, state_in = model(input_dict, state_batches, seq_lens)
-
-    states_in = model.select_state(state_in, ["policy", "q", "twin_q"])
-
-    distribution_inputs, policy_state_out = \
-        model.get_policy_output(model_out, states_in["policy"], seq_lens)
-    _, q_state_out = model.get_q_values(model_out, states_in["q"], seq_lens)
-    if model.twin_q_model:
-        _, twin_q_state_out = \
-            model.get_twin_q_values(model_out, states_in["twin_q"], seq_lens)
-    else:
-        twin_q_state_out = []
-
-    states_out = policy_state_out + q_state_out + twin_q_state_out
-
-    return distribution_inputs, (TorchDeterministic
-                                 if policy.config["framework"] == "torch" else
-                                 Deterministic), states_out
 
 
 def ddpg_actor_critic_loss(policy: Policy, model: ModelV2, _,
@@ -324,7 +234,96 @@ def ddpg_actor_critic_loss(policy: Policy, model: ModelV2, _,
     return actor_loss, critic_loss
 
 
-class IDDPG_TorchModel(DDPGTorchModel):
+def build_iddpg_models(policy, observation_space, action_space, config):
+    num_outputs = int(np.product(observation_space.shape))
+
+    policy_model_config = MODEL_DEFAULTS.copy()
+    policy_model_config.update(config["policy_model"])
+    q_model_config = MODEL_DEFAULTS.copy()
+    q_model_config.update(config["Q_model"])
+
+    policy.model = ModelCatalog.get_model_v2(
+        obs_space=observation_space,
+        action_space=action_space,
+        num_outputs=num_outputs,
+        model_config=config["model"],
+        framework=config["framework"],
+        default_model=IDDPGTorchModel,
+        name="iddpg_model",
+        policy_model_config=policy_model_config,
+        q_model_config=q_model_config,
+        twin_q=config["twin_q"],
+        add_layer_norm=(policy.config["exploration_config"].get("type") ==
+                        "ParameterNoise"),
+    )
+
+    policy.target_model = ModelCatalog.get_model_v2(
+        obs_space=observation_space,
+        action_space=action_space,
+        num_outputs=num_outputs,
+        model_config=config["model"],
+        framework=config["framework"],
+        default_model=IDDPGTorchModel,
+        name="iddpg_model",
+        policy_model_config=policy_model_config,
+        q_model_config=q_model_config,
+        twin_q=config["twin_q"],
+        add_layer_norm=(policy.config["exploration_config"].get("type") ==
+                        "ParameterNoise"),
+    )
+
+    return policy.model
+
+
+def build_iddpg_models_and_action_dist(
+        policy: Policy, obs_space: gym.spaces.Space,
+        action_space: gym.spaces.Space,
+        config: TrainerConfigDict) -> Tuple[ModelV2, ActionDistribution]:
+    model = build_iddpg_models(policy, obs_space, action_space, config)
+
+    assert model.get_initial_state() != [], \
+        "IDDPG requires its model to be a recurrent one!"
+
+    if isinstance(action_space, Simplex):
+        return model, TorchDirichlet
+    else:
+        return model, TorchDeterministic
+
+
+def action_distribution_fn(policy: Policy,
+                           model: ModelV2,
+                           input_dict: ModelInputDict,
+                           *,
+                           explore=True,
+                           is_training=False,
+                           state_batches=None,
+                           seq_lens=None,
+                           prev_action_batch=None,
+                           prev_reward_batch=None,
+                           timestep=None,
+                           **kwargs):
+    # modify input output change
+    model_out, state_in = model(input_dict, state_batches, seq_lens)
+
+    states_in = model.select_state(state_in, ["policy", "q", "twin_q"])
+
+    distribution_inputs, policy_state_out = \
+        model.get_policy_output(model_out, states_in["policy"], seq_lens)
+    _, q_state_out = model.get_q_values(model_out, states_in["q"], seq_lens)
+    if model.twin_q_model:
+        _, twin_q_state_out = \
+            model.get_twin_q_values(model_out, states_in["twin_q"], seq_lens)
+    else:
+        twin_q_state_out = []
+
+    states_out = policy_state_out + q_state_out + twin_q_state_out
+
+    return distribution_inputs, (TorchDeterministic
+                                 if policy.config["framework"] == "torch" else
+                                 Deterministic), states_out
+
+
+class IDDPGTorchModel(DDPGTorchModel):
     """Extension of standard DDPGTorchModel for IDDPG.
 
     Data flow:
@@ -511,7 +510,6 @@ class IDDPG_TorchModel(DDPGTorchModel):
         out, state_out = net(model_out, state_in, seq_lens)
         return out, state_out
 
-
     @override(DDPGTorchModel)
     def get_q_values(self,
                      model_out: TensorType,
@@ -606,6 +604,7 @@ IDDPGTorchPolicy = DDPGTorchPolicy.with_updates(
 def get_policy_class(config: TrainerConfigDict) -> Optional[Type[Policy]]:
     if config["framework"] == "torch":
         return IDDPGTorchPolicy
+
 
 IDDPGTrainer = DDPGTrainer.with_updates(
     name="IDDPGTrainer",

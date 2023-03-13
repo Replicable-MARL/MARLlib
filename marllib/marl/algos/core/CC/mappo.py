@@ -20,30 +20,37 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from ray.rllib.utils.framework import try_import_torch
-from ray.rllib.agents.ppo.ppo_torch_policy import PPOTorchPolicy, ValueNetworkMixin, KLCoeffMixin, ppo_surrogate_loss
+from ray.rllib.agents.ppo.ppo_torch_policy import PPOTorchPolicy, KLCoeffMixin, ppo_surrogate_loss
 from ray.rllib.agents.ppo.ppo import PPOTrainer, DEFAULT_CONFIG as PPO_CONFIG
-from ray.rllib.policy.torch_policy import LearningRateSchedule, EntropyCoeffSchedule
+from ray.rllib.models.action_dist import ActionDistribution
+import gym
+from ray.rllib.models.modelv2 import ModelV2
+from ray.rllib.policy.policy import Policy
+from ray.rllib.policy.sample_batch import SampleBatch
+from ray.rllib.policy.torch_policy import EntropyCoeffSchedule, \
+    LearningRateSchedule
+from ray.rllib.utils.typing import TensorType, TrainerConfigDict
 from marllib.marl.algos.utils.centralized_critic import CentralizedValueMixin, centralized_critic_postprocessing
-
-torch, nn = try_import_torch()
-
-
+from marllib.marl.algos.core.CC.common import setup_torch_mixins
 
 #############
 ### MAPPO ###
 #############
 
-# Copied from PPO but optimizing the central value function.
-def setup_torch_mixins(policy, obs_space, action_space, config):
-    # Copied from PPOTorchPolicy  (w/o ValueNetworkMixin).
-    KLCoeffMixin.__init__(policy, config)
-    EntropyCoeffSchedule.__init__(policy, config["entropy_coeff"],
-                                  config["entropy_coeff_schedule"])
-    LearningRateSchedule.__init__(policy, config["lr"], config["lr_schedule"])
+def central_critic_ppo_loss(policy: Policy, model: ModelV2,
+                            dist_class: ActionDistribution,
+                            train_batch: SampleBatch) -> TensorType:
+    """Constructs the loss for Centralized PPO Objective.
+    Args:
+        policy (Policy): The Policy to calculate the loss for.
+        model (ModelV2): The Model to calculate the loss for.
+        dist_class (Type[ActionDistribution]: The action distr. class.
+        train_batch (SampleBatch): The training data.
 
-
-def central_critic_ppo_loss(policy, model, dist_class, train_batch):
+    Returns:
+        Union[TensorType, List[TensorType]]: A single loss tensor or a list
+            of loss tensors.
+    """
     CentralizedValueMixin.__init__(policy)
     func = ppo_surrogate_loss
 
@@ -83,4 +90,3 @@ MAPPOTrainer = PPOTrainer.with_updates(
     default_policy=None,
     get_policy_class=get_policy_class_mappo,
 )
-

@@ -23,6 +23,7 @@
 import yaml
 import os
 import collections
+from typing import Dict
 
 algo_type_dict = {
     "IL": ["a2c", "a3c", "pg", "ddpg", "trpo", "ppo"],
@@ -31,78 +32,76 @@ algo_type_dict = {
 }
 
 
-def merge_default_and_customized_and_check(default_dict, customized_dict):
-    if customized_dict and isinstance(customized_dict, dict):
-        for k in customized_dict.keys():
-            if k not in default_dict:
-                raise ValueError("{} illegal, not in default config".format(k))
-            else:  # update
-                default_dict[k] = customized_dict[k]
+def dict_update(target_dict: Dict, new_dict: Dict, check: bool = False) -> Dict:
+    """
+    update target dict with new dict
+    Args:
+        :param target_dict: name of the environment
+        :param new_dict: name of the algorithm
+        :param check: whether a new key is allowed to add into target_dict
 
-    return default_dict
+    Returns:
+        Dict: updated dict
+    """
+    if new_dict and isinstance(new_dict, dict):
+        for key, value in new_dict.items():
+            if check:
+                if key not in target_dict:
+                    raise ValueError("{} illegal, not in default config".format(key))
+                else:  # update
+                    target_dict[key] = value
+            if key in target_dict:
+                target_dict[key] = value
+
+    return target_dict
 
 
-def merge_default_and_customized(default_dict, customized_dict):
-    if customized_dict and isinstance(customized_dict, dict):
-        for key, value in customized_dict.items():
-            if key in default_dict:
-                default_dict[key] = value
+def recursive_dict_update(target_dict: Dict, new_dict: Dict) -> Dict:
+    """
+    recursively update target dict with new dict
+    Args:
+        :param target_dict: name of the environment
+        :param new_dict: name of the algorithm
 
-    return default_dict
+    Returns:
+        Dict: updated dict
+    """
+    for k, v in new_dict.items():
+        if isinstance(v, collections.Mapping):
+            target_dict[k] = recursive_dict_update(target_dict.get(k, {}), v)
+        else:
+            target_dict[k] = v
+    return target_dict
 
 
-def check_algo_type(algo_name):
+def check_algo_type(algo_name: str) -> str:
+    """
+    check algorithm learning style from 1. il, 2. cc, 3. vd
+    Args:
+        :param algo_name: name of the algorithm
+
+    Returns:
+        str: learning style from 1. il, 2. cc, 3. vd
+    """
     for key in algo_type_dict.keys():
         if algo_name in algo_type_dict[key]:
             return key
     raise ValueError("{} current not supported".format(algo_name))
 
 
-def get_model_config(arg_name):
-    with open(os.path.join(os.path.dirname(__file__), "models/configs", "{}.yaml".format(arg_name)),
+def get_model_config(model_arch: str) -> Dict:
+    """
+    read model config
+    Args:
+        :param model_arch: type of the model
+
+    Returns:
+        Dict: model config dict
+    """
+    with open(os.path.join(os.path.dirname(__file__), "models/configs", "{}.yaml".format(model_arch)),
               "r") as f:
         try:
             config_dict = yaml.load(f, Loader=yaml.FullLoader)
         except yaml.YAMLError as exc:
-            assert False, "{}.yaml error: {}".format(arg_name, exc)
+            assert False, "{}.yaml error: {}".format(model_arch, exc)
     return config_dict
-
-
-def get_config(params, arg_name, info=None):
-    config_name = None
-
-    for _i, _v in enumerate(params):
-        if _v.split("=")[0] == arg_name:
-            config_name = _v.split("=")[1]
-            del params[_i]
-            break
-
-    if "algo" in arg_name:
-        if "--finetuned" in params:
-            path = "algos/hyperparams/finetuned/{}".format(info["env"])
-        else:
-            path = "algos/hyperparams/common"
-
-    elif "env" in arg_name:
-        path = "../envs/base_env/config"
-
-    else:
-        raise ValueError()
-
-    if config_name is not None:
-        with open(os.path.join(os.path.dirname(__file__), path, "{}.yaml".format(config_name)),
-                  "r") as f:
-            try:
-                config_dict = yaml.load(f, Loader=yaml.FullLoader)
-            except yaml.YAMLError as exc:
-                assert False, "{}.yaml error: {}".format(config_name, exc)
-        return config_dict
-
-
-def recursive_dict_update(d, u):
-    for k, v in u.items():
-        if isinstance(v, collections.Mapping):
-            d[k] = recursive_dict_update(d.get(k, {}), v)
-        else:
-            d[k] = v
-    return d
