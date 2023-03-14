@@ -22,7 +22,7 @@
 
 # MAA2C parameters
 
-# Detailed explanation for each hyper parameter can be found in ray/rllib/agents/a3c/a2c.py
+# Detailed explanation for each hyper parameter can be found in ray/rllib/agents/a3c/ia2c.py
 
 algo_args:
   use_gae: True

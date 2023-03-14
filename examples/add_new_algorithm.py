@@ -61,7 +61,7 @@ IPGTrainer = PGTrainer.with_updates(
 )
 
 
-def run_pg(model_class, config_dict, common_config, env_dict, stop, restore):
+def run_ipg(model_class, config_dict, common_config, env_dict, stop, restore):
     ModelCatalog.register_custom_model(
         "Base_Model", model_class)
 
@@ -123,14 +123,14 @@ if __name__ == '__main__':
     env = marl.make_env(environment_name="mpe", map_name="simple_spread", force_coop=True)
 
     # register new algorithm
-    marl.algos.register_algo(algo_name="pg", style="il", script=run_pg)
+    marl.algos.register_algo(algo_name="ipg", style="il", script=run_ipg)
 
     # initialize algorithm
-    pg = marl.algos.pg(hyperparam_source="mpe")
+    ipg = marl.algos.ipg(hyperparam_source="mpe")
 
     # build agent model based on env + algorithms + user preference if checked available
-    model = marl.build_model(env, pg, {"core_arch": "mlp", "encode_layer": "128-256"})
+    model = marl.build_model(env, ipg, {"core_arch": "mlp", "encode_layer": "128-256"})
 
     # start learning + extra experiment settings if needed. remember to check ray.yaml before use
-    pg.fit(env, model, stop={'episode_reward_mean': 2000, 'timesteps_total': 10000000}, local_mode=True, num_gpus=1,
+    ipg.fit(env, model, stop={'episode_reward_mean': 2000, 'timesteps_total': 10000000}, local_mode=True, num_gpus=1,
              num_workers=0, share_policy='all', checkpoint_freq=10)

@@ -26,7 +26,7 @@ import collections
 from typing import Dict
 
 algo_type_dict = {
-    "IL": ["a2c", "a3c", "pg", "ddpg", "trpo", "ppo"],
+    "IL": ["ia2c", "iddpg", "itrpo", "ippo"],
     "VD": ["vda2c", "vdppo", "facmac", "iql", "vdn", "qmix"],
     "CC": ["maa2c", "maddpg", "mappo", "matrpo", "happo", "hatrpo", "coma"]
 }

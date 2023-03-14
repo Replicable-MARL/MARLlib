@@ -20,16 +20,15 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from ray.rllib.policy.sample_batch import SampleBatch
 import numpy as np
+from ray.rllib.policy.sample_batch import SampleBatch
 from ray.rllib.evaluation.postprocessing import discount_cumsum, Postprocessing, compute_gae_for_sample_batch
 from marllib.marl.algos.utils.valuenorm import ValueNorm
 from marllib.marl.algos.utils.centralized_critic import convert_to_torch_tensor
 from marllib.marl.algos.utils.setup_utils import get_agent_num
 from marllib.marl.algos.utils.centralized_Q import get_dim
-from ray.rllib.utils.framework import try_import_tf, try_import_torch
+from ray.rllib.utils.framework import try_import_torch
 
-tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
 
 """

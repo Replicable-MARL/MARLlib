@@ -28,19 +28,35 @@ from marllib.marl.algos.core.CC.coma import COMATrainer
 from marllib.marl.algos.utils.setup_utils import AlgVar
 from marllib.marl.algos.utils.log_dir_util import available_local_dir
 import json
+from typing import Any, Dict
+from ray.tune.analysis import ExperimentAnalysis
 
 
-def run_coma(model_class, config_dict, common_config, env_dict, stop, restore):
+def run_coma(model: Any, exp: Dict, run: Dict, env: Dict,
+            stop: Dict, restore: Dict) -> ExperimentAnalysis:
+    """ This script runs the Counterfactual Multi-Agent Policy Gradients (COMA) algorithm using Ray RLlib.
+    Args:
+        :params model (str): The name of the model class to register.
+        :params exp (dict): A dictionary containing all the learning settings.
+        :params run (dict): A dictionary containing all the environment-related settings.
+        :params env (dict): A dictionary specifying the condition for stopping the training.
+        :params restore (bool): A flag indicating whether to restore training/rendering or not.
 
+    Returns:
+        ExperimentAnalysis: Object for experiment analysis.
+
+    Raises:
+        TuneError: Any trials failed and `raise_on_failed_trial` is True.
+    """
     ModelCatalog.register_custom_model(
-        "Centralized_Critic_Model", model_class)
+        "Centralized_Critic_Model", model)
 
-    _param = AlgVar(config_dict)
+    _param = AlgVar(exp)
 
-    train_batch_size = _param["batch_episode"] * env_dict["episode_limit"]
-    if "fixed_batch_timesteps" in config_dict:
-        train_batch_size = config_dict["fixed_batch_timesteps"]
-    episode_limit = env_dict["episode_limit"]
+    train_batch_size = _param["batch_episode"] * env["episode_limit"]
+    if "fixed_batch_timesteps" in exp:
+        train_batch_size = exp["fixed_batch_timesteps"]
+    episode_limit = env["episode_limit"]
 
     batch_mode = _param["batch_mode"]
     lr = _param["lr"]
@@ -60,23 +76,23 @@ def run_coma(model_class, config_dict, common_config, env_dict, stop, restore):
         "model": {
             "custom_model": "Centralized_Critic_Model",
             "max_seq_len": episode_limit,
-            "custom_model_config": merge_dicts(config_dict, env_dict),
+            "custom_model_config": merge_dicts(exp, env),
         },
     }
 
-    config.update(common_config)
+    config.update(run)
 
-    algorithm = config_dict["algorithm"]
-    map_name = config_dict["env_args"]["map_name"]
-    arch = config_dict["model_arch_args"]["core_arch"]
+    algorithm = exp["algorithm"]
+    map_name = exp["env_args"]["map_name"]
+    arch = exp["model_arch_args"]["core_arch"]
     RUNNING_NAME = '_'.join([algorithm, arch, map_name])
 
     if restore is not None:
         with open(restore["params_path"], 'r') as JSON:
-            raw_config = json.load(JSON)
-            raw_config = raw_config["model"]["custom_model_config"]['model_arch_args']
-            check_config = config["model"]["custom_model_config"]['model_arch_args']
-            if check_config != raw_config:
+            raw_exp = json.load(JSON)
+            raw_exp = raw_exp["model"]["custom_model_config"]['model_arch_args']
+            check_exp = exp["model"]["custom_model_config"]['model_arch_args']
+            if check_exp != raw_exp:
                 raise ValueError("is not using the params required by the checkpoint model")
         model_path = restore["model_path"]
     else:
@@ -84,13 +100,13 @@ def run_coma(model_class, config_dict, common_config, env_dict, stop, restore):
 
     results = tune.run(COMATrainer,
                        name=RUNNING_NAME,
-                       checkpoint_at_end=config_dict['checkpoint_end'],
-                       checkpoint_freq=config_dict['checkpoint_freq'],
+                       checkpoint_at_end=exp['checkpoint_end'],
+                       checkpoint_freq=exp['checkpoint_freq'],
                        restore=model_path,
                        stop=stop,
                        config=config,
                        verbose=1,
                        progress_reporter=CLIReporter(),
-                       local_dir=available_local_dir if config_dict["local_dir"] == "" else config_dict["local_dir"])
+                       local_dir=available_local_dir if exp["local_dir"] == "" else exp["local_dir"])
 
     return results

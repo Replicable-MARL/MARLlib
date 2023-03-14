@@ -20,11 +20,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from ray.rllib.utils.framework import try_import_torch
 from ray.rllib.agents.a3c.a3c_torch_policy import A3CTorchPolicy
 from ray.rllib.agents.a3c.a2c import A2C_DEFAULT_CONFIG as A2C_CONFIG, A2CTrainer
-
-torch, nn = try_import_torch()
 
 ###########
 ### A2C ###

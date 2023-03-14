@@ -29,7 +29,7 @@ class TestMPEEnv(unittest.TestCase):
     def test_rnn_simple_case(self):
         for algo_name in dir(marl.algos):
             if "_" not in algo_name:
-                if algo_name in ["ddpg", "maddpg", "facmac"]:
+                if algo_name in ["iddpg", "maddpg", "facmac"]:
                     env = marl.make_env(environment_name="mpe", map_name="simple_spread", force_coop=True,
                                         continuous_actions=True)
                     algo = getattr(marl.algos, algo_name)(hyperparam_source="test")

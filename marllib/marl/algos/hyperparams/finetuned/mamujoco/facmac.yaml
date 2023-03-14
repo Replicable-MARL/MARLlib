@@ -22,7 +22,7 @@
 
 # FACMAC parameters
 
-# Detailed explanation for each hyper parameter can be found in ray/rllib/agents/ddpg/ddpg.py
+# Detailed explanation for each hyper parameter can be found in ray/rllib/agents/ddpg/iddpg.py
 
 algo_args:
   batch_episode:  10

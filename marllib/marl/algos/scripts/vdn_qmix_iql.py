@@ -29,26 +29,34 @@ from marllib.marl.algos.core.VD.iql_vdn_qmix import JointQTrainer
 from marllib.marl.algos.utils.setup_utils import AlgVar
 from marllib.marl.algos.utils.log_dir_util import available_local_dir
 import json
-
-"""
-This version is based on but different from that rllib built-in qmix_policy
-1. the replay buffer is now standard localreplaybuffer instead of simplereplaybuffer
-2. the loss function is modified to be align with pymarl
-3. provide reward standardize option
-4. provide model optimizer option
-5. follow DQN execution plan
-"""
+from typing import Any, Dict
+from ray.tune.analysis import ExperimentAnalysis
 
 
-def run_joint_q(model_class, config_dict, common_config, env_dict, stop, restore):
+def run_joint_q(model: Any, exp: Dict, run: Dict, env: Dict,
+                stop: Dict, restore: Dict) -> ExperimentAnalysis:
+    """ This script runs the IQL, VDN, and QMIX algorithm using Ray RLlib.
+    Args:
+        :params model (str): The name of the model class to register.
+        :params exp (dict): A dictionary containing all the learning settings.
+        :params run (dict): A dictionary containing all the environment-related settings.
+        :params env (dict): A dictionary specifying the condition for stopping the training.
+        :params restore (bool): A flag indicating whether to restore training/rendering or not.
+
+    Returns:
+        ExperimentAnalysis: Object for experiment analysis.
+
+    Raises:
+        TuneError: Any trials failed and `raise_on_failed_trial` is True.
+    """
 
     ModelCatalog.register_custom_model(
-        "Joint_Q_Model", model_class)
+        "Joint_Q_Model", model)
 
-    _param = AlgVar(config_dict)
+    _param = AlgVar(exp)
 
-    algorithm = config_dict["algorithm"]
-    episode_limit = env_dict["episode_limit"]
+    algorithm = exp["algorithm"]
+    episode_limit = env["episode_limit"]
     train_batch_episode = _param["batch_episode"]
     lr = _param["lr"]
     buffer_size = _param["buffer_size"]
@@ -67,11 +75,11 @@ def run_joint_q(model_class, config_dict, common_config, env_dict, stop, restore
     config = {
         "model": {
             "max_seq_len": episode_limit,  # dynamic
-            "custom_model_config": merge_dicts(config_dict, env_dict),
+            "custom_model_config": merge_dicts(exp, env),
         },
     }
 
-    config.update(common_config)
+    config.update(run)
 
     JointQ_Config.update(
         {
@@ -99,8 +107,8 @@ def run_joint_q(model_class, config_dict, common_config, env_dict, stop, restore
         default_config=JointQ_Config
     )
 
-    map_name = config_dict["env_args"]["map_name"]
-    arch = config_dict["model_arch_args"]["core_arch"]
+    map_name = exp["env_args"]["map_name"]
+    arch = exp["model_arch_args"]["core_arch"]
     RUNNING_NAME = '_'.join([algorithm, arch, map_name])
 
     if restore is not None:
@@ -116,13 +124,13 @@ def run_joint_q(model_class, config_dict, common_config, env_dict, stop, restore
 
     results = tune.run(JQTrainer,
                        name=RUNNING_NAME,
-                       checkpoint_at_end=config_dict['checkpoint_end'],
-                       checkpoint_freq=config_dict['checkpoint_freq'],
+                       checkpoint_at_end=exp['checkpoint_end'],
+                       checkpoint_freq=exp['checkpoint_freq'],
                        restore=model_path,
                        stop=stop,
                        config=config,
                        verbose=1,
                        progress_reporter=CLIReporter(),
-                       local_dir=available_local_dir if config_dict["local_dir"] == "" else config_dict["local_dir"])
+                       local_dir=available_local_dir if exp["local_dir"] == "" else exp["local_dir"])
 
     return results

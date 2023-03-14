@@ -21,8 +21,9 @@
 # SOFTWARE.
 
 import numpy as np
-import torch
-import torch.nn as nn
+from ray.rllib.utils.framework import try_import_torch
+
+torch, nn = try_import_torch()
 
 
 class ValueNorm(nn.Module):

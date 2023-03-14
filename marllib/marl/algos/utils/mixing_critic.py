@@ -20,8 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from ray.rllib.evaluation.postprocessing import compute_gae_for_sample_batch, \
-    Postprocessing, compute_advantages
+from ray.rllib.evaluation.postprocessing import compute_advantages
 from ray.rllib.utils.framework import try_import_torch
 from ray.rllib.utils.torch_ops import convert_to_torch_tensor
 from copy import deepcopy

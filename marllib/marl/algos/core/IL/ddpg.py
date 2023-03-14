@@ -31,10 +31,10 @@ from ray.rllib.models.action_dist import ActionDistribution
 from ray.rllib.models.torch.torch_action_dist import TorchDeterministic, TorchDirichlet
 from ray.rllib.models.tf.tf_action_dist import Deterministic
 from ray.rllib.policy.policy import Policy
-from ray.rllib.models import ModelCatalog, MODEL_DEFAULTS
+from ray.rllib.models import MODEL_DEFAULTS
 from ray.rllib.utils.spaces.simplex import Simplex
 from ray.rllib.utils.torch_ops import huber_loss, l2_loss, sequence_mask
-from ray.rllib.utils.typing import TrainerConfigDict, TensorType, ModelInputDict
+from ray.rllib.utils.typing import TrainerConfigDict, ModelInputDict
 from ray.rllib.models.modelv2 import ModelV2
 from ray.rllib.agents.ddpg.ddpg_torch_model import DDPGTorchModel
 from ray.rllib.policy.view_requirement import ViewRequirement
@@ -50,6 +50,17 @@ torch, nn = try_import_torch()
 
 def ddpg_actor_critic_loss(policy: Policy, model: ModelV2, _,
                            train_batch: SampleBatch) -> TensorType:
+    """Constructs the loss for DDPG Objective.
+    Args:
+        policy (Policy): The Policy to calculate the loss for.
+        model (ModelV2): The Model to calculate the loss for.
+        dist_class (Type[ActionDistribution]: The action distr. class.
+        train_batch (SampleBatch): The training data.
+
+    Returns:
+        Union[TensorType, List[TensorType]]: A single loss tensor or a list
+            of loss tensors.
+    """
     target_model = policy.target_models[model]
 
     i = 0
@@ -83,21 +94,14 @@ def ddpg_actor_critic_loss(policy: Policy, model: ModelV2, _,
         "prev_rewards": train_batch[SampleBatch.REWARDS],
     }
 
-    # model_out_tp1, state_in_tp1 = model(
-    #     input_dict_next, state_batches, seq_lens)
-    # states_in_tp1 = model.select_state(state_in_tp1, ["policy", "q", "twin_q"])
-
     target_model_out_tp1, target_state_in_tp1 = target_model(
         input_dict_next, state_batches, seq_lens)
     target_states_in_tp1 = target_model.select_state(target_state_in_tp1,
                                                      ["policy", "q", "twin_q"])
 
     # Policy network evaluation.
-    # prev_update_ops = set(tf1.get_collection(tf.GraphKeys.UPDATE_OPS))
     policy_t = model.get_policy_output(
         model_out_t, states_in_t["policy"], seq_lens)[0]
-    # policy_batchnorm_update_ops = list(
-    #    set(tf1.get_collection(tf.GraphKeys.UPDATE_OPS)) - prev_update_ops)
 
     policy_tp1 = target_model.get_policy_output(
         target_model_out_tp1, target_states_in_tp1["policy"], seq_lens)[0]
@@ -127,7 +131,6 @@ def ddpg_actor_critic_loss(policy: Policy, model: ModelV2, _,
         policy_tp1_smoothed = policy_tp1
 
     # Q-net(s) evaluation.
-    # prev_update_ops = set(tf1.get_collection(tf.GraphKeys.UPDATE_OPS))
     # Q-values for given actions & observations in given current
     q_t = model.get_q_values(
         model_out_t, states_in_t["q"], seq_lens, train_batch[SampleBatch.ACTIONS])[0]
@@ -140,8 +143,6 @@ def ddpg_actor_critic_loss(policy: Policy, model: ModelV2, _,
     if twin_q:
         twin_q_t = model.get_twin_q_values(model_out_t, states_in_t["twin_q"], seq_lens,
                                            train_batch[SampleBatch.ACTIONS])[0]
-    # q_batchnorm_update_ops = list(
-    #     set(tf1.get_collection(tf.GraphKeys.UPDATE_OPS)) - prev_update_ops)
 
     # Target q-net(s) evaluation.
     q_tp1 = target_model.get_q_values(

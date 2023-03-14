@@ -29,7 +29,6 @@ from ray.rllib.utils.annotations import override
 from functools import reduce
 from torch.optim import Adam
 from torch.nn.utils import parameters_to_vector, vector_to_parameters
-from marllib.marl.algos.utils.distributions import init
 from marllib.marl.models.zoo.encoder.cc_encoder import CentralizedEncoder
 
 tf1, tf, tfv = try_import_tf()
@@ -71,6 +70,11 @@ class CentralizedCriticRNN(BaseRNN):
         if self.custom_config['algorithm'].lower() in ['happo']:
             # set actor
             def init_(m, value):
+                def init(module, weight_init, bias_init, gain=1):
+                    weight_init(module.weight.data, gain=gain)
+                    bias_init(module.bias.data)
+                    return module
+
                 return init(m, nn.init.orthogonal_, lambda x: nn.init.constant_(x, 0), value)
 
             self.p_branch = init_(nn.Linear(self.hidden_state_size, num_outputs), value=self.custom_config['gain'])
@@ -235,4 +239,3 @@ class CentralizedCriticRNN(BaseRNN):
         adam_info['v'] = v_v
 
         return step
-

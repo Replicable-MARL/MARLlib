@@ -29,7 +29,7 @@ class TestAlgo(unittest.TestCase):
     def test_cooperative_scenarios(self):
         for algo_name in dir(marl.algos):
             if "_" not in algo_name:
-                if algo_name in ["ddpg", "maddpg", "facmac"]:
+                if algo_name in ["iddpg", "maddpg", "facmac"]:
                     env = marl.make_env(environment_name="mamujoco", map_name="2AgentAnt")
                 elif algo_name in ["happo", "hatrpo"]:
                     continue

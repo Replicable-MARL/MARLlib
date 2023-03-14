@@ -30,7 +30,7 @@ class TestMAgentEnv(unittest.TestCase):
         for algo_name in dir(marl.algos):
             if algo_name[:2] != "__" and algo_name not in ["vdppo", "vda2c", "facmac", "qmix", "vdn", "happo",
                                                            "hatrpo"]:
-                if algo_name in ["ddpg", "maddpg", "facmac"]:
+                if algo_name in ["iddpg", "maddpg", "facmac"]:
                     env = marl.make_env(environment_name="mpe", map_name="simple_crypto", continuous_actions=True)
                 elif algo_name in ["iql"]:
                     continue

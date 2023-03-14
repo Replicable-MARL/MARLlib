@@ -20,11 +20,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from ray.rllib.utils.framework import try_import_torch
 from ray.rllib.agents.ppo.ppo_torch_policy import PPOTorchPolicy
 from ray.rllib.agents.ppo.ppo import PPOTrainer as PPOTrainer, DEFAULT_CONFIG as PPO_CONFIG
-
-torch, nn = try_import_torch()
 
 ###########
 ### PPO ###

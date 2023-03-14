@@ -30,7 +30,6 @@ from ray.rllib.utils.framework import try_import_torch
 from ray.rllib.utils.typing import TensorType
 from marllib.marl.models.zoo.mlp.base_mlp import BaseMLP
 from marllib.marl.models.zoo.encoder.cc_encoder import CentralizedEncoder
-from marllib.marl.algos.utils.distributions import init
 from torch.optim import Adam
 
 torch, nn = try_import_torch()
@@ -84,6 +83,12 @@ class CentralizedCriticMLP(BaseMLP):
         if self.custom_config['algorithm'].lower() in ['happo']:
             # set actor
             def init_(m, value):
+
+                def init(module, weight_init, bias_init, gain=1):
+                    weight_init(module.weight.data, gain=gain)
+                    bias_init(module.bias.data)
+                    return module
+
                 return init(m, nn.init.orthogonal_, lambda x: nn.init.constant_(x, 0), value)
 
             self.cc_vf_branch = nn.Sequential(

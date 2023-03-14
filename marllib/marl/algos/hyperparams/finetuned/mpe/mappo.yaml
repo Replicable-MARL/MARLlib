@@ -22,7 +22,7 @@
 
 # MAPPO parameters
 
-# Detailed explanation for each hyper parameter can be found in ray/rllib/agents/ppo/ppo.py
+# Detailed explanation for each hyper parameter can be found in ray/rllib/agents/ppo/ippo.py
 
 algo_args:
   use_gae: True

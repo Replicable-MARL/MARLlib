@@ -28,12 +28,11 @@ from marllib.envs.base_env import ENV_REGISTRY
 from marllib.envs.global_reward_env import COOP_ENV_REGISTRY
 from marllib.marl.models import BaseRNN, BaseMLP, CentralizedCriticRNN, CentralizedCriticMLP, ValueDecompRNN, \
     ValueDecompMLP, JointQMLP, JointQRNN, DDPGSeriesRNN, DDPGSeriesMLP
-from ray.rllib.models.torch.torch_modelv2 import TorchModelV2
 from ray.rllib.env.multi_agent_env import MultiAgentEnv
 from ray.tune import register_env
 from copy import deepcopy
 from tabulate import tabulate
-from typing import Any, Dict, List, Optional, Sequence, Tuple, Type, Union
+from typing import Any, Dict, Tuple
 import yaml
 import os
 import sys
@@ -169,7 +168,7 @@ def build_model(
         Tuple[Any, Dict]: model class & model configuration
     """
 
-    if algorithm.name in ["ddpg", "facmac", "maddpg"]:
+    if algorithm.name in ["iddpg", "facmac", "maddpg"]:
         if model_preference["core_arch"] in ["gru", "lstm"]:
             model_class = DDPGSeriesRNN
         else:

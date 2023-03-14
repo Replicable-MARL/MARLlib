@@ -20,10 +20,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import re
 from ray.rllib.agents.ppo.ppo_torch_policy import KLCoeffMixin
 from ray.rllib.policy.torch_policy import LearningRateSchedule, EntropyCoeffSchedule
-import re
-import torch
+from ray.rllib.utils.framework import try_import_torch
+
+torch, nn = try_import_torch()
 
 
 def get_device():

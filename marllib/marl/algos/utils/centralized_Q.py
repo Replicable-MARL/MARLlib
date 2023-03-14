@@ -20,11 +20,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import numpy as np
 from ray.rllib.utils.framework import try_import_torch
 from ray.rllib.evaluation.postprocessing import adjust_nstep
 from ray.rllib.policy.policy import Policy
 from ray.rllib.policy.sample_batch import SampleBatch
-import numpy as np
 from ray.rllib.utils.torch_ops import convert_to_torch_tensor
 from ray.rllib.utils.numpy import convert_to_numpy
 from ray.rllib.policy.rnn_sequencing import pad_batch_to_sequences_of_same_size

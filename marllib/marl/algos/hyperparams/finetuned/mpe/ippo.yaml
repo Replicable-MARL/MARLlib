@@ -20,15 +20,20 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# A2C parameters
+# PPO parameters
 
-# Detailed explanation for each hyper parameter can be found in ray/rllib/agents/a3c/a2c.py
+# Detailed explanation for each hyper parameter can be found in ray/rllib/agents/ppo/ippo.py
 
 algo_args:
   use_gae: True
   lambda: 1.0
+  kl_coeff: 0.2
+  batch_episode: 128
+  num_sgd_iter: 10
   vf_loss_coeff: 1.0
-  batch_episode:  2
-  batch_mode: "complete_episodes"
   lr: 0.0005
   entropy_coeff: 0.01
+  clip_param: 0.3
+  vf_clip_param: 20.0
+  batch_mode: "complete_episodes"
+

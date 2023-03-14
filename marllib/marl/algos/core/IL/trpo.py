@@ -42,15 +42,12 @@ from ray.rllib.policy.torch_policy import LearningRateSchedule, EntropyCoeffSche
 from marllib.marl.algos.utils.setup_utils import setup_torch_mixins
 from marllib.marl.algos.utils.centralized_critic_hetero import trpo_post_process
 
-
 from marllib.marl.algos.utils.trust_regions import TrustRegionUpdator
 
 from ray.rllib.examples.centralized_critic import CentralizedValueMixin
 from icecream import ic
 
-tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
-
 
 logger = logging.getLogger(__name__)
 
@@ -106,13 +103,11 @@ def trpo_loss_fn(
 
     # Compute a value function loss.
 
-    # policy_loss = reduce_mean_valid(logp_ratio * advantages)
-
     prev_action_dist = dist_class(train_batch[SampleBatch.ACTION_DIST_INPUTS], model)
     action_kl = prev_action_dist.kl(curr_action_dist)
 
     if policy.config["use_critic"]:
-        prev_value_fn_out = train_batch[SampleBatch.VF_PREDS] #
+        prev_value_fn_out = train_batch[SampleBatch.VF_PREDS]  #
         value_fn_out = model.value_function()  # same as values
         vf_loss1 = torch.pow(
             value_fn_out - train_batch[Postprocessing.VALUE_TARGETS], 2.0)
@@ -167,16 +162,17 @@ def apply_gradients(policy, gradients) -> None:
 
 
 TRPOTorchPolicy = PPOTorchPolicy.with_updates(
-        name="TRPO-TorchPolicy",
-        get_default_config=lambda: PPO_CONFIG,
-        postprocess_fn=trpo_post_process,
-        loss_fn=trpo_loss_fn,
-        before_init=setup_torch_mixins,
-        apply_gradients_fn=apply_gradients,
-        mixins=[
-            EntropyCoeffSchedule, KLCoeffMixin,
-            CentralizedValueMixin, LearningRateSchedule,
-        ])
+    name="TRPO-TorchPolicy",
+    get_default_config=lambda: PPO_CONFIG,
+    postprocess_fn=trpo_post_process,
+    loss_fn=trpo_loss_fn,
+    before_init=setup_torch_mixins,
+    apply_gradients_fn=apply_gradients,
+    mixins=[
+        EntropyCoeffSchedule, KLCoeffMixin,
+        CentralizedValueMixin, LearningRateSchedule,
+    ])
+
 
 # TRPOTorchPolicy.apply_gradients = apply_gradients
 

@@ -29,7 +29,7 @@ class TestMAgentEnv(unittest.TestCase):
     def test_cnn_encoder(self):
         for algo_name in dir(marl.algos):
             if "_" not in algo_name:
-                if algo_name not in ["ddpg", "maddpg", "facmac", "happo", "hatrpo"]:
+                if algo_name not in ["iddpg", "maddpg", "facmac", "happo", "hatrpo"]:
                     algo = getattr(marl.algos, algo_name)(hyperparam_source="test")
                     for core_arch in ["mlp", "gru"]:
                         env = marl.make_env(environment_name="football", map_name="academy_pass_and_shoot_with_keeper",
