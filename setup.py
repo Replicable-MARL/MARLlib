@@ -4,7 +4,7 @@ import pathlib
 
 lib_folder = os.path.dirname(os.path.realpath(__file__))
 requirement_path = lib_folder + '/requirements.txt'
-install_requires = [] # Here we'll get: ["gunicorn", "docutils>=0.3", "lxml==0.5a7"]
+install_requires = []  # Here we'll get: ["gunicorn", "docutils>=0.3", "lxml==0.5a7"]
 if os.path.isfile(requirement_path):
     with open(requirement_path) as f:
         install_requires = f.read().splitlines()
@@ -15,12 +15,9 @@ HERE = pathlib.Path(__file__).parent
 # The text of the README file
 README = (HERE / "README.md").read_text()
 
-with open("VERSION.txt", "r") as file_handler:
-    __version__ = file_handler.read().strip()
-
 setup(
     name="marllib",
-    version=__version__,
+    version="1.0.1",
     long_description=README,
     long_description_content_type="text/markdown",
     packages=find_packages(exclude=["examples", "docs", "tests"]),
