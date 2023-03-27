@@ -1,4 +1,4 @@
-MARLlib: The MARL Extension for RLlib
+MARLlib: A Scalable and Efficient Multi-agent Reinforcement Learning Library
 ========================================
 
 .. figure:: images/logo1.png

@@ -171,7 +171,7 @@ Official Link: https://github.com/google-research/football
    * - ``Action Space``
      - Discrete
    * - ``Observation Space Dim``
-     - 3D
+     - 2D
    * - ``Action Mask``
      - No
    * - ``Global State``
@@ -373,13 +373,13 @@ Our version: https://github.com/Farama-Foundation/PettingZoo/tree/master/petting
    * - ``Action Space``
      - Discrete
    * - ``Observation Space Dim``
-     - 3D
+     - 2D
    * - ``Action Mask``
      - No
    * - ``Global State``
      - MiniMap
    * - ``Global State Space Dim``
-     - 3D
+     - 2D
    * - ``Reward``
      - Dense
    * - ``Agent-Env Interact Mode``
@@ -421,7 +421,7 @@ Official Link: https://github.com/MultiAgentLearning/playground
    * - ``Action Space``
      - Discrete
    * - ``Observation Space Dim``
-     - 3D
+     - 2D
    * - ``Action Mask``
      - No
    * - ``Global State``

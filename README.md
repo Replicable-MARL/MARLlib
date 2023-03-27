@@ -2,7 +2,7 @@
 <img src=docs/source/images/logo1.png width=65% />
 </div>
 
-<h1 align="center"> MARLlib: An Extensive Multi-agent Reinforcement Learning Library </h1>
+<h1 align="center"> MARLlib: A Scalable and Efficient Multi-agent Reinforcement Learning Library </h1>
 
 
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)]()
@@ -88,7 +88,7 @@ Here we provide a table for the comparison of MARLlib and existing work.
 ## Installation
 
 > __Note__:
-> MARLlib supports Linux only.
+> Currently MARLlib supports Linux only.
 
 ### Step-by-step  (recommended)
 
