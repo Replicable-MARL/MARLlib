@@ -311,12 +311,19 @@ Try MPE + MAPPO examples on Google Colaboratory!
 
 More tutorial documentations are available [here](https://marllib.readthedocs.io/).
 
+## Awesome List
+
+A collection of research and review papers of multi-agent reinforcement learning (MARL) is available [here](https://marllib.readthedocs.io/en/latest/resources/awesome.html). The papers have been organized based on their publication date and their evaluation of the corresponding environments.
+
 ## Community
 
 |  Channel   | Link |
 | :----------- | :----------- |
 | Issues | [GitHub Issues](https://github.com/Replicable-MARL/MARLlib/issues) |
 
+## Roadmap
+
+The roadmap to the future release is available in [ROADMAP.md](https://github.com/Replicable-MARL/MARLlib/blob/main/ROADMAP.md).
 
 ## Contributing
 
