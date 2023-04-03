@@ -26,16 +26,16 @@ from ray.rllib.models.torch.torch_modelv2 import TorchModelV2
 from ray.rllib.utils.annotations import override
 from ray.rllib.utils.framework import try_import_tf, try_import_torch, \
     TensorType
-from ray.rllib.models.torch.misc import SlimFC, SlimConv2d, normc_initializer
+from ray.rllib.models.torch.misc import SlimFC, normc_initializer
 from marllib.marl.models.zoo.mixer import QMixer, VDNMixer
+from marllib.marl.models.zoo.encoder.base_encoder import BaseEncoder
 
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
 
-
 class DDPGSeriesMLP(TorchModelV2, nn.Module):
     """
-    DDOG/MADDPG/FACMAC agent arch in one model
+    IDDPG/MADDPG/FACMAC agent arch in one model
     """
 
     def __init__(
@@ -51,88 +51,44 @@ class DDPGSeriesMLP(TorchModelV2, nn.Module):
         super().__init__(obs_space, action_space, num_outputs, model_config,
                          name)
 
-        # judge the model arch
         self.custom_config = model_config["custom_model_config"]
         self.full_obs_space = getattr(obs_space, "original_space", obs_space)
         self.n_agents = self.custom_config["num_agents"]
         self.activation = model_config.get("fcnet_activation")
 
-        if self.custom_config["model_arch_args"]["core_arch"] != "mlp":
-            raise ValueError()
         # encoder
-        layers = []
-        if "fc_layer" in self.custom_config["model_arch_args"]:
-            if "encode_layer" in self.custom_config["model_arch_args"]:
-                encode_layer = self.custom_config["model_arch_args"]["encode_layer"]
-                encoder_layer_dim = encode_layer.split("-")
-                encoder_layer_dim = [int(i) for i in encoder_layer_dim]
-            else:  # default config
-                encoder_layer_dim = []
-                for i in range(self.custom_config["model_arch_args"]["fc_layer"]):
-                    out_dim = self.custom_config["model_arch_args"]["out_dim_fc_{}".format(i)]
-                    encoder_layer_dim.append(out_dim)
-
-            self.encoder_layer_dim = encoder_layer_dim
-            self.obs_size = self.full_obs_space["obs"].shape[0]
-            input_dim = self.obs_size
-            for out_dim in self.encoder_layer_dim:
-                layers.append(
-                    SlimFC(in_size=input_dim,
-                           out_size=out_dim,
-                           initializer=normc_initializer(1.0),
-                           activation_fn=self.activation))
-                input_dim = out_dim
-        elif "conv_layer" in self.custom_config["model_arch_args"]:
-            self.obs_size = self.full_obs_space['obs'].shape
-            input_dim = self.obs_size[2]
-            for i in range(self.custom_config["model_arch_args"]["conv_layer"]):
-                layers.append(
-                    SlimConv2d(
-                        in_channels=input_dim,
-                        out_channels=self.custom_config["model_arch_args"]["out_channel_layer_{}".format(i)],
-                        kernel=self.custom_config["model_arch_args"]["kernel_size_layer_{}".format(i)],
-                        stride=self.custom_config["model_arch_args"]["stride_layer_{}".format(i)],
-                        padding=self.custom_config["model_arch_args"]["padding_layer_{}".format(i)],
-                        activation_fn=self.activation
-                    )
-                )
-                pool_f = nn.MaxPool2d(
-                    kernel_size=self.custom_config["model_arch_args"]["pool_size_layer_{}".format(i)])
-                layers.append(pool_f)
-
-                input_dim = self.custom_config["model_arch_args"]["out_channel_layer_{}".format(i)]
-
-        else:
-            raise ValueError()
-
-        self.encoder = nn.Sequential(
-            *layers
-        )
+        self.encoder = BaseEncoder(model_config, self.full_obs_space)
 
         if self.custom_config["algorithm"] in ["maddpg"]:
             all_action_dim = self.custom_config["space_act"].shape[0] * self.custom_config["num_agents"]
             if self.custom_config["global_state_flag"]:
                 self.state_encoder = nn.Linear(self.full_obs_space["state"].shape[0],
-                                               input_dim)
+                                               self.encoder.output_dim)
             if "q" in name:
                 if self.custom_config["global_state_flag"]:
-                    input_dim = input_dim * 2 + all_action_dim
+                    input_dim = self.encoder.output_dim * 2 + all_action_dim
                 else:
-                    input_dim = input_dim * self.custom_config["num_agents"] + all_action_dim
+                    input_dim = self.encoder.output_dim * self.custom_config["num_agents"] + all_action_dim
+            else:
+                input_dim = self.encoder.output_dim
 
         else:  # no centralized critic -> iddpg
             if "q" in name:
-                input_dim = input_dim + self.custom_config["space_act"].shape[0]
+                input_dim = self.encoder.output_dim + self.custom_config["space_act"].shape[0]
+            else:
+                input_dim = self.encoder.output_dim
 
-        # core rnn
         self.hidden_state_size = self.custom_config["model_arch_args"]["hidden_state_size"]
         self.input_dim = input_dim
 
         self.mlp = nn.Linear(input_dim, self.hidden_state_size)
 
         # action branch and value branch
-        self.action_branch = nn.Linear(self.hidden_state_size, num_outputs)
-        self.value_branch = nn.Linear(self.hidden_state_size, 1)
+        self.out_branch = SlimFC(
+            in_size=self.hidden_state_size,
+            out_size=num_outputs,
+            initializer=normc_initializer(0.01),
+            activation_fn=None)
 
         if self.custom_config["algorithm"] in ["facmac"]:
             # mixer:
@@ -155,9 +111,9 @@ class DDPGSeriesMLP(TorchModelV2, nn.Module):
         self.q_flag = False
 
     @override(ModelV2)
-    def get_initial_state(self):
+    def get_initial_state(self): # not used
         # Place hidden states on same device as model.
-        return self.value_branch.weight.new(1, self.hidden_state_size).zero_().squeeze(0),
+        return self.out_branch._model._modules["0"].weight.new(1, self.hidden_state_size).zero_().squeeze(0),
 
     @override(ModelV2)
     def forward(self, input_dict: Dict[str, TensorType],
@@ -228,7 +184,7 @@ class DDPGSeriesMLP(TorchModelV2, nn.Module):
         x = nn.functional.relu(x)
 
         self._features = self.mlp(x)
-        logits = self.action_branch(self._features)
+        logits = self.out_branch(self._features)
 
         return logits, state
 
