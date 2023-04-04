@@ -13,11 +13,9 @@
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Replicable-MARL/MARLlib/blob/sy_dev/marllib.ipynb)
 [![Awesome](https://awesome.re/badge.svg)](https://marllib.readthedocs.io/en/latest/resources/awesome.html)
 
-**Multi-agent Reinforcement Learning Library ([MARLlib](https://arxiv.org/abs/2210.13708))** is ***a MARL library*** based
-on [**Ray**](https://github.com/ray-project/ray) and one of its toolkits [**RLlib**](https://github.com/ray-project/ray/tree/master/rllib). It provides the MARL research community a unified
-platform for building, training, and evaluating MARL algorithms on almost all diverse tasks and environments.
+**Multi-agent Reinforcement Learning Library ([MARLlib](https://arxiv.org/abs/2210.13708))** is ***a MARL library*** that utilizes [**Ray**](https://github.com/ray-project/ray) and one of its toolkits [**RLlib**](https://github.com/ray-project/ray/tree/master/rllib). It offers a comprehensive platform for developing, training, and testing MARL algorithms across various tasks and environments. 
 
-A simple case of MARLlib usage:
+Here's an example of how MARLlib can be used:
 
 ```py
 from marllib import marl
@@ -70,20 +68,20 @@ Here we provide a table for the comparison of MARLlib and existing work.
 
 ## key features
 
-:beginner: What **MARLlib** brings to MARL community:
+:beginner: MARLlib offers several key features that make it stand out::
 
-- it unifies diverse algorithm pipelines with agent-level distributed dataflow.
-- it supports all task modes: cooperative, collaborative, competitive, and mixed.
-- it unifies multi-agent environment interfaces with a new interface following Gym.
-- it provides flexible and customizable parameter-sharing strategies.
+- MARLlib unifies diverse algorithm pipelines with agent-level distributed dataflow, allowing researchers to develop, test, and evaluate MARL algorithms across different tasks and environments.
+- MARLlib supports all task modes, including cooperative, collaborative, competitive, and mixed. This makes it easier for researchers to train and evaluate MARL algorithms across a wide range of tasks.
+- MARLlib provides a new interface that follows the structure of Gym, making it easier for researchers to work with multi-agent environments.
+- MARLlib provides flexible and customizable parameter-sharing strategies, allowing researchers to optimize their algorithms for different tasks and environments.
 
-:rocket: With MARLlib, you can exploit the advantages not limited to:
+:rocket: Using MARLlib, you can take advantage of various benefits, such as:
 
-- **zero knowledge of MARL**: out of the box 18 algorithms with intuitive API!
-- **all task modes available**: support almost all multi-agent environment!
-- **customizable model arch**: pick your favorite one from the model zoo!
-- **customizable policy sharing**: grouped by MARLlib or build your own!
-- more than a thousand experiments are conducted and released!
+- **Zero knowledge of MARL**: MARLlib provides 18 pre-built algorithms with an intuitive API, allowing researchers to start experimenting with MARL without prior knowledge of the field.
+- **Support for all task modes**: MARLlib supports almost all multi-agent environments, making it easier for researchers to experiment with different task modes.
+- **Customizable model architecture**: Researchers can choose their preferred model architecture from the model zoo, or build their own.
+- **Customizable policy sharing**: MARLlib provides grouping options for policy sharing, or researchers can create their own.
+- **Access to over a thousand released experiments**: Researchers can access over a thousand released experiments to see how other researchers have used MARLlib.
 
 ## Installation
 
@@ -332,23 +330,16 @@ If you would like to get involved, here is information on [contribution guidelin
 
 You can contribute in multiple ways, e.g., reporting bugs, writing or translating documentation, reviewing or refactoring code, requesting or implementing new features, etc.
 
-[comment]: <> (## Paper)
+## Paper
 
-[comment]: <> (If you use MARLlib in your research, please cite the [MARLlib paper]&#40;https://arxiv.org/abs/2210.13708&#41;.)
+If you use MARLlib in your research, please cite the [MARLlib paper](https://arxiv.org/abs/2210.13708).
 
-[comment]: <> (```tex)
-
-[comment]: <> (@article{hu2022marllib,)
-
-[comment]: <> (  title={MARLlib: Extending RLlib for Multi-agent Reinforcement Learning},)
-
-[comment]: <> (  author={Hu, Siyi and Zhong, Yifan and Gao, Minquan and Wang, Weixun and Dong, Hao and Li, Zhihui and Liang, Xiaodan and Chang, Xiaojun and Yang, Yaodong},)
-
-[comment]: <> (  journal={arXiv preprint arXiv:2210.13708},)
-
-[comment]: <> (  year={2022})
-
-[comment]: <> (})
-
-[comment]: <> (```)
+```tex
+@article{hu2022marllib,
+  title={MARLlib: Extending RLlib for Multi-agent Reinforcement Learning},
+  author={Hu, Siyi and Zhong, Yifan and Gao, Minquan and Wang, Weixun and Dong, Hao and Li, Zhihui and Liang, Xiaodan and Chang, Xiaojun and Yang, Yaodong},
+  journal={arXiv preprint arXiv:2210.13708},
+  year={2022}
+}
+```
 
