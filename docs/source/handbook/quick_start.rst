@@ -28,8 +28,8 @@ There are four configuration files that you need to ensure correctness for your 
 Scenario Configuration
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-This file specifies your environment/task settings. MARLlib provides ten environments for you to conduct your experiment.
-You can follow the instruction in the :ref:`env` section to install the environment you need and change the corresponding configuration.
+MARLlib provides ten environments for you to conduct your experiment.
+You can follow the instruction in the :ref:`env` section to install them and change the corresponding configuration to customize the chosen task.
 
 Algorithm Hyper-parameter
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -39,7 +39,7 @@ Most of the algorithms are sensitive to the environment settings. Therefore, you
 
 We provide a `commonly used hyper-parameters directory <https://github.com/Replicable-MARL/MARLlib/tree/sy_dev/marllib/marl/algos/hyperparams/common>`_,
 a `test-only hyper-parameters directory <https://github.com/Replicable-MARL/MARLlib/tree/sy_dev/marllib/marl/algos/hyperparams/test>`_, and
-And a finetuned hyper-parameters sets for the three most used MARL environments/benchmarks, including `SMAC <https://github.com/Replicable-MARL/MARLlib/tree/sy_dev/marllib/marl/algos/hyperparams/finetuned/smac>`_
+a finetuned hyper-parameters sets for the three most used MARL environments, including `SMAC <https://github.com/Replicable-MARL/MARLlib/tree/sy_dev/marllib/marl/algos/hyperparams/finetuned/smac>`_
 , `MPE <https://github.com/Replicable-MARL/MARLlib/tree/sy_dev/marllib/marl/algos/hyperparams/finetuned/mpe>`_, and `MAMuJoCo <https://github.com/Replicable-MARL/MARLlib/tree/sy_dev/marllib/marl/algos/hyperparams/finetuned/mamujoco>`_
 
 Model Architecture
@@ -47,7 +47,7 @@ Model Architecture
 
 Observation space varies with different environments. MARLlib automatically constructs the agent model to fit the diverse input shape, including: observation, global state, action mask, and additional information (e.g., minimap)
 
-However, you can customize your model in `model's config <https://github.com/Replicable-MARL/MARLlib/tree/sy_dev/marllib/marl/models/configs>`_.
+However, you can still customize your model in `model's config <https://github.com/Replicable-MARL/MARLlib/tree/sy_dev/marllib/marl/models/configs>`_.
 The supported architecture change includes:
 
 - Observation/State Encoder: `CNN <https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/marllib/marl/models/configs/cnn_encoder.yaml>`_, `FC <https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/marllib/marl/models/configs/fc_encoder.yaml>`_
@@ -57,7 +57,6 @@ The supported architecture change includes:
 
 Ray/RLlib Running Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
 
 Ray/RLlib provides a flexible multi-processing scheduling mechanism for MARLlib.
 You can modify the `file of ray configuration <https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/marllib/marl/ray.yaml>`_ to adjust sampling speed (worker number, CPU number), training speed (GPU acceleration),
@@ -78,8 +77,8 @@ There are three levels of configuration, listed here in order of priority from l
 
 If a parameter is set at multiple levels, the higher level configuration will take precedence over the lower level configuration.
 
-Legality
-^^^^^^^^^^^^^^^
+Compatibility across different levels
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 It is important to ensure that hyperparameter choices are compatible across different levels.
 For example, the Multiple Particle Environments (MPE) support both discrete and continuous actions.

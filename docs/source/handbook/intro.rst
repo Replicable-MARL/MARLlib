@@ -11,12 +11,21 @@ Introduction
     Overview of the MARLlib architecture.
 
 
-There are four core features of **MARLlib**.
+MARLlib offers several key features that make it stand out:
 
-- It unifies diverse algorithm pipeline with a newly proposed agent-level distributed dataflow. Currently, MARLlib delivers 18 algorithms and is able to handle cooperative (team-reward-only cooperation), collaborative (individual-reward-accessible cooperation), competitive (individual competition), and mixed (teamwork-based competition) tasks.
-- It unifies multi-agent environment interfaces with a new interface following Gym standard and supports both synchronous and asynchronous agent-environment interaction. Currently, MARLlib provides support to ten environments.
-- It provides three parameter sharing strategies, namely full-sharing, non-sharing, and group-sharing, by implementing the policy mapping API of RLlib. This is implemented to be fully decoupled from algorithms and environments, and is completely controlled by configuration files.
-- It provides standard 2 or 20 millions timesteps learning curve in the form of CSV of each task-algorithm for reference. These results are reproducible as configuration files for each experiment are provided along. In total, more than a thousand experiments are conducted and released. 
+- MARLlib unifies diverse algorithm pipelines with agent-level distributed dataflow, allowing researchers to develop, test, and evaluate MARL algorithms across different tasks and environments.
+- MARLlib supports all task modes, including cooperative, collaborative, competitive, and mixed. This makes it easier for researchers to train and evaluate MARL algorithms across a wide range of tasks.
+- MARLlib provides a new interface that follows the structure of Gym, making it easier for researchers to work with multi-agent environments.
+- MARLlib provides flexible and customizable parameter-sharing strategies, allowing researchers to optimize their algorithms for different tasks and environments.
+
+Using MARLlib, you can take advantage of various benefits, such as:
+
+- **Zero knowledge of MARL**: MARLlib provides 18 pre-built algorithms with an intuitive API, allowing researchers to start experimenting with MARL without prior knowledge of the field.
+- **Support for all task modes**: MARLlib supports almost all multi-agent environments, making it easier for researchers to experiment with different task modes.
+- **Customizable model architecture**: Researchers can choose their preferred model architecture from the model zoo, or build their own.
+- **Customizable policy sharing**: MARLlib provides grouping options for policy sharing, or researchers can create their own.
+- **Access to over a thousand released experiments**: Researchers can access over a thousand released experiments to see how other researchers have used MARLlib.
+
 
 Before starting, please ensure you've installed the dependencies by following the :ref:`basic-installation`.
 The environment-specific description is maintained in :ref:`env`.
