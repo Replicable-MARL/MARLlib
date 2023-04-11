@@ -13,6 +13,11 @@
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Replicable-MARL/MARLlib/blob/sy_dev/marllib.ipynb)
 [![Awesome](https://awesome.re/badge.svg)](https://marllib.readthedocs.io/en/latest/resources/awesome.html)
 
+
+> __News__:
+> We are excited to announce that a major update has just been released. For detailed version information, please refer to the [version info](https://github.com/Replicable-MARL/MARLlib/releases/tag/1.0.2).
+
+
 **Multi-agent Reinforcement Learning Library ([MARLlib](https://arxiv.org/abs/2210.13708))** is ***a MARL library*** that utilizes [**Ray**](https://github.com/ray-project/ray) and one of its toolkits [**RLlib**](https://github.com/ray-project/ray/tree/master/rllib). It offers a comprehensive platform for developing, training, and testing MARL algorithms across various tasks and environments. 
 
 Here's an example of how MARLlib can be used:
@@ -35,6 +40,8 @@ mappo.fit(env, model, stop={'timesteps_total': 1000000}, share_policy='group')
 # ready to control
 mappo.render(env, model, share_policy='group', restore_path='path_to_checkpoint')
 ```
+
+
 
 ## Why MARLlib?
 

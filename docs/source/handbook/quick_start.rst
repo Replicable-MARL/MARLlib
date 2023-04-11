@@ -9,86 +9,81 @@ Quick Start
 
 If you have not installed MARLlib yet, please refer to :ref:`basic-installation` before running.
 
-Before Running
------------------
+Configuration Overview
+---------------------------
 
 .. figure:: ../images/configurations.png
     :align: center
 
     Prepare all the configuration files to start your MARL journey
 
-MARLlib adopt a configuration based customization method to control the whole learning pipeline.
-There are four configuration files you need to ensure correctness for your training demand.
+To start your MARL journey with MARLlib, you need to prepare all the configuration files to customize the whole learning pipeline.
+There are four configuration files that you need to ensure correctness for your training demand:
 
 - scenario: specify your environment/task settings
 - algorithm: finetune your algorithm hyperparameters
 - model: customize the model architecture
 - ray/rllib: changing the basic training settings
 
-We introduce them one by one.
-
 Scenario Configuration
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 MARLlib provides ten environments for you to conduct your experiment.
-After installing :ref:`basic-installation`, you don't have to install all of these environments.
-Simply follow the instruction :ref:`env` to install the environment you need and change the corresponding configuration.
-
-All the scenario configurations are in  `env configure <https://github.com/Replicable-MARL/MARLlib/tree/sy_dev/envs/base_env/config>`_.
-
-For instance, the Multiple Particle Environments (MPE) are set to accept only discrete action.
-To allow continuous action, simply change **continuous_actions** in `mpe.yaml <https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/envs/base_env/config/mpe.yaml>`_ to **True**
-
+You can follow the instruction in the :ref:`env` section to install them and change the corresponding configuration to customize the chosen task.
 
 Algorithm Hyper-parameter
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-After the environment is all set, you need to visit the MARL algorithms' hyper-parameter directory.
-Each algorithm has different hyper-parameters to finetune with.
+After setting up the environment, you need to visit the MARL algorithms' hyper-parameter directory. Each algorithm has different hyper-parameters that you can finetune.
+Most of the algorithms are sensitive to the environment settings. Therefore, you need to give a set of hyper-parameters that fit the current MARL task.
 
-Most of the algorithms are sensitive to the environment settings.
-This means you need to give a set of hyper-parameters that fit for current MARL task.
-
-We provide a `commonly used hyper-parameters directory <https://github.com/Replicable-MARL/MARLlib/tree/sy_dev/marl/algos/hyperparams/common>`_,
-a `test-only hyper-parameters directory <https://github.com/Replicable-MARL/MARLlib/tree/sy_dev/marl/algos/hyperparams/test>`_, and
-And a finetuned hyper-parameters sets for the three most used MARL environments/benchmarks, including
-
-- `SMAC <https://github.com/Replicable-MARL/MARLlib/tree/sy_dev/marl/algos/hyperparams/finetuned/smac>`_
-- `MPE <https://github.com/Replicable-MARL/MARLlib/tree/sy_dev/marl/algos/hyperparams/finetuned/mpe>`_
-- `MAMuJoCo <https://github.com/Replicable-MARL/MARLlib/tree/sy_dev/marl/algos/hyperparams/finetuned/mamujoco>`_
+We provide a `commonly used hyper-parameters directory <https://github.com/Replicable-MARL/MARLlib/tree/sy_dev/marllib/marl/algos/hyperparams/common>`_,
+a `test-only hyper-parameters directory <https://github.com/Replicable-MARL/MARLlib/tree/sy_dev/marllib/marl/algos/hyperparams/test>`_, and
+a finetuned hyper-parameters sets for the three most used MARL environments, including `SMAC <https://github.com/Replicable-MARL/MARLlib/tree/sy_dev/marllib/marl/algos/hyperparams/finetuned/smac>`_
+, `MPE <https://github.com/Replicable-MARL/MARLlib/tree/sy_dev/marllib/marl/algos/hyperparams/finetuned/mpe>`_, and `MAMuJoCo <https://github.com/Replicable-MARL/MARLlib/tree/sy_dev/marllib/marl/algos/hyperparams/finetuned/mamujoco>`_
 
 Model Architecture
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Observation space varies with different environments, MARLlib automatically constructs the agent model to fit the diverse input shape, including:
+Observation space varies with different environments. MARLlib automatically constructs the agent model to fit the diverse input shape, including: observation, global state, action mask, and additional information (e.g., minimap)
 
-- observation
-- global state
-- action mask
-- additional information (e.g., minimap)
-
-However, we leave space for you to customize your model in `model's config <https://github.com/Replicable-MARL/MARLlib/tree/sy_dev/marl/models/configs>`_.
+However, you can still customize your model in `model's config <https://github.com/Replicable-MARL/MARLlib/tree/sy_dev/marllib/marl/models/configs>`_.
 The supported architecture change includes:
 
-- Observation/Global State Encoder: `CNN <https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/marl/models/configs/cnn_encoder.yaml>`_, `FC <https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/marl/models/configs/fc_encoder.yaml>`_
-- `Multiple Layers perceptron <https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/marl/models/configs/mlp.yaml>`_: MLP
-- `Recurrent Neural Network <https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/marl/models/configs/rnn.yaml>`_: GRU, LSTM
-- `Q/Critic Value Mixer <https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/marl/models/configs/mixer.yaml>`_: VDN, QMIX
+- Observation/State Encoder: `CNN <https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/marllib/marl/models/configs/cnn_encoder.yaml>`_, `FC <https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/marllib/marl/models/configs/fc_encoder.yaml>`_
+- `Multi-layers Perceptron <https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/marllib/marl/models/configs/mlp.yaml>`_: MLP
+- `Recurrent Neural Network <https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/marllib/marl/models/configs/rnn.yaml>`_: GRU, LSTM
+- `Q/Critic Value Mixer <https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/marllib/marl/models/configs/mixer.yaml>`_: VDN, QMIX
 
-Running Configuration
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Ray/RLlib Running Options
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Ray/RLlib provides a flexible multi-processing scheduling mechanism for MARLlib.
-You can modify the `file of ray configuration <https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/marl/ray.yaml>`_ to adjust:
+You can modify the `file of ray configuration <https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/marllib/marl/ray.yaml>`_ to adjust sampling speed (worker number, CPU number), training speed (GPU acceleration),
+running mode (locally or distributed), parameter sharing strategy (all, group, individual), and stop condition (iteration, reward, timestep).
 
-- sampling speed (worker number, CPU number)
-- training speed (GPU acceleration)
+How to Customize
+------------------------------
+To modify the configuration settings in MARLlib, it is important to first understand the underlying configuration system.
 
-and switch
 
-- running mode (locally or distributed)
-- parameter sharing strategy (all, group, individual)
-- stop condition (iteration, reward, timestep)
+Level of the configuration
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+There are three levels of configuration, listed here in order of priority from low to high:
+
+- File-based configuration, which includes all the default ``*.yaml`` files.
+- API-based customized configuration, which allows users to specify their own preferences, such as ``{"core_arch": "mlp", "encode_layer": "128-256"}``.
+- Command line arguments, such as ``python xxx.py --ray_args.local_mode --env_args.difficulty=6 --algo_args.num_sgd_iter=6``.
+
+If a parameter is set at multiple levels, the higher level configuration will take precedence over the lower level configuration.
+
+Compatibility across different levels
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+It is important to ensure that hyperparameter choices are compatible across different levels.
+For example, the Multiple Particle Environments (MPE) support both discrete and continuous actions.
+To enable continuous action space settings, one can simply change the `continuous_actions` parameter in the `mpe.yaml <https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/marllib/envs/base_env/config/mpe.yaml>`_ to **True**.
+It is important to pay attention to the corresponding setting when using the API-based approach or command line arguments, such as marl.make_env(xxxx, continuous_actions=True), where the argument name must match the one in ``mpe.yaml`` exactly.
 
 
 Training
@@ -367,5 +362,5 @@ Logging & Saving
 ----------------------------------
 
 MARLlib uses the default logger provided by Ray in **ray.tune.CLIReporter**.
-You can change the saved log location `here <https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/marl/algos/utils/log_dir_util.py>`_.
+You can change the saved log location `here <https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/marllib/marl/algos/utils/log_dir_util.py>`_.
 

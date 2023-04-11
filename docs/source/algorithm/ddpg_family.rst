@@ -18,11 +18,9 @@ Deep Deterministic Policy Gradient: A Recap
 
 - Q-Learning & Deep Q Network(DQN)
 
-Deep Deterministic Policy Gradient (DDPG) is an algorithm that concurrently learns a Q-function and a policy.
-It uses off-policy data and the Bellman equation to learn the Q-function and the Q-function to learn the policy.
-The motivation of DDPG is to tackle the problem that standard Q-learning can only be used in discrete action space (a finite number of actions).
-To extend the Q function to the continuous control problem, DDPG adopts an extra policy network :math:`\mu(s)` parameterized by :math:`\theta` to produce action value.
-The Q value is estimated as :math:`Q(s,\mu(s))`. The Q function is parameterized by :math:`\phi`.
+Deep Deterministic Policy Gradient (DDPG) is a popular reinforcement learning algorithm that can handle continuous action spaces. DDPG concurrently learns a Q-function and a policy network using off-policy data and the Bellman equation. The Q-function estimates the expected cumulative reward for taking a specific action in a given state, and the policy network produces actions to maximize the Q-value.
+
+To extend Q-learning to continuous action spaces, DDPG introduces an additional policy network, represented by the function :math:`\mu(s;\theta)`, which takes the state as input and outputs a continuous action. The Q-value is estimated as :math:`Q(s, a;\phi)` using the state-action pair as input, where the Q-function is represented by :math:`\phi`, and :math:`a` is obtained by applying the policy network on the state. By learning both the Q-function and the policy network concurrently, DDPG can handle continuous action spaces effectively.
 
 **Mathematical Form**
 
@@ -54,7 +52,7 @@ Here :math:`{\mathcal D}` is the replay buffer
 
 .. admonition:: You Should Know
 
-    Some tricks like `gumble softmax` enables DDPG policy function to output categorical-like action distribution.
+    Tricks like `gumble softmax` enables DDPG policy function to output categorical-like action distribution.
 
 ---------------------
 
@@ -76,8 +74,7 @@ IDDPG: multi-agent version of DDPG
 Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Each agent follows the standard DDPG learning pipeline. Models and Buffers can be shared or separated according to agents' group.
-Note that buffer and agent models can be shared or separately training across agents. And this applies to all algorithms in DDPG family.
+Each agent follows the standard DDPG learning pipeline, which concurrently learns a Q-function and a policy. The models and buffers used in the pipeline can be shared or separated according to the agents' group. This flexibility also applies to all algorithms in the DDPG family. For example, the models and buffers can be shared across all agents to allow for better coordination and faster learning, or they can be trained separately to allow for agents to learn individual strategies.
 
 .. figure:: ../images/iddpg.png
     :width: 600
@@ -123,22 +120,21 @@ Insights
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 
-Independent Deep Deterministic Policy Gradient (IDDPG) is the multi-agent version of standard DDPG. Each agent is now a DDPG-based sampler and learner.
-IDDPG does not need information sharing, including real/sampled data and predicted data.
-While knowledge sharing across agents is optional in IDDPG.
+Independent Deep Deterministic Policy Gradient (IDDPG) is a version of the Deep Deterministic Policy Gradient (DDPG) algorithm designed for multi-agent scenarios. In IDDPG, each agent has its own DDPG algorithm that samples data and learns independently from other agents. Unlike other multi-agent algorithms, IDDPG does not require agents to share any information, including real or sampled data and predicted actions.
+
+However, IDDPG does allow for optional knowledge sharing between agents. This means that agents can choose to share their models or other information with each other to improve their learning performance. Overall, IDDPG is a flexible and scalable algorithm that can be applied to a wide range of multi-agent scenarios.
+
 
 .. admonition:: Information Sharing
 
-    In multi-agent learning, the concept of information sharing is not well defined and may confuse.
-    Here we try to clarify this by categorizing the type of information sharing into three.
+    In the field of multi-agent learning, the term "information sharing" can be vague and unclear, so it's important to provide clarification. We can categorize information sharing into three types:
+
 
     - real/sampled data: observation, action, etc.
     - predicted data: Q/critic value, message for communication, etc.
     - knowledge: experience replay buffer, model parameters, etc.
 
-    Knowledge-level information sharing is usually excluded from information sharing and is only seen as a trick.
-    But recent works find it is essential for good performance. So here, we include knowledge sharing as part of the information sharing.
-
+    Traditionally, knowledge-level information sharing has been viewed as a "trick" and not considered a true form of information sharing in multi-agent learning. However, recent research has shown that knowledge sharing is actually crucial for achieving optimal performance. Therefore, we now consider knowledge sharing to be a valid form of information sharing in multi-agent learning.
 
 Mathematical Form
 ^^^^^^^^^^^^^^^^^^
@@ -147,7 +143,7 @@ Standing at the view of a single agent, the mathematical formulation of IDDPG is
 , except that in MARL,
 agent usually has no access to the global state typically under partial observable setting.
 Therefore, we use :math:`o` for
-local observation and :math:`s`for the global state. We then rewrite the mathematical formulation of DDPG as:
+local observation and :math:`s` for the global state. We then rewrite the mathematical formulation of DDPG as:
 
 Q learning: get a better Q function
 
@@ -231,9 +227,9 @@ MADDPG: DDPG agent with a centralized Q
 Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-In the sampling stage, each agent follows the standard DDPG learning pipeline to infer the action but uses a centralized Q function to compute the Q value, which needs data sharing
-before sending all the collected data to the buffer.
-In the learning stage, each agent predicts its next action using the target policy and shares it with other agents before entering the training loop.
+During the sampling stage, each agent in MADDPG follows the same DDPG learning pipeline to infer an action. However, instead of computing the Q-value based on its own action, each agent uses a centralized Q-function that takes all agents' actions as input to compute the Q-value. This requires sharing data among agents before storing it in the buffer.
+
+During the learning stage, each agent predicts its next action using the target policy and shares it with other agents before entering the training loop. This is done to ensure that all agents use the same action for computing the Q-value in the centralized Q-function during the next sampling stage.
 
 .. figure:: ../images/maddpg.png
     :width: 600
@@ -277,31 +273,24 @@ Insights
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 
-
-Traditional reinforcement learning approaches such as Q-Learning or policy gradient are poorly suited to multi-agent environments because:
-
-#. Each agent's policy changes as training progress.
-#. The environment becomes non-stationary from the perspective of any individual agent.
-#. Deep Q-learning becomes unstable due to points 1 & 2.
-#. Policy gradient methods suffer from high variance in the coordination of agents due to points 1 & 2.
-
-Multi-agent Deep Deterministic Policy Gradient (MADDPG) is an algorithm that extends DDPG with a centralized Q function that takes observation and action from current agents and other agents. Like DDPG, MADDPG also has a policy network :math:`\mu(s)` parameterized by :math:`\theta` to produce action value.
-While the centralized Q value is calculated as :math:`Q(\mathbf{s},\mu(\mathbf{s}))` and the Q network is parameterized by :math:`\phi`.
-Note :math:`o` in policy network is the local observation while :math:`\mathbf{s}` in centralized Q is the joint observation/state, which also includes the opponents.
-
+In multi-agent environments, traditional reinforcement learning algorithms like Q-Learning or policy gradient may not be effective due to various reasons such as changing policies during training, non-stationary environments, and high variance in coordination between agents.
+To address these challenges, Multi-agent Deep Deterministic Policy Gradient (MADDPG) was introduced.
+MADDPG extends the DDPG algorithm with a centralized Q function that takes observation and action from all agents,
+including other agents. The policy network :math:`\mu(s)` is parameterized by :math:`\theta` to produce action values,
+while the centralized Q value is calculated as :math:`Q(\mathbf{s},\mu(\mathbf{s}))` and the Q network is parameterized by :math:`\phi`.
+It's important to note that the local observation is denoted by :math:`o` in the policy network, while the joint observation/state is
+denoted by :math:`\mathbf{s}` in the centralized Q function, which includes information about opponents.
 
 .. admonition:: You Should Know
 
-    - MADDPG is the most famous work that started MARL research under centralized training and decentralized execution(CTDE) these years.
-    - Recent works find that stochastic policy gradient methods can be directly applied to MARL and maintain good performance. E.g., :ref:`IPPO`
-    - MADDPG is criticized for its unstable performance in practice.
+    - MADDPG is a widely known research work that initiated the exploration of Multi-Agent Reinforcement Learning (MARL) under the paradigm of centralized training and decentralized execution (CTDE).
+    - Recent studies have shown that stochastic policy gradient methods can be directly employed in MARL with good performance, as exemplified by :ref:`IPPO`
+    - However, MADDPG has been subject to criticism due to its unstable performance in practical scenarios.
 
 Mathematical Form
 ^^^^^^^^^^^^^^^^^^
 
-MADDPG needs information sharing across agents. The Q learning utilizes self-observation and information other agents provide, including
-observation and actions. Here we bold the symbol (e.g., :math:`u` to :math:`\mathbf{u}`) to indicate more than one agent information is contained.
-
+In MADDPG, information sharing between agents is required. This includes the observation and actions of other agents, in addition to the agent's own observations. The shared information can be denoted using bold symbols, such as :math:`\mathbf{u}` to represent the actions of all agents.
 
 Q learning: get a better centralized Q function
 
@@ -334,9 +323,9 @@ Here :math:`{\mathcal D}` is the replay buffer and can be shared across agents.
 Implementation
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-We extend the vanilla DDPG of RLlib to be recurrent neural network(RNN) compatible.
-Based on RNN compatible DDPG, we add the centralized sampling and training module to the original pipeline.
-The main differences between IDDPG and MADDPG are:
+To make DDPG compatible with recurrent neural networks (RNNs), we extend vanilla DDPG in RLlib. Then, we add a centralized sampling and training module to the original pipeline.
+
+The main differences between Independent Deep Deterministic Policy Gradient (IDDPG) and MADDPG are:
 
 - model side: the agent model-related modules and functions are built in a centralized style:
     - ``build_maddpg_models_and_action_dist``
@@ -354,8 +343,8 @@ Key hyperparameter location:
 
 .. admonition:: You Should Know
 
-    -The policy inference procedure of MADDPG is kept the same as IDDPG.
-    -Some tricks like `gumble softmax` enables MADDPG to output categorical-like action distribution.
+    - The policy inference procedure of MADDPG is kept the same as IDDPG.
+    - Some tricks like `gumble softmax` enables MADDPG to output categorical-like action distribution.
 
 ---------------------
 
@@ -379,10 +368,10 @@ FACMAC: mixing a bunch of DDPG agents
 Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Each agent follows the standard DDPG learning pipeline in the sampling stage to infer and send the action to the Q function to get the Q value. Data like observation/state is shared among agents
-before sending the sampled data to the buffer.
-In the learning stage, each agent predicts its Q value using the Q function, the next action using the target policy,  and the next Q value using the target Q function.
-Then each agent shares the predicted data with other agents before entering the training loop.
+Each agent in the FACMAC algorithm follows the standard DDPG learning pipeline to infer the action and calculate the Q value using the centralized Q function. However, in this stage, agents share data such as observations or states with each other before sending the sampled data to the buffer.
+
+In the learning stage, each agent predicts its own Q value using the Q function, its next action using the target policy, and the next Q value using the target Q function. Then, each agent shares the predicted data with other agents before entering the training loop.
+
 
 .. figure:: ../images/facmac.png
     :width: 600
@@ -440,15 +429,14 @@ Compared to existing methods, FACMAC:
 
 .. admonition:: You Should Know
 
-    - Recent works prove that stochastic policy gradient methods are more stable and perform well in tackling MARL. E.g., :ref:`MAA2C`. If you need better performance, try stochastic policy gradient methods.
-    - Applicable scenarios of FACMAC are pretty restrained. E.g., the cooperative task only, the continuous task only(without adding tricks).
+    - Recent studies have shown that stochastic policy gradient methods are more stable and effective in handling MARL problems, such as the MAA2C algorithm mentioned in :ref:MAA2C. If you aim for improved performance, it is recommended to consider using stochastic policy gradient methods.
+    - The scope of applicable scenarios for FACMAC is relatively limited. This includes only cooperative tasks and continuous tasks without the use of any additional techniques or methods.
 
 
 Mathematical Form
 ^^^^^^^^^^^^^^^^^^
 
 FAMAC needs information sharing across agents. Here we bold the symbol (e.g., :math:`u` to :math:`\mathbf{u}`) to indicate more than one agent information is contained.
-
 
 Q mixing: using a learnable mixer to compute the global Q value.
 
@@ -490,9 +478,8 @@ Here :math:`{\mathcal D}` is the replay buffer, which can be shared across agent
 Implementation
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-We extend the vanilla DDPG of RLlib to be recurrent neural network(RNN) compatible.
-Based on RNN compatible DDPG, we add the centralized sampling and training module to the original pipeline.
-The main differences between IDDPG and MADDPG are:
+We have extended the vanilla DDPG algorithm of RLlib to be compatible with recurrent neural networks (RNNs). This RNN-compatible DDPG algorithm is further enhanced with a centralized sampling and training module. The main distinguishing features between IDDPG and MADDPG are as follows:
+
 
 - model side: the agent model-related modules and functions are built in a value decomposition style:
     - ``build_facmac_models_and_action_dist``
@@ -511,7 +498,7 @@ Key hyperparameter location:
 .. admonition:: You Should Know
 
     - The policy inference procedure of FACMAC is kept the same as IDDPG.
-    - Some tricks like `gumble softmax` enables FACMAC net to output categorical-like action distribution.
+    - Tricks such as using `gumbel softmax` are employed to allow the FACMAC network to produce action distributions that resemble categorical distributions.
 
 ---------------------
 

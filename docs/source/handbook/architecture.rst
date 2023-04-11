@@ -5,9 +5,11 @@
 Framework
 *******************************
 
-Based on Ray and one of its toolkits RLlib, MARLlib enriches the RLlib with 18 multi-agent reinforcement learning (MARL) algorithms and incorporates ten diverse multi-agent environments as a testing bed.
-All the algorithms can be smoothly run on any environment with auto adaptation like model architecture and environment interface, and flexible customization via simply modifying the configuration files.
-
+MARLlib is a software library designed to facilitate the development and evaluation of multi-agent reinforcement learning (MARL) algorithms.
+The library is built on top of Ray, a distributed computing framework, and RLlib, one of its toolkits.
+Specifically, MARLlib extends RLlib by incorporating 18 MARL algorithms and 10 multi-agent environments, providing a comprehensive testing bed for MARL research.
+One of the key features of MARLlib is its auto-adaptation capability, which allows for seamless execution of algorithms on various environments,including model architecture and interface.
+Additionally, MARLlib offers flexible customization options through straightforward configuration file modifications.
 
 .. contents::
     :local:
@@ -55,8 +57,7 @@ Same as RLlib, MARLlib has two phases after launching the process.
 Phase 1:   Pre-learning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-MARLlib initializes the environment and the agent model, producing a fake batch according to environment attributes and passing it to the sampling/training pipeline of the chosen algorithm.
-If the fake batch goes through the whole learning workflow with no error reported, MARLlib steps into the next stage.
+MARLlib commences the reinforcement learning process by instantiating the environment and the agent model. Subsequently, a mock batch is generated based on environment characteristics and fed into the sampling/training pipeline of the designated algorithm. Upon successful completion of the learning workflow with no encountered errors, MARLlib proceeds to the subsequent stage.
 
 .. figure:: ../images/rllib_data_flow_left.png
     :align: center
@@ -68,15 +69,11 @@ If the fake batch goes through the whole learning workflow with no error reporte
 Phase 2: Sampling & Training
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-After checking the whole pipeline in the pre-learning stage, real jobs are assigned to the workers and the learner. Then finally, these processes are scheduled under the execution plan, where MARL officially starts.
+Upon completion of the pre-learning stage, MARLlib assigns real jobs to the workers and the learner, and schedules these processes under the execution plan to initiate the learning process.
 
-In a standard learning iteration, each worker first samples the data by interacting with its environment instance(s) using agent model(s). Then, the workers pass The sampled data to the replay buffer.
-Reply buffer is initialized according to the algorithm, which will decide how the data are stored. For example, the buffer is a concatenation operation for the on-policy algorithm.
-For the off-policy algorithm, the buffer is a FIFO queue.
+During a standard learning iteration, each worker interacts with its environment instance(s) using agent model(s) to sample data, which is then passed to the replay buffer. The replay buffer is initialized according to the algorithm and decides how the data are stored. For instance, for the on-policy algorithm, the buffer is a concatenation operation, while for the off-policy algorithm, the buffer is a FIFO queue.
 
-Next, a pre-defined policy mapping function will distribute these data to different agents.
-Once the data for one training iteration is fully collected, the learner starts to optimize the policy/policies using these data
-and broadcasts the new model to each worker for the next sampling round.
+Following this, a pre-defined policy mapping function distributes the collected data to different agents. Once all the data for one training iteration are fully collected, the learner begins to optimize the policy/policies using these data, and broadcasts the new model to each worker for the next sampling round.
 
 .. figure:: ../images/rllib_data_flow_right.png
     :align: center
@@ -93,31 +90,21 @@ Algorithm Pipeline
 Independent Learning
 ^^^^^^^^^^^^^^^^^^^^
 
-Independent learning (left) is easy to implement in MARLlib as RLlib provides many algorithms.
-Choosing one from them and applied to the multi-agent environment to start training is easy and require no extra work compared to RLlib.
-While no data exchange is needed in independent learning of MARL, the performance is worse than the centralized training strategy in most tasks.
+In MARLlib, implementing independent learning (left) is straightforward due to the availability of many algorithms provided by RLlib. To initiate training, one can select an algorithm from RLlib and apply it to the multi-agent environment with no additional effort compared to RLlib. Although independent learning in MARL does not require any data exchange, its performance is typically inferior to that of the centralized training strategy in most tasks.
 
 Centralized Critic
 ^^^^^^^^^^^^^^^^^^^^
 
-Centralized critic learning (middle) is one of the two centralized training strategies under the CTDE framework.
-Agents must share their information after getting the policy output and before the critic value computing.
-They must share specific information with other agents, including individual observation, actions, and global state (if available).
+Centralized critic learning is one of the two centralized training strategies in the CTDE framework supported by MARLlib. Under this approach, agents are required to share their information with each other after obtaining the policy output but before the critic value computation. This shared information includes individual observations, actions, and global state (if available).
 
-The exchanged data is collected and stored as transition data during the sampling stage. Each transition data contains both self-collected data and exchanged data.
-All the data is then used to optimize a centralized critic function with a decentralized policy function.
-How information is shared is mainly implemented in the postprocessing function for on-policy algorithms. For off-policy algorithms like MADDPG,
-additional data like action value provided by other agents is collected before the data enters the training iteration batch.
+The exchanged data is collected and stored as transition data during the sampling stage, where each transition data contains both self-collected data and exchanged data. These data are then utilized to optimize a centralized critic function along with a decentralized policy function. The implementation of information sharing is primarily done in the postprocessing function for on-policy algorithms. In the case of off-policy algorithms like MADDPG, additional data such as action value provided by other agents is collected before the data enters the training iteration batch.
 
 Value Decomposition
 ^^^^^^^^^^^^^^^^^^^^
 
-Value Decomposition (right) is another branch of centralized training strategies. Different from a centralized critic, the only information for the agent
-to share is the predicted Q value or critic value. Additional data is required according to the algorithm. For instance, QMIX needs a global state to
-compute the mixing Q value.
+In MARLlib, Value Decomposition (VD) is another category of centralized training strategies, differing from centralized critics in terms of the information agents are required to share. Specifically, only the predicted Q value or critic value needs to be shared among the agents, and additional data may be necessary depending on the algorithm used. For example, QMIX requires a global state to compute the mixing Q value.
 
-The data collecting and storage logic is the same as a centralized critic. The joint Q learning methods (VDN, QMIX) are heavily copied from the original PyMARL. Only the FACMAC, VDA2C, and VDPPO follow the standard RLlib training pipeline among all five value decomposition algorithms.
-
+The data collection and storage mechanism for VD is similar to that of centralized critics, with the agents collecting and storing transition data during the sampling stage. The joint Q learning methods (VDN, QMIX) are based on the original PyMARL, with only FACMAC, VDA2C, and VDPPO following the standard RLlib training pipeline among the five VD algorithms.
 
 Key Component
 -------------------------
@@ -125,12 +112,7 @@ Key Component
 Postprocessing Before Data Collection
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-MARL algorithms with centralized training with decentralized execution (CTDE) require agents to share their information with others in the learning stage.
-Algorithms in value decomposition like QMIX, FACMAC, and VDA2C require other agents to provide their Q value or V value estimation to compute Q total or V total. Likewise, algorithms in centralized criticism like MADDPG, MAPPO, and HAPPO require other agents to provide their observation and actions to help determine a centralized critic value.
-A postprocessing module is then a perfect place for agents to share the data with other agents.
-For algorithms belonging to centralized critics, the agent can get extra information from other agents to compute a centralized critic value.
-For algorithms belonging to value decomposition, the agent needs to provide other agents with their Q or V value predicted.
-Besides, the postprocessing module is also the place for computing different learning targets using GAE or N-step reward adjustment.
+MARL algorithms adopting the centralized training with decentralized execution (CTDE) paradigm necessitate the sharing of information among agents during the learning phase. In value decomposition algorithms such as QMIX, FACMAC, and VDA2C, the computation of the total Q or V value requires agents to provide their respective Q or V value estimation. Conversely, algorithms based on centralized criticism such as MADDPG, MAPPO, and HAPPO require agents to share their observation and action data to determine a centralized critic value. The postprocessing module is the ideal location for agents to exchange data with their peers. For centralized critics algorithms, agents may obtain additional information from other agents to calculate a centralized critic value. On the other hand, for value decomposition algorithms, agents must provide their predicted Q or V value to other agents. Additionally, the postprocessing module is also responsible for computing various learning targets using techniques such as GAE or N-step reward adjustment.
 
 .. figure:: ../images/pp.png
     :align: center
@@ -140,10 +122,7 @@ Besides, the postprocessing module is also the place for computing different lea
 Postprocessing Before Batch Learning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Postprocessing is unsuitable for every algorithm; exceptions are off-policy algorithms, including MADDPG and FACMAC.
-The problem is that the data stored in the replay buffer are from the old model, e.g., Q value, which can not be used for the current training interaction.
-To deal with this, the additional before batch learning function is adopted to calculate the accurate Q or V value
-using the current model just before the sampled batch enters the training loop.
+In the context of MARL algorithms, not all algorithms can leverage the postprocessing module. One such example is off-policy algorithms like MADDPG and FACMAC, which face the challenge of outdated data in the replay buffer that cannot be used for current training interactions. To address this challenge, an additional "before batch learning" function is implemented to accurately compute the Q or V value of the current model just before the sampled batch enters the training loop. This ensures that the data used for training is up-to-date and accurate, improving the training effectiveness.
 
 .. figure:: ../images/pp_batch.png
     :align: center
@@ -154,26 +133,21 @@ using the current model just before the sampled batch enters the training loop.
 Centralized Value function
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The centralized critic agent model abandons the original value function conditioned only on self-observation. Instead, a centralized critic who dynamically fits the
-algorithm needs are provided to deal with data supplied from other agents and output a centralized value.
+In the centralized critic agent model, the conventional value function based solely on an agent's self-observation is replaced with a centralized critic that can adapt to the algorithm's requirements. The centralized critic is responsible for processing information received from other agents and generating a centralized value as output.
 
 Mixing Value function
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The value decomposition agent model preserves the original value function but adds a new mixing value function to get the mixing value function.
-The mixing function is customizable. Currently, VDN and QMIX mixing function is provided. To change the mixing value, modify
-the model configuration file in **marl/model/configs/mixer**.
+In the value decomposition agent model, the original value function is retained, but a new mixing value function is introduced to obtain the overall mixing value. The mixing function is flexible and can be customized as per the user's requirements. Currently, the VDN and QMIX mixing functions are available. To modify the mixing value, the user can make changes to the model configuration file located at **marl/model/configs/mixer**.
 
 Heterogeneous Optimization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-In heterogeneous optimization, the parameters of each agent are updated separately.
-Therefore, policy function is not shared across different agents.
-According to the proof of the algorithm, if agents were to set the values of the loss-related summons by sequentially updating their policies,
-any positive update would lead to an increment in summation.
+In heterogeneous optimization, individual agent parameters are updated independently, and therefore, the policy function is not shared across different agents.
+However, according to the algorithm proof, updating the policies of agents sequentially and setting the values of the loss-related summons can lead to an incremental summation with any positive update.
 
-To ensure the monotonic increment, we use the trust region to get the suitable parameters update (HATRPO).
-Considering the computing consumption, we use the proximal policy optimization to speed up the policy and critic update (HAPPO).
+To ensure the incremental monotonicity of the algorithm, a trust region is utilized to obtain suitable parameter updates, as is the case in the HATRPO algorithm.
+To accelerate the policy and critic update process while considering computational efficiency, the proximal policy optimization technique is employed in the HAPPO algorithm.
 
 .. figure:: ../images/hetero.png
     :align: center
@@ -183,14 +157,10 @@ Considering the computing consumption, we use the proximal policy optimization t
 Policy Mapping
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Policy mapping plays an important role in unifying the MARL environment interface. In MARLlib, the policy mapping is designed to be a dictionary,
-with a top-level key as the scenario name, a second-level key as the group information, with four extra keys including **description**, **team_prefix**,
-**all_agents_one_policy**, and **one_agent_one_policy**. **team_prefix** is used to group the agents according to their names.
-The last two keys indicate whether a fully shared or no-sharing policy strategy is a valid option for this scenario.
-We use policy mapping to initialize the policies and allocate them to different agents.
-Each policy is optimized only using the data sampled by the agent that belongs to this policy group.
+Policy mapping plays a crucial role in standardizing the interface of the Multi-Agent Reinforcement Learning (MARL) environment. In MARLlib, policy mapping is implemented as a dictionary with a hierarchical structure. The top-level key represents the scenario name, the second-level key contains group information, and four additional keys (**description**, **team_prefix**,
+**all_agents_one_policy**, and **one_agent_one_policy**) are used to define various policy settings. The **team_prefix** key groups the agents based on their names, while the last two keys indicate whether a fully shared or no-sharing policy strategy is applicable for the given scenario. The policy mapping method is utilized to initialize and allocate policies to different agents, and each policy is trained using the data sampled only by the agents in its corresponding policy group.
 
-Here is an example of policy mapping, which is a mixed mode scenario from MAgent:
+For instance, consider a mixed mode scenario from MAgent, which can be represented using the following policy mapping:
 
 
 .. code-block:: ini

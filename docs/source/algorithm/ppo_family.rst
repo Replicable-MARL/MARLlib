@@ -18,9 +18,15 @@ Proximal Policy Optimization: A Recap
 - Trust Region Policy Optimization (TRPO)
 - General Advantage Estimation (GAE)
 
-Proximal Policy Optimization (PPO) is a first-order optimization that simplifies its implementation. Similar to TRPO objective function, It defines the probability ratio between the new policy and old policy as :math:`\frac{\pi_{\theta}(a|s)}{\pi_{\theta_k}(a|s)}`.
-Instead of adding complicated KL constraints, PPO imposes this policy ratio to stay within a small interval between :math:`1-\epsilon` and :math:`1+\epsilon`.
-The objective function of PPO takes the minimum value between the original value and the clipped value.
+Proximal Policy Optimization (PPO) is a simple first-order optimization algorithm for reinforcement learning.
+It is similar to another algorithm called Trust Region Policy Optimization (TRPO) but with a simpler implementation.
+The PPO algorithm defines the probability ratio between the new policy and the old policy as :math:`\frac{\pi_{\theta}(a|s)}{\pi_{\theta_k}(a|s)}`
+where :math:`\theta` is the new policy and :math:`\theta_k` is the old policy. Instead of adding complicated KL constraints,
+PPO ensures that this policy ratio stays within a small interval between :math:`1-\epsilon` and :math:`1+\epsilon`,
+where :math:`\epsilon` is a hyperparameter that controls the size of the interval. The objective function of PPO takes
+the minimum value between the original value and the clipped value, where the clipped value is obtained by multiplying
+the policy ratio by the advantage estimate and then clipping it to the interval :math:`[1-\epsilon, 1+\epsilon]`.
+
 
 There are two primary variants of PPO: PPO-Penalty and PPO-Clip. Here we only give the formulation of PPO-Clip, which is more common in practice.
 For PPO-penalty, please refer to `Proximal Policy Optimization <https://spinningup.openai.com/en/latest/algorithms/ppo.html>`_.
@@ -83,8 +89,8 @@ IPPO: multi-agent version of PPO
 Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-In IPPO, each agent follows a standard PPO sampling/training pipeline. Therefore, IPPO is a general baseline for all MARL tasks with robust performance.
-Note that buffer and agent models can be shared or separately training across agents. And this applies to all algorithms in PPO family.
+In IPPO, each agent uses the standard PPO sampling/training pipeline, making it a versatile baseline for multi-agent reinforcement learning tasks with reliable performance. It's worth noting that the buffer and agent models can either be shared or trained separately across agents. This applies to all algorithms in the PPO family, not just IPPO.
+
 
 .. figure:: ../images/ippo.png
     :width: 600
@@ -130,21 +136,20 @@ Insights
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 
-IPPO is the simplest multi-agent version of standard PPO. Each agent is now a PPO-based sampler and learner.
-IPPO does not need information sharing
-While knowledge sharing across agents is optional in IPPO.
+In simpler terms, IPPO is a straightforward implementation of PPO for multi-agent reinforcement learning tasks. Each agent follows the same PPO sampling and training process, making it a versatile baseline for various MARL tasks. Unlike other MARL algorithms, IPPO does not require information sharing between agents, although it can still be optionally implemented for knowledge sharing.
+
 
 .. admonition:: Information Sharing
 
-    In multi-agent learning, the concept of information sharing is not well defined and may confuse.
-    Here we try to clarify this by categorizing the type of information sharing into three.
+    In the field of multi-agent learning, the term "information sharing" can be vague and unclear, so it's important to provide clarification. We can categorize information sharing into three types:
+
 
     - real/sampled data: observation, action, etc.
     - predicted data: Q/critic value, message for communication, etc.
     - knowledge: experience replay buffer, model parameters, etc.
 
-    Knowledge-level information sharing is usually excluded from information sharing and is only seen as a trick.
-    But recent works find it is essential for good performance. So here, we include knowledge sharing as part of the information sharing.
+    Traditionally, knowledge-level information sharing has been viewed as a "trick" and not considered a true form of information sharing in multi-agent learning. However, recent research has shown that knowledge sharing is actually crucial for achieving optimal performance. Therefore, we now consider knowledge sharing to be a valid form of information sharing in multi-agent learning.
+
 
 Mathematical Form 
 ^^^^^^^^^^^^^^^^^^
@@ -198,8 +203,8 @@ Note that in multi-agent settings, all the agent models can be shared, including
 Implementation
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-We use vanilla PPO implementation of RLlib in IPPO. The only exception is we rewrite the SGD iteration logic.
-The details can be found in
+We have made some modifications to the IPPO algorithm, specifically to the way the stochastic gradient descent (SGD) iteration is implemented. Other than that, we use the vanilla PPO implementation provided by RLlib as the basis for IPPO. You can find more information about the modifications we made to the SGD iteration in our documentation.
+
 
 - ``MultiGPUTrainOneStep``
 - ``learn_on_loaded_batch``
@@ -231,8 +236,7 @@ MAPPO: PPO agent with a centralized critic
 Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-In the sampling stage, agents share information with others. The information includes others' observations and predicted actions. After collecting the necessary information from other agents,
-all agents follow the standard PPO training pipeline, except using the centralized value function to calculate the GAE and conduct the PPO critic learning procedure.
+During the sampling stage in collaborative multi-agent reinforcement learning, agents need to communicate and share information with each other, such as observations and predicted actions. Once all the necessary information is collected, each agent follows the standard PPO training pipeline, but with the addition of a centralized value function for calculating the Generalized Advantage Estimation (GAE) and conducting the PPO critic learning procedure.
 
 .. figure:: ../images/mappo.png
     :width: 600

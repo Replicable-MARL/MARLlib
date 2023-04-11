@@ -12,14 +12,10 @@ Part 3. A Collective Survey of MARL
 Tasks: Arenas of MARL
 =====================
 
-Finding a dataset to evaluate the new idea has become a consensus in machine learning.
-The best way is to get a representative or commonly acknowledged dataset,
-follow its standard evaluation pipeline, and compare the performance with other existing algorithms.
+In the field of machine learning, it is widely accepted that the evaluation of a new idea necessitates the use of an appropriate dataset. The most effective approach is to employ a representative or widely accepted dataset, adhere to its established evaluation pipeline, and compare the performance of the new idea with other existing algorithms.
 
-In MARL, the dataset is a set of scenarios contained in one multi-agent task.
-Most multi-agent tasks are customizable on many aspects like agent number, map size, reward function, unit status, etc.
-In this section, we briefly introduce the category of multi-agent tasks, from the most straightforward matrix game
-to the real-world application.
+In the context of Multi-Agent Reinforcement Learning (MARL), a dataset corresponds to a collection of scenarios that comprise a single multi-agent task. Multi-agent tasks are customizable on a variety of aspects, such as the number of agents, map size, reward function, and unit status. This section provides a brief overview of the categories of multi-agent tasks, ranging from the simplest matrix game to real-world applications.
+
 
 Matrix Problem and Grid World
 --------------------------------------------------------------
@@ -29,8 +25,8 @@ Matrix Problem and Grid World
 
     Two-step game
 
-The first option is using a matrix and grid world task to verify a new idea in MARL quickly.
-A well-known example is the **Two-step Game**.
+The first option for evaluating a new idea in MARL involves using a matrix and grid world task.
+ One such example is the **Two-step Game**.
 In this task, two agents act in turn to gain the highest team reward.
 The task is very straightforward:
 
@@ -62,8 +58,7 @@ Gaming and Physical Simulation
 
     Gaming & Simulation: MAMuJoCo, Pommerman, Hanabi, Starcraft, etc.
 
-To find a offset between naive matrix games and the expensive cost of sampling and training on real-world scenarios,  recent MARL research focuses more on video gaming and physical simulation,
-as most algorithms try to prove their advance on more complicated tasks with a modest cost.
+Recent advances in MARL research have shifted the focus towards video gaming and physical simulation, as a means to bridge the gap between simple matrix games and the high cost of sampling and training on real-world scenarios. This approach allows for algorithms to showcase their performance on more complex tasks with a more manageable cost.
 One of the most popular multi-agent tasks in MARL is StarCraft Multi-Agent Challenge(:ref:`SMAC`), which is for discrete control and cooperative task mode.
 For continuous control, the most used task is the multi-agent version of MuJoCo: (:ref:`MAMuJoCo`).
 To analyze the agent behavior of adversary agents, a typical task is :ref:`Pommerman`.
@@ -88,20 +83,13 @@ these tasks due to high complexity and standard evaluation procedure.
 Methodology of MARL: Task First or Algorithm First
 ====================================================================
 
-Current research on MARL is struggling with the diversity of multi-agent tasks and the categorization of MARL algorithms.
-These characteristics make the fair comparison of different algorithms hard to conduct and throw a question to researchers: should algorithms be developed for one task (task first)
-or for general tasks (algorithm first)
-This is partly due to multi-agent tasks,
-as well as the various learning styles and knowledge-sharing strategies.
+The current state of research on multi-agent reinforcement learning (MARL) is facing challenges regarding the diversity of multi-agent tasks and the categorization of MARL algorithms. These characteristics make it difficult to conduct a fair comparison of different algorithms and raise a question for researchers: should algorithms be developed for a specific task (task first) or for general tasks (algorithm first). This difficulty stems from the nature of multi-agent tasks, as well as the various learning styles and knowledge-sharing strategies.
 
-As the algorithm development is bound tightly with the task features, we can see an offset between the algorithm's generalization on
-a broad topic and its expertise in one particular multi-agent task.
+Since the development of algorithms is closely related to the features of the task, there is a trade-off between the algorithm's ability to generalize on a broad topic and its expertise in a particular multi-agent task.
 
-In the following part, we first briefly introduce how the environment is categorized according to the agents' relationship.
-Then we categorize the algorithms depending on their learning style and how the learning style is connected to the agents' relationship.
+In the subsequent section, we will provide a brief introduction to how the environment is categorized based on the agents' relationship. We will then classify the algorithms based on their learning style and the connection between the learning style and the agents' relationship.
 
-Finally, we will talk about extending MARL algorithms to be more general and applicable to real-world scenarios via knowledge-sharing techniques.
-
+Finally, we will discuss the extension of MARL algorithms to become more general and applicable to real-world scenarios using knowledge-sharing techniques.
 
 Agent Relationship
 --------------------------------------------------------------
@@ -110,28 +98,22 @@ Agent Relationship
     :align: center
 
 
-The relationship among agents regulates agent learning.
-Two aspects of this relationship affect the MARL algorithm development the most.
+In multi-agent reinforcement learning (MARL), the learning of agents is regulated by the relationship among them. Two critical factors affecting the development of MARL algorithms are the working mode and agent similarity.
 
-First is the **working mode** of agents. For example, a task can be Cooperative-like, where agents share the same target.
-A task can be Competitive-like, where agents have different or adversary targets.
-We also refer **working mode** as **task mode**, as an overall description of how agents work and learn in a multi-agent task.
+The first factor is the working mode, also referred to as the task mode, which describes how agents work and learn in a multi-agent task. For instance, a task can be Cooperative-like, where agents share the same goal. Alternatively, a task can be Competitive-like, where agents have different or adversary objectives.
 
-The second is agent similarity. A task can contain homogeneous agents which prefer knowledge sharing with others and learning as a team.
-A task can also contain heterogeneous agents, which prefer learning their policies separately.
+The second factor is agent similarity. In a task with homogeneous agents, they prefer knowledge sharing with each other and learning as a team. Conversely, in a task with heterogeneous agents, they prefer to learn their policies separately.
+
 
 Task Mode: Cooperative-like or Competitive-like
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The task modes can be roughly divided into two types: **cooperative-like**, where agents tend to work as a team, and **competitive-like**, where agents have adversarial targets and are aggressive to other agents.
-
+The task modes in multi-agent reinforcement learning can be broadly classified into two types: Cooperative-like, where agents tend to work as a team towards a shared goal, and Competitive-like, where agents have adversarial targets and exhibit aggression towards other agents.
 
 Mode 1: Cooperative-like
 """""""""""""""""""""""""""""
 
-Cooperative-like task mode is commonly seen in many scenarios where agents are only awarded when the team target is met.
-This mode is a strict **cooperative**, where each agent cannot access its own reward.
-**cooperative** tasks require agents to have a robust credit assignment mechanism to decompose the global reward to update their policies.
+The Cooperative-like task mode is prevalent in scenarios where agents are rewarded only when the team achieves a shared goal. This mode is considered a strict form of cooperation, where each agent cannot access its individual reward. In Cooperative tasks, agents must have a robust credit assignment mechanism to decompose the global reward and update their policies accordingly.
 
 Environments contain **cooperative** scenarios:
 
@@ -167,9 +149,7 @@ Environments contain **collaborative** scenarios:
 Mode 2: Competitive-like
 """"""""""""""""""""""""""""""
 
-Once agents have different targets in one task, especially when the targets are adversaries,
-the task can become much more complicated. A famous example is **zero-sum** game, where the total reward is fixed.
-One agent being rewarded will result in another agent being punished.
+When agents have different targets in a task, especially when the targets are adversarial, the task can become much more complicated. An example of such a task is a zero-sum game, where the total reward is fixed, and any reward gained by one agent results in an equal loss for another agent.
 A specific example can be found in :ref:`MPE` that in scenarios like **simple_push**, agent ONE is trying to gain more reward by
 getting closer to its target location while agent TWO gains reward by pushing agent ONE away from the target location.
 
@@ -191,17 +171,16 @@ Heterogeneous methods require each agent to maintain its individual policy, whic
 Learning Style
 --------------------------------------------------------------
 
-Categorizing the MARL algorithm by its learning style provides an overview of which topic researchers are most interested in.
-The first class is **Independent Learning**, which directly applies single-agent RL to multi-agent settings.
-The second class is **Centralized Training Decentralized Execution**, where extra modules are added to the training pipeline
-to help agents learn a coordinated behavior while keeping an independently executed policy.
-The third class is **Fully Centralized**, where agents are treated as a single agent with multiple actions to execute simultaneously.
+Categorizing MARL algorithms by their learning style provides an overview of the topics that researchers are currently interested in. The following are the three main classes:
+
+- Independent Learning: This class applies single-agent RL directly to multi-agent settings without additional coordination mechanisms.
+- Centralized Training Decentralized Execution: This class adds extra modules to the training pipeline to help agents learn coordinated behavior while keeping independently executed policies.
+- Fully Centralized: In this class, agents are treated as a single agent with multiple actions to execute simultaneously, and the learning algorithm is designed accordingly.
 
 Independent Learning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-We then get an independent policy to separate one agent from the multi-agent system and train this agent using RL ignoring other agents and system states. This is the core idea of independent learning. Based on this, if every agent learns its policy independently,
-we can have a group of policies that jointly solve the task.
+The core idea of Independent Learning is to extract an independent policy for one agent from the multi-agent system and train it using RL, ignoring other agents and system states. Based on this idea, if every agent learns its policy independently, we can obtain a set of policies that jointly solve the task.
 
 Every RL algorithm can be extended to be MARL compatible, including:
 
@@ -218,13 +197,11 @@ a coordinated behavior among agents. This is primarily due to the low utilizatio
 Centralized Training Decentralized Execution (CTDE)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-To help agents learn a coordinated behavior while keeping a low computation budget and optimization complexity, many different learning settings have been proposed,
-among which the Centralized Training Decentralized Execution (CDTE) framework has attracted the most attention in recent years MARL research.
-We have introduced the CTDE framework here: :ref:`CTDE`.
+To enable agents to learn a coordinated behavior while keeping computation budget and optimization complexity low, various learning settings have been proposed in MARL research. Among these, the Centralized Training Decentralized Execution (CTDE) framework has garnered the most attention in recent years. We have introduced the CTDE framework earlier: :ref:`CTDE`.
 
-Under the CTDE framework, there are two main branches of algorithms: **Centralized Critic (CC)** and **Value Decomposition (VD)**.
-The CC-based algorithms can cover general multi-agent tasks while having some restrictions on their architecture.
-The VD-based algorithms are good at solving cooperative-like tasks with the credit assignment mechanism, while the tasks they can cover are limited.
+Within the CTDE framework, there are two main branches of algorithms: Centralized Critic (CC) and Value Decomposition (VD).
+
+CC-based algorithms can handle general multi-agent tasks but have some restrictions on their architecture. On the other hand, VD-based algorithms are well-suited for solving cooperative-like tasks with a robust credit assignment mechanism, but they have limited applicability.
 
 Type 1. Centralized Critic
 """""""""""""""""""""""""""
@@ -281,60 +258,38 @@ A list of commonly seen VD algorithms:
 Fully Centralized
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-A fully centralized method is an option when the agent number and the action space are relatively small.
-The approach of the fully centralized algorithm to the multi-agent tasks is straightforward: combine all the agents and their action spaces into one and follow a standard RL
-pipeline to update the policy or Q value function.
-For instance, a five-agent discrete control problem can be transformed into a single-agent multi-discrete control problem.
-Therefore, only a cooperative-like task mode is suitable for this approach. It would be nonsense to combine agents that are adversaries to each other.
+A fully centralized method is a viable option when the number of agents and the action space are relatively small. The approach of the fully centralized algorithm to multi-agent tasks is straightforward: all agents and their action spaces are combined into one, and a standard RL pipeline is used to update the policy or Q-value function. For instance, a five-agent discrete control problem can be transformed into a single-agent multi-discrete control problem. Therefore, only a cooperative-like task mode is suitable for this approach, as it would be counterproductive to combine agents that are adversaries to each other.
 
-Few works focus on fully centralized MARL. However, it can still serve as a baseline for algorithms of CTDE and others.
-
+Although few works focus on fully centralized MARL, it can still serve as a baseline for algorithms of CTDE and others.
 
 Knowledge Sharing
 --------------------------------------------------------------
 
-Agents can share the knowledge with others to learn faster or reuse the knowledge from the old task to adapt quickly to new tasks.
-We can quickly get this inspiration based on the fact that different strategies may share a similar function.
-Moreover, this similarity exists across three levels in MARL: agent, scenario, and task.
-Agent-level knowledge sharing is targeted to increase sample efficiency and improve learning speed.
-Scenario-level sharing focuses on developing a multi-task MARL to handle multiple scenarios simultaneously but in the same task domain.
-Task-level sharing is the most difficult, and it requires an algorithm to learn and conclude general knowledge from one task domain and apply them to
-a new domain.
+In MARL, agents can share knowledge with others to learn faster or reuse knowledge from previous tasks to adapt quickly to new ones. This is based on the idea that different strategies may share a similar function, which exists across three levels in MARL: agent, scenario, and task.
+
+At the agent level, knowledge sharing is targeted at increasing sample efficiency and improving learning speed. Sharing at the scenario level focuses on developing a multi-task MARL framework to handle multiple scenarios simultaneously within the same task domain. Task-level sharing is the most difficult, and it requires an algorithm to learn and generalize knowledge from one task domain and apply it to a new domain.
+
 
 Agent Level
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Agent-level knowledge sharing mainly focuses on two parts: replay buffer and model parameters.
-In most cases, these two parts are bound, meaning if two agents share the model parameters, they share the replay buffer(sampled data in the on-policy case).
-There are still some exceptions, like only part of the model is shared. For instance,  in actor-critic architecture, if only the critic is shared, then the critic is
-updated with the full data while the policy is updated with the data sampled.
+Agent-level knowledge sharing primarily focuses on two components: the replay buffer and model parameters. Typically, these two parts are linked, implying that if two agents share model parameters, they also share the replay buffer. However, there are some exceptions where only part of the model is shared. For example, in an actor-critic architecture, if only the critic is shared, the critic is updated with full data, while the policy is updated with the sampled data.
 
-Knowledge across other agents can significantly benefit the algorithm performance as it improves the sample efficiency and thus can be an essential trick in MARL.
+Sharing knowledge across agents can enhance the algorithm's performance by increasing sample efficiency, making it an essential technique in MARL. However, sharing knowledge is not always beneficial. In some cases, diverse individual policy sets are required, and sharing knowledge can significantly reduce this diversity. For example, adversary agents may not share knowledge to maintain competitiveness.
 
-However, sharing knowledge is not always good. For example, in some circumstances, we may need a diverse individual policy set, but the sharing operation vastly reduces this diversity.
-An extreme instance will be adversary agents who never share knowledge to keep competitiveness.
 
 Scenario Level
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Scenario-level multi-task MARL focuses on learning a general policy that can cover multiple scenarios in one task. Therefore, scenario-level multi-task MARL is of great feasibility than task-level multi-task MARL
-as the learned strategies of different scenarios are more similar than different.
-For instance, although scenarios in SMAC vary on unit type, agent number, and map terrain, skills like hit and run always exist in most of the learned
-strategy from them.
+Scenario-level multi-task MARL is a learning approach that focuses on developing a general policy that can be applied to multiple scenarios within the same task. Compared to task-level multi-task MARL, scenario-level multi-task MARL is more feasible as the learned strategies across different scenarios are more similar than different. For example, skills like hit and run are commonly used across different scenarios in SMAC, despite variations in unit type, agent number, and map terrain.
 
-Recent work has proved that scenario-level knowledge sharing is doable with transformer-based architecture and a meta-learning method.
-This is a potential solution for real-world applications where the working environment constantly changes and requires agents to adapt to new scenarios soon.
+Recent research has demonstrated that scenario-level knowledge sharing can be achieved through a transformer-based architecture and a meta-learning approach. This holds promise for real-world applications where the working environment is subject to constant changes, requiring agents to quickly adapt to new scenarios.
 
 Task Level
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Task level multi-task MARL is the final step of learning a self-contained and constantly evolving strategy, with no restrictions on task mode and easily
-adopting new tasks and reusing the knowledge from other tasks.
+Task-level multi-task MARL aims to learn a self-contained and adaptable strategy without limitations on task mode, enabling agents to effectively reuse knowledge from previous tasks and learn new ones. Achieving task-level knowledge sharing requires agents to identify and apply common principles across different tasks. For example, when presented with a new cooperative task, agents can leverage their understanding of teamwork to quickly find effective solutions. This ability to understand and apply common sense and teamwork concepts is a critical component of human intelligence. Thus, achieving task-level knowledge sharing represents a significant milestone towards the development of artificial general intelligence.
 
-Task-level knowledge sharing requires agents to conclude common sense from different tasks.
-For instance, when a new cooperative-like task comes, agents behave more agreeably with others and can quickly find a way to cooperate as a team.
-As common sense and team-working concepts are what make human beings intelligent, achieving task-level knowledge-sharing equals training an agent
-to learn and act like humans is the holy grail of artificial general intelligence.
 
 
 
