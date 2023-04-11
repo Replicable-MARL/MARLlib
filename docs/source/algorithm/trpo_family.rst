@@ -16,9 +16,7 @@ Trust Region Policy Optimization: A Recap
 
 - Vanilla Policy Gradient (PG)
 
-In polciy-gradient based method, how to find a suitable learning rate for the whole optimization process is very crucial.
-Trust Region Policy Optimization (TRPO) is proposed to make sure that the updated policy lies within a trust region, which is then a fundamental work to ground the suitable gradient finding issue.
-TRPO has four steps to optimize its policy function:
+In reinforcement learning, finding the appropriate learning rate is essential for policy-gradient based methods. To address this issue, Trust Region Policy Optimization (TRPO) proposes that the updated policy should remain within a trust region. TRPO has four steps to optimize its policy function:
 
 #. sample a set of trajectories.
 #. estimate the advantages using any advantage estimation method (here we adopt General Advantage Estimation (GAE)).
@@ -151,21 +149,20 @@ Insights
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 
-ITRPO is the simplest multi-agent version of standard TRPO. Each agent is now a TRPO-based sampler and learner.
-ITRPO does not need information sharing
-While knowledge sharing across agents is optional in ITRPO.
+ITRPO is a multi-agent version of TRPO, where each agent is a TRPO-based sampler and learner.
+ITRPO does not require information sharing between agents during training.
+However, knowledge sharing between agents is optional and can be implemented if desired.
 
 .. admonition:: Information Sharing
 
-    In multi-agent learning, the concept of information sharing is not well defined and may confuse.
-    Here we try to clarify this by categorizing the type of information sharing into three.
+    In the field of multi-agent learning, the term "information sharing" can be vague and unclear, so it's important to provide clarification. We can categorize information sharing into three types:
 
     - real/sampled data: observation, action, etc.
     - predicted data: Q/critic value, message for communication, etc.
     - knowledge: experience replay buffer, model parameters, etc.
 
-    Knowledge-level information sharing is usually excluded from information sharing and is only seen as a trick.
-    But recent works find it is essential for good performance. So here, we include knowledge sharing as part of the information sharing.
+    Traditionally, knowledge-level information sharing has been viewed as a "trick" and not considered a true form of information sharing in multi-agent learning. However, recent research has shown that knowledge sharing is actually crucial for achieving optimal performance. Therefore, we now consider knowledge sharing to be a valid form of information sharing in multi-agent learning.
+
 
 Mathematical Form
 ^^^^^^^^^^^^^^^^^^
@@ -252,8 +249,7 @@ MATRPO: TRPO agent with a centralized critic
 Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-In the sampling stage, agents share information with others. The information includes others' observations and predicted actions. After collecting the necessary information from other agents,
-all agents follow the standard TRPO training pipeline, except using the centralized value function to calculate the GAE and conduct the TRPO policy learning/critic learning procedure.
+During the sampling stage of MATRPO, agents share information such as observations and predicted actions with each other. Once each agent collects the necessary information from the others, they can begin the standard TRPO training pipeline. The only difference is that a centralized value function is used to calculate the Generalized Advantage Estimation (GAE) and conduct the TRPO policy learning and critic learning procedure. This allows the agents to take into account the actions and observations of their teammates when updating their policies.
 
 .. figure:: ../images/matrpo.png
     :width: 600
@@ -380,8 +376,7 @@ HATRPO: Sequentially updating critic of MATRPO agents
 Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-In the sampling stage, agents share information with others. The information includes others' observations and predicted actions. After collecting the necessary information from other agents,
-all agents follow the standard TRPO training pipeline, except HATRPO would update each policy sequentially.  In this updating sequence, the next agent's advantage is iterated by the current sampling importance and hte former advantage, except the first agent's advantage is the original advantae value.
+HATRPO is a variant of TRPO in which each agent still shares information with others during the sampling stage, but the policies are updated sequentially rather than simultaneously. In the updating sequence, the next agent's advantage is computed using the current sampling importance and the former advantage, except for the first agent, whose advantage is the original advantage value.
 
 .. figure:: ../images/hatrpo.png
     :width: 600

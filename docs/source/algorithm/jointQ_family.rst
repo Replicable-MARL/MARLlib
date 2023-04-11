@@ -14,13 +14,11 @@ Deep (Recurrent) Q Learning: A Recap
 
 **Vanilla Q Learning**
 
-Without deep learning to approximate the state-action pair value, Q learning is restricted in the Q-table, which records all the pairs of :math:`(s,a)` with their corresponding Q values.
-The Q-Learning algorithm aims to learn the Q-Value of each :math:`(s,a)` pair based on interaction with the environment and iteratively update the Q-value record in the Q-table.
+In Q-learning, the goal is to learn the value of each state-action pair by iteratively updating a table of Q-values. Without the use of deep learning to approximate the Q-values, Q-learning is limited to a Q-table that stores all possible state-action pairs and their corresponding Q-values.
 
-The first step is choosing the action using **Epsilon-Greedy Exploration Strategy**.
-The agent then takes the best-known action or does random exploration, entering the next state with a reward given by the environment.
+To update the Q-values in the table, the algorithm follows a two-step process. First, the agent selects an action using the epsilon-greedy exploration strategy, which involves choosing the best-known action or exploring a random action. The agent then transitions to the next state and receives a reward from the environment.
 
-The second step uses the bellman equation to update the Q-table based on collected data.
+In the second step, the Q-value for the state-action pair is updated using the Bellman equation, which takes into account the immediate reward received and the expected future rewards. The updated Q-value is then stored in the Q-table. The process repeats until the Q-values converge or the desired performance is achieved.
 
 .. math::
 
@@ -38,16 +36,9 @@ Keeping iterating these two steps and updating the Q-table can converge the Q va
 
 **Deep Q Learning**
 
-Introducing deep learning into Q learning is a giant leap. However, it enables us to approximate the Q value using a neural network.
-There are two networks in deep Q learning:math:`Q` network and math:`Q_{tag}` network, which are the same in architecture.
+Deep Q learning is a significant advancement in Q learning that allows us to approximate the Q value using a neural network. Instead of using a Q-table to store all possible state-action pairs and their corresponding Q values, a Q network is used to approximate the Q value. This is possible because we can encode the state to a feature vector and learn the mapping between the feature vector and the Q value. The Q function is designed to take the state as input and has a number of output dimensions corresponding to the number of possible actions. The max value of output nodes is selected as the Q value for the next state-action pair.
 
-Q table is now replaced by :math:`Q` network to approximate the Q value.
-This way, the :math:`(s,a)` pairs number can be huge. As we can encode the state to a feature vector and learn the mapping between
-the feature vector and the Q value.
-The design of the Q function is simple, it takes :math:`s` as input and has :math:`a` number of output dimensions.
-The max value of output nodes is chosen to be :math:`max_a(s^{'},a^{'})` in vanilla Q learning.
-Finally, we use the Bellman equation to update the network.
-The optimization target is to minimize the minimum square error (MSE) between the current Q value estimation and the target Q estimation.
+The Q network is updated using the Bellman equation. The optimization target is to minimize the minimum square error (MSE) between the current Q value estimation and the target Q estimation.
 
 .. math::
 
@@ -57,9 +48,10 @@ The :math:`Q_{tag}` network is updated every :math:`t` timesteps copying the :ma
 
 **DQN + Recurrent Neural Network(DRQN)**
 
-When we do not have full access to the state information, we need to record the history (trajectory information) to help the action chosen.
-RNN is then introduced to deep Q learning to deal with the partial observable Markov Decision Process(POMDP) by encoding the history into the hidden state.
-The optimization target now becomes:
+When dealing with a Partially Observable Markov Decision Process (POMDP), we may not have full access to the state information, and therefore, we need to record the history or trajectory information to assist in choosing the action. Recurrent Neural Networks (RNNs) are introduced to Deep Q Learning to handle POMDPs by encoding the history into the hidden state of the RNN.
+
+In this case, the optimization target is changed to predicting the next Q-value given the current state and the history. We can use the RNN to encode the history of past states and actions, and then pass this encoded information along with the current state to the Q network to predict the Q-value. The goal is to minimize the difference between the predicted Q-value and the target Q-value obtained from the Bellman equation.
+
 
 .. math::
 
@@ -143,21 +135,19 @@ Insights
 
 - :ref:`DQN`
 
-IQL treats each agent in a multi-agent system as a single agent and uses its own collected data as input to conduct the standard DQN or DRQN learning procedure.
-No information sharing is needed.
-While knowledge sharing across agents is optional in IQL.
+In Independent Q-Learning (IQL), each agent in a multi-agent system is treated as a single agent and uses its own collected data as input to conduct the standard DQN or DRQN learning procedure. This means that each agent learns its own Q-function independently without any information sharing among the other agents. However, knowledge sharing across agents is possible but optional in IQL.
+
 
 .. admonition:: Information Sharing
 
-    In multi-agent learning, the concept of information sharing is not well defined and may confuse.
-    Here we try to clarify this by categorizing the type of information sharing into three.
+    In the field of multi-agent learning, the term "information sharing" can be vague and unclear, so it's important to provide clarification. We can categorize information sharing into three types:
+
 
     - real/sampled data: observation, action, etc.
     - predicted data: Q/critic value, message for communication, etc.
     - knowledge: experience replay buffer, model parameters, etc.
 
-    Knowledge-level information sharing is usually excluded from information sharing and is only seen as a trick.
-    However, recent works find it is essential for good performance. Here, we include knowledge sharing as part of the information sharing.
+    Traditionally, knowledge-level information sharing has been viewed as a "trick" and not considered a true form of information sharing in multi-agent learning. However, recent research has shown that knowledge sharing is actually crucial for achieving optimal performance. Therefore, we now consider knowledge sharing to be a valid form of information sharing in multi-agent learning.
 
 
 Math Formulation
@@ -176,8 +166,8 @@ Note in multi-agent settings, all the agent models and buffer can be shared, inc
 Implementation
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-We use vanilla IQL implementation of RLlib, but with further improvement to ensure the performance is aligned with the official implementation.
-The differences between ours and vanilla IQL can be found in
+Our implementation of IQL is based on the vanilla implementation in RLlib, but we have made some additional improvements to ensure that its performance matches the official implementation. The differences between our implementation and the vanilla implementation can be found in the following:
+
 
 - ``episode_execution_plan``
 - ``EpisodeBasedReplayBuffer``
@@ -200,15 +190,14 @@ VDN: mixing Q with value decomposition network
 .. admonition:: Quick Facts
 
     - Value Decomposition Network(VDN) is one of the value decomposition versions of IQL.
-    - Agent architecture of VDN consists of one module: ``Q`` network.
+    - Agent architecture of VDN consists of one module: `Q` network.
     - VDN is applicable for cooperative and collaborative task modes.
 
 Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-In VDN, each agent follows a standard D(R)QN sampling pipeline. And sharing its Q value and target Q value with other agents before entering the training loop.
-In the training loop, the Q value and target Q value of the current agent and other agents are summed to get the :math:`Q_{tot}`.
-
+In the VDN approach, each agent follows the same D(R)QN sampling pipeline as in other deep Q-learning methods. However, before entering the training loop, each agent shares its Q value and target Q value with other agents.
+During the training loop, the Q value and target Q value of the current agent and other agents are summed to obtain the :math:`Q_{tot}` value. This summation allows each agent to incorporate the impact of other agents' actions on the environment and make more informed decisions.
 
 .. figure:: ../images/vdn.png
     :width: 600
@@ -257,10 +246,9 @@ Preliminary
 
 - :ref:`IQL`
 
-Optimizing multiple agents' joint policy with a single team reward can be very challenging as the action and observation space is now too large when combined.
-Value Decomposition Network(VDN) is the first proposed algorithm for this problem. The solution is relatively straightforward:
+Optimizing the joint policy of multiple agents with a single team reward can be a challenging task due to the large combined action and observation space. Value Decomposition Network (VDN) was introduced as a solution to this problem. The algorithm decomposes the joint Q value into the sum of individual Q values for each agent. This allows each agent to learn and optimize its own policy independently while still contributing to the team reward. In VDN, each agent follows a standard D(R)QN sampling pipeline and shares its Q value and target Q value with other agents before entering the training loop. The Q value and target Q value of the current agent and other agents are then summed in the training loop to get the total Q value.
 
-- Each agent is still a standard ``Q``, use self-observation as input and output the action logits(Q value).
+- Each agent is still a standard `Q`, use self-observation as input and output the action logits(Q value).
 - The Q values of all agents are added together for mixed Q value annotated as :math:`Q_{tot}`
 - Using standard DQN to optimize the Q net using :math:`Q_{tot}` with the team reward :math:`r`.
 - The gradient each Q net received depends on the **contribution** of its Q value to the :math:`Q_{tot}`:
@@ -273,15 +261,12 @@ As VDN is developed to address the cooperative multi-agent task, sharing the par
 
 .. admonition:: You Should Know:
 
-    VDN is the first value decomposition algorithm for cooperative multi-agent tasks. However, simply summing the Q value can reduce the diversity of
-    the policy and can quickly stuck into local optimum, especially when the Q net is shared across agents.
-
+    VDN is the first algorithm that decomposes the joint value function for cooperative multi-agent tasks. However, simply summing the Q value across agents can lead to a reduced diversity of policy and can quickly get stuck in a local optimum, particularly when the Q network is shared across agents.
 
 Math Formulation
 ^^^^^^^^^^^^^^^^^^
 
 VDN needs information sharing across agents. Here we bold the symbol (e.g., :math:`o` to :math:`\mathbf{o}`) to indicate that more than one agent information is contained.
-
 
 Q sum: add all the Q values to get the total Q value
 
@@ -337,9 +322,7 @@ QMIX: mixing Q with monotonic factorization
 Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-In QMIX, each agent follows a standard D(R)QN sampling pipeline. And sharing its Q value and target Q value with other agents before entering the training loop.
-In the training loop, the Q value and target Q value of the current agent and other agents are fed into the ``Mixer`` to get the :math:`Q_{tot}`.
-
+In QMIX, each agent follows a standard D(R)QN sampling pipeline and shares its Q-value and target Q-value with other agents before entering the training loop. During the training loop, the Q-value and target Q-value of the current agent and other agents are fed into the Mixer to obtain the overall Q-value of the team, denoted as :math:`Q_{tot}`.
 
 .. figure:: ../images/qmix.png
     :width: 600
@@ -467,8 +450,8 @@ Here :math:`{\mathcal D}` is the replay buffer, which can be shared across agent
 Implementation
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-We use vanilla QMIX implementation of RLlib, but with further improvement to ensure the performance is aligned with the official implementation.
-The differences between ours and vanilla QMIX can be found in
+In our implementation of QMIX in RLlib, we have made some changes to improve its performance and make it consistent with the official implementation. These differences can be found in the code and configuration files used in our implementation, such as changes in the network architecture or the hyperparameters used during training. We have made these changes to ensure that our version of QMIX is capable of achieving similar or better results compared to the official implementation.
+
 
 - ``episode_execution_plan``
 - ``EpisodeBasedReplayBuffer``

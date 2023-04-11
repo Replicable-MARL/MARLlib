@@ -17,9 +17,7 @@ Advanced Actor-Critic: A Recap
 - Vanilla Policy Gradient (PG)
 - Monte Carlo Policy Gradients (REINFORCE)
 
-Why do we need an advanced actor-critic (A2C)? Before A2C, we already have some policy gradient method variants like REINFORCE. However, these methods are not stable in training. This is due to
-the large variance in the reward signal, which is used to update the policy. A solution to reduce this variance is introducing a baseline for it. A2C adopts a critic value function conditioned on **state**
-as the baseline and compute the difference between the state value and Q value as the **advantage**.
+You might be wondering why we need an advanced actor-critic (A2C) algorithm when we already have policy gradient method variants like REINFORCE. Well, the thing is, these methods are not always stable during training due to the large variance in the reward signal used to update the policy. To reduce this variance, we can introduce a baseline. A2C tackles this issue by using a critic value function, which is conditioned on the state, as the baseline. The difference between the Q value and the state value is then calculated as the advantage.
 
 .. math::
 
@@ -80,8 +78,7 @@ IA2C: multi-agent version of A2C
 Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-In IA2C, each agent follows a standard A2C sampling/training pipeline. Therefore, IA2C is a general baseline for all MARL tasks with robust performance.
-Note that buffer and agent models can be shared or separately trained across agents. And this applies to all algorithms in the A2C family.
+The IA2C algorithm employs a standard A2C sampling and training pipeline for each of its agents, making it a reliable baseline for all multi-agent reinforcement learning (MARL) tasks with consistent performance. It's worth noting that the buffer and agent models can be either shared or separately trained among agents, which is a feature that applies to all algorithms within the A2C family.
 
 .. figure:: ../images/ia2c.png
     :width: 600
@@ -127,28 +124,24 @@ Insights
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 
-IA2C is the simplest multi-agent version of standard A2C. Each agent is now an A2C-based sampler and learner.
-IA2C does not need information sharing.
-While knowledge sharing across agents is optional in IA2C.
+IA2C is a straightforward adaptation of the standard A2C algorithm to multi-agent scenarios, where each agent acts as an A2C-based sampler and learner. Unlike some other multi-agent algorithms, IA2C does not require information sharing among agents to function effectively. However, the option to share knowledge among agents is available in IA2C.
+
 
 .. admonition:: Information Sharing
 
-    In multi-agent learning, the concept of information sharing is not well defined and may confuse.
-    Here we try to clarify this by categorizing the type of information sharing into three.
+    In the field of multi-agent learning, the term "information sharing" can be vague and unclear, so it's important to provide clarification. We can categorize information sharing into three types:
+
 
     - real/sampled data: observation, action, etc.
     - predicted data: Q/critic value, message for communication, etc.
     - knowledge: experience replay buffer, model parameters, etc.
 
-    Knowledge-level information sharing is usually excluded from information sharing and is only seen as a trick.
-    However, recent works find it is essential for good performance. Here, we include knowledge sharing as part of the information sharing.
+    Traditionally, knowledge-level information sharing has been viewed as a "trick" and not considered a true form of information sharing in multi-agent learning. However, recent research has shown that knowledge sharing is actually crucial for achieving optimal performance. Therefore, we now consider knowledge sharing to be a valid form of information sharing in multi-agent learning.
 
 Mathematical Form
 ^^^^^^^^^^^^^^^^^^
 
-Standing at the view of a single agent, the mathematical formulation of IA2C is similiar as :ref:`A2C`, except that in MARL,
-agent usually has no access to the global state typically under partial observable setting. Therefore, we use :math:`o` for
-local observation and :math:`s`for the global state. We then rewrite the mathematical formulation of A2C as:
+When considering a single agent's perspective, the mathematical formulation of IA2C is similar to that of A2C, with the exception that in multi-agent reinforcement learning (MARL), agents often do not have access to the global state, especially under partial observable settings. In this case, we use :math:o to represent the local observation of the agent and :math:s to represent the global state. The mathematical formulation of IA2C can be rewritten as follows to account for this:
 
 Critic learning: every iteration gives a better value function.
 
@@ -256,9 +249,7 @@ taxonomy label
 Insights
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-Centralized critic enables MAPPO to gain a strong performance in MARL. The same architecture can also be applied to IA2C.
-In practice, MAA2C can also perform well in most scenarios.
-There is no official MAA2C paper, and we implement MAA2C in the same pipeline as MAPPO but with an advanced actor-critic loss.
+The use of a centralized critic has been shown to significantly improve the performance of multi-agent proximal policy optimization (MAPPO) in multi-agent reinforcement learning (MARL). This same architecture can also be applied to IA2C with similar success. Additionally, MAA2C can perform well in most scenarios, even without the use of a centralized critic. While there is no official MAA2C paper, we have implemented MAA2C in the same pipeline as MAPPO, using an advanced actor-critic loss function. Our implementation has shown promising results in various MARL tasks.
 
 
 Mathematical Form
@@ -337,8 +328,7 @@ COMA: MAA2C with Counterfactual Multi-Agent Policy Gradients
 Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-In the sampling stage, agents share information with others. The information includes others' observations and predicted actions. After collecting the necessary information from other agents,
-all agents follow the A2C training pipeline but use COMA loss to update the policy. The value function (critic) is centralized the same as MAA2C.
+In the sampling stage, agents share information with each other, including their observations and predicted actions. Once the necessary information has been collected, all agents follow the standard A2C training pipeline. However, in order to update the policy, agents use the counterfactual multi-agent (COMA) loss function. Similar to MAA2C, the value function (critic) is centralized. This centralized critic enables agents to effectively learn from the collective experience of all agents, leading to improved performance in MARL tasks.
 
 .. figure:: ../images/coma.png
     :width: 600
@@ -387,20 +377,21 @@ Insights
 Efficiently learning decentralized policies is an essential demand for modern AI systems. However, assigning credit to an agent becomes a significant challenge when only one global reward exists.
 COMA provides one solution for this problem:
 
-#. COMA uses a counterfactual baseline that marginalizes a single agent’s action while keeping the other agents’ actions fixed.
-#. COMA develops a centralized Q that allows the counterfactual baseline to be computed efficiently in a single forward pass.
-#. COMA significantly improves average performance over other multi-agent actor-critic methods under decentralized execution and partial observability settings.
+#. COMA uses a counterfactual baseline that considers the actions of all agents except for the one whose credit is being assigned, making the computation of the credit assignment more effective.
+#. COMA also utilizes a centralized Q value function, allowing for the efficient computation of the counterfactual baseline in a single forward pass.
+#. By incorporating these techniques, COMA significantly improves average performance compared to other multi-agent actor-critic methods under decentralized execution and partial observability settings.
 
 .. admonition:: You Should Know
 
-    - Although COMA is based on stochastic policy gradient methods, it is only evaluated in discrete action space. Extending to continuous action space requires additional tricks on computing critic value (which is not good news for stochastic methods)
-    - In recent years' research, COMA's has been proven to be relatively worse in solving tasks like :ref:`SMAC` and :ref:`MPE` than other on-policy methods, even basic independent methods like :ref:`IA2C`.
+    - While COMA is based on stochastic policy gradient methods, it has only been evaluated in the context of discrete action spaces. Extending this method to continuous action spaces can be challenging and may require additional techniques to compute the critic value. This is because continuous action spaces involve a potentially infinite number of actions, making it difficult to compute the critic value in a tractable manner.
+    - While COMA has shown promising results in improving average performance over other multi-agent actor-critic methods under decentralized execution and partial observability settings, it is worth noting that it may not always outperform other MARL methods in all tasks. It is important to carefully consider the specific task and setting when selecting an appropriate MARL method for a particular application.
 
 Mathematical Form
 ^^^^^^^^^^^^^^^^^^
 
-COMA needs information sharing across agents. Q learning utilizes self-observation and global information,
-including state and actions. The advantage estimation is based on counterfactual baseline, which is different from other algorithms in A2C family.
+COMA requires information sharing across agents. In particular, it uses Q learning which utilizes both self-observation and global information, including state and actions of other agents.
+
+One unique feature of COMA is its use of a counterfactual baseline for advantage estimation, which is different from other algorithms in the A2C family. This allows for more accurate credit assignment to individual agents, even when there is only one global reward.
 
 Q learning: every iteration gives a better Q function.
 
@@ -471,8 +462,7 @@ VDA2C: mixing a bunch of A2C agents' critics
 Workflow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-In the sampling stage, agents share information with others. The information includes others' observations and predicted critic value. After collecting the necessary information from other agents,
-all agents follow the standard A2C training pipeline, except for using the mixed critic value to calculate the GAE and conduct the A2C critic learning procedure.
+During the sampling stage, agents exchange information with other agents, including their observations and predicted critic values. After gathering the required information, all agents follow the usual A2C training pipeline, with the exception of using a mixed critic value to calculate the Generalized Advantage Estimation (GAE) and perform the critic learning procedure for A2C.
 
 .. figure:: ../images/vda2c.png
     :width: 600
@@ -518,8 +508,7 @@ taxonomy label
 Insights
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-VDA2C focuses on credit assignment learning, similar to the joint Q learning family. However, compared to the joint Q learning family, VDA2C adopts on-policy learning and mixes the V function instead of the Q function.
-The sampling efficiency of VDA2C is worse than joint Q learning algorithms. VDA2C is applicable for both discrete and continuous control problems.
+To put it simply, VDA2C is an algorithm that focuses on assigning credit to different actions in multi-agent settings. It does this by using a value function, called the V function, which is different from the Q function used in other similar algorithms. VDA2C uses on-policy learning and is applicable to both discrete and continuous control problems. However, it may not be as efficient as other joint Q learning algorithms in terms of sampling.
 
 Mathematical Form
 ^^^^^^^^^^^^^^^^^^
