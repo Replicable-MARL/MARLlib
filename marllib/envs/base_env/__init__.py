@@ -82,3 +82,9 @@ try:
 except Exception as e:
     ENV_REGISTRY["metadrive"] = str(e)
 
+try:
+    from marllib.envs.base_env.mate import RllibMATE
+    ENV_REGISTRY["mate"] = RllibMATE
+except Exception as e:
+    ENV_REGISTRY["mate"] = str(e)
+

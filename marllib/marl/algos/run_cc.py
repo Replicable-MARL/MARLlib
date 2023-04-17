@@ -57,9 +57,9 @@ def run_cc(exp_info, env, model, stop=None):
         if not policy_mapping_info["all_agents_one_policy"]:
             raise ValueError("in {}, policy can not be shared, change it to 1. group 2. individual".format(map_name))
 
-        policies = {"av"}
+        policies = {"shared_policy"}
         policy_mapping_fn = (
-            lambda agent_id, episode, **kwargs: "av")
+            lambda agent_id, episode, **kwargs: "shared_policy")
 
     elif exp_info["share_policy"] == "group":
         groups = policy_mapping_info["team_prefix"]

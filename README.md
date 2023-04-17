@@ -4,7 +4,9 @@
 
 <h1 align="center"> MARLlib: A Scalable and Efficient Multi-agent Reinforcement Learning Library </h1>
 
+[comment]: <> ([![Organization]&#40;https://img.shields.io/badge/Organization-ReLER_RL-blue.svg&#41;]&#40;https://github.com/Replicable-MARL/MARLlib&#41;)
 
+[comment]: <> ([![Organization]&#40;https://img.shields.io/badge/Organization-PKU_MARL-blue.svg&#41;]&#40;https://github.com/Replicable-MARL/MARLlib&#41;)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)]()
 ![test](https://github.com/Replicable-MARL/MARLlib/workflows/test/badge.svg)
 [![Documentation Status](https://readthedocs.org/projects/marllib/badge/?version=latest)](https://marllib.readthedocs.io/en/latest/)
@@ -75,7 +77,7 @@ Here we provide a table for the comparison of MARLlib and existing work.
 
 ## key features
 
-:beginner: MARLlib offers several key features that make it stand out::
+:beginner: MARLlib offers several key features that make it stand out:
 
 - MARLlib unifies diverse algorithm pipelines with agent-level distributed dataflow, allowing researchers to develop, test, and evaluate MARL algorithms across different tasks and environments.
 - MARLlib supports all task modes, including cooperative, collaborative, competitive, and mixed. This makes it easier for researchers to train and evaluate MARL algorithms across a wide range of tasks.
