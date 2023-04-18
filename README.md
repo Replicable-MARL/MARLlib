@@ -4,7 +4,6 @@
 
 <h1 align="center"> MARLlib: A Scalable and Efficient Multi-agent Reinforcement Learning Library </h1>
 
-
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)]()
 ![test](https://github.com/Replicable-MARL/MARLlib/workflows/test/badge.svg)
 [![Documentation Status](https://readthedocs.org/projects/marllib/badge/?version=latest)](https://marllib.readthedocs.io/en/latest/)
@@ -12,6 +11,8 @@
 [![PyPI version](https://badge.fury.io/py/marllib.svg)](https://badge.fury.io/py/marllib)
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Replicable-MARL/MARLlib/blob/sy_dev/marllib.ipynb)
 [![Awesome](https://awesome.re/badge.svg)](https://marllib.readthedocs.io/en/latest/resources/awesome.html)
+[![Organization](https://img.shields.io/badge/Organization-ReLER_RL-blue.svg)](https://github.com/Replicable-MARL/MARLlib)
+[![Organization](https://img.shields.io/badge/Organization-PKU_MARL-blue.svg)](https://github.com/Replicable-MARL/MARLlib)
 
 
 > __News__:
@@ -54,14 +55,14 @@ Here we provide a table for the comparison of MARLlib and existing work.
 | [MAPPO Benchmark](https://github.com/marlbenchmark/on-policy) |       4 cooperative       |      1     |          share + separate        |          MLP + GRU        |         :x:              |
 | [MAlib](https://github.com/sjtu-marl/malib) |  4 self-play  | 10 | share + group + separate | MLP + LSTM | [![Documentation Status](https://readthedocs.org/projects/malib/badge/?version=latest)](https://malib.readthedocs.io/en/latest/?badge=latest)
 |    [EPyMARL](https://github.com/uoe-agents/epymarl)|        4 cooperative      |    9    |        share + separate       |      GRU             |           :x:            |
-|    **[MARLlib](https://github.com/Replicable-MARL/MARLlib)** |       10 **no task mode restriction**     |    18     |   share + group + separate + **customizable**         |         MLP + CNN + GRU + LSTM          |           [![Documentation Status](https://readthedocs.org/projects/marllib/badge/?version=latest)](https://marllib.readthedocs.io/en/latest/) |
+|    **[MARLlib](https://github.com/Replicable-MARL/MARLlib)** |       11 **no task mode restriction**     |    18     |   share + group + separate + **customizable**         |         MLP + CNN + GRU + LSTM          |           [![Documentation Status](https://readthedocs.org/projects/marllib/badge/?version=latest)](https://marllib.readthedocs.io/en/latest/) |
 
 |   Library   | Github Stars  | Documentation | Issues Open | Activity | Last Update
 |:-------------:|:-------------:|:-------------:|:-------------:|:-------------:|:-------------:|
 |     [PyMARL](https://github.com/oxwhirl/pymarl) | [![GitHub stars](https://img.shields.io/github/stars/oxwhirl/pymarl)](https://github.com/oxwhirl/pymarl)    |       :x: | ![GitHub opened issue](https://img.shields.io/github/issues/oxwhirl/pymarl.svg) | ![GitHub commit-activity](https://img.shields.io/github/commit-activity/y/oxwhirl/pymarl?label=commit) | ![GitHub last commit](https://img.shields.io/github/last-commit/oxwhirl/pymarl?label=last%20update)  
 |   [PyMARL2](https://github.com/hijkzzz/pymarl2)| [![GitHub stars](https://img.shields.io/github/stars/hijkzzz/pymarl2)](https://github.com/hijkzzz/pymarl2)       |       :x:  | ![GitHub opened issue](https://img.shields.io/github/issues/hijkzzz/pymarl2.svg) | ![GitHub commit-activity](https://img.shields.io/github/commit-activity/y/hijkzzz/pymarl2?label=commit) | ![GitHub last commit](https://img.shields.io/github/last-commit/hijkzzz/pymarl2?label=last%20update)  
 | [MAPPO Benchmark](https://github.com/marlbenchmark/on-policy)| [![GitHub stars](https://img.shields.io/github/stars/marlbenchmark/on-policy)](https://github.com/marlbenchmark/on-policy)   |        :x:              | ![GitHub opened issue](https://img.shields.io/github/issues/marlbenchmark/on-policy.svg) | ![GitHub commit-activity](https://img.shields.io/github/commit-activity/y/marlbenchmark/on-policy?label=commit)| ![GitHub last commit](https://img.shields.io/github/last-commit/marlbenchmark/on-policy?label=last%20update)  
-| [MAlib](https://github.com/sjtu-marl/malib) | [![GitHub stars](https://img.shields.io/github/stars/sjtu-marl/malib)](https://github.com/hijkzzz/sjtu-marl/malib) | [![Documentation Status](https://readthedocs.org/projects/malib/badge/?version=latest)](https://malib.readthedocs.io/en/latest/?badge=latest) | ![GitHub opened issue](https://img.shields.io/github/issues/sjtu-marl/malib.svg) | ![GitHub commit-activity](https://img.shields.io/github/commit-activity/y/sjtu-marl/malib?label=commit) | ![GitHub last commit](https://img.shields.io/github/last-commit/sjtu-marl/malib?label=last%20update)  
+| [MAlib](https://github.com/sjtu-marl/malib) | [![GitHub stars](https://img.shields.io/github/stars/sjtu-marl/malib)](https://github.com/sjtu-marl/malib) | [![Documentation Status](https://readthedocs.org/projects/malib/badge/?version=latest)](https://malib.readthedocs.io/en/latest/?badge=latest) | ![GitHub opened issue](https://img.shields.io/github/issues/sjtu-marl/malib.svg) | ![GitHub commit-activity](https://img.shields.io/github/commit-activity/y/sjtu-marl/malib?label=commit) | ![GitHub last commit](https://img.shields.io/github/last-commit/sjtu-marl/malib?label=last%20update)  
 |    [EPyMARL](https://github.com/uoe-agents/epymarl)| [![GitHub stars](https://img.shields.io/github/stars/uoe-agents/epymarl)](https://github.com/uoe-agents/epymarl)        |           :x:            | ![GitHub opened issue](https://img.shields.io/github/issues/uoe-agents/epymarl.svg) | ![GitHub commit-activity](https://img.shields.io/github/commit-activity/y/uoe-agents/epymarl?label=commit) | ![GitHub last commit](https://img.shields.io/github/last-commit/uoe-agents/epymarl?label=last%20update)  
 |    **[MARLlib](https://github.com/Replicable-MARL/MARLlib)** |  [![GitHub stars](https://img.shields.io/github/stars/Replicable-MARL/MARLlib)](https://github.com/Replicable-MARL/MARLlib)  |           [![Documentation Status](https://readthedocs.org/projects/marllib/badge/?version=latest)](https://marllib.readthedocs.io/en/latest/) | ![GitHub opened issue](https://img.shields.io/github/issues/Replicable-MARL/MARLlib.svg) | ![GitHub commit-activity](https://img.shields.io/github/commit-activity/m/Replicable-MARL/MARLlib/sy_dev?label=commit) | ![GitHub last commit](https://img.shields.io/github/last-commit/Replicable-MARL/MARLlib/sy_dev?label=last%20update)  
 
@@ -75,7 +76,7 @@ Here we provide a table for the comparison of MARLlib and existing work.
 
 ## key features
 
-:beginner: MARLlib offers several key features that make it stand out::
+:beginner: MARLlib offers several key features that make it stand out:
 
 - MARLlib unifies diverse algorithm pipelines with agent-level distributed dataflow, allowing researchers to develop, test, and evaluate MARL algorithms across different tasks and environments.
 - MARLlib supports all task modes, including cooperative, collaborative, competitive, and mixed. This makes it easier for researchers to train and evaluate MARL algorithms across a wide range of tasks.
@@ -180,9 +181,10 @@ Most of the popular environments in MARL research are supported by MARLlib:
 | **[MetaDrive](https://github.com/decisionforce/metadrive)**  | collaborative | Partial | Continuous | 1D |
 | **[MAgent](https://www.pettingzoo.ml/magent)** | collaborative + mixed | Partial | Discrete | 2D |
 | **[Pommerman](https://github.com/MultiAgentLearning/playground)**  | collaborative + competitive + mixed | Both | Discrete | 2D |
-| **[MAMuJoCo](https://github.com/schroederdewitt/multiagent_mujoco)**  | cooperative | Partial | Continuous | 1D |
+| **[MAMuJoCo](https://github.com/schroederdewitt/multiagent_mujoco)**  | cooperative | Full | Continuous | 1D |
 | **[GRF](https://github.com/google-research/football)**  | collaborative + mixed | Full | Discrete | 2D |
 | **[Hanabi](https://github.com/deepmind/hanabi-learning-environment)** | cooperative | Partial | Discrete | 1D |
+| **[MATE](https://github.com/XuehaiPan/mate)** | cooperative + mixed | Partial | Both | 1D |
 
 Each environment has a readme file, standing as the instruction for this task, including env settings, installation, and
 important notes.

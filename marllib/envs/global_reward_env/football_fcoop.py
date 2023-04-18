@@ -20,10 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from marllib.envs.base_env.football import RllibGFootball
+from marllib.envs.base_env.football import RLlibGFootball
 
 
-class RllibGFootball_FCOOP(RllibGFootball):
+class RLlibGFootball_FCOOP(RLlibGFootball):
 
     def step(self, action_dict):
         actions = []

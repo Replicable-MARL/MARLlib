@@ -20,80 +20,85 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from lbforaging.foraging import ForagingEnv
 from ray.rllib.env.multi_agent_env import MultiAgentEnv
 from gym.spaces import Dict as GymDict, Discrete, Box
+import time
+import mate
+import numpy as np
 
 policy_mapping_dict = {
     "all_scenario": {
-        "description": "lbf all scenarios",
+        "description": "mate single team multi-agent scenarios",
         "team_prefix": ("agent_",),
         "all_agents_one_policy": True,
         "one_agent_one_policy": True,
     },
 }
 
-class RLlibLBF(MultiAgentEnv):
+
+class RLlibMATE_FCOOP(MultiAgentEnv):
 
     def __init__(self, env_config):
-        map_name = env_config["map_name"]
+        map = env_config["map_name"]
         env_config.pop("map_name", None)
-        field_size_y = env_config.pop("field_size_y", None)
-        field_size_x = env_config.pop("field_size_x", None)
+        self.env = mate.make(map)
 
-        env_config["field_size"] = (field_size_y, field_size_x)
-        self.env = ForagingEnv(**env_config)
+        if env_config["coop_team"] == "camera":
+            if not env_config["continuous_actions_camera"]:
+                self.env = mate.DiscreteCamera(self.env, levels=env_config["discrete_levels"])
+            self.env = mate.MultiCamera(self.env, target_agent=mate.agents.GreedyTargetAgent(seed=0))
+        else:  # target
+            if not env_config["continuous_actions_target"]:
+                self.env = mate.DiscreteTarget(self.env, levels=env_config["discrete_levels"])
+            self.env = mate.MultiTarget(self.env, camera_agent=mate.agents.HeuristicCameraAgent(seed=0))
 
-        self.action_space = self.env.action_space[0]
-        self.observation_space = GymDict({"obs": Box(
-            low=-100.0,
-            high=100.0,
-            shape=(self.env.observation_space[0].shape[0],),
-            dtype=self.env.observation_space[0].dtype)})
-        self.num_agents = self.env.n_agents
+        self.action_space = self.env.action_space.spaces[0]
+        self.observation_space = GymDict({"obs": self.env.observation_space.spaces[0]})
+        self.num_agents = self.env.num_teammates
         self.agents = ["agent_{}".format(i) for i in range(self.num_agents)]
-        env_config["field_size_y"] = field_size_y
-        env_config["field_size_x"] = field_size_x
-        env_config["map_name"] = map_name
+        env_config["map_name"] = map
         self.env_config = env_config
 
     def reset(self):
         original_obs = self.env.reset()
         obs = {}
-        for x in range(self.num_agents):
-            obs["agent_%d" % x] = {
-                "obs": original_obs[x]
-            }
+        for i, name in enumerate(self.agents):
+            obs[name] = {"obs": original_obs[i]}
         return obs
 
     def step(self, action_dict):
-        actions = []
-        for key, value in sorted(action_dict.items()):
-            actions.append(value)
-        o, r, d, i = self.env.step(tuple(actions))
+        action = []
+        for name in self.agents:
+            action.append(action_dict[name])
+
+        joint_observation, team_reward, done, infos = self.env.step(np.array(action))
+
         rewards = {}
         obs = {}
-        infos = {}
-        done_flag = False
-        for pos, key in enumerate(sorted(action_dict.keys())):
-            infos[key] = i
-            rewards[key] = r[pos]
-            obs[key] = {
-                "obs": o[pos]
+
+        for i, name in enumerate(self.agents):
+            rewards[name] = team_reward
+            obs[name] = {
+                "obs": joint_observation[i]
             }
-            done_flag = d[pos] or done_flag
-        dones = {"__all__": done_flag}
-        return obs, rewards, dones, infos
+
+        dones = {"__all__": done}
+        return obs, rewards, dones, {}
+
+    def close(self):
+        self.env.close()
+
+    def render(self, mode=None):
+        self.env.render()
+        time.sleep(0.05)
+        return True
 
     def get_env_info(self):
         env_info = {
             "space_obs": self.observation_space,
             "space_act": self.action_space,
             "num_agents": self.num_agents,
-            "episode_limit": self.env_config["max_episode_steps"],
+            "episode_limit": 2000,
             "policy_mapping_info": policy_mapping_dict
         }
         return env_info
-
-    def close(self):
-        self.env.close()

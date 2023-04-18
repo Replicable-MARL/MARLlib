@@ -23,14 +23,14 @@
 ENV_REGISTRY = {}
 
 try:
-    from marllib.envs.base_env.mpe import RllibMPE
-    ENV_REGISTRY["mpe"] = RllibMPE
+    from marllib.envs.base_env.mpe import RLlibMPE
+    ENV_REGISTRY["mpe"] = RLlibMPE
 except Exception as e:
     ENV_REGISTRY["mpe"] = str(e)
 
 try:
-    from marllib.envs.base_env.mamujoco import RllibMAMujoco
-    ENV_REGISTRY["mamujoco"] = RllibMAMujoco
+    from marllib.envs.base_env.mamujoco import RLlibMAMujoco
+    ENV_REGISTRY["mamujoco"] = RLlibMAMujoco
 except Exception as e:
     ENV_REGISTRY["mamujoco"] = str(e)
 
@@ -41,32 +41,32 @@ except Exception as e:
     ENV_REGISTRY["smac"] = str(e)
 
 try:
-    from marllib.envs.base_env.football import RllibGFootball
-    ENV_REGISTRY["football"] = RllibGFootball
+    from marllib.envs.base_env.football import RLlibGFootball
+    ENV_REGISTRY["football"] = RLlibGFootball
 except Exception as e:
     ENV_REGISTRY["football"] = str(e)
 
 try:
-    from marllib.envs.base_env.magent import RllibMAgent
-    ENV_REGISTRY["magent"] = RllibMAgent
+    from marllib.envs.base_env.magent import RLlibMAgent
+    ENV_REGISTRY["magent"] = RLlibMAgent
 except Exception as e:
     ENV_REGISTRY["magent"] = str(e)
 
 try:
-    from marllib.envs.base_env.rware import RllibRWARE
-    ENV_REGISTRY["rware"] = RllibRWARE
+    from marllib.envs.base_env.rware import RLlibRWARE
+    ENV_REGISTRY["rware"] = RLlibRWARE
 except Exception as e:
     ENV_REGISTRY["rware"] = str(e)
 
 try:
-    from marllib.envs.base_env.lbf import RllibLBF
-    ENV_REGISTRY["lbf"] = RllibLBF
+    from marllib.envs.base_env.lbf import RLlibLBF
+    ENV_REGISTRY["lbf"] = RLlibLBF
 except Exception as e:
     ENV_REGISTRY["lbf"] = str(e)
 
 try:
-    from marllib.envs.base_env.pommerman import RllibPommerman
-    ENV_REGISTRY["pommerman"] = RllibPommerman
+    from marllib.envs.base_env.pommerman import RLlibPommerman
+    ENV_REGISTRY["pommerman"] = RLlibPommerman
 except Exception as e:
     ENV_REGISTRY["pommerman"] = str(e)
 
@@ -77,8 +77,14 @@ except Exception as e:
     ENV_REGISTRY["hanabi"] = str(e)
 
 try:
-    from marllib.envs.base_env.metadrive import RllibMetaDrive
-    ENV_REGISTRY["metadrive"] = RllibMetaDrive
+    from marllib.envs.base_env.metadrive import RLlibMetaDrive
+    ENV_REGISTRY["metadrive"] = RLlibMetaDrive
 except Exception as e:
     ENV_REGISTRY["metadrive"] = str(e)
+
+try:
+    from marllib.envs.base_env.mate import RLlibMATE
+    ENV_REGISTRY["mate"] = RLlibMATE
+except Exception as e:
+    ENV_REGISTRY["mate"] = str(e)
 

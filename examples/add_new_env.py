@@ -63,7 +63,7 @@ policy_mapping_dict = {
 }
 
 # must inherited from MultiAgentEnv class
-class RllibMAGym(MultiAgentEnv):
+class RLlibMAGym(MultiAgentEnv):
 
     def __init__(self, env_config):
         map = env_config["map_name"]
@@ -123,7 +123,7 @@ class RllibMAGym(MultiAgentEnv):
 
 if __name__ == '__main__':
     # register new env
-    ENV_REGISTRY["magym"] = RllibMAGym
+    ENV_REGISTRY["magym"] = RLlibMAGym
     # initialize env
     env = marl.make_env(environment_name="magym", map_name="Checkers")
     # pick mappo algorithms

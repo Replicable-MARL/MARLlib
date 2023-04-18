@@ -205,10 +205,8 @@ def build_model(
         raise NotImplementedError("{} not supported agent model arch".format(model_preference["core_arch"]))
 
     if len(environment[0].observation_space.spaces["obs"].shape) == 1:
-        print("use fc encoder")
         encoder = "fc_encoder"
     else:
-        print("use cnn encoder")
         encoder = "cnn_encoder"
 
     # encoder config

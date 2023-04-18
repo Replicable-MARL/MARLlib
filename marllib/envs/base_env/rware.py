@@ -42,7 +42,7 @@ policy_mapping_dict = {
 }
 
 
-class RllibRWARE(MultiAgentEnv):
+class RLlibRWARE(MultiAgentEnv):
 
     def __init__(self, env_config):
 

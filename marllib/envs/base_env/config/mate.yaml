@@ -20,31 +20,15 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from marllib.envs.base_env.lbf import RLlibLBF
+env: mate
+# 'MATE-4v2-9-v0''MATE-4v2-0-v0''MATE-4v4-9-v0''MATE-4v4-0-v0''MATE-4v8-9-v0''MATE-4v8-0-v0''MATE-8v8-9-v0''MATE-8v8-0-v0'
+env_args:
+  map_name: "MATE-4v2-9-v0"
+  continuous_actions_camera: Discrete
+  continuous_actions_target: True
+  discrete_levels: 5
+  coop_team: "camera" # or "target"
 
-
-class RLlibLBF_FCOOP(RLlibLBF):
-
-    def __init__(self, env_config):
-        env_config["force_coop"] = True
-        super().__init__(env_config)
-
-    def step(self, action_dict):
-        actions = []
-        for key, value in sorted(action_dict.items()):
-            actions.append(value)
-        o, r, d, i = self.env.step(tuple(actions))
-        r = sum(r)
-        rewards = {}
-        obs = {}
-        infos = {}
-        done_flag = False
-        for pos, key in enumerate(sorted(action_dict.keys())):
-            infos[key] = i
-            rewards[key] = r/self.num_agents
-            obs[key] = {
-                "obs": o[pos]
-            }
-            done_flag = d[pos] or done_flag
-        dones = {"__all__": done_flag}
-        return obs, rewards, dones, infos
+mask_flag: False
+global_state_flag: False
+opp_action_in_cc: True

@@ -21,7 +21,7 @@
 # SOFTWARE.
 
 import numpy as np
-from marllib.envs.base_env.pommerman import RllibPommerman, get_obs_dict
+from marllib.envs.base_env.pommerman import RLlibPommerman, get_obs_dict
 
 
 """
@@ -31,7 +31,7 @@ from marllib.envs.base_env.pommerman import RllibPommerman, get_obs_dict
 """
 
 
-class RllibPommerman_FCOOP(RllibPommerman):
+class RLlibPommerman_FCOOP(RLlibPommerman):
 
     def step(self, action_dict):
         # fake action

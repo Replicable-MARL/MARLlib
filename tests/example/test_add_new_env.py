@@ -22,7 +22,7 @@
 
 from marllib import marl
 from marllib.envs.base_env import ENV_REGISTRY
-from examples.add_new_env import RllibMAGym
+from examples.add_new_env import RLlibMAGym
 import unittest
 
 
@@ -30,7 +30,7 @@ class TestAddEnv(unittest.TestCase):
 
     def test_add_env(self):
         # register new env
-        ENV_REGISTRY["magym"] = RllibMAGym
+        ENV_REGISTRY["magym"] = RLlibMAGym
         # initialize env
         env = marl.make_env(environment_name="magym", map_name="Checkers")
         # pick mappo algorithms

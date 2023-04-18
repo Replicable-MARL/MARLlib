@@ -20,4 +20,4 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from marllib.envs.base_env.mamujoco import RllibMAMujoco as RllibMAMujoco_FCOOP
+from marllib.envs.base_env.mamujoco import RLlibMAMujoco as RLlibMAMujoco_FCOOP

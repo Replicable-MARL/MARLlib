@@ -48,7 +48,7 @@ policy_mapping_dict = {
     },
 }
 
-class RllibGFootball(MultiAgentEnv):
+class RLlibGFootball(MultiAgentEnv):
     """An example of a wrapper for GFootball to make it compatible with rllib."""
 
     def __init__(self, env_config):

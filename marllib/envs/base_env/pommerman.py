@@ -47,7 +47,7 @@ policy_mapping_dict = {
     },
 }
 
-class RllibPommerman(MultiAgentEnv):
+class RLlibPommerman(MultiAgentEnv):
 
     def __init__(self, env_config):
         agent_position = env_config["agent_position"]

@@ -47,7 +47,7 @@ policy_mapping_dict = {
 
 
 def dynamic_inheritance(super_class):
-    class RllibMetaDrive_Scenario(super_class):
+    class RLlibMetaDrive_Scenario(super_class):
 
         def __init__(self, config):
             map = config["map_name"]
@@ -63,10 +63,10 @@ def dynamic_inheritance(super_class):
             update_neighbours_map(self.distance_map, self.vehicles, reward, info, self.config)
             return obs, reward, done, info
 
-    return RllibMetaDrive_Scenario
+    return RLlibMetaDrive_Scenario
 
 
-class RllibMetaDrive(MultiAgentEnv):
+class RLlibMetaDrive(MultiAgentEnv):
 
     def __init__(self, env_config):
         map = env_config["map_name"]
