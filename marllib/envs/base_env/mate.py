@@ -25,6 +25,7 @@ from gym.spaces import Dict as GymDict, Discrete, Box
 import time
 import mate
 
+
 policy_mapping_dict = {
     "all_scenario": {
         "description": "mate mixed scenarios",
@@ -34,13 +35,16 @@ policy_mapping_dict = {
     },
 }
 
-
-class RllibMATE(MultiAgentEnv):
+class RLlibMATE(MultiAgentEnv):
 
     def __init__(self, env_config):
         map = env_config["map_name"]
         env_config.pop("map_name", None)
-        self.env = mate.make('MultiAgentTracking-v0')
+        self.env = mate.make(map)
+        if not env_config["continuous_actions_camera"]:
+            self.env = mate.DiscreteCamera(self.env, levels=env_config["discrete_levels"])
+        if not env_config["continuous_actions_target"]:
+            self.env = mate.DiscreteTarget(self.env, levels=env_config["discrete_levels"])
         self.action_space_camera = self.env.action_space.spaces[0].spaces[0]
         self.action_space_target = self.env.action_space.spaces[1].spaces[0]
 
@@ -118,6 +122,7 @@ class RllibMATE(MultiAgentEnv):
             "space_obs_target": self.observation_space_target,
             "space_act_target": self.action_space_target,
             "num_agents": self.num_agents,
+            "agents": self.agents,
             "episode_limit": 2000,
             "policy_mapping_info": policy_mapping_dict
         }

@@ -85,7 +85,7 @@ policy_mapping_dict = {
 }
 
 
-class RllibMAgent(MultiAgentEnv):
+class RLlibMAgent(MultiAgentEnv):
 
     def __init__(self, env_config):
         map = env_config.pop("map_name", None)

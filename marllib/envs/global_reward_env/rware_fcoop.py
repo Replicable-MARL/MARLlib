@@ -20,10 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from marllib.envs.base_env.rware import RllibRWARE
+from marllib.envs.base_env.rware import RLlibRWARE
 
 
-class RllibRWARE_FCOOP(RllibRWARE):
+class RLlibRWARE_FCOOP(RLlibRWARE):
 
     def step(self, action_dict):
         actions = []

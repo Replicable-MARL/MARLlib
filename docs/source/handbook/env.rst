@@ -549,3 +549,49 @@ To install, execute the following:
     cd build
     cmake ..
     make -j
+
+
+.. _MATE:
+
+MATE
+==============
+
+.. figure:: ../images/env_mate.png
+    :align: center
+
+Multi-Agent Tracking Environment (MATE) is an asymmetric two-team zero-sum stochastic game with partial observations, and each team has multiple agents (multiplayer). Intra-team communications are allowed, but inter-team communications are prohibited. It is cooperative among teammates, but it is competitive among teams (opponents).
+
+Official Link: https://github.com/XuehaiPan/mate
+
+.. list-table::
+   :widths: 25 25
+   :header-rows: 0
+
+   * - ``Original Learning Mode``
+     - Cooperative + Mixed
+   * - ``MARLlib Learning Mode``
+     - Cooperative + Mixed
+   * - ``Observability``
+     - Partial
+   * - ``Action Space``
+     - Discrete + Continuous
+   * - ``Observation Space Dim``
+     - 1D
+   * - ``Action Mask``
+     - No
+   * - ``Global State``
+     - No
+   * - ``Global State Space Dim``
+     - /
+   * - ``Reward``
+     - Dense
+   * - ``Agent-Env Interact Mode``
+     - Simultaneous
+
+
+Installation
+-----------------
+
+.. code-block:: shell
+
+    pip3 install git+https://github.com/XuehaiPan/mate.git#egg=mate

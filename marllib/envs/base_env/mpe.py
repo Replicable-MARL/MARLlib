@@ -90,7 +90,7 @@ policy_mapping_dict = {
 }
 
 
-class RllibMPE(MultiAgentEnv):
+class RLlibMPE(MultiAgentEnv):
 
     def __init__(self, env_config):
         map = env_config["map_name"]

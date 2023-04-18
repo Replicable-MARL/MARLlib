@@ -105,14 +105,36 @@ def run_il(exp_info, env, model, stop=None):
     elif exp_info["share_policy"] == "individual":
         if not policy_mapping_info["one_agent_one_policy"]:
             raise ValueError("in {}, agent number too large, we disable no sharing function".format(map_name))
+        if "space_obs" in env_info:
+            print("homogeneous action space")
+            policies = {
+                "policy_{}".format(i): (None, env_info["space_obs"], env_info["space_act"], {}) for i in
+                range(env_info["num_agents"])
+            }
+            policy_ids = list(policies.keys())
+            policy_mapping_fn = tune.function(
+                lambda agent_id: policy_ids[agent_name_ls.index(agent_id)])
+        else:
+            print("heterogeneous action space")
+            action_spec_dict = {}
+            obs_spec_dict = {}
+            for key in env_info.keys():
+                if "space_obs" in key:
+                    g_name = key.split("space_obs_")[1]
+                    obs_spec_dict[g_name] = env_info[key]
+                if "space_act" in key:
+                    g_name = key.split("space_act_")[1]
+                    action_spec_dict[g_name] = env_info[key]
 
-        policies = {
-            "policy_{}".format(i): (None, env_info["space_obs"], env_info["space_act"], {}) for i in
-            range(env_info["num_agents"])
-        }
-        policy_ids = list(policies.keys())
-        policy_mapping_fn = tune.function(
-            lambda agent_id: policy_ids[agent_name_ls.index(agent_id)])
+            policies = {}
+
+            for agent in env_info["agents"]:
+                for g_name in action_spec_dict.keys():
+                    if g_name in agent:
+                        policies[agent] = PolicySpec(None, obs_spec_dict[g_name], action_spec_dict[g_name], {})
+
+            policy_mapping_fn = tune.function(
+                lambda agent_id: agent_id)
 
     else:
         raise ValueError("wrong share_policy {}".format(exp_info["share_policy"]))

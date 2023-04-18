@@ -21,10 +21,13 @@
 # SOFTWARE.
 
 env: mate
-
+# 'MATE-4v2-9-v0''MATE-4v2-0-v0''MATE-4v4-9-v0''MATE-4v4-0-v0''MATE-4v8-9-v0''MATE-4v8-0-v0''MATE-8v8-9-v0''MATE-8v8-0-v0'
 env_args:
-  map_name: "MultiAgentTracking" # others can be found in mpe.py
-  continuous_actions: True
+  map_name: "MATE-4v2-9-v0"
+  continuous_actions_camera: Discrete
+  continuous_actions_target: True
+  discrete_levels: 5
+  coop_team: "camera" # or "target"
 
 mask_flag: False
 global_state_flag: False

@@ -20,12 +20,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from marllib.envs.base_env.magent import RllibMAgent
+from marllib.envs.base_env.magent import RLlibMAgent
 
 legal_scenarios = ["gather"]
 
 
-class RllibMAgent_FCOOP(RllibMAgent):
+class RLlibMAgent_FCOOP(RLlibMAgent):
 
     def __init__(self, env_config):
         if env_config["map_name"] not in legal_scenarios:

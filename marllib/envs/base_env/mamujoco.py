@@ -90,7 +90,7 @@ policy_mapping_dict = {
 }
 
 
-class RllibMAMujoco(MultiAgentEnv):
+class RLlibMAMujoco(MultiAgentEnv):
 
     def __init__(self, env_config):
         self.env_config = env_args_dict[env_config["map_name"]]

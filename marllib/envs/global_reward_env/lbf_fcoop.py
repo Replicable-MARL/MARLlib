@@ -20,10 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from marllib.envs.base_env.lbf import RllibLBF
+from marllib.envs.base_env.lbf import RLlibLBF
 
 
-class RllibLBF_FCOOP(RllibLBF):
+class RLlibLBF_FCOOP(RLlibLBF):
 
     def __init__(self, env_config):
         env_config["force_coop"] = True

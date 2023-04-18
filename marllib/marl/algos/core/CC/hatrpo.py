@@ -21,7 +21,7 @@
 # SOFTWARE.
 
 """
-Implement TRPO and HATRPO in Ray Rllib
+Implement TRPO and HATRPO in Ray RLlib
 __author__: minquan
 __data__: May-15
 """

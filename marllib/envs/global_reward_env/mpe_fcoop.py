@@ -20,12 +20,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from marllib.envs.base_env.mpe import RllibMPE
+from marllib.envs.base_env.mpe import RLlibMPE
 
 legal_scenarios = ["simple_spread", "simple_reference", "simple_speaker_listener"]
 
 
-class RllibMPE_FCOOP(RllibMPE):
+class RLlibMPE_FCOOP(RLlibMPE):
 
     def __init__(self, env_config):
         if env_config["map_name"] not in legal_scenarios:
