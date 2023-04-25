@@ -595,3 +595,51 @@ Installation
 .. code-block:: shell
 
     pip3 install git+https://github.com/XuehaiPan/mate.git#egg=mate
+
+
+.. _GoBigger:
+
+GoBigger
+==============
+.. only:: html
+
+    .. figure:: images/env_gobigger.gif
+       :width: 320
+       :align: center
+
+
+GoBigger is a game engine that offers an efficient and easy-to-use platform for agar-like game development. It provides a variety of interfaces specifically designed for game AI development. The game mechanics of GoBigger are similar to those of Agar, a popular massive multiplayer online action game developed by Matheus Valadares of Brazil. The objective of GoBigger is for players to navigate one or more circular balls across a map, consuming Food Balls and smaller balls to increase their size while avoiding larger balls that can consume them. Each player starts with a single ball, but can divide it into two when it reaches a certain size, giving them control over multiple balls.
+Official Link: https://github.com/opendilab/GoBigger
+
+.. list-table::
+   :widths: 25 25
+   :header-rows: 0
+
+   * - ``Original Learning Mode``
+     - Cooperative + Mixed
+   * - ``MARLlib Learning Mode``
+     - Cooperative + Mixed
+   * - ``Observability``
+     - Partial + Full
+   * - ``Action Space``
+     - Continuous
+   * - ``Observation Space Dim``
+     - 1D
+   * - ``Action Mask``
+     - No
+   * - ``Global State``
+     - No
+   * - ``Global State Space Dim``
+     - /
+   * - ``Reward``
+     - Dense
+   * - ``Agent-Env Interact Mode``
+     - Simultaneous
+
+
+Installation
+-----------------
+
+.. code-block:: shell
+
+    conda install -c opendilab gobigger

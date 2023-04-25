@@ -11,7 +11,8 @@ This list describes the planned features including breaking changes.
 - [ ] manual training, refer to issue: https://github.com/Replicable-MARL/MARLlib/issues/86#issuecomment-1468188682
 - [ ] new environments
   - [x] MATE: https://github.com/UnrealTracking/mate
-  - [ ] Go-Bigger: https://github.com/opendilab/GoBigger
+  - [x] Go-Bigger: https://github.com/opendilab/GoBigger
   - [ ] Voltage Control: https://github.com/Future-Power-Networks/MAPDN
   - [ ] Overcooked: https://github.com/HumanCompatibleAI/overcooked_ai
-- [ ] Support Transformer architecture
+  - [ ] CloseAirCombat: https://github.com/liuqh16/CloseAirCombat
+- [ ] Support Transformers
