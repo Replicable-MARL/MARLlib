@@ -601,10 +601,11 @@ Installation
 
 GoBigger
 ==============
+.. only:: html
 
-.. figure:: images/env_gobigger.gif
-   :width: 320
-   :align: center
+    .. figure:: images/env_gobigger.gif
+       :width: 320
+       :align: center
 
 
 GoBigger is a game engine that offers an efficient and easy-to-use platform for agar-like game development. It provides a variety of interfaces specifically designed for game AI development. The game mechanics of GoBigger are similar to those of Agar, a popular massive multiplayer online action game developed by Matheus Valadares of Brazil. The objective of GoBigger is for players to navigate one or more circular balls across a map, consuming Food Balls and smaller balls to increase their size while avoiding larger balls that can consume them. Each player starts with a single ball, but can divide it into two when it reaches a certain size, giving them control over multiple balls.
