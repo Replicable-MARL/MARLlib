@@ -20,20 +20,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# VDPPO parameters
+env: gobigger
 
-# Detailed explanation for each hyper parameter can be found in ray/rllib/agents/ppo/ippo.py
-
-algo_args:
-  use_gae: True
-  lambda: 1.0
-  kl_coeff: 0.2
-  batch_episode: 2
-  num_sgd_iter: 5
-  vf_loss_coeff: 1.0
-  lr: 0.0005
-  entropy_coeff: 0.01
-  clip_param: 0.3
-  vf_clip_param: 10.0
-  batch_mode: "truncate_episodes"
-  mixer: "qmix" # qmix or vdn
+env_args:
+  map_name: "st_t1p2" #  st(andard)_t(eam)2p(layer)2
+  #num_teams: 1
+  #num_agents: 2
+  frame_limit: 1600
+mask_flag: False
+global_state_flag: False
+opp_action_in_cc: True
+fixed_batch_timesteps: 3200 # optional, all scenario will use this batch size, only valid for on-policy algorithms

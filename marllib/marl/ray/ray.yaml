@@ -24,7 +24,7 @@
 
 local_mode: False # True for debug mode only
 share_policy: "group" #  individual(separate) / group(division) / all(share)
-evaluation_interval: 10 # evaluate model every 10 training iterations
+evaluation_interval: 50 # evaluate model every 10 training iterations
 framework: "torch"
 num_workers: 1 # thread number
 num_gpus: 1 # gpu to use
