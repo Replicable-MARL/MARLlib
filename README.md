@@ -14,11 +14,7 @@
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Replicable-MARL/MARLlib/blob/sy_dev/marllib.ipynb)
 [![Organization](https://img.shields.io/badge/Organization-ReLER_RL-blue.svg)](https://github.com/Replicable-MARL/MARLlib)
 [![Organization](https://img.shields.io/badge/Organization-PKU_MARL-blue.svg)](https://github.com/Replicable-MARL/MARLlib)
-
-MARL algorithms: [![Awesome](https://awesome.re/badge.svg)](https://marllib.readthedocs.io/en/latest/resources/awesome.html)
-
-MARL environments: [![Awesome](https://awesome.re/badge.svg)](https://marllib.readthedocs.io/en/latest/handbook/env.html)
-
+[![Awesome](https://awesome.re/badge.svg)](https://marllib.readthedocs.io/en/latest/resources/awesome.html)
 
 > __News__:
 > We are excited to announce that a major update has just been released. For detailed version information, please refer to the [version info](https://github.com/Replicable-MARL/MARLlib/releases/tag/1.0.2).
@@ -326,7 +322,11 @@ More tutorial documentations are available [here](https://marllib.readthedocs.io
 
 ## Awesome List
 
-A collection of research and review papers of multi-agent reinforcement learning (MARL) is available [here](https://marllib.readthedocs.io/en/latest/resources/awesome.html). The papers have been organized based on their publication date and their evaluation of the corresponding environments.
+A collection of research and review papers of multi-agent reinforcement learning (MARL) is available. The papers have been organized based on their publication date and their evaluation of the corresponding environments.
+
+Algorithms: [![Awesome](https://awesome.re/badge.svg)](https://marllib.readthedocs.io/en/latest/resources/awesome.html)
+Environments: [![Awesome](https://awesome.re/badge.svg)](https://marllib.readthedocs.io/en/latest/handbook/env.html)
+
 
 ## Community
 
