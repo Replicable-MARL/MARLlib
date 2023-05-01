@@ -47,7 +47,6 @@ mappo.render(env, model, share_policy='group', restore_path='path_to_checkpoint'
 ```
 
 
-
 ## Why MARLlib?
 
 Here we provide a table for the comparison of MARLlib and existing work.
@@ -299,7 +298,7 @@ mappo.render(
 ```
 </details>
 
-## Benchmark results
+## Results
 
 All results are listed [here](https://github.com/Replicable-MARL/MARLlib/tree/main/results).
 
