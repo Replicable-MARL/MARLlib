@@ -94,3 +94,9 @@ try:
 except Exception as e:
     ENV_REGISTRY["gobigger"] = str(e)
 
+
+try:
+    from marllib.envs.base_env.overcooked import RLlibOverCooked
+    ENV_REGISTRY["overcooked"] = RLlibOverCooked
+except Exception as e:
+    ENV_REGISTRY["overcooked"] = str(e)
