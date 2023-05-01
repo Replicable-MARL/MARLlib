@@ -603,7 +603,7 @@ GoBigger
 ==============
 .. only:: html
 
-    .. figure:: images/env_gobigger.png
+    .. figure:: ../images/env_gobigger.png
        :width: 320
        :align: center
 
@@ -651,7 +651,7 @@ Overcooked-AI
 ==============
 .. only:: html
 
-    .. figure:: images/env_overcooked.png
+    .. figure:: ../images/env_overcooked.png
        :width: 320
        :align: center
 

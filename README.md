@@ -19,8 +19,8 @@
 
 | :exclamation:  News |
 |:-----------------------------------------|
-| [21 Mar 2023] We are excited to announce that a major update has just been released. For detailed version information, please refer to the [version info](https://github.com/Replicable-MARL/MARLlib/releases/tag/1.0.2).|
-| [1 May 2023] Exciting news! MARLlib now supports three more popular tasks: [MATE](https://github.com/XuehaiPan/mate), [GoBigger](https://github.com/opendilab/GoBigger), [Overcooked-AI](https://github.com/HumanCompatibleAI/overcooked_ai). Give them a try!|
+| **March 2023** We are excited to announce that a major update has just been released. For detailed version information, please refer to the [version info](https://github.com/Replicable-MARL/MARLlib/releases/tag/1.0.2).|
+| **May 2023** Exciting news! MARLlib now supports three more popular tasks: [MATE](https://github.com/XuehaiPan/mate), [GoBigger](https://github.com/opendilab/GoBigger), [Overcooked-AI](https://github.com/HumanCompatibleAI/overcooked_ai). Give them a try!|
 
 
 **Multi-agent Reinforcement Learning Library ([MARLlib](https://arxiv.org/abs/2210.13708))** is ***a MARL library*** that utilizes [**Ray**](https://github.com/ray-project/ray) and one of its toolkits [**RLlib**](https://github.com/ray-project/ray/tree/master/rllib). It offers a comprehensive platform for developing, training, and testing MARL algorithms across various tasks and environments. 
