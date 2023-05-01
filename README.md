@@ -16,8 +16,11 @@
 [![Organization](https://img.shields.io/badge/Organization-PKU_MARL-blue.svg)](https://github.com/Replicable-MARL/MARLlib)
 [![Awesome](https://awesome.re/badge.svg)](https://marllib.readthedocs.io/en/latest/resources/awesome.html)
 
-> __News__:
-> We are excited to announce that a major update has just been released. For detailed version information, please refer to the [version info](https://github.com/Replicable-MARL/MARLlib/releases/tag/1.0.2).
+
+| :exclamation:  News |
+|:-----------------------------------------|
+| [21 Mar 2023] We are excited to announce that a major update has just been released. For detailed version information, please refer to the [version info](https://github.com/Replicable-MARL/MARLlib/releases/tag/1.0.2).|
+| [1 May 2023] Exciting news! MARLlib now supports three more popular tasks: [MATE](https://github.com/XuehaiPan/mate), [GoBigger](https://github.com/opendilab/GoBigger), [Overcooked-AI](https://github.com/HumanCompatibleAI/overcooked_ai). Give them a try!|
 
 
 **Multi-agent Reinforcement Learning Library ([MARLlib](https://arxiv.org/abs/2210.13708))** is ***a MARL library*** that utilizes [**Ray**](https://github.com/ray-project/ray) and one of its toolkits [**RLlib**](https://github.com/ray-project/ray/tree/master/rllib). It offers a comprehensive platform for developing, training, and testing MARL algorithms across various tasks and environments. 
@@ -56,7 +59,7 @@ Here we provide a table for the comparison of MARLlib and existing work.
 | [MAPPO Benchmark](https://github.com/marlbenchmark/on-policy) |       4 cooperative       |      1     |          share + separate        |          MLP + GRU        |         :x:              |
 | [MAlib](https://github.com/sjtu-marl/malib) |  4 self-play  | 10 | share + group + separate | MLP + LSTM | [![Documentation Status](https://readthedocs.org/projects/malib/badge/?version=latest)](https://malib.readthedocs.io/en/latest/?badge=latest)
 |    [EPyMARL](https://github.com/uoe-agents/epymarl)|        4 cooperative      |    9    |        share + separate       |      GRU             |           :x:            |
-|    **[MARLlib](https://github.com/Replicable-MARL/MARLlib)** |       12 **no task mode restriction**     |    18     |   share + group + separate + **customizable**         |         MLP + CNN + GRU + LSTM          |           [![Documentation Status](https://readthedocs.org/projects/marllib/badge/?version=latest)](https://marllib.readthedocs.io/en/latest/) |
+|    **[MARLlib](https://github.com/Replicable-MARL/MARLlib)** |       13 **no task mode restriction**     |    18     |   share + group + separate + **customizable**         |         MLP + CNN + GRU + LSTM          |           [![Documentation Status](https://readthedocs.org/projects/marllib/badge/?version=latest)](https://marllib.readthedocs.io/en/latest/) |
 
 |   Library   | Github Stars  | Documentation | Issues Open | Activity | Last Update
 |:-------------:|:-------------:|:-------------:|:-------------:|:-------------:|:-------------:|
@@ -65,7 +68,7 @@ Here we provide a table for the comparison of MARLlib and existing work.
 | [MAPPO Benchmark](https://github.com/marlbenchmark/on-policy)| [![GitHub stars](https://img.shields.io/github/stars/marlbenchmark/on-policy)](https://github.com/marlbenchmark/on-policy)   |        :x:              | ![GitHub opened issue](https://img.shields.io/github/issues/marlbenchmark/on-policy.svg) | ![GitHub commit-activity](https://img.shields.io/github/commit-activity/y/marlbenchmark/on-policy?label=commit)| ![GitHub last commit](https://img.shields.io/github/last-commit/marlbenchmark/on-policy?label=last%20update)  
 | [MAlib](https://github.com/sjtu-marl/malib) | [![GitHub stars](https://img.shields.io/github/stars/sjtu-marl/malib)](https://github.com/sjtu-marl/malib) | [![Documentation Status](https://readthedocs.org/projects/malib/badge/?version=latest)](https://malib.readthedocs.io/en/latest/?badge=latest) | ![GitHub opened issue](https://img.shields.io/github/issues/sjtu-marl/malib.svg) | ![GitHub commit-activity](https://img.shields.io/github/commit-activity/y/sjtu-marl/malib?label=commit) | ![GitHub last commit](https://img.shields.io/github/last-commit/sjtu-marl/malib?label=last%20update)  
 |    [EPyMARL](https://github.com/uoe-agents/epymarl)| [![GitHub stars](https://img.shields.io/github/stars/uoe-agents/epymarl)](https://github.com/uoe-agents/epymarl)        |           :x:            | ![GitHub opened issue](https://img.shields.io/github/issues/uoe-agents/epymarl.svg) | ![GitHub commit-activity](https://img.shields.io/github/commit-activity/y/uoe-agents/epymarl?label=commit) | ![GitHub last commit](https://img.shields.io/github/last-commit/uoe-agents/epymarl?label=last%20update)  
-|    **[MARLlib](https://github.com/Replicable-MARL/MARLlib)** |  [![GitHub stars](https://img.shields.io/github/stars/Replicable-MARL/MARLlib)](https://github.com/Replicable-MARL/MARLlib)  |           [![Documentation Status](https://readthedocs.org/projects/marllib/badge/?version=latest)](https://marllib.readthedocs.io/en/latest/) | ![GitHub opened issue](https://img.shields.io/github/issues/Replicable-MARL/MARLlib.svg) | ![GitHub commit-activity](https://img.shields.io/github/commit-activity/m/Replicable-MARL/MARLlib/sy_dev?label=commit) | ![GitHub last commit](https://img.shields.io/github/last-commit/Replicable-MARL/MARLlib/sy_dev?label=last%20update)  
+|    **[MARLlib](https://github.com/Replicable-MARL/MARLlib)** |  [![GitHub stars](https://img.shields.io/github/stars/Replicable-MARL/MARLlib)](https://github.com/Replicable-MARL/MARLlib)  |           [![Documentation Status](https://readthedocs.org/projects/marllib/badge/?version=latest)](https://marllib.readthedocs.io/en/latest/) | ![GitHub opened issue](https://img.shields.io/github/issues/Replicable-MARL/MARLlib.svg) | ![GitHub commit-activity](https://img.shields.io/github/commit-activity/m/Replicable-MARL/MARLlib?label=commit) | ![GitHub last commit](https://img.shields.io/github/last-commit/Replicable-MARL/MARLlib?label=last%20update)  
 
 
 
@@ -95,7 +98,7 @@ Here we provide a table for the comparison of MARLlib and existing work.
 ## Installation
 
 > __Note__:
-> Currently MARLlib supports Linux only.
+> Please note that at this time, MARLlib is only compatible with Linux operating systems.
 
 ### Step-by-step  (recommended)
 
@@ -187,6 +190,8 @@ Most of the popular environments in MARL research are supported by MARLlib:
 | **[Hanabi](https://github.com/deepmind/hanabi-learning-environment)** | cooperative | Partial | Discrete | 1D |
 | **[MATE](https://github.com/XuehaiPan/mate)** | cooperative + mixed | Partial | Both | 1D |
 | **[GoBigger](https://github.com/opendilab/GoBigger)** | cooperative + mixed | Both | Continuous | 1D |
+| **[Overcooked-AI](https://github.com/HumanCompatibleAI/overcooked_ai)** | cooperative | Full | Discrete | 1D |
+
 
 Each environment has a readme file, standing as the instruction for this task, including env settings, installation, and
 important notes.

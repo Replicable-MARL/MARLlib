@@ -603,7 +603,7 @@ GoBigger
 ==============
 .. only:: html
 
-    .. figure:: images/env_gobigger.gif
+    .. figure:: images/env_gobigger.png
        :width: 320
        :align: center
 
@@ -643,3 +643,53 @@ Installation
 .. code-block:: shell
 
     conda install -c opendilab gobigger
+
+
+.. _Overcooked-AI:
+
+Overcooked-AI
+==============
+.. only:: html
+
+    .. figure:: images/env_overcooked.png
+       :width: 320
+       :align: center
+
+
+Overcooked-AI is a benchmark environment for fully cooperative human-AI task performance, based on the wildly popular video game Overcooked.
+Official Link: https://github.com/HumanCompatibleAI/overcooked_ai
+
+.. list-table::
+   :widths: 25 25
+   :header-rows: 0
+
+   * - ``Original Learning Mode``
+     - Cooperative
+   * - ``MARLlib Learning Mode``
+     - Cooperative
+   * - ``Observability``
+     - Full
+   * - ``Action Space``
+     - Discrete
+   * - ``Observation Space Dim``
+     - 1D
+   * - ``Action Mask``
+     - No
+   * - ``Global State``
+     - No
+   * - ``Global State Space Dim``
+     - /
+   * - ``Reward``
+     - Dense
+   * - ``Agent-Env Interact Mode``
+     - Simultaneous
+
+
+Installation
+-----------------
+
+.. code-block:: shell
+
+    git clone https://github.com/Replicable-MARL/overcooked_ai.git
+    cd overcooked_ai
+    pip install -e .
