@@ -693,3 +693,55 @@ Installation
     git clone https://github.com/Replicable-MARL/overcooked_ai.git
     cd overcooked_ai
     pip install -e .
+
+
+.. _Active_Voltage_Control_on_Power_Distribution_Networks:
+
+Future-Power-Networks
+========================
+.. only:: html
+
+    .. figure:: ../images/env_voltage.png
+       :width: 320
+       :align: center
+
+
+MAPDN is an environment of distributed/decentralised active voltage control on power distribution networks and a batch of state-of-the-art multi-agent actor-critic algorithms that can be used for training.
+Official Link: https://github.com/Future-Power-Networks/MAPDN
+
+.. list-table::
+   :widths: 25 25
+   :header-rows: 0
+
+   * - ``Original Learning Mode``
+     - Cooperative
+   * - ``MARLlib Learning Mode``
+     - Cooperative
+   * - ``Observability``
+     - Partial
+   * - ``Action Space``
+     - Continuous
+   * - ``Observation Space Dim``
+     - 1D
+   * - ``Action Mask``
+     - No
+   * - ``Global State``
+     - Yes
+   * - ``Global State Space Dim``
+     - 1D
+   * - ``Reward``
+     - Dense
+   * - ``Agent-Env Interact Mode``
+     - Simultaneous
+
+
+Installation
+-----------------
+
+Please follow this `data link <https://github.com/Future-Power-Networks/MAPDN#downloading-the-dataset>`_ to download data and unzip them to ``$Your_Project_Path/marllib/patch/dpn`` or anywhere you like (need to adjust the corresponding file location to load the data).
+
+.. code-block:: shell
+
+    pip install pandapower==2.11.1
+    pip install numba==0.56.4
+    pip install llvmlite==0.39.1
