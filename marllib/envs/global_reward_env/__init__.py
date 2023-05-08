@@ -98,3 +98,10 @@ try:
     COOP_ENV_REGISTRY["overcooked"] = RLlibOverCooked_FCOOP
 except Exception as e:
     COOP_ENV_REGISTRY["overcooked"] = str(e)
+
+try:
+    from marllib.envs.global_reward_env.voltage_fcoop import RLlibVoltageControl_FCOOP
+
+    COOP_ENV_REGISTRY["voltage"] = RLlibVoltageControl_FCOOP
+except Exception as e:
+    COOP_ENV_REGISTRY["voltage"] = str(e)

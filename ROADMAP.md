@@ -13,6 +13,6 @@ This list describes the planned features including breaking changes.
   - [x] MATE: https://github.com/UnrealTracking/mate
   - [x] Go-Bigger: https://github.com/opendilab/GoBigger
   - [ ] Voltage Control: https://github.com/Future-Power-Networks/MAPDN
-  - [ ] Overcooked: https://github.com/HumanCompatibleAI/overcooked_ai
+  - [x] Overcooked: https://github.com/HumanCompatibleAI/overcooked_ai
   - [ ] CloseAirCombat: https://github.com/liuqh16/CloseAirCombat
 - [ ] Support Transformers

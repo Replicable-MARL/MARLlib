@@ -24,79 +24,98 @@ ENV_REGISTRY = {}
 
 try:
     from marllib.envs.base_env.mpe import RLlibMPE
+
     ENV_REGISTRY["mpe"] = RLlibMPE
 except Exception as e:
     ENV_REGISTRY["mpe"] = str(e)
 
 try:
     from marllib.envs.base_env.mamujoco import RLlibMAMujoco
+
     ENV_REGISTRY["mamujoco"] = RLlibMAMujoco
 except Exception as e:
     ENV_REGISTRY["mamujoco"] = str(e)
 
 try:
     from marllib.envs.base_env.smac import RLlibSMAC
+
     ENV_REGISTRY["smac"] = RLlibSMAC
 except Exception as e:
     ENV_REGISTRY["smac"] = str(e)
 
 try:
     from marllib.envs.base_env.football import RLlibGFootball
+
     ENV_REGISTRY["football"] = RLlibGFootball
 except Exception as e:
     ENV_REGISTRY["football"] = str(e)
 
 try:
     from marllib.envs.base_env.magent import RLlibMAgent
+
     ENV_REGISTRY["magent"] = RLlibMAgent
 except Exception as e:
     ENV_REGISTRY["magent"] = str(e)
 
 try:
     from marllib.envs.base_env.rware import RLlibRWARE
+
     ENV_REGISTRY["rware"] = RLlibRWARE
 except Exception as e:
     ENV_REGISTRY["rware"] = str(e)
 
 try:
     from marllib.envs.base_env.lbf import RLlibLBF
+
     ENV_REGISTRY["lbf"] = RLlibLBF
 except Exception as e:
     ENV_REGISTRY["lbf"] = str(e)
 
 try:
     from marllib.envs.base_env.pommerman import RLlibPommerman
+
     ENV_REGISTRY["pommerman"] = RLlibPommerman
 except Exception as e:
     ENV_REGISTRY["pommerman"] = str(e)
 
 try:
     from marllib.envs.base_env.hanabi import RLlibHanabi
+
     ENV_REGISTRY["hanabi"] = RLlibHanabi
 except Exception as e:
     ENV_REGISTRY["hanabi"] = str(e)
 
 try:
     from marllib.envs.base_env.metadrive import RLlibMetaDrive
+
     ENV_REGISTRY["metadrive"] = RLlibMetaDrive
 except Exception as e:
     ENV_REGISTRY["metadrive"] = str(e)
 
 try:
     from marllib.envs.base_env.mate import RLlibMATE
+
     ENV_REGISTRY["mate"] = RLlibMATE
 except Exception as e:
     ENV_REGISTRY["mate"] = str(e)
 
 try:
     from marllib.envs.base_env.gobigger import RLlibGoBigger
+
     ENV_REGISTRY["gobigger"] = RLlibGoBigger
 except Exception as e:
     ENV_REGISTRY["gobigger"] = str(e)
 
-
 try:
     from marllib.envs.base_env.overcooked import RLlibOverCooked
+
     ENV_REGISTRY["overcooked"] = RLlibOverCooked
 except Exception as e:
     ENV_REGISTRY["overcooked"] = str(e)
+
+try:
+    from marllib.envs.base_env.voltage import RLlibVoltageControl
+
+    ENV_REGISTRY["voltage"] = RLlibVoltageControl
+except Exception as e:
+    ENV_REGISTRY["voltage"] = str(e)

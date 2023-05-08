@@ -36,8 +36,6 @@ policy_mapping_dict = {
         "team_prefix": ("agent_",),
         "all_agents_one_policy": True,
         "one_agent_one_policy": True,
-        # be careful using one_agent_one_policy when training in maps like 27m_vs_30m, which has relatively large
-        # number of agents
     },
 }
 
