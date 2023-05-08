@@ -121,6 +121,13 @@ $ pip install -r requirements.txt
 
 Please follow [this guide](https://marllib.readthedocs.io/en/latest/handbook/env.html).
 
+> __Note__:
+> We recommend always keeping the gym version at 0.21.0.
+
+```bash
+$ pip install gym==0.21.0
+```
+
 #### 3. install patches (basic)
 
 Fix bugs of RLlib using patches by running the following command:
@@ -349,7 +356,7 @@ If you would like to get involved, here is information on [contribution guidelin
 
 You can contribute in multiple ways, e.g., reporting bugs, writing or translating documentation, reviewing or refactoring code, requesting or implementing new features, etc.
 
-## Paper
+## Citation
 
 If you use MARLlib in your research, please cite the [MARLlib paper](https://arxiv.org/abs/2210.13708).
 
