@@ -22,6 +22,9 @@ Here we show the example of building python 3.8 based conda environment.
     pip install --upgrade pip
     pip install -r requirements.txt
 
+    # recommend always keeping the gym version at 0.21.0.
+    pip install gym==0.21.0
+
     # add patch files to MARLlib
     python patch/add_patch.py -y
 

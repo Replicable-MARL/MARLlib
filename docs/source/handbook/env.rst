@@ -702,7 +702,7 @@ Future-Power-Networks
 .. only:: html
 
     .. figure:: ../images/env_voltage.png
-       :width: 320
+       :width: 640
        :align: center
 
 
