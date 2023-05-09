@@ -362,10 +362,28 @@ If you use MARLlib in your research, please cite the [MARLlib paper](https://arx
 
 ```tex
 @article{hu2022marllib,
-  title={MARLlib: Extending RLlib for Multi-agent Reinforcement Learning},
-  author={Hu, Siyi and Zhong, Yifan and Gao, Minquan and Wang, Weixun and Dong, Hao and Li, Zhihui and Liang, Xiaodan and Chang, Xiaojun and Yang, Yaodong},
-  journal={arXiv preprint arXiv:2210.13708},
-  year={2022}
+      title={MARLlib: Extending RLlib for Multi-agent Reinforcement Learning},
+      author={Hu, Siyi and Zhong, Yifan and Gao, Minquan and Wang, Weixun and Dong, Hao and Li, Zhihui and Liang, Xiaodan and Chang, Xiaojun and Yang, Yaodong},
+      journal={arXiv preprint arXiv:2210.13708},
+      year={2022}
 }
 ```
+
+Works that are based on or closely collaborate with MARLlib <[link](https://github.com/PKU-MARL/HARL)>
+
+```tex
+@InProceedings{hu2022policy,
+      title={Policy Diagnosis via Measuring Role Diversity in Cooperative Multi-agent {RL}},
+      author={Hu, Siyi and Xie, Chuanlong and Liang, Xiaodan and Chang, Xiaojun},
+      booktitle={Proceedings of the 39th International Conference on Machine Learning},
+      year={2022},
+}
+@misc{zhong2023heterogeneousagent,
+      title={Heterogeneous-Agent Reinforcement Learning}, 
+      author={Yifan Zhong and Jakub Grudzien Kuba and Siyi Hu and Jiaming Ji and Yaodong Yang},
+      archivePrefix={arXiv},
+      year={2023},
+}
+```
+
 
