@@ -71,7 +71,7 @@ Installation
 
     git clone https://github.com/oxwhirl/smac.git
     cd smac
-    pip install .
+    pip install -e .
 
 **Note**: the location of the StarcraftII game directory should be pre-defined,
 or you can just follow the error log (when the process can not found the game's location)
