@@ -1,7 +1,7 @@
 .. _concept:
 
 ***************************************
-Existing Benchmarks
+Benchmarks
 ***************************************
 
 We collect most of the existing MARL benchmarks here with brief introduction.
@@ -9,8 +9,6 @@ We collect most of the existing MARL benchmarks here with brief introduction.
 .. contents::
     :local:
     :depth: 3
-
-[B] Basic [S] Information Sharing [RG] Behavior/Role Grouping [I] Imitation [G] Graph [E] Exploration [R] Robust [P] Reward Shaping [F] Offline [T] Tree Search [MT] Multi-task
 
 PyMARL
 ========================
