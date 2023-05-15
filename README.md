@@ -197,7 +197,7 @@ Most of the popular environments in MARL research are supported by MARLlib:
 | **[MATE](https://github.com/XuehaiPan/mate)** | cooperative + mixed | Partial | Both | 1D |
 | **[GoBigger](https://github.com/opendilab/GoBigger)** | cooperative + mixed | Both | Continuous | 1D |
 | **[Overcooked-AI](https://github.com/HumanCompatibleAI/overcooked_ai)** | cooperative | Full | Discrete | 1D |
-| **[Future-Power-Networks](https://github.com/Future-Power-Networks/MAPDN)** | cooperative | Partial | Continuous | 1D |
+| **[PDN](https://github.com/Future-Power-Networks/MAPDN)** | cooperative | Partial | Continuous | 1D |
 
 Each environment has a readme file, standing as the instruction for this task, including env settings, installation, and
 important notes.
