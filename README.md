@@ -8,6 +8,7 @@
 
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)]()
 ![test](https://github.com/Replicable-MARL/MARLlib/workflows/test/badge.svg)
+![coverage](https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/coverage.svg)
 [![Documentation Status](https://readthedocs.org/projects/marllib/badge/?version=latest)](https://marllib.readthedocs.io/en/latest/)
 [![GitHub issues](https://img.shields.io/github/issues/Replicable-MARL/MARLlib)](https://github.com/Replicable-MARL/MARLlib/issues)
 [![PyPI version](https://badge.fury.io/py/marllib.svg)](https://badge.fury.io/py/marllib)

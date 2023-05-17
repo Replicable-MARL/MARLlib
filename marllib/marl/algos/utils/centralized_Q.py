@@ -155,16 +155,6 @@ def centralized_critic_q(policy: Policy,
     if "weights" not in sample_batch:
         sample_batch["weights"] = np.ones_like(sample_batch[SampleBatch.REWARDS])
 
-    # Prioritize on the worker side.
-    if sample_batch.count > 0 and policy.config["worker_side_prioritization"]:
-        td_errors = policy.compute_td_error(
-            sample_batch[SampleBatch.OBS], sample_batch[SampleBatch.ACTIONS],
-            sample_batch[SampleBatch.REWARDS], sample_batch[SampleBatch.NEXT_OBS],
-            sample_batch[SampleBatch.DONES], sample_batch["weights"])
-        new_priorities = (np.abs(convert_to_numpy(td_errors)) +
-                          policy.config["prioritized_replay_eps"])
-        sample_batch["weights"] = new_priorities
-
     return sample_batch
 
 
@@ -196,11 +186,16 @@ def before_learn_on_batch(multi_agent_batch, policies, train_batch_size):
             input_dict["obs"]["obs"] = next_obs[:, :obs_dim]
             input_dict["state"] = next_obs[:, obs_dim:]
 
-        state_in = policy_batch["state_in_0"]
+        if "state_in_2" not in policy_batch:
+            state_in = policy_batch["state_in_0"]
+            state_in = [convert_to_torch_tensor(state_in, policy.device)]
+        else:
+            state_in = [convert_to_torch_tensor(policy_batch["state_in_0"], policy.device),
+                        convert_to_torch_tensor(policy_batch["state_in_1"], policy.device)]
+
         seq_lens = policy_batch["seq_lens"]
 
         input_dict = convert_to_torch_tensor(input_dict, policy.device)
-        state_in = convert_to_torch_tensor(state_in, policy.device).unsqueeze(0)
         seq_lens = convert_to_torch_tensor(seq_lens, policy.device)
 
         next_action_out, _ = target_policy_model.forward(input_dict, state_in, seq_lens)

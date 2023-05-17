@@ -217,6 +217,8 @@ def build_model(
     if algorithm.algo_type == "VD":
         mixer_arch_config = get_model_config("mixer")
         model_config = recursive_dict_update(model_config, mixer_arch_config)
+        if "mixer_arch" in model_preference:
+            recursive_dict_update(model_config, {"model_arch_args": model_preference})
 
     return model_class, model_config
 

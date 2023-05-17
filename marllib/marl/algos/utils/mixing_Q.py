@@ -45,6 +45,19 @@ class MixingQValueMixin:
         self.compute_mixing_q = True
 
 
+def align_batch(one_opponent_batch, sample_batch):
+    if len(one_opponent_batch) == len(sample_batch):
+        pass
+    else:
+        if len(one_opponent_batch) > len(sample_batch):
+            one_opponent_batch = one_opponent_batch.slice(0, len(sample_batch))
+        else:  # len(one_opponent_batch) < len(sample_batch):
+            length_dif = len(sample_batch) - len(one_opponent_batch)
+            one_opponent_batch = one_opponent_batch.concat(
+                one_opponent_batch.slice(len(one_opponent_batch) - length_dif, len(one_opponent_batch)))
+    return one_opponent_batch
+
+
 def q_value_mixing(policy: Policy,
                    sample_batch: SampleBatch,
                    other_agent_batches=None,
@@ -78,15 +91,7 @@ def q_value_mixing(policy: Policy,
             raw_opponent_batch = [opponent_batch_list[i][1] for i in range(opponent_agents_num)]
             opponent_batch = []
             for one_opponent_batch in raw_opponent_batch:
-                if len(one_opponent_batch) == len(sample_batch):
-                    pass
-                else:
-                    if len(one_opponent_batch) > len(sample_batch):
-                        one_opponent_batch = one_opponent_batch.slice(0, len(sample_batch))
-                    else:  # len(one_opponent_batch) < len(sample_batch):
-                        length_dif = len(sample_batch) - len(one_opponent_batch)
-                        one_opponent_batch = one_opponent_batch.concat(
-                            one_opponent_batch.slice(len(one_opponent_batch) - length_dif, len(one_opponent_batch)))
+                one_opponent_batch = align_batch(one_opponent_batch, sample_batch)
                 opponent_batch.append(one_opponent_batch)
 
             # all other agent obs as state
@@ -134,16 +139,6 @@ def q_value_mixing(policy: Policy,
     # the batch.
     if "weights" not in sample_batch:
         sample_batch["weights"] = np.ones_like(sample_batch[SampleBatch.REWARDS])
-
-    # Prioritize on the worker side.
-    if sample_batch.count > 0 and policy.config["worker_side_prioritization"]:
-        td_errors = policy.compute_td_error(
-            sample_batch[SampleBatch.OBS], sample_batch[SampleBatch.ACTIONS],
-            sample_batch[SampleBatch.REWARDS], sample_batch[SampleBatch.NEXT_OBS],
-            sample_batch[SampleBatch.DONES], sample_batch["weights"])
-        new_priorities = (np.abs(convert_to_numpy(td_errors)) +
-                          policy.config["prioritized_replay_eps"])
-        sample_batch["weights"] = new_priorities
 
     return sample_batch
 

@@ -7,6 +7,7 @@ This list describes the planned features including breaking changes.
 - [x] API-based usage
 
 ## Roadmap to v2.0.0
+- [x] test suits + coverage
 - [ ] support Windows
 - [ ] manual training, refer to issue: https://github.com/Replicable-MARL/MARLlib/issues/86#issuecomment-1468188682
 - [ ] new environments

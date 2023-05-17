@@ -82,20 +82,6 @@ class AlgVar(dict):
             return value
 
 
-if __name__ == '__main__':
-    assert AlgVar({'algo_args': {'test': False}})['test'] is False
-    assert AlgVar({'algo_args': {'test': 1}})['test'] == 1
-    assert AlgVar({'algo_args': {'test': 0.1}})['test'] == 0.1
-    assert AlgVar({'algo_args': {'test': '1e5'}})['test'] == 100000
-    assert AlgVar({'algo_args': {'test': '1e-5'}})['test'] == 0.00001
-    assert AlgVar({'algo_args': {'test': '1e0'}})['test'] == 1
-    assert AlgVar({'algo_args': {'test': '2e0'}})['test'] == 2
-    assert AlgVar({'algo_args': {'test': '1.01'}})['test'] == 1.01
-    assert AlgVar({'algo_args': {'test': '123'}})['test'] == 123
-
-    print('test done!')
-
-
 
 
 
