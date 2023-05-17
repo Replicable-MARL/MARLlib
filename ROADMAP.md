@@ -7,6 +7,7 @@ This list describes the planned features including breaking changes.
 - [x] API-based usage
 
 ## Roadmap to v2.0.0
+- [x] test suits + coverage
 - [ ] support Windows
 - [ ] manual training, refer to issue: https://github.com/Replicable-MARL/MARLlib/issues/86#issuecomment-1468188682
 - [ ] new environments
@@ -15,4 +16,6 @@ This list describes the planned features including breaking changes.
   - [x] Voltage Control: https://github.com/Future-Power-Networks/MAPDN
   - [x] Overcooked: https://github.com/HumanCompatibleAI/overcooked_ai
   - [ ] CloseAirCombat: https://github.com/liuqh16/CloseAirCombat
+  - [ ] HideAndSeek: https://github.com/jiayu-ch15/Variational-Automatic-Curriculum-Learning#3-train-hide-and-seek
 - [ ] Support Transformers
+- [ ] support multi-discrete action space

@@ -29,6 +29,32 @@ from marllib.marl.common import recursive_dict_update, dict_update
 torch, nn = try_import_torch()
 
 
+def restore_config_update(exp_info, run_config, stop_config):
+    if exp_info['restore_path']['model_path'] == '':
+        restore_config = None
+    else:
+        restore_config = exp_info['restore_path']
+        render_config = {
+            "evaluation_interval": 1,
+            "evaluation_num_episodes": 100,
+            "evaluation_num_workers": 1,
+            "evaluation_config": {
+                "record_env": False,
+                "render_env": True,
+            }
+        }
+
+        run_config = recursive_dict_update(run_config, render_config)
+
+        render_stop_config = {
+            "training_iteration": 1,
+        }
+
+        stop_config = recursive_dict_update(stop_config, render_stop_config)
+
+    return exp_info, run_config, stop_config, restore_config
+
+
 def run_cc(exp_info, env, model, stop=None):
     ray.init(local_mode=exp_info["local_mode"])
 
@@ -57,9 +83,9 @@ def run_cc(exp_info, env, model, stop=None):
         if not policy_mapping_info["all_agents_one_policy"]:
             raise ValueError("in {}, policy can not be shared, change it to 1. group 2. individual".format(map_name))
 
-        policies = {"shared_policy"}
+        policies = {"av"}
         policy_mapping_fn = (
-            lambda agent_id, episode, **kwargs: "shared_policy")
+            lambda agent_id, episode, **kwargs: "av")
 
     elif exp_info["share_policy"] == "group":
         groups = policy_mapping_info["team_prefix"]
@@ -137,27 +163,7 @@ def run_cc(exp_info, env, model, stop=None):
 
     stop_config = dict_update(stop_config, stop)
 
-    if exp_info['restore_path']['model_path'] == '':
-        restore_config = None
-    else:
-        restore_config = exp_info['restore_path']
-        render_config = {
-            "evaluation_interval": 1,
-            "evaluation_num_episodes": 100,
-            "evaluation_num_workers": 1,
-            "evaluation_config": {
-                "record_env": False,
-                "render_env": True,
-            }
-        }
-
-        run_config = recursive_dict_update(run_config, render_config)
-
-        render_stop_config = {
-            "training_iteration": 1,
-        }
-
-        stop_config = recursive_dict_update(stop_config, render_stop_config)
+    exp_info, run_config, stop_config, restore_config = restore_config_update(exp_info, run_config, stop_config)
 
     ##################
     ### run script ###

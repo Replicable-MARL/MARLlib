@@ -29,6 +29,7 @@ from ray.rllib.utils.framework import try_import_tf, try_import_torch, get_varia
 from marllib.marl.algos.utils.setup_utils import AlgVar
 from marllib.marl.algos.utils.log_dir_util import available_local_dir
 from marllib.marl.algos.utils.trust_regions import TrustRegionUpdator
+from marllib.marl.algos.scripts.coma import restore_model
 import json
 from typing import Any, Dict
 from ray.tune.analysis import ExperimentAnalysis
@@ -115,17 +116,7 @@ def run_itrpo(model: Any, exp: Dict, run: Dict, env: Dict,
     arch = exp["model_arch_args"]["core_arch"]
     algorithm = exp["algorithm"]
     RUNNING_NAME = '_'.join([algorithm, arch, map_name])
-
-    if restore is not None:
-        with open(restore["params_path"], 'r') as JSON:
-            raw_config = json.load(JSON)
-            raw_config = raw_config["model"]["custom_model_config"]['model_arch_args']
-            check_config = config["model"]["custom_model_config"]['model_arch_args']
-            if check_config != raw_config:
-                raise ValueError("is not using the params required by the checkpoint model")
-        model_path = restore["model_path"]
-    else:
-        model_path = None
+    model_path = restore_model(restore, exp)
 
     results = tune.run(TRPOTrainer,
                        name=RUNNING_NAME,

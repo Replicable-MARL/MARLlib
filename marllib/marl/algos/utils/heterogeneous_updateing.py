@@ -120,43 +120,6 @@ class IterTrainBatch(SampleBatch):
 
         self.pat = re.compile(r'^state_in_(\d+)')
 
-    def get_state_index(self, string):
-        match = self.pat.findall(string)
-        if match:
-            return match[0]
-        else:
-            return None
-
-    def __getitem__(self, item):
-        """
-        Adds an adaptor to get the item.
-        Input a key name, it would get the corresponding opponent's key-value
-        """
-        directly_get = [SampleBatch.SEQ_LENS]
-
-        if item in directly_get:
-            return self.main_train_batch[item]
-        elif get_global_name(item, self.policy_name) in self.main_train_batch:
-            return self.main_train_batch[get_global_name(item, self.policy_name)]
-        # elif state_index := self.get_state_index(item):
-        else:
-            state_index = self.get_state_index(item)
-            if state_index:
-                return self.main_train_batch[global_state_name(state_index, self.policy_name)]
-
-    def __contains__(self, item):
-        if item in self.keys() or get_global_name(item, self.policy_name) in self.keys():
-            return True
-        else:
-            state_index = self.get_state_index(item)
-            return state_index and global_state_name(state_index, self.policy_name) in self.keys()
-        # elif state_index := self.get_state_index(item):
-        #     if global_state_name(state_index, self.policy_name) in self.keys():
-        #         return True
-
-        # return False
-
-
 def get_each_agent_train(model, policy, dist_class, train_batch):
     all_policies_with_names = list(model.other_policies.items()) + [('self', policy)]
     random.shuffle(all_policies_with_names)

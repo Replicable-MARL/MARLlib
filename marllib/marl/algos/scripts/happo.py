@@ -27,6 +27,7 @@ from ray.tune import CLIReporter
 from marllib.marl.algos.core.CC.happo import HAPPOTrainer
 from marllib.marl.algos.utils.setup_utils import AlgVar
 from marllib.marl.algos.utils.log_dir_util import available_local_dir
+from marllib.marl.algos.scripts.coma import restore_model
 from ray.rllib.agents.ppo.ppo import DEFAULT_CONFIG as PPO_CONFIG
 from ray.rllib.models import ModelCatalog
 import json
@@ -127,16 +128,7 @@ def run_happo(model: Any, exp: Dict, run: Dict, env: Dict,
     arch = exp["model_arch_args"]["core_arch"]
     RUNNING_NAME = '_'.join([algorithm, arch, map_name, str(lr), str(critic_lr), TRAIN_MARK.upper(), f'seed-{seed}'])
 
-    if restore is not None:
-        with open(restore["params_path"], 'r') as JSON:
-            raw_config = json.load(JSON)
-            raw_config = raw_config["model"]["custom_model_config"]['model_arch_args']
-            check_config = config["model"]["custom_model_config"]['model_arch_args']
-            if check_config != raw_config:
-                raise ValueError("is not using the params required by the checkpoint model")
-        model_path = restore["model_path"]
-    else:
-        model_path = None
+    model_path = restore_model(restore, exp)
 
     _HAPPOTrainer = HAPPOTrainer(PPO_CONFIG)
 

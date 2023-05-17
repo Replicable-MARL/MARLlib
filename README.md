@@ -8,6 +8,7 @@
 
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)]()
 ![test](https://github.com/Replicable-MARL/MARLlib/workflows/test/badge.svg)
+![coverage](https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/coverage.svg)
 [![Documentation Status](https://readthedocs.org/projects/marllib/badge/?version=latest)](https://marllib.readthedocs.io/en/latest/)
 [![GitHub issues](https://img.shields.io/github/issues/Replicable-MARL/MARLlib)](https://github.com/Replicable-MARL/MARLlib/issues)
 [![PyPI version](https://badge.fury.io/py/marllib.svg)](https://badge.fury.io/py/marllib)
@@ -197,7 +198,7 @@ Most of the popular environments in MARL research are supported by MARLlib:
 | **[MATE](https://github.com/XuehaiPan/mate)** | cooperative + mixed | Partial | Both | 1D |
 | **[GoBigger](https://github.com/opendilab/GoBigger)** | cooperative + mixed | Both | Continuous | 1D |
 | **[Overcooked-AI](https://github.com/HumanCompatibleAI/overcooked_ai)** | cooperative | Full | Discrete | 1D |
-| **[Future-Power-Networks](https://github.com/Future-Power-Networks/MAPDN)** | cooperative | Partial | Continuous | 1D |
+| **[PDN](https://github.com/Future-Power-Networks/MAPDN)** | cooperative | Partial | Continuous | 1D |
 
 Each environment has a readme file, standing as the instruction for this task, including env settings, installation, and
 important notes.

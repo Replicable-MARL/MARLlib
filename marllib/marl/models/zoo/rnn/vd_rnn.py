@@ -45,13 +45,13 @@ class ValueDecompRNN(BaseRNN):
         if self.custom_config["global_state_flag"]:
             state_dim = self.custom_config["space_obs"]["state"].shape
         else:
-            state_dim = self.custom_config["space_obs"]["obs"].shape + (self.custom_config["num_agents"], )
-        if self.custom_config["algo_args"]["mixer"] == "qmix":
+            state_dim = self.custom_config["space_obs"]["obs"].shape + (self.custom_config["num_agents"],)
+
+        mixer_arch = model_config["custom_model_config"]["model_arch_args"]["mixer_arch"]
+        if mixer_arch == "qmix":
             self.mixer = QMixer(self.custom_config, state_dim)
-        elif self.custom_config["algo_args"]["mixer"] == "vdn":
+        elif mixer_arch == "vdn":
             self.mixer = VDNMixer()
-        else:
-            raise ValueError("Unknown mixer type {}".format(self.custom_config["algo_args"]["mixer"]))
 
     def mixing_value(self, all_agents_vf, state):
         # compatiable with rllib qmix mixer

@@ -46,7 +46,7 @@ class JointQMLP(TorchModelV2, nn.Module):
 
         # currently only support gru cell
         if self.custom_config["model_arch_args"]["core_arch"] != "mlp":
-            raise ValueError()
+            raise ValueError("core_arch can only be MLP")
 
         self.activation = model_config.get("fcnet_activation")
 
@@ -67,7 +67,6 @@ class JointQMLP(TorchModelV2, nn.Module):
             state_dim = self.custom_config["space_obs"]["obs"].shape
         self.raw_state_dim = state_dim
 
-
     @override(ModelV2)
     def get_initial_state(self):
         # Place hidden states on same device as model.
@@ -79,10 +78,10 @@ class JointQMLP(TorchModelV2, nn.Module):
     @override(ModelV2)
     def forward(self, input_dict, hidden_state, seq_lens):
         inputs = input_dict["obs_flat"].float()
-        if len(self.full_obs_space.shape) == 3: # 3D
+        if len(self.full_obs_space.shape) == 3:  # 3D
             inputs = inputs.reshape((-1,) + self.full_obs_space.shape)
         x = self.encoder(inputs)
-        h = hidden_state[0].reshape(-1, self.hidden_state_size) # fake a hidden state no use
+        h = hidden_state[0].reshape(-1, self.hidden_state_size)  # fake a hidden state no use
         x = self.mlp(x)
         q = self.q_value(x)
         return q, [h]

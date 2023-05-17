@@ -89,8 +89,6 @@ class DDPGSeriesRNN(TorchRNN, nn.Module):
             self.rnn = nn.GRU(self.input_dim, self.hidden_state_size, batch_first=True)
         elif self.custom_config["model_arch_args"]["core_arch"] == "lstm":
             self.rnn = nn.LSTM(self.input_dim, self.hidden_state_size, batch_first=True)
-        else:
-            raise ValueError()
 
         # action branch and value branch
         self.out_branch = SlimFC(
@@ -105,12 +103,12 @@ class DDPGSeriesRNN(TorchRNN, nn.Module):
                 state_dim = self.custom_config["space_obs"]["state"].shape
             else:
                 state_dim = self.custom_config["space_obs"]["obs"].shape + (self.custom_config["num_agents"],)
-            if self.custom_config["algo_args"]["mixer"] == "qmix":
+
+            mixer_arch = model_config["custom_model_config"]["model_arch_args"]["mixer_arch"]
+            if mixer_arch == "qmix":
                 self.mixer = QMixer(self.custom_config, state_dim)
-            elif self.custom_config["algo_args"]["mixer"] == "vdn":
+            elif mixer_arch == "vdn":
                 self.mixer = VDNMixer()
-            else:
-                raise ValueError("Unknown mixer type {}".format(self.custom_config["algo_args"]["mixer"]))
 
         # Holds the current "base" output (before logits layer).
         self._features = None
@@ -218,15 +216,7 @@ class DDPGSeriesRNN(TorchRNN, nn.Module):
                 x = self.encoder(obs_inputs)
 
         else:
-            if "conv_layer" in self.custom_config["model_arch_args"]:
-                x = obs_inputs.reshape(-1, obs_inputs.shape[2], obs_inputs.shape[3], obs_inputs.shape[4]).permute(0, 3,
-                                                                                                                  1,
-                                                                                                                  2)
-                x = self.encoder(x)
-                x = torch.mean(x, (2, 3))
-                x = x.reshape(obs_inputs.shape[0], obs_inputs.shape[1], -1)
-            else:
-                x = self.encoder(obs_inputs)
+            x = self.encoder(obs_inputs)
 
             if action_inputs is not None:
                 x = torch.cat((x, action_inputs), -1)

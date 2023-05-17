@@ -26,6 +26,7 @@ from ray.rllib.utils.framework import try_import_torch
 from ray.rllib.utils.torch_ops import convert_to_torch_tensor
 from ray.rllib.policy.sample_batch import SampleBatch
 from marllib.marl.algos.utils.centralized_Q import get_dim
+from marllib.marl.algos.utils.mixing_Q import align_batch
 
 torch, nn = try_import_torch()
 
@@ -79,15 +80,7 @@ def centralized_critic_postprocessing(policy,
             raw_opponent_batch = [opponent_batch_list[i][1] for i in range(opponent_agents_num)]
             opponent_batch = []
             for one_opponent_batch in raw_opponent_batch:
-                if len(one_opponent_batch) == len(sample_batch):
-                    pass
-                else:
-                    if len(one_opponent_batch) > len(sample_batch):
-                        one_opponent_batch = one_opponent_batch.slice(0, len(sample_batch))
-                    else:  # len(one_opponent_batch) < len(sample_batch):
-                        length_dif = len(sample_batch) - len(one_opponent_batch)
-                        one_opponent_batch = one_opponent_batch.concat(
-                            one_opponent_batch.slice(len(one_opponent_batch) - length_dif, len(one_opponent_batch)))
+                one_opponent_batch = align_batch(one_opponent_batch, sample_batch)
                 opponent_batch.append(one_opponent_batch)
 
             # all other agent obs as state

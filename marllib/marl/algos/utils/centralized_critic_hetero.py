@@ -23,11 +23,11 @@
 import numpy as np
 from ray.rllib.policy.sample_batch import SampleBatch
 from ray.rllib.evaluation.postprocessing import discount_cumsum, Postprocessing, compute_gae_for_sample_batch
-from marllib.marl.algos.utils.valuenorm import ValueNorm
 from marllib.marl.algos.utils.centralized_critic import convert_to_torch_tensor
 from marllib.marl.algos.utils.setup_utils import get_agent_num
 from marllib.marl.algos.utils.centralized_Q import get_dim
 from ray.rllib.utils.framework import try_import_torch
+from marllib.marl.algos.utils.mixing_Q import align_batch
 
 torch, nn = try_import_torch()
 
@@ -48,8 +48,6 @@ MODEL = 'model'
 POLICY_ID = 'policy_id'
 TRAINING = 'training'
 
-value_normalizer = ValueNorm(1)
-
 
 def get_global_name(key, i=None):
     if i == 'self': return key
@@ -58,30 +56,9 @@ def get_global_name(key, i=None):
     return f'{GLOBAL_PREFIX}{key}_agent_{i}'
 
 
-def _extract_from_all_others(take_fn):
-    def inner(other_agent_batches):
-        agent_ids = sorted([agent_id for agent_id in other_agent_batches])
-
-        return [
-            take_fn(other_agent_batches[_id]) for _id in agent_ids
-        ]
-
-    return inner
-
-
-def extract_other_agents_train_batch(other_agent_batches):
-    return _extract_from_all_others(lambda a: a[1])(other_agent_batches)
-
-
 def add_all_agents_gae(policy, sample_batch, other_agent_batches=None, episode=None):
     # print('------------step into post processing ----------\n'*8)
     sample_batch = add_opponent_information_and_critical_vf(policy, sample_batch, other_agent_batches, episode=episode)
-
-    # global value_normalizer
-
-    # if value_normalizer.updated:
-    #     sample_batch[SampleBatch.VF_PREDS] = value_normalizer.denormalize(sample_batch[SampleBatch.VF_PREDS])
-
     train_batch = compute_gae_for_sample_batch(policy, sample_batch, other_agent_batches, episode)
 
     return train_batch
@@ -172,13 +149,6 @@ def contain_global_obs(train_batch):
     return any(key.startswith(GLOBAL_PREFIX) for key in train_batch)
 
 
-def get_action_from_batch(train_batch, model, dist_class):
-    logits, state = model(train_batch)
-    curr_action_dist = dist_class(logits, model)
-
-    return curr_action_dist
-
-
 def add_other_agent_mul_info(sample_batch, other_agent_info, agent_num):
     global GLOBAL_NEED_COLLECT
 
@@ -187,33 +157,20 @@ def add_other_agent_mul_info(sample_batch, other_agent_info, agent_num):
             for key in GLOBAL_NEED_COLLECT:
                 if key not in sample_batch: continue
 
-                _p, _b = other_agent_info[name] # _p means policy, _b means batch
+                _p, _b = other_agent_info[name]  # _p means policy, _b means batch
                 sample_batch[get_global_name(key, name)] = _b[key]
 
     return sample_batch
 
 
 def get_vf_pred(policy, algorithm, sample_batch, opp_action_in_cc):
-    if algorithm in ["coma"]:
-        sample_batch[SampleBatch.VF_PREDS] = policy.compute_central_vf(
-            convert_to_torch_tensor(
-                sample_batch[STATE], policy.device),
-            convert_to_torch_tensor(
-                sample_batch['opponent_actions'], policy.device) if opp_action_in_cc else None,
-        ) \
-            .cpu().detach().numpy()
-        sample_batch[SampleBatch.VF_PREDS] = np.take(
-            sample_batch[SampleBatch.VF_PREDS],
-            np.expand_dims(sample_batch['opponent_actions'], axis=1)
-        ).squeeze(axis=1)
-    else:
-        sample_batch[SampleBatch.VF_PREDS] = policy.compute_central_vf(
-            convert_to_torch_tensor(
-                sample_batch[STATE], policy.device),
-            convert_to_torch_tensor(
-                sample_batch['opponent_actions'], policy.device) if opp_action_in_cc else None,
-        ) \
-            .cpu().detach().numpy()
+    sample_batch[SampleBatch.VF_PREDS] = policy.compute_central_vf(
+        convert_to_torch_tensor(
+            sample_batch[STATE], policy.device),
+        convert_to_torch_tensor(
+            sample_batch['opponent_actions'], policy.device) if opp_action_in_cc else None,
+    ) \
+        .cpu().detach().numpy()
 
     return sample_batch
 
@@ -237,17 +194,12 @@ def link_with_other_agents(current_policy, agent_num, sample_batches, other_agen
                 _p.model.cc_vf_branch is not current_policy.model.cc_vf_branch,
                 _p.model.vf_encoder is not current_policy.model.vf_encoder,
                 _p.model.vf_branch is not current_policy.model.vf_branch]):
-                    _p.model.cc_vf_encoder = current_policy.model.cc_vf_encoder
-                    _p.model.cc_vf_branch = current_policy.model.cc_vf_branch
-                    _p.model.vf_encoder = current_policy.model.vf_encoder
-                    _p.model.vf_branch = current_policy.model.vf_branch
+                _p.model.cc_vf_encoder = current_policy.model.cc_vf_encoder
+                _p.model.cc_vf_branch = current_policy.model.cc_vf_branch
+                _p.model.vf_encoder = current_policy.model.vf_encoder
+                _p.model.vf_branch = current_policy.model.vf_branch
 
             current_policy.model.link_other_agent_policy(name, _p)
-
-
-def get_real_state_by_one_sample():
-    pass
-
 
 def collect_opponent_array(other_agent_batches: dict, opponent_agents_num, sample_batch):
     assert other_agent_batches is not None
@@ -257,14 +209,7 @@ def collect_opponent_array(other_agent_batches: dict, opponent_agents_num, sampl
     opponent_batch = []
 
     for i, one_opponent_batch in enumerate(raw_opponent_batch):
-        if len(one_opponent_batch) != len(sample_batch):
-            if len(one_opponent_batch) > len(sample_batch):
-                one_opponent_batch = one_opponent_batch.slice(0, len(sample_batch))
-            else:  # len(one_opponent_batch) < len(sample_batch):
-                length_dif = len(sample_batch) - len(one_opponent_batch)
-                one_opponent_batch = one_opponent_batch.concat(
-                    one_opponent_batch.slice(len(one_opponent_batch) - length_dif, len(one_opponent_batch)))
-
+        one_opponent_batch = align_batch(one_opponent_batch, sample_batch)
         opponent_batch.append(one_opponent_batch)
 
     return opponent_batch
@@ -274,18 +219,6 @@ def state_name(i): return f'state_in_{i}'
 
 
 def global_state_name(i, ai): return f'state_in_{i}_of_agent_{ai}'
-
-
-def exist_in_opponent(opponent_index, opponent_batches: dict):
-    possible_1 = f'agent_{opponent_index}'
-    possible_2 = f'adversary_{opponent_index}'
-
-    if possible_1 in opponent_batches:
-        return possible_1
-    elif possible_2 in opponent_batches:
-        return possible_2
-    else:
-        return False
 
 
 def add_state_in_for_opponent(sample_batch, other_agent_batches, agent_num):
@@ -339,7 +272,7 @@ def add_opponent_information_and_critical_vf(policy,
     opponent_agents_num = n_agents - 1
 
     opponent_info_exists = (pytorch and hasattr(policy, "compute_central_vf")) or (
-                not pytorch and policy.loss_initialized())
+            not pytorch and policy.loss_initialized())
 
     if opponent_info_exists:
         if not opp_action_in_cc and global_state_flag:

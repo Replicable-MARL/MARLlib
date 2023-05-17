@@ -604,7 +604,7 @@ GoBigger
 .. only:: html
 
     .. figure:: ../images/env_gobigger.png
-       :width: 320
+       :width: 500
        :align: center
 
 
@@ -697,8 +697,8 @@ Installation
 
 .. _Active_Voltage_Control_on_Power_Distribution_Networks:
 
-Future-Power-Networks
-========================
+Power Distribution Networks
+==============================
 .. only:: html
 
     .. figure:: ../images/env_voltage.png
@@ -742,6 +742,7 @@ Please follow this `data link <https://github.com/Future-Power-Networks/MAPDN#do
 
 .. code-block:: shell
 
-    pip install pandapower==2.11.1
     pip install numba==0.56.4
     pip install llvmlite==0.39.1
+    pip install pandapower==2.7.0
+    pip install pandas==1.1.3
