@@ -754,7 +754,7 @@ Air Combat
 ==============================
 .. only:: html
 
-    .. figure:: ../images/env_voltage.png
+    .. figure:: ../images/env_aircombat.gif
        :width: 640
        :align: center
 
@@ -762,6 +762,8 @@ Air Combat
 CloseAirCombat is a competitive environment for red and blue aircrafts games, which includes single control setting, 1v1 setting and 2v2 setting. The flight dynamics based on JSBSIM, and missile dynamics based on our implementation of proportional guidance.
 Official Link: https://github.com/liuqh16/CloseAirCombat
 
+In MARLlib we supports three scenario including extended multi-agent vs Bot games just like tasks such as SMAC.
+We will test and support more scenarios in the future.
 Our fork: https://github.com/Theohhhu/CloseAirCombat_baseline
 
 .. list-table::
