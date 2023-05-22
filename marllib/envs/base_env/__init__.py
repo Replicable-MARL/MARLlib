@@ -119,3 +119,10 @@ try:
     ENV_REGISTRY["voltage"] = RLlibVoltageControl
 except Exception as e:
     ENV_REGISTRY["voltage"] = str(e)
+
+try:
+    from marllib.envs.base_env.aircombat import RLlibCloseAirCombatEnv
+
+    ENV_REGISTRY["aircombat"] = RLlibCloseAirCombatEnv
+except Exception as e:
+    ENV_REGISTRY["aircombat"] = str(e)
