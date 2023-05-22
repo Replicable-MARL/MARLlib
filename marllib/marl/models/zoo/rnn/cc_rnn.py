@@ -21,7 +21,7 @@
 # SOFTWARE.
 
 import numpy as np
-from gym.spaces import Box
+from gym.spaces import Box, MultiDiscrete
 from ray.rllib.utils.framework import try_import_tf, try_import_torch
 from marllib.marl.models.zoo.rnn.base_rnn import BaseRNN
 from ray.rllib.models.torch.misc import SlimFC, normc_initializer
@@ -115,6 +115,17 @@ class CentralizedCriticRNN(BaseRNN):
                 opponent_actions_ls = [opponent_actions[:, i, :]
                                        for i in
                                        range(self.n_agents - 1)]
+            elif isinstance(self.custom_config["space_act"], MultiDiscrete):
+                opponent_actions_ls = []
+                action_space_ls = [single_action_space.n for single_action_space in self.action_space]
+                for i in range(self.n_agents - 1):
+                    opponent_action_ls = []
+                    for single_action_index, single_action_space in enumerate(action_space_ls):
+                        opponent_action = torch.nn.functional.one_hot(
+                            opponent_actions[:, i, single_action_index].long(), single_action_space).float()
+                        opponent_action_ls.append(opponent_action)
+                    opponent_actions_ls.append(torch.cat(opponent_action_ls, axis=1))
+
             else:
                 opponent_actions_ls = [
                     torch.nn.functional.one_hot(opponent_actions[:, i].long(), self.num_outputs).float()

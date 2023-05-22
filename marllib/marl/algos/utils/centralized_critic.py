@@ -98,10 +98,6 @@ def centralized_critic_postprocessing(policy,
                     else:
                         state_batch_list.append(sample_batch['obs'][:, action_mask_dim:action_mask_dim + obs_dim])
                 sample_batch["state"] = np.stack(state_batch_list, 1)
-                # sample_batch["state"] = np.stack(
-                #     [sample_batch['obs'][:, action_mask_dim:action_mask_dim + obs_dim]] + [
-                #         opponent_batch[i]["obs"][:, action_mask_dim:action_mask_dim + obs_dim] for i in
-                #         range(opponent_agents_num)], 1)
 
             sample_batch["opponent_actions"] = np.stack(
                 [opponent_batch[i]["actions"] for i in range(opponent_agents_num)],
