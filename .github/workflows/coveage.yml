@@ -21,6 +21,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
+        pip install --user --upgrade setuptools
         pip install -r requirements.txt
         pip install coverage pytest
         # If you have a requirements.txt file
