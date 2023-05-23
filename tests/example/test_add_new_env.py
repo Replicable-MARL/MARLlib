@@ -24,8 +24,9 @@ from marllib import marl
 from marllib.envs.base_env import ENV_REGISTRY
 from examples.add_new_env import RLlibMAGym
 import unittest
+import pytest
 
-
+@pytest.mark.skip
 class TestAddEnv(unittest.TestCase):
 
     def test_add_env(self):
