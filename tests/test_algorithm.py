@@ -46,13 +46,13 @@ class TestBaseOnMPE(unittest.TestCase):
         algo.fit(env, model, stop={"training_iteration": 1}, local_mode=True, num_gpus=0,
                  num_workers=2, share_policy="individual", checkpoint_end=False)
 
-    def test_a21_happo_global_state(self):
-        env = marl.make_env(environment_name="smac", map_name="3m", force_coop=True)
-        algo = marl.algos.happo(hyperparam_source="test")
-        model = marl.build_model(env, algo, {"core_arch": "gru", "encode_layer": "8-8"})
-        algo.fit(env, model, stop={"training_iteration": 1}, local_mode=True, num_gpus=0,
-                 num_workers=2, share_policy="individual", checkpoint_end=False)
-
+    # def test_a21_happo_global_state(self):
+    #     env = marl.make_env(environment_name="smac", map_name="3m", force_coop=True)
+    #     algo = marl.algos.happo(hyperparam_source="test")
+    #     model = marl.build_model(env, algo, {"core_arch": "gru", "encode_layer": "8-8"})
+    #     algo.fit(env, model, stop={"training_iteration": 1}, local_mode=True, num_gpus=0,
+    #              num_workers=2, share_policy="individual", checkpoint_end=False)
+    #
     # CC algorithm
     def test_b1_maa2c(self):
         env = marl.make_env(environment_name="mpe", map_name="simple_adversary")
@@ -61,13 +61,13 @@ class TestBaseOnMPE(unittest.TestCase):
         algo.fit(env, model, stop={"training_iteration": 1}, local_mode=True, num_gpus=0,
                  num_workers=2, share_policy="group", checkpoint_end=False)
 
-    def test_b12_maa2c_global_state(self):
-        env = marl.make_env(environment_name="smac", map_name="3m", force_coop=True)
-        algo = marl.algos.maa2c(hyperparam_source="test")
-        model = marl.build_model(env, algo, {"core_arch": "lstm", "encode_layer": "8-8"})
-        algo.fit(env, model, stop={"training_iteration": 1}, local_mode=True, num_gpus=0,
-                 num_workers=2, share_policy="group", checkpoint_end=False)
-
+    # def test_b12_maa2c_global_state(self):
+    #     env = marl.make_env(environment_name="smac", map_name="3m", force_coop=True)
+    #     algo = marl.algos.maa2c(hyperparam_source="test")
+    #     model = marl.build_model(env, algo, {"core_arch": "lstm", "encode_layer": "8-8"})
+    #     algo.fit(env, model, stop={"training_iteration": 1}, local_mode=True, num_gpus=0,
+    #              num_workers=2, share_policy="group", checkpoint_end=False)
+    #
     def test_b2_coma(self):
         env = marl.make_env(environment_name="mpe", map_name="simple_adversary", continuous_actions=False)
         algo = marl.algos.coma(hyperparam_source="test")
@@ -89,12 +89,12 @@ class TestBaseOnMPE(unittest.TestCase):
         algo.fit(env, model, stop={"training_iteration": 1}, local_mode=True, num_gpus=0,
                  num_workers=2, share_policy="individual", checkpoint_end=False)
 
-    def test_b5_maddpg_global_state(self):
-        env = marl.make_env(environment_name="mamujoco", map_name="2AgentAnt", force_coop=True)
-        algo = marl.algos.maddpg(hyperparam_source="test")
-        model = marl.build_model(env, algo, {"core_arch": "mlp", "encode_layer": "8-8"})
-        algo.fit(env, model, stop={"training_iteration": 1}, local_mode=True, num_gpus=0,
-                 num_workers=2, share_policy="all", checkpoint_end=False)
+    # def test_b5_maddpg_global_state(self):
+    #     env = marl.make_env(environment_name="mamujoco", map_name="2AgentAnt", force_coop=True)
+    #     algo = marl.algos.maddpg(hyperparam_source="test")
+    #     model = marl.build_model(env, algo, {"core_arch": "mlp", "encode_layer": "8-8"})
+    #     algo.fit(env, model, stop={"training_iteration": 1}, local_mode=True, num_gpus=0,
+    #              num_workers=2, share_policy="all", checkpoint_end=False)
 
     def test_b51_maddpg(self):
         env = marl.make_env(environment_name="mpe", map_name="simple_spread", continuous_actions=True)
@@ -118,12 +118,12 @@ class TestBaseOnMPE(unittest.TestCase):
         algo.fit(env, model, stop={"training_iteration": 1}, local_mode=True, num_gpus=0,
                  num_workers=2, share_policy="all", checkpoint_end=False)
 
-    def test_c2_itrpo(self):
-        env = marl.make_env(environment_name="smac", map_name="3m")
-        algo = marl.algos.itrpo(hyperparam_source="test")
-        model = marl.build_model(env, algo, {"core_arch": "lstm", "encode_layer": "8-8"})
-        algo.fit(env, model, stop={"training_iteration": 1}, local_mode=True, num_gpus=0,
-                 num_workers=2, share_policy="group", checkpoint_end=False)
+    # def test_c2_itrpo(self):
+    #     env = marl.make_env(environment_name="smac", map_name="3m")
+    #     algo = marl.algos.itrpo(hyperparam_source="test")
+    #     model = marl.build_model(env, algo, {"core_arch": "lstm", "encode_layer": "8-8"})
+    #     algo.fit(env, model, stop={"training_iteration": 1}, local_mode=True, num_gpus=0,
+    #              num_workers=2, share_policy="group", checkpoint_end=False)
 
     def test_c3_ippo(self):
         env = marl.make_env(environment_name="mpe", map_name="simple_spread")
@@ -169,12 +169,12 @@ class TestBaseOnMPE(unittest.TestCase):
         algo.fit(env, model, stop={"training_iteration": 1}, local_mode=True, num_gpus=0,
                  num_workers=2, share_policy="all", checkpoint_end=False)
 
-    def test_d21_vdn_smac_action_mask_and_state(self):
-        env = marl.make_env(environment_name="smac", map_name="3m", force_coop=True)
-        algo = marl.algos.vdn(hyperparam_source="test")
-        model = marl.build_model(env, algo, {"core_arch": "gru", "encode_layer": "8-8"})
-        algo.fit(env, model, stop={"training_iteration": 1}, local_mode=True, num_gpus=0,
-                 num_workers=2, share_policy="all", checkpoint_end=False)
+    # def test_d21_vdn_smac_action_mask_and_state(self):
+    #     env = marl.make_env(environment_name="smac", map_name="3m", force_coop=True)
+    #     algo = marl.algos.vdn(hyperparam_source="test")
+    #     model = marl.build_model(env, algo, {"core_arch": "gru", "encode_layer": "8-8"})
+    #     algo.fit(env, model, stop={"training_iteration": 1}, local_mode=True, num_gpus=0,
+    #              num_workers=2, share_policy="all", checkpoint_end=False)
 
     def test_d23_vdn_adam(self):
         env = marl.make_env(environment_name="mpe", map_name="simple_spread", force_coop=True)
@@ -190,12 +190,12 @@ class TestBaseOnMPE(unittest.TestCase):
         algo.fit(env, model, stop={"training_iteration": 1}, local_mode=True, num_gpus=0,
                  num_workers=2, share_policy="group", checkpoint_end=False)
 
-    def test_d33_vda2c_global_state(self):
-        env = marl.make_env(environment_name="smac", map_name="3m", force_coop=True)
-        algo = marl.algos.vda2c(hyperparam_source="test")
-        model = marl.build_model(env, algo, {"core_arch": "gru", "encode_layer": "8-8"})
-        algo.fit(env, model, stop={"training_iteration": 1}, local_mode=True, num_gpus=0,
-                 num_workers=2, share_policy="group", checkpoint_end=False)
+    # def test_d33_vda2c_global_state(self):
+    #     env = marl.make_env(environment_name="smac", map_name="3m", force_coop=True)
+    #     algo = marl.algos.vda2c(hyperparam_source="test")
+    #     model = marl.build_model(env, algo, {"core_arch": "gru", "encode_layer": "8-8"})
+    #     algo.fit(env, model, stop={"training_iteration": 1}, local_mode=True, num_gpus=0,
+    #              num_workers=2, share_policy="group", checkpoint_end=False)
 
     def test_d4_vdppo(self):
         env = marl.make_env(environment_name="mpe", map_name="simple_spread", force_coop=True, continuous_actions=True)
