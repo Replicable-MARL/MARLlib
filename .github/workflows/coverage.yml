@@ -1,10 +1,11 @@
 name: coverage
 
-on:
-  push:
-    branches: [ sy_dev ]
-  pull_request:
-    branches: [ sy_dev ]
+# on:
+#   push:
+#     branches: [ sy_dev ]
+#   pull_request:
+#     branches: [ sy_dev ]
+on: [push, pull_request]
 
 jobs:
   build:
