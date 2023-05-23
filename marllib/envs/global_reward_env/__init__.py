@@ -105,3 +105,10 @@ try:
     COOP_ENV_REGISTRY["voltage"] = RLlibVoltageControl_FCOOP
 except Exception as e:
     COOP_ENV_REGISTRY["voltage"] = str(e)
+
+try:
+    from marllib.envs.global_reward_env.aircombat_fcoop import RLlibCloseAirCombatEnv_FCOOP
+
+    COOP_ENV_REGISTRY["aircombat"] = RLlibCloseAirCombatEnv_FCOOP
+except Exception as e:
+    COOP_ENV_REGISTRY["aircombat"] = str(e)

@@ -1,0 +1,61 @@
+# task config
+task: singlecombat_dodge_missile
+
+# simulation config
+sim_freq: 60
+agent_interaction_steps: 12 # step 0.2s
+
+# termination config
+max_steps: 1000             # episode length: 200s
+altitude_limit: 2500
+acceleration_limit_x: 10.0
+acceleration_limit_y: 10.0
+acceleration_limit_z: 10.0
+
+# aircraft config
+# A0100 and B0100 are opposite
+aircraft_configs: {
+  A0100: {
+    color: Red,
+    model: f16,
+    init_state: {
+      ic_long_gc_deg: 120.0,
+      ic_lat_geod_deg: 60.0,
+      ic_h_sl_ft: 20000,
+      ic_psi_true_deg: 0.0,
+      ic_u_fps: 800.0,
+    },
+    missile: 0,
+  },
+  B0100: {
+    color: Blue,
+    model: f16,
+    init_state: {
+      ic_h_sl_ft: 20000,
+      ic_lat_geod_deg: 60.07,
+      ic_long_gc_deg: 120.0,
+      ic_psi_true_deg: 180.0,
+      ic_u_fps: 800.0,
+    },
+    missile: 0,
+  }
+}
+
+# reward config
+PostureReward_scale: 100.0
+PostureReward_potential: true
+PostureReward_orientation_version: v2
+PostureReward_range_version: v2
+PostureReward_target_dist: 3.0
+
+AltitudeReward_safe_altitude: 4.0
+AltitudeReward_danger_altitude: 3.5
+AltitudeReward_Kv: 0.2
+
+RelativeAltitudeReward_KH: 1.0
+
+MissileAttackReward_potential: true
+
+
+MissilePostureReward_potential: true
+MissilePostureReward_scale: 1

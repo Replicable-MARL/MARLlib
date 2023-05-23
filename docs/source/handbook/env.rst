@@ -746,3 +746,58 @@ Please follow this `data link <https://github.com/Future-Power-Networks/MAPDN#do
     pip install llvmlite==0.39.1
     pip install pandapower==2.7.0
     pip install pandas==1.1.3
+
+
+.. _Light_Aircraft_Game:
+
+Air Combat
+==============================
+.. only:: html
+
+    .. figure:: ../images/env_aircombat.gif
+       :width: 640
+       :align: center
+
+
+CloseAirCombat is a competitive environment for red and blue aircrafts games, which includes single control setting, 1v1 setting and 2v2 setting. The flight dynamics based on JSBSIM, and missile dynamics based on our implementation of proportional guidance.
+Official Link: https://github.com/liuqh16/CloseAirCombat
+
+In MARLlib we supports three scenario including extended multi-agent vs Bot games just like tasks such as SMAC.
+We will test and support more scenarios in the future.
+Our fork: https://github.com/Theohhhu/CloseAirCombat_baseline
+
+.. list-table::
+   :widths: 25 25
+   :header-rows: 0
+
+   * - ``Original Learning Mode``
+     - Competitive + Cooperative
+   * - ``MARLlib Learning Mode``
+     - Cooperative + Mixed
+   * - ``Observability``
+     - Partial
+   * - ``Action Space``
+     - MultiDiscrete
+   * - ``Observation Space Dim``
+     - 1D
+   * - ``Action Mask``
+     - No
+   * - ``Global State``
+     - No
+   * - ``Global State Space Dim``
+     - 1D
+   * - ``Reward``
+     - Dense
+   * - ``Agent-Env Interact Mode``
+     - Simultaneous
+
+
+Installation
+-----------------
+
+.. code-block:: shell
+
+    pip install torch pymap3d jsbsim==1.1.6 geographiclib gym==0.20.0 wandb icecream setproctitle
+    cd Path/To/MARLlib
+    # we use commit 8c13fd6 on JBSim, version is not restricted but may trigger potential bugs
+    git submodule add --force https://github.com/JSBSim-Team/jsbsim.git marllib/patch/aircombat/JBSim/data

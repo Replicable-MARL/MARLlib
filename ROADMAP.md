@@ -9,13 +9,13 @@ This list describes the planned features including breaking changes.
 ## Roadmap to v2.0.0
 - [x] test suits + coverage
 - [ ] support Windows
-- [ ] manual training, refer to issue: https://github.com/Replicable-MARL/MARLlib/issues/86#issuecomment-1468188682
+- [ ] manually inference, refer to issue: https://github.com/Replicable-MARL/MARLlib/issues/86#issuecomment-1468188682
 - [ ] new environments
   - [x] MATE: https://github.com/UnrealTracking/mate
   - [x] Go-Bigger: https://github.com/opendilab/GoBigger
   - [x] Voltage Control: https://github.com/Future-Power-Networks/MAPDN
   - [x] Overcooked: https://github.com/HumanCompatibleAI/overcooked_ai
-  - [ ] CloseAirCombat: https://github.com/liuqh16/CloseAirCombat
+  - [x] CloseAirCombat: https://github.com/liuqh16/CloseAirCombat
   - [ ] HideAndSeek: https://github.com/jiayu-ch15/Variational-Automatic-Curriculum-Learning#3-train-hide-and-seek
-- [ ] Support Transformers
-- [ ] support multi-discrete action space
+- [ ] support Transformers
+- [x] support MultiDiscrete action space
