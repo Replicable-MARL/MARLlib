@@ -28,6 +28,7 @@ from ray.rllib.utils.framework import try_import_tf, try_import_torch
 from marllib.marl.algos.scripts import POlICY_REGISTRY
 from marllib.envs.global_reward_env import COOP_ENV_REGISTRY as ENV_REGISTRY
 from marllib.marl.common import recursive_dict_update, dict_update
+from marllib.marl.algos.run_cc import restore_config_update
 
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
@@ -171,27 +172,7 @@ def run_vd(exp_info, env, model, stop=None):
 
     stop_config = dict_update(stop_config, stop)
 
-    if exp_info['restore_path']['model_path'] == '':
-        restore_config = None
-    else:
-        restore_config = exp_info['restore_path']
-        render_config = {
-            "evaluation_interval": 1,
-            "evaluation_num_episodes": 100,
-            "evaluation_num_workers": 1,
-            "evaluation_config": {
-                "record_env": False,
-                "render_env": True,
-            }
-        }
-
-        run_config = recursive_dict_update(run_config, render_config)
-
-        render_stop_config = {
-            "training_iteration": 1,
-        }
-
-        stop_config = recursive_dict_update(stop_config, render_stop_config)
+    exp_info, run_config, stop_config, restore_config = restore_config_update(exp_info, run_config, stop_config)
 
     ##################
     ### run script ###

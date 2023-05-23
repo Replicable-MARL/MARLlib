@@ -140,22 +140,11 @@ def ddpg_actor_critic_loss(policy: Policy, model: ModelV2, _,
         model_out_t, states_in_t["q"], seq_lens, policy_t)[0]
     q_t_det_policy = torch.squeeze(input=q_t_det_policy, axis=len(q_t_det_policy.shape) - 1)
 
-    if twin_q:
-        twin_q_t = model.get_twin_q_values(model_out_t, states_in_t["twin_q"], seq_lens,
-                                           train_batch[SampleBatch.ACTIONS])[0]
-
     # Target q-net(s) evaluation.
     q_tp1 = target_model.get_q_values(
         target_model_out_tp1, target_states_in_tp1["q"], seq_lens, policy_tp1_smoothed)[0]
 
-    if twin_q:
-        twin_q_tp1 = target_model.get_twin_q_values(target_model_out_tp1, target_states_in_tp1["twin_q"], seq_lens,
-                                                    policy_tp1_smoothed)[0]
-
     q_t_selected = torch.squeeze(q_t, axis=len(q_t.shape) - 1)
-    if twin_q:
-        twin_q_t_selected = torch.squeeze(twin_q_t, axis=len(q_t.shape) - 1)
-        q_tp1 = torch.min(q_tp1, twin_q_tp1)
 
     q_tp1_best = torch.squeeze(input=q_tp1, axis=len(q_tp1.shape) - 1)
     q_tp1_best_masked = \
@@ -182,23 +171,12 @@ def ddpg_actor_critic_loss(policy: Policy, model: ModelV2, _,
         return torch.sum(t[seq_mask]) / num_valid
 
     # Compute the error (potentially clipped).
-    if twin_q:
-        td_error = q_t_selected - q_t_selected_target
-        td_error = td_error * seq_mask
-        twin_td_error = twin_q_t_selected - q_t_selected_target
-        if use_huber:
-            errors = huber_loss(td_error, huber_threshold) \
-                     + huber_loss(twin_td_error, huber_threshold)
-        else:
-            errors = 0.5 * \
-                     (torch.pow(td_error, 2.0) + torch.pow(twin_td_error, 2.0))
+    td_error = q_t_selected - q_t_selected_target
+    td_error = td_error * seq_mask
+    if use_huber:
+        errors = huber_loss(td_error, huber_threshold)
     else:
-        td_error = q_t_selected - q_t_selected_target
-        td_error = td_error * seq_mask
-        if use_huber:
-            errors = huber_loss(td_error, huber_threshold)
-        else:
-            errors = 0.5 * torch.pow(td_error, 2.0)
+        errors = 0.5 * torch.pow(td_error, 2.0)
 
     critic_loss = torch.mean(train_batch[PRIO_WEIGHTS] * errors)
     actor_loss = -torch.mean(q_t_det_policy * seq_mask)
@@ -311,11 +289,8 @@ def action_distribution_fn(policy: Policy,
     distribution_inputs, policy_state_out = \
         model.get_policy_output(model_out, states_in["policy"], seq_lens)
     _, q_state_out = model.get_q_values(model_out, states_in["q"], seq_lens)
-    if model.twin_q_model:
-        _, twin_q_state_out = \
-            model.get_twin_q_values(model_out, states_in["twin_q"], seq_lens)
-    else:
-        twin_q_state_out = []
+
+    twin_q_state_out = []
 
     states_out = policy_state_out + q_state_out + twin_q_state_out
 
@@ -408,12 +383,8 @@ class IDDPGTorchModel(DDPGTorchModel):
         # Build the Q-network(s).
         self.q_model = self.build_q_model(self.obs_space, self.action_space,
                                           q_outs, {}, "q")
-        if twin_q:
-            self.twin_q_model = self.build_q_model(self.obs_space,
-                                                   self.action_space, q_outs,
-                                                   {}, "twin_q")
-        else:
-            self.twin_q_model = None
+
+        self.twin_q_model = None
 
         self.state_flag = model_config["custom_model_config"]["global_state_flag"]
         self.num_agents = model_config["custom_model_config"]["num_agents"]
@@ -521,15 +492,6 @@ class IDDPGTorchModel(DDPGTorchModel):
                                  seq_lens)
 
     @override(DDPGTorchModel)
-    def get_twin_q_values(self,
-                          model_out: TensorType,
-                          state_in: List[TensorType],
-                          seq_lens: TensorType,
-                          actions: Optional[TensorType] = None) -> TensorType:
-        return self._get_q_value(model_out, actions, self.twin_q_model, state_in,
-                                 seq_lens)
-
-    @override(DDPGTorchModel)
     def get_policy_output(
             self, model_out: TensorType, state_in: List[TensorType],
             seq_lens: TensorType):
@@ -541,8 +503,6 @@ class IDDPGTorchModel(DDPGTorchModel):
     def get_initial_state(self):
         policy_initial_state = self.policy_model.get_initial_state()
         q_initial_state = self.q_model.get_initial_state()
-        if self.twin_q_model:
-            q_initial_state *= 2
         return policy_initial_state + q_initial_state
 
     def select_state(self, state_batch: List[TensorType],
@@ -559,12 +519,6 @@ class IDDPGTorchModel(DDPGTorchModel):
             elif n == "q":
                 selected_state[n] = state_batch[policy_state_len:
                                                 policy_state_len + q_state_len]
-            elif n == "twin_q":
-                if self.twin_q_model:
-                    selected_state[n] = state_batch[policy_state_len +
-                                                    q_state_len:]
-                else:
-                    selected_state[n] = []
         return selected_state
 
 

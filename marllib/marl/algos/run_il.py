@@ -26,6 +26,7 @@ from ray.rllib.utils.framework import try_import_tf, try_import_torch
 from ray.rllib.policy.policy import PolicySpec
 from marllib.marl.algos.scripts import POlICY_REGISTRY
 from marllib.marl.common import recursive_dict_update, dict_update
+from marllib.marl.algos.run_cc import restore_config_update
 
 tf1, tf, tfv = try_import_tf()
 torch, nn = try_import_torch()
@@ -74,67 +75,25 @@ def run_il(exp_info, env, model, stop=None):
             policy_mapping_fn = (
                 lambda agent_id, episode, **kwargs: "shared_policy")
         else:
-            if "space_obs" in env_info:
-                print("homogeneous action space")
-                policies = {
-                    "policy_{}".format(i): (None, env_info["space_obs"], env_info["space_act"], {}) for i in
-                    groups
-                }
-                policy_ids = list(policies.keys())
-                policy_mapping_fn = tune.function(
-                    lambda agent_id: "policy_{}_".format(agent_id.split("_")[0]))
-            else:
-                print("heterogeneous action space")
-                action_spec_dict = {}
-                obs_spec_dict = {}
-                for key in env_info.keys():
-                    if "space_obs" in key:
-                        g_name = key.split("space_obs")[1]
-                        obs_spec_dict[g_name] = env_info[key]
-                    if "space_act" in key:
-                        g_name = key.split("space_act")[1]
-                        action_spec_dict[g_name] = env_info[key]
-
-                policies = {}
-                for g_name in action_spec_dict.keys():
-                    policies["policy" + g_name + "_"] = PolicySpec(None, obs_spec_dict[g_name], action_spec_dict[g_name], {})
-
-                policy_mapping_fn = tune.function(
-                    lambda agent_id: "policy_{}_".format(agent_id.split("_")[0]))
+            policies = {
+                "policy_{}".format(i): (None, env_info["space_obs"], env_info["space_act"], {}) for i in
+                groups
+            }
+            policy_ids = list(policies.keys())
+            policy_mapping_fn = tune.function(
+                lambda agent_id: "policy_{}_".format(agent_id.split("_")[0]))
 
     elif exp_info["share_policy"] == "individual":
         if not policy_mapping_info["one_agent_one_policy"]:
             raise ValueError("in {}, agent number too large, we disable no sharing function".format(map_name))
-        if "space_obs" in env_info:
-            print("homogeneous action space")
-            policies = {
-                "policy_{}".format(i): (None, env_info["space_obs"], env_info["space_act"], {}) for i in
-                range(env_info["num_agents"])
-            }
-            policy_ids = list(policies.keys())
-            policy_mapping_fn = tune.function(
-                lambda agent_id: policy_ids[agent_name_ls.index(agent_id)])
-        else:
-            print("heterogeneous action space")
-            action_spec_dict = {}
-            obs_spec_dict = {}
-            for key in env_info.keys():
-                if "space_obs" in key:
-                    g_name = key.split("space_obs_")[1]
-                    obs_spec_dict[g_name] = env_info[key]
-                if "space_act" in key:
-                    g_name = key.split("space_act_")[1]
-                    action_spec_dict[g_name] = env_info[key]
 
-            policies = {}
-
-            for agent in env_info["agents"]:
-                for g_name in action_spec_dict.keys():
-                    if g_name in agent:
-                        policies[agent] = PolicySpec(None, obs_spec_dict[g_name], action_spec_dict[g_name], {})
-
-            policy_mapping_fn = tune.function(
-                lambda agent_id: agent_id)
+        policies = {
+            "policy_{}".format(i): (None, env_info["space_obs"], env_info["space_act"], {}) for i in
+            range(env_info["num_agents"])
+        }
+        policy_ids = list(policies.keys())
+        policy_mapping_fn = tune.function(
+            lambda agent_id: policy_ids[agent_name_ls.index(agent_id)])
 
     else:
         raise ValueError("wrong share_policy {}".format(exp_info["share_policy"]))
@@ -166,27 +125,7 @@ def run_il(exp_info, env, model, stop=None):
 
     stop_config = dict_update(stop_config, stop)
 
-    if exp_info['restore_path']['model_path'] == '':
-        restore_config = None
-    else:
-        restore_config = exp_info['restore_path']
-        render_config = {
-            "evaluation_interval": 1,
-            "evaluation_num_episodes": 100,
-            "evaluation_num_workers": 1,
-            "evaluation_config": {
-                "record_env": False,
-                "render_env": True,
-            }
-        }
-
-        run_config = recursive_dict_update(run_config, render_config)
-
-        render_stop_config = {
-            "training_iteration": 1,
-        }
-
-        stop_config = recursive_dict_update(stop_config, render_stop_config)
+    exp_info, run_config, stop_config, restore_config = restore_config_update(exp_info, run_config, stop_config)
 
     ##################
     ### run script ###

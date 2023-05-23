@@ -184,11 +184,11 @@ class BaseRNN(TorchRNN, nn.Module):
     def critic_parameters(self):
         return list(self.vf_branch.parameters())
 
-    def sample(self, obs, training_batch, sample_num):
-        indices = torch.multinomial(torch.arange(len(obs)), sample_num, replacement=True)
-        training_batch = training_batch.copy()
-        training_batch['obs']['obs'] = training_batch['obs']['obs'][indices]
-        if 'action_mask' in training_batch['obs']:
-            training_batch['obs']['action_mask'] = training_batch['obs']['action_mask'][indices]
-
-        return self(training_batch)
+    # def sample(self, obs, training_batch, sample_num):
+    #     indices = torch.multinomial(torch.arange(len(obs)), sample_num, replacement=True)
+    #     training_batch = training_batch.copy()
+    #     training_batch['obs']['obs'] = training_batch['obs']['obs'][indices]
+    #     if 'action_mask' in training_batch['obs']:
+    #         training_batch['obs']['action_mask'] = training_batch['obs']['action_mask'][indices]
+    #
+    #     return self(training_batch)

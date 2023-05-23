@@ -248,8 +248,6 @@ class JointQPolicy(Policy):
         elif config["mixer"] == "vdn":
             self.mixer = VDNMixer().to(self.device)
             self.target_mixer = VDNMixer().to(self.device)
-        else:
-            raise ValueError("Unknown mixer type {}".format(config["mixer"]))
 
         self.cur_epsilon = 1.0
         self.update_target()  # initial sync

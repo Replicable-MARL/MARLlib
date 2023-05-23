@@ -27,6 +27,7 @@ from marllib.marl.algos.core.CC.hatrpo import HATRPOTrainer
 from marllib.marl.algos.utils.log_dir_util import available_local_dir
 from marllib.marl.algos.utils.setup_utils import AlgVar
 from marllib.marl.algos.utils.trust_regions import TrustRegionUpdator
+from marllib.marl.algos.scripts.coma import restore_model
 from ray.rllib.models import ModelCatalog
 import json
 from typing import Any, Dict
@@ -113,17 +114,7 @@ def run_hatrpo(model: Any, exp: Dict, run: Dict, env: Dict,
     arch = exp["model_arch_args"]["core_arch"]
     map_name = exp["env_args"]["map_name"]
     RUNNING_NAME = '_'.join([algorithm, arch, map_name])
-
-    if restore is not None:
-        with open(restore["params_path"], 'r') as JSON:
-            raw_config = json.load(JSON)
-            raw_config = raw_config["model"]["custom_model_config"]['model_arch_args']
-            check_config = config["model"]["custom_model_config"]['model_arch_args']
-            if check_config != raw_config:
-                raise ValueError("is not using the params required by the checkpoint model")
-        model_path = restore["model_path"]
-    else:
-        model_path = None
+    model_path = restore_model(restore, exp)
 
     results = tune.run(HATRPOTrainer,
                        name=RUNNING_NAME,

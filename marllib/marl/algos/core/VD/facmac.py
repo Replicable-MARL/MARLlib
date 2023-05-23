@@ -254,24 +254,11 @@ def value_mixing_ddpg_loss(policy, model, dist_class, train_batch):
 
     actor_loss = -torch.mean(q_t_det_policy)
 
-    if twin_q:
-        twin_q_t = model.get_twin_q_values(model_out_t, states_in_t["twin_q"], seq_lens,
-                                           train_batch[SampleBatch.ACTIONS])[0]
-    # q_batchnorm_update_ops = list(
-    #     set(tf1.get_collection(tf.GraphKeys.UPDATE_OPS)) - prev_update_ops)
-
     # Target q-net(s) evaluation.
     q_tp1 = target_model.get_q_values_and_mixing(
         target_model_out_tp1, target_states_in_tp1["q"], seq_lens, policy_tp1_smoothed)[0]
 
-    if twin_q:
-        twin_q_tp1 = target_model.get_twin_q_values(target_model_out_tp1, target_states_in_tp1["twin_q"], seq_lens,
-                                                    policy_tp1_smoothed)[0]
-
     q_t_selected = torch.squeeze(q_t, axis=len(q_t.shape) - 1)
-    if twin_q:
-        twin_q_t_selected = torch.squeeze(twin_q_t, axis=len(q_t.shape) - 1)
-        q_tp1 = torch.min(q_tp1, twin_q_tp1)
 
     q_tp1_best = torch.squeeze(input=q_tp1, axis=len(q_tp1.shape) - 1)
     q_tp1_best_masked = \
@@ -292,29 +279,14 @@ def value_mixing_ddpg_loss(policy, model, dist_class, train_batch):
         seq_mask[:, :burn_in] = False
 
     seq_mask = seq_mask.reshape(-1)
-    num_valid = torch.sum(seq_mask)
-
-    def reduce_mean_valid(t):
-        return torch.sum(t[seq_mask]) / num_valid
 
     # Compute the error (potentially clipped).
-    if twin_q:
-        td_error = q_t_selected - q_t_selected_target
-        td_error = td_error * seq_mask
-        twin_td_error = twin_q_t_selected - q_t_selected_target
-        if use_huber:
-            errors = huber_loss(td_error, huber_threshold) \
-                     + huber_loss(twin_td_error, huber_threshold)
-        else:
-            errors = 0.5 * \
-                     (torch.pow(td_error, 2.0) + torch.pow(twin_td_error, 2.0))
+    td_error = q_t_selected - q_t_selected_target
+    td_error = td_error * seq_mask
+    if use_huber:
+        errors = huber_loss(td_error, huber_threshold)
     else:
-        td_error = q_t_selected - q_t_selected_target
-        td_error = td_error * seq_mask
-        if use_huber:
-            errors = huber_loss(td_error, huber_threshold)
-        else:
-            errors = 0.5 * torch.pow(td_error, 2.0)
+        errors = 0.5 * torch.pow(td_error, 2.0)
 
     critic_loss = torch.mean(train_batch[PRIO_WEIGHTS] * errors)
 
@@ -326,16 +298,6 @@ def value_mixing_ddpg_loss(policy, model, dist_class, train_batch):
         for name, var in model.q_variables(as_dict=True).items():
             if "bias" not in name:
                 critic_loss += (l2_reg * l2_loss(var))
-
-    # Model self-supervised losses.
-    if policy.config["use_state_preprocessor"]:
-        # Expand input_dict in case custom_loss' need them.
-        input_dict[SampleBatch.ACTIONS] = train_batch[SampleBatch.ACTIONS]
-        input_dict[SampleBatch.REWARDS] = train_batch[SampleBatch.REWARDS]
-        input_dict[SampleBatch.DONES] = train_batch[SampleBatch.DONES]
-        input_dict[SampleBatch.NEXT_OBS] = train_batch[SampleBatch.NEXT_OBS]
-        [actor_loss, critic_loss] = model.custom_loss(
-            [actor_loss, critic_loss], input_dict)
 
     # Store values for stats function in model (tower), such that for
     # multi-GPU, we do not override them during the parallel loss phase.

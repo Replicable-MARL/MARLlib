@@ -32,8 +32,24 @@ from typing import Any, Dict
 from ray.tune.analysis import ExperimentAnalysis
 
 
+def restore_model(restore: Dict, exp: Dict):
+
+    if restore is not None:
+        with open(restore["params_path"], 'r') as JSON:
+            raw_exp = json.load(JSON)
+            raw_exp = raw_exp["model"]["custom_model_config"]['model_arch_args']
+            check_exp = exp["model"]["custom_model_config"]['model_arch_args']
+            if check_exp != raw_exp:
+                raise ValueError("is not using the params required by the checkpoint model")
+        model_path = restore["model_path"]
+    else:
+        model_path = None
+
+    return model_path
+
+
 def run_coma(model: Any, exp: Dict, run: Dict, env: Dict,
-            stop: Dict, restore: Dict) -> ExperimentAnalysis:
+             stop: Dict, restore: Dict) -> ExperimentAnalysis:
     """ This script runs the Counterfactual Multi-Agent Policy Gradients (COMA) algorithm using Ray RLlib.
     Args:
         :params model (str): The name of the model class to register.
@@ -87,17 +103,7 @@ def run_coma(model: Any, exp: Dict, run: Dict, env: Dict,
     arch = exp["model_arch_args"]["core_arch"]
     RUNNING_NAME = '_'.join([algorithm, arch, map_name])
 
-    if restore is not None:
-        with open(restore["params_path"], 'r') as JSON:
-            raw_exp = json.load(JSON)
-            raw_exp = raw_exp["model"]["custom_model_config"]['model_arch_args']
-            check_exp = exp["model"]["custom_model_config"]['model_arch_args']
-            if check_exp != raw_exp:
-                raise ValueError("is not using the params required by the checkpoint model")
-        model_path = restore["model_path"]
-    else:
-        model_path = None
-
+    model_path = restore_model(restore, exp)
     results = tune.run(COMATrainer,
                        name=RUNNING_NAME,
                        checkpoint_at_end=exp['checkpoint_end'],
