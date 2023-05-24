@@ -4,7 +4,7 @@
 
 </div>
 
-[comment]: <> (<h1 align="center"> MARLlib: A Scalable Multi-agent Reinforcement Learning Library </h1>)
+<h1 align="center"> MARLlib: A Multi-agent Reinforcement Learning Library </h1>
 
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)]()
 ![test](https://github.com/Replicable-MARL/MARLlib/workflows/test/badge.svg)

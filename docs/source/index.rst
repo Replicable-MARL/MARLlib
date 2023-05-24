@@ -1,4 +1,4 @@
-MARLlib: A Scalable Multi-agent Reinforcement Learning Library
+MARLlib: A Multi-agent Reinforcement Learning Library
 ========================================
 
 .. figure:: images/allenv.gif
