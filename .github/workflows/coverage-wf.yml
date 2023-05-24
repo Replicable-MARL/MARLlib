@@ -2,20 +2,29 @@ name: workflow for Codecov
 on: [push]
 jobs:
   run:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ ubuntu-latest ]
+    env:
+      OS: ${{ matrix.os }}
+      PYTHON: '3.8'
     steps:
     - uses: actions/checkout@master
     - name: Setup Python
       uses: actions/setup-python@master
       with:
         python-version: 3.8
-    - name: Generate coverage report
+    - name: Install dependencies
       run: |
         pip install pytest
         pip install pytest-cov
         pip install psutil==5.7.0
         pip install -r requirements.txt
-        pytest --cov=./ --cov-report=xml
+    - name: Run tests with Coverage
+      run: |
+        coverage run -m pytest
+        coverage xml
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
       with:
