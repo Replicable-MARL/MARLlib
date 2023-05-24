@@ -23,7 +23,7 @@ SMAC
 ==============
 
 .. figure:: ../images/smac.gif
-    :width: 700
+    :width: 550
     :align: center
 
 StarCraft Multi-Agent Challenge (SMAC) is a multi-agent environment for collaborative multi-agent reinforcement learning (MARL) research based on Blizzard's StarCraft II RTS game.
@@ -84,7 +84,7 @@ MAMuJoCo
 ==============
 
 .. figure:: ../images/mamujoco.gif
-    :width: 700
+    :width: 400
     :align: center
 
 Multi-Agent Mujoco (MAMuJoCo) is an environment for continuous cooperative multi-agent robotic control.
@@ -152,7 +152,7 @@ Google Research Football
 
 
 .. figure:: ../images/grf.gif
-    :width: 700
+    :width: 550
     :align: center
 
 
@@ -211,7 +211,7 @@ MPE
 ==============
 
 .. figure:: ../images/mpe.gif
-    :width: 700
+    :width: 550
     :align: center
 
 Multi-particle Environments (MPE) are a set of communication-oriented environments where particle agents can (sometimes) move,
@@ -264,7 +264,7 @@ LBF
 ==============
 
 .. figure:: ../images/lbf.gif
-    :width: 700
+    :width: 550
     :align: center
 
 Level-based Foraging (LBF) is a mixed cooperative-competitive game that focuses on coordinating the agents involved.
@@ -311,7 +311,7 @@ RWARE
 ==============
 
 .. figure:: ../images/rware.gif
-    :width: 700
+    :width: 550
     :align: center
 
 Robot Warehouse (RWARE) simulates a warehouse with robots moving and delivering requested goods.
@@ -407,7 +407,7 @@ Pommerman
 ==============
 
 .. figure:: ../images/pommerman.gif
-    :width: 700
+    :width: 550
     :align: center
 
 Pommerman is stylistically similar to Bomberman, the famous game from Nintendo.
@@ -461,7 +461,7 @@ MetaDrive
 ==============
 
 .. figure:: ../images/metadrive.gif
-    :width: 700
+    :width: 550
     :align: center
 
 MetaDrive is a driving simulator that supports generating infinite scenes with various road maps and
@@ -509,7 +509,7 @@ Hanabi
 ==============
 
 .. figure:: ../images/hanabi.gif
-    :width: 700
+    :width: 550
     :align: center
 
 Hanabi is a cooperative card game created by French game designer Antoine Bauza.
@@ -567,7 +567,7 @@ MATE
 ==============
 
 .. figure:: ../images/mate.gif
-    :width: 700
+    :width: 550
     :align: center
 
 Multi-Agent Tracking Environment (MATE) is an asymmetric two-team zero-sum stochastic game with partial observations, and each team has multiple agents (multiplayer). Intra-team communications are allowed, but inter-team communications are prohibited. It is cooperative among teammates, but it is competitive among teams (opponents).
@@ -615,7 +615,7 @@ GoBigger
 .. only:: html
 
     .. figure:: ../images/gobigger.gif
-       :width: 700
+       :width: 550
        :align: center
 
 
