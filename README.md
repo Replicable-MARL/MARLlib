@@ -1,10 +1,10 @@
-[comment]: <> (<div align="center">)
+<div align="center">
 
-[comment]: <> (<img src=docs/source/images/logo1.png width=65% />)
+<img src=docs/source/images/allenv.gif width=95% />
 
-[comment]: <> (</div>)
+</div>
 
-<h1 align="center"> MARLlib: A Scalable Multi-agent Reinforcement Learning Library </h1>
+<h1 align="center"> MARLlib: A Multi-agent Reinforcement Learning Library </h1>
 
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)]()
 ![test](https://github.com/Replicable-MARL/MARLlib/workflows/test/badge.svg)

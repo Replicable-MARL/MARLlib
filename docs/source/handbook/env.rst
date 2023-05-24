@@ -22,7 +22,8 @@ Environment list of MARLlib, including installation and description.
 SMAC
 ==============
 
-.. figure:: ../images/env_smac.png
+.. figure:: ../images/smac.gif
+    :width: 700
     :align: center
 
 StarCraft Multi-Agent Challenge (SMAC) is a multi-agent environment for collaborative multi-agent reinforcement learning (MARL) research based on Blizzard's StarCraft II RTS game.
@@ -82,7 +83,8 @@ and put it in the right place.
 MAMuJoCo
 ==============
 
-.. figure:: ../images/env_mamujoco.png
+.. figure:: ../images/mamujoco.gif
+    :width: 700
     :align: center
 
 Multi-Agent Mujoco (MAMuJoCo) is an environment for continuous cooperative multi-agent robotic control.
@@ -149,7 +151,8 @@ Google Research Football
 ================================
 
 
-.. figure:: ../images/env_football.png
+.. figure:: ../images/grf.gif
+    :width: 700
     :align: center
 
 
@@ -207,7 +210,8 @@ We provide solutions (may work) for potential bugs
 MPE
 ==============
 
-.. figure:: ../images/env_mpe.png
+.. figure:: ../images/mpe.gif
+    :width: 700
     :align: center
 
 Multi-particle Environments (MPE) are a set of communication-oriented environments where particle agents can (sometimes) move,
@@ -259,7 +263,8 @@ We use the pettingzoo version of MPE
 LBF
 ==============
 
-.. figure:: ../images/env_lbf.png
+.. figure:: ../images/lbf.gif
+    :width: 700
     :align: center
 
 Level-based Foraging (LBF) is a mixed cooperative-competitive game that focuses on coordinating the agents involved.
@@ -305,7 +310,8 @@ Installation
 RWARE
 ==============
 
-.. figure:: ../images/env_rware.png
+.. figure:: ../images/rware.gif
+    :width: 700
     :align: center
 
 Robot Warehouse (RWARE) simulates a warehouse with robots moving and delivering requested goods.
@@ -351,7 +357,8 @@ Installation
 MAgent
 ==============
 
-.. figure:: ../images/env_magent.png
+.. figure:: ../images/magent.gif
+    :width: 700
     :align: center
 
 MAgent is a set of environments where large numbers of pixel agents in a grid world interact in battles or other competitive scenarios.
@@ -399,7 +406,8 @@ Installation
 Pommerman
 ==============
 
-.. figure:: ../images/env_pommerman.png
+.. figure:: ../images/pommerman.gif
+    :width: 700
     :align: center
 
 Pommerman is stylistically similar to Bomberman, the famous game from Nintendo.
@@ -452,7 +460,8 @@ Installation
 MetaDrive
 ==============
 
-.. figure:: ../images/env_metadrive.png
+.. figure:: ../images/metadrive.gif
+    :width: 700
     :align: center
 
 MetaDrive is a driving simulator that supports generating infinite scenes with various road maps and
@@ -499,7 +508,8 @@ Installation
 Hanabi
 ==============
 
-.. figure:: ../images/env_hanabi.png
+.. figure:: ../images/hanabi.gif
+    :width: 700
     :align: center
 
 Hanabi is a cooperative card game created by French game designer Antoine Bauza.
@@ -556,7 +566,8 @@ To install, execute the following:
 MATE
 ==============
 
-.. figure:: ../images/env_mate.png
+.. figure:: ../images/mate.gif
+    :width: 700
     :align: center
 
 Multi-Agent Tracking Environment (MATE) is an asymmetric two-team zero-sum stochastic game with partial observations, and each team has multiple agents (multiplayer). Intra-team communications are allowed, but inter-team communications are prohibited. It is cooperative among teammates, but it is competitive among teams (opponents).
@@ -603,8 +614,8 @@ GoBigger
 ==============
 .. only:: html
 
-    .. figure:: ../images/env_gobigger.png
-       :width: 500
+    .. figure:: ../images/gobigger.gif
+       :width: 700
        :align: center
 
 
@@ -651,8 +662,8 @@ Overcooked-AI
 ==============
 .. only:: html
 
-    .. figure:: ../images/env_overcooked.png
-       :width: 320
+    .. figure:: ../images/overcooked.gif
+       :width: 500
        :align: center
 
 
@@ -754,8 +765,8 @@ Air Combat
 ==============================
 .. only:: html
 
-    .. figure:: ../images/env_aircombat.gif
-       :width: 640
+    .. figure:: ../images/aircombat.gif
+       :width: 700
        :align: center
 
 
