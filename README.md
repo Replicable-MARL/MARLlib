@@ -21,8 +21,8 @@
 | :exclamation:  News |
 |:-----------------------------------------|
 | **March 2023** We are excited to announce that a major update has just been released. For detailed version information, please refer to the [version info](https://github.com/Replicable-MARL/MARLlib/releases/tag/1.0.2).|
-| **May 2023** Exciting news! MARLlib now supports three more tasks: [MATE](https://github.com/XuehaiPan/mate), [GoBigger](https://github.com/opendilab/GoBigger), [Overcooked-AI](https://github.com/HumanCompatibleAI/overcooked_ai). Give them a try!|
-| **May 2023 (update)** Supports two more tasks: [MAPDN](https://github.com/Future-Power-Networks/MAPDN) and [AirCombat](https://github.com/liuqh16/CloseAirCombat). Give them a try!|
+| **May 2023** Exciting news! MARLlib now supports three more tasks: [MATE](https://marllib.readthedocs.io/en/latest/handbook/env.html#mate), [GoBigger](https://marllib.readthedocs.io/en/latest/handbook/env.html#gobigger), [Overcooked-AI](https://marllib.readthedocs.io/en/latest/handbook/env.html#overcooked-ai). Give them a try!|
+| **May 2023 (update)** Supports two more tasks: [MAPDN](https://marllib.readthedocs.io/en/latest/handbook/env.html#power-distribution-networks) and [AirCombat](https://marllib.readthedocs.io/en/latest/handbook/env.html#air-combat). Give them a try!|
 
 
 **Multi-agent Reinforcement Learning Library ([MARLlib](https://arxiv.org/abs/2210.13708))** is ***a MARL library*** that utilizes [**Ray**](https://github.com/ray-project/ray) and one of its toolkits [**RLlib**](https://github.com/ray-project/ray/tree/master/rllib). It offers a comprehensive platform for developing, training, and testing MARL algorithms across various tasks and environments. 
@@ -186,21 +186,21 @@ Most of the popular environments in MARL research are supported by MARLlib:
 
 | Env Name | Learning Mode | Observability | Action Space | Observations |
 | :-----------: | :-----------: | :-----------: | :-----------: | :-----------: |
-| **[LBF](https://github.com/semitable/lb-foraging)**  | cooperative + collaborative | Both | Discrete | 1D  |
-| **[RWARE](https://github.com/semitable/robotic-warehouse)**  | cooperative | Partial | Discrete | 1D  |
-| **[MPE](https://github.com/openai/multiagent-particle-envs)**  | cooperative + collaborative + mixed | Both | Both | 1D  |
-| **[SMAC](https://github.com/oxwhirl/smac)**  | cooperative | Partial | Discrete | 1D |
-| **[MetaDrive](https://github.com/decisionforce/metadrive)**  | collaborative | Partial | Continuous | 1D |
-| **[MAgent](https://www.pettingzoo.ml/magent)** | collaborative + mixed | Partial | Discrete | 2D |
-| **[Pommerman](https://github.com/MultiAgentLearning/playground)**  | collaborative + competitive + mixed | Both | Discrete | 2D |
-| **[MAMuJoCo](https://github.com/schroederdewitt/multiagent_mujoco)**  | cooperative | Full | Continuous | 1D |
-| **[GRF](https://github.com/google-research/football)**  | collaborative + mixed | Full | Discrete | 2D |
-| **[Hanabi](https://github.com/deepmind/hanabi-learning-environment)** | cooperative | Partial | Discrete | 1D |
-| **[MATE](https://github.com/XuehaiPan/mate)** | cooperative + mixed | Partial | Both | 1D |
-| **[GoBigger](https://github.com/opendilab/GoBigger)** | cooperative + mixed | Both | Continuous | 1D |
-| **[Overcooked-AI](https://github.com/HumanCompatibleAI/overcooked_ai)** | cooperative | Full | Discrete | 1D |
-| **[PDN](https://github.com/Future-Power-Networks/MAPDN)** | cooperative | Partial | Continuous | 1D |
-| **[AirCombat](https://github.com/liuqh16/CloseAirCombat)** | cooperative + mixed | Partial | MultiDiscrete | 1D |
+| **[LBF](https://marllib.readthedocs.io/en/latest/handbook/env.html#lbf)**  | cooperative + collaborative | Both | Discrete | 1D  |
+| **[RWARE](https://marllib.readthedocs.io/en/latest/handbook/env.html#rware)**  | cooperative | Partial | Discrete | 1D  |
+| **[MPE](https://marllib.readthedocs.io/en/latest/handbook/env.html#mpe)**  | cooperative + collaborative + mixed | Both | Both | 1D  |
+| **[SMAC](https://marllib.readthedocs.io/en/latest/handbook/env.html#smac)**  | cooperative | Partial | Discrete | 1D |
+| **[MetaDrive](https://marllib.readthedocs.io/en/latest/handbook/env.html#metadrive)**  | collaborative | Partial | Continuous | 1D |
+| **[MAgent](https://marllib.readthedocs.io/en/latest/handbook/env.html#magent)** | collaborative + mixed | Partial | Discrete | 2D |
+| **[Pommerman](https://marllib.readthedocs.io/en/latest/handbook/env.html#pommerman)**  | collaborative + competitive + mixed | Both | Discrete | 2D |
+| **[MAMuJoCo](https://marllib.readthedocs.io/en/latest/handbook/env.html#mamujoco)**  | cooperative | Full | Continuous | 1D |
+| **[GRF](https://marllib.readthedocs.io/en/latest/handbook/env.html#google-research-football)**  | collaborative + mixed | Full | Discrete | 2D |
+| **[Hanabi](https://marllib.readthedocs.io/en/latest/handbook/env.html#hanabi)** | cooperative | Partial | Discrete | 1D |
+| **[MATE](https://marllib.readthedocs.io/en/latest/handbook/env.html#mate)** | cooperative + mixed | Partial | Both | 1D |
+| **[GoBigger](https://marllib.readthedocs.io/en/latest/handbook/env.html#gobigger)** | cooperative + mixed | Both | Continuous | 1D |
+| **[Overcooked-AI](https://marllib.readthedocs.io/en/latest/handbook/env.html#overcooked-ai)** | cooperative | Full | Discrete | 1D |
+| **[PDN](https://marllib.readthedocs.io/en/latest/handbook/env.html#power-distribution-networks)** | cooperative | Partial | Continuous | 1D |
+| **[AirCombat](https://marllib.readthedocs.io/en/latest/handbook/env.html#air-combat)** | cooperative + mixed | Partial | MultiDiscrete | 1D |
 
 Each environment has a readme file, standing as the instruction for this task, including env settings, installation, and
 important notes.
@@ -310,7 +310,21 @@ mappo.render(
 
 ## Results
 
-All results are listed [here](https://github.com/Replicable-MARL/MARLlib/tree/main/results).
+Under the current working directory, you can find all the training data (logging and TensorFlow files) as well as the saved models. To visualize the learning curve, you can use Tensorboard. Follow the steps below:
+
+1. Install Tensorboard by running the following command:
+```bash
+pip install tensorboard
+```
+
+2. Use the following command to launch Tensorboard and visualize the results:
+```bash
+tensorboard --logdir .
+```
+
+Alternatively, you can refer to [this tutorial](https://github.com/tensorflow/tensorboard/blob/master/docs/get_started.ipynb) for more detailed instructions.
+
+For a list of all the existing results, you can visit [this link](https://github.com/Replicable-MARL/MARLlib/tree/main/results). Please note that these results were obtained from an older version of MARLlib, which may lead to inconsistencies when compared to the current results.
 
 ## Quick examples
 

@@ -3,7 +3,7 @@ MARLlib: A Multi-agent Reinforcement Learning Library
 
 .. figure:: images/allenv.gif
     :align: left
-    :width: 700
+    :width: 900
 
 .. toctree::
    :maxdepth: 1
