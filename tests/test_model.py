@@ -31,20 +31,20 @@ class TestBaseOnMPE(unittest.TestCase):
     ### model ###
     #############
 
-    # def test_a01_hatrpo_hacc_mlp(self):
-    #     env = marl.make_env(environment_name="mpe", map_name="simple_spread", force_coop=True)
-    #     algo = marl.algos.hatrpo(hyperparam_source="test")
-    #     model = marl.build_model(env, algo, {"core_arch": "mlp", "encode_layer": "8-8"})
-    #     algo.fit(env, model, stop={"training_iteration": 1}, local_mode=True, num_gpus=0,
-    #              num_workers=2, share_policy="individual", checkpoint_end=False)
+    def test_a01_hatrpo_hacc_mlp(self):
+        env = marl.make_env(environment_name="mpe", map_name="simple_spread", force_coop=True)
+        algo = marl.algos.hatrpo(hyperparam_source="test")
+        model = marl.build_model(env, algo, {"core_arch": "mlp", "encode_layer": "8-8"})
+        algo.fit(env, model, stop={"training_iteration": 1}, local_mode=True, num_gpus=0,
+                 num_workers=2, share_policy="individual", checkpoint_end=False)
 
-    # def test_a02_hatrpo_hacc_gru(self):
-    #     env = marl.make_env(environment_name="mpe", map_name="simple_spread", force_coop=True)
-    #     algo = marl.algos.hatrpo(hyperparam_source="test")
-    #     model = marl.build_model(env, algo, {"core_arch": "gru", "encode_layer": "8-8"})
-    #     algo.fit(env, model, stop={"training_iteration": 1}, local_mode=True, num_gpus=0,
-    #              num_workers=2, share_policy="individual", checkpoint_end=False)
-    #
+    def test_a02_hatrpo_hacc_gru(self):
+        env = marl.make_env(environment_name="mpe", map_name="simple_spread", force_coop=True)
+        algo = marl.algos.hatrpo(hyperparam_source="test")
+        model = marl.build_model(env, algo, {"core_arch": "gru", "encode_layer": "8-8"})
+        algo.fit(env, model, stop={"training_iteration": 1}, local_mode=True, num_gpus=0,
+                 num_workers=2, share_policy="individual", checkpoint_end=False)
+    
     def test_a11_happo_hacc_mlp(self):
         env = marl.make_env(environment_name="mpe", map_name="simple_spread", force_coop=True)
         algo = marl.algos.happo(hyperparam_source="test")
@@ -171,34 +171,34 @@ class TestBaseOnMPE(unittest.TestCase):
         algo.fit(env, model, stop={"training_iteration": 1}, local_mode=True, num_gpus=0,
                  num_workers=2, share_policy="all", checkpoint_end=False)
 
-    # def test_e11_ippo_cnn(self):
-    #     env = marl.make_env(environment_name="magent", map_name="battlefield")
-    #     algo = marl.algos.ippo(hyperparam_source="test")
-    #     model = marl.build_model(env, algo, {"core_arch": "mlp"})
-    #     algo.fit(env, model, stop={"training_iteration": 1}, local_mode=True, num_gpus=0,
-    #              num_workers=2, share_policy="group", checkpoint_end=False)
-    #
-    # def test_e12_ippo_cnn(self):
-    #     env = marl.make_env(environment_name="magent", map_name="battlefield")
-    #     algo = marl.algos.ippo(hyperparam_source="test")
-    #     model = marl.build_model(env, algo, {"core_arch": "gru"})
-    #     algo.fit(env, model, stop={"training_iteration": 1}, local_mode=True, num_gpus=0,
-    #              num_workers=2, share_policy="group", checkpoint_end=False)
-    #
-    # def test_f11_mappo_cnn(self):
-    #     env = marl.make_env(environment_name="magent", map_name="battlefield")
-    #     algo = marl.algos.mappo(hyperparam_source="test")
-    #     model = marl.build_model(env, algo, {"core_arch": "mlp"})
-    #     algo.fit(env, model, stop={"training_iteration": 1}, local_mode=True, num_gpus=0,
-    #              num_workers=2, share_policy="group", checkpoint_end=False)
-    #
-    # def test_f12_mappo_cnn(self):
-    #     env = marl.make_env(environment_name="magent", map_name="battlefield")
-    #     algo = marl.algos.mappo(hyperparam_source="test")
-    #     model = marl.build_model(env, algo, {"core_arch": "gru"})
-    #     algo.fit(env, model, stop={"training_iteration": 1}, local_mode=True, num_gpus=0,
-    #              num_workers=2, share_policy="group", checkpoint_end=False)
-    #
+    def test_e11_ippo_cnn(self):
+        env = marl.make_env(environment_name="magent", map_name="battlefield")
+        algo = marl.algos.ippo(hyperparam_source="test")
+        model = marl.build_model(env, algo, {"core_arch": "mlp"})
+        algo.fit(env, model, stop={"training_iteration": 1}, local_mode=True, num_gpus=0,
+                 num_workers=2, share_policy="group", checkpoint_end=False)
+    
+    def test_e12_ippo_cnn(self):
+        env = marl.make_env(environment_name="magent", map_name="battlefield")
+        algo = marl.algos.ippo(hyperparam_source="test")
+        model = marl.build_model(env, algo, {"core_arch": "gru"})
+        algo.fit(env, model, stop={"training_iteration": 1}, local_mode=True, num_gpus=0,
+                 num_workers=2, share_policy="group", checkpoint_end=False)
+    
+    def test_f11_mappo_cnn(self):
+        env = marl.make_env(environment_name="magent", map_name="battlefield")
+        algo = marl.algos.mappo(hyperparam_source="test")
+        model = marl.build_model(env, algo, {"core_arch": "mlp"})
+        algo.fit(env, model, stop={"training_iteration": 1}, local_mode=True, num_gpus=0,
+                 num_workers=2, share_policy="group", checkpoint_end=False)
+    
+    def test_f12_mappo_cnn(self):
+        env = marl.make_env(environment_name="magent", map_name="battlefield")
+        algo = marl.algos.mappo(hyperparam_source="test")
+        model = marl.build_model(env, algo, {"core_arch": "gru"})
+        algo.fit(env, model, stop={"training_iteration": 1}, local_mode=True, num_gpus=0,
+                 num_workers=2, share_policy="group", checkpoint_end=False)
+    
     def test_f11_mappo_1d_encoder(self):
         env = marl.make_env(environment_name="mpe", map_name="simple_spread")
         algo = marl.algos.mappo(hyperparam_source="test")
@@ -230,74 +230,74 @@ class TestBaseOnMPE(unittest.TestCase):
 
     # VD algorithms
 
-    # def test_d1_qmix(self):
-    #     env = marl.make_env(environment_name="mpe", map_name="simple_spread", force_coop=True, continuous_actions=False)
-    #     algo = marl.algos.qmix(hyperparam_source="test")
-    #     model = marl.build_model(env, algo, {"core_arch": "gru", "encode_layer": "8-8"})
-    #     algo.fit(env, model, stop={"training_iteration": 1}, local_mode=True, num_gpus=0,
-    #              num_workers=2, share_policy="all", checkpoint_end=False)
-    #
-    # def test_d2_vdn(self):
-    #     env = marl.make_env(environment_name="mpe", map_name="simple_spread", force_coop=True, continuous_actions=False)
-    #     algo = marl.algos.vdn(hyperparam_source="test")
-    #     model = marl.build_model(env, algo, {"core_arch": "gru", "encode_layer": "8-8"})
-    #     algo.fit(env, model, stop={"training_iteration": 1}, local_mode=True, num_gpus=0,
-    #              num_workers=2, share_policy="all", checkpoint_end=False)
-    #
-    # def test_d3_vda2c(self):
-    #     env = marl.make_env(environment_name="mpe", map_name="simple_spread", force_coop=True, continuous_actions=True)
-    #     algo = marl.algos.vda2c(hyperparam_source="test")
-    #     model = marl.build_model(env, algo, {"core_arch": "gru", "encode_layer": "8-8"})
-    #     algo.fit(env, model, stop={"training_iteration": 1}, local_mode=True, num_gpus=0,
-    #              num_workers=2, share_policy="all", checkpoint_end=False)
-    #
-    # def test_d4_vdppo(self):
-    #     env = marl.make_env(environment_name="mpe", map_name="simple_spread", force_coop=True, continuous_actions=True)
-    #     algo = marl.algos.vdppo(hyperparam_source="test")
-    #     model = marl.build_model(env, algo, {"core_arch": "lstm", "encode_layer": "8-8"})
-    #     algo.fit(env, model, stop={"training_iteration": 1}, local_mode=True, num_gpus=0,
-    #              num_workers=2, share_policy="all", checkpoint_end=False)
-    #
-    # def test_d5_facmac(self):
-    #     env = marl.make_env(environment_name="mpe", map_name="simple_spread", force_coop=True, continuous_actions=True)
-    #     algo = marl.algos.facmac(hyperparam_source="test")
-    #     model = marl.build_model(env, algo, {"core_arch": "gru", "encode_layer": "8-8"})
-    #     algo.fit(env, model, stop={"training_iteration": 1}, local_mode=True, num_gpus=0,
-    #              num_workers=2, share_policy="all", checkpoint_end=False)
+    def test_d1_qmix(self):
+        env = marl.make_env(environment_name="mpe", map_name="simple_spread", force_coop=True, continuous_actions=False)
+        algo = marl.algos.qmix(hyperparam_source="test")
+        model = marl.build_model(env, algo, {"core_arch": "gru", "encode_layer": "8-8"})
+        algo.fit(env, model, stop={"training_iteration": 1}, local_mode=True, num_gpus=0,
+                 num_workers=2, share_policy="all", checkpoint_end=False)
+    
+    def test_d2_vdn(self):
+        env = marl.make_env(environment_name="mpe", map_name="simple_spread", force_coop=True, continuous_actions=False)
+        algo = marl.algos.vdn(hyperparam_source="test")
+        model = marl.build_model(env, algo, {"core_arch": "gru", "encode_layer": "8-8"})
+        algo.fit(env, model, stop={"training_iteration": 1}, local_mode=True, num_gpus=0,
+                 num_workers=2, share_policy="all", checkpoint_end=False)
+    
+    def test_d3_vda2c(self):
+        env = marl.make_env(environment_name="mpe", map_name="simple_spread", force_coop=True, continuous_actions=True)
+        algo = marl.algos.vda2c(hyperparam_source="test")
+        model = marl.build_model(env, algo, {"core_arch": "gru", "encode_layer": "8-8"})
+        algo.fit(env, model, stop={"training_iteration": 1}, local_mode=True, num_gpus=0,
+                 num_workers=2, share_policy="all", checkpoint_end=False)
+    
+    def test_d4_vdppo(self):
+        env = marl.make_env(environment_name="mpe", map_name="simple_spread", force_coop=True, continuous_actions=True)
+        algo = marl.algos.vdppo(hyperparam_source="test")
+        model = marl.build_model(env, algo, {"core_arch": "lstm", "encode_layer": "8-8"})
+        algo.fit(env, model, stop={"training_iteration": 1}, local_mode=True, num_gpus=0,
+                 num_workers=2, share_policy="all", checkpoint_end=False)
+    
+    def test_d5_facmac(self):
+        env = marl.make_env(environment_name="mpe", map_name="simple_spread", force_coop=True, continuous_actions=True)
+        algo = marl.algos.facmac(hyperparam_source="test")
+        model = marl.build_model(env, algo, {"core_arch": "gru", "encode_layer": "8-8"})
+        algo.fit(env, model, stop={"training_iteration": 1}, local_mode=True, num_gpus=0,
+                 num_workers=2, share_policy="all", checkpoint_end=False)
 
-    # def test_all_algorithms(self):
-    #
-    #     env = marl.make_env(environment_name="mpe", map_name="simple_spread", force_coop=True)
-    #     algo = marl.algos.happo(hyperparam_source="test")
-    #     model = marl.build_model(env, algo, {"core_arch": "lstm", "encode_layer": "8-8"})
-    #     algo.fit(env, model, stop={"training_iteration": 1}, local_mode=True, num_gpus=0,
-    #              num_workers=2, share_policy="individual", checkpoint_end=False)
-    #
-    #     env = marl.make_env(environment_name="mpe", map_name="simple_spread")
-    #     algo = marl.algos.hatrpo(hyperparam_source="test")
-    #     model = marl.build_model(env, algo, {"core_arch": "lstm", "encode_layer": "8-8"})
-    #     algo.fit(env, model, stop={"training_iteration": 1}, local_mode=True, num_gpus=0,
-    #              num_workers=2, share_policy="individual", checkpoint_end=False)
-    #
-    #
-    #
-    #     for algo_name in dir(marl.algos):
-    #         if "_" not in algo_name:
-    #             if algo_name in ["iddpg", "maddpg", "facmac"]:
-    #                 env = marl.make_env(environment_name="mpe", map_name="simple_spread", force_coop=True,
-    #                                     continuous_actions=True)
-    #                 algo = getattr(marl.algos, algo_name)(hyperparam_source="test")
-    #                 model = marl.build_model(env, algo, {"core_arch": "gru", "encode_layer": "8-8"})
-    #                 algo.fit(env, model, stop={"training_iteration": 1}, local_mode=True, num_gpus=1,
-    #                              num_workers=2, share_policy="all", checkpoint_end=False)
-    #             elif algo_name in ["happo", "hatrpo"]:
-    #                 continue
-    #             else:
-    #                 env = marl.make_env(environment_name="mpe", map_name="simple_spread", force_coop=True)
-    #                 algo = getattr(marl.algos, algo_name)(hyperparam_source="test")
-    #                 model = marl.build_model(env, algo, {"core_arch": "mlp", "encode_layer": "8-8"})
-    #                 algo.fit(env, model, stop={"training_iteration": 1}, local_mode=True, num_gpus=1,
-    #                              num_workers=2, share_policy="group", checkpoint_end=False)
+    def test_all_algorithms(self):
+    
+        env = marl.make_env(environment_name="mpe", map_name="simple_spread", force_coop=True)
+        algo = marl.algos.happo(hyperparam_source="test")
+        model = marl.build_model(env, algo, {"core_arch": "lstm", "encode_layer": "8-8"})
+        algo.fit(env, model, stop={"training_iteration": 1}, local_mode=True, num_gpus=0,
+                 num_workers=2, share_policy="individual", checkpoint_end=False)
+    
+        env = marl.make_env(environment_name="mpe", map_name="simple_spread")
+        algo = marl.algos.hatrpo(hyperparam_source="test")
+        model = marl.build_model(env, algo, {"core_arch": "lstm", "encode_layer": "8-8"})
+        algo.fit(env, model, stop={"training_iteration": 1}, local_mode=True, num_gpus=0,
+                 num_workers=2, share_policy="individual", checkpoint_end=False)
+    
+    
+    
+        for algo_name in dir(marl.algos):
+            if "_" not in algo_name:
+                if algo_name in ["iddpg", "maddpg", "facmac"]:
+                    env = marl.make_env(environment_name="mpe", map_name="simple_spread", force_coop=True,
+                                        continuous_actions=True)
+                    algo = getattr(marl.algos, algo_name)(hyperparam_source="test")
+                    model = marl.build_model(env, algo, {"core_arch": "gru", "encode_layer": "8-8"})
+                    algo.fit(env, model, stop={"training_iteration": 1}, local_mode=True, num_gpus=1,
+                                 num_workers=2, share_policy="all", checkpoint_end=False)
+                elif algo_name in ["happo", "hatrpo"]:
+                    continue
+                else:
+                    env = marl.make_env(environment_name="mpe", map_name="simple_spread", force_coop=True)
+                    algo = getattr(marl.algos, algo_name)(hyperparam_source="test")
+                    model = marl.build_model(env, algo, {"core_arch": "mlp", "encode_layer": "8-8"})
+                    algo.fit(env, model, stop={"training_iteration": 1}, local_mode=True, num_gpus=1,
+                                 num_workers=2, share_policy="group", checkpoint_end=False)
 
 
 if __name__ == "__main__":
