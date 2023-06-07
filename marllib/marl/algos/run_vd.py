@@ -54,6 +54,7 @@ def run_vd(exp_info, env, model, stop=None):
     # grab the policy mapping info here to use in grouping environment
     policy_mapping_info = env_info["policy_mapping_info"]
 
+    shared_policy_name = "default_policy" if exp_info["agent_level_batch_update"] else "shared_policy"
     if "all_scenario" in policy_mapping_info:
         policy_mapping_info = policy_mapping_info["all_scenario"]
     else:
@@ -108,9 +109,9 @@ def run_vd(exp_info, env, model, stop=None):
             if not policy_mapping_info["all_agents_one_policy"]:
                 raise ValueError("in {}, policy can not be shared".format(map_name))
 
-            policies = {"shared_policy"}
+            policies = {shared_policy_name}
             policy_mapping_fn = (
-                lambda agent_id, episode, **kwargs: "shared_policy")
+                lambda agent_id, episode, **kwargs: shared_policy_name)
 
         elif exp_info["share_policy"] == "group":
             groups = policy_mapping_info["team_prefix"]
@@ -118,9 +119,9 @@ def run_vd(exp_info, env, model, stop=None):
                 if not policy_mapping_info["all_agents_one_policy"]:
                     raise ValueError(
                         "in {}, policy can not be shared, change it to 1. group 2. individual".format(map_name))
-                policies = {"shared_policy"}
+                policies = {shared_policy_name}
                 policy_mapping_fn = (
-                    lambda agent_id, episode, **kwargs: "shared_policy")
+                    lambda agent_id, episode, **kwargs: shared_policy_name)
             else:
                 policies = {
                     "policy_{}".format(i): (None, env_info["space_obs"], env_info["space_act"], {}) for i in

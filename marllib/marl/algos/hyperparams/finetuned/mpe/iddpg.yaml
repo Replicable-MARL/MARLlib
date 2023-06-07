@@ -25,8 +25,8 @@
 # Detailed explanation for each hyper parameter can be found in ray/rllib/agents/ddpg/iddpg.py
 
 algo_args:
-  batch_episode:  128
-  learning_starts_episode: 128
+  batch_episode: 256
+  learning_starts_episode: 256
   twin_q: False
   prioritized_replay: False
   smooth_target_policy: False
