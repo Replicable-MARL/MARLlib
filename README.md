@@ -1,14 +1,10 @@
 <div align="center">
 
-<img src=docs/source/images/logo1.png width=80% />
+<img src=docs/source/images/logo1.png width=75% />
 
 </div>
 
-<div align="center">
-
-<img src=docs/source/images/allenv.gif width=95% />
-
-</div>
+&nbsp
 
 <h1 align="center"> MARLlib: A Multi-agent Reinforcement Learning Library </h1>
 
@@ -51,6 +47,11 @@ model = marl.build_model(env, mappo, {"core_arch": "mlp", "encode_layer": "128-2
 mappo.fit(env, model, stop={'timesteps_total': 1000000}, share_policy='group')
 ```
 
+<div align="center">
+
+<img src=docs/source/images/allenv.gif width=95% />
+
+</div>
 
 ## Why MARLlib?
 
