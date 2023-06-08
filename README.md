@@ -9,9 +9,11 @@
 
 <div align="center">
 
-<img src=docs/source/images/allenv.gif width=95% />
+<img src=docs/source/images/allenv.gif width=99% />
 
 </div>
+
+&emsp;
 
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)]()
 ![test](https://github.com/Replicable-MARL/MARLlib/workflows/test/badge.svg)
