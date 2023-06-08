@@ -299,8 +299,8 @@ mappo.fit(
 mappo.render(
   env, model, 
   local_mode=True, 
-  restore_path={'params_path': "checkpoint_000010/params.json",
-                'model_path': "checkpoint_000010/checkpoint-10"}
+  restore_path={'params_path': "checkpoint/params.json",
+                'model_path': "checkpoint/checkpoint-10"}
 )
 ```
 </details>
