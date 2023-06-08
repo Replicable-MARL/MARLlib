@@ -1,12 +1,12 @@
 <div align="center">
 
-<img src=docs/source/images/allenv.gif width=95% />
+<img src=docs/source/images/logo1.png width=80% />
 
 </div>
 
 <div align="center">
 
-<img src=docs/source/images/logo1.png width=85% />
+<img src=docs/source/images/allenv.gif width=95% />
 
 </div>
 
