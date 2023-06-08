@@ -1,12 +1,17 @@
 <div align="center">
 
 <img src=docs/source/images/logo1.png width=75% />
-
 </div>
 
-&nbsp
+
 
 <h1 align="center"> MARLlib: A Multi-agent Reinforcement Learning Library </h1>
+
+<div align="center">
+
+<img src=docs/source/images/allenv.gif width=95% />
+
+</div>
 
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)]()
 ![test](https://github.com/Replicable-MARL/MARLlib/workflows/test/badge.svg)
@@ -47,11 +52,7 @@ model = marl.build_model(env, mappo, {"core_arch": "mlp", "encode_layer": "128-2
 mappo.fit(env, model, stop={'timesteps_total': 1000000}, share_policy='group')
 ```
 
-<div align="center">
 
-<img src=docs/source/images/allenv.gif width=95% />
-
-</div>
 
 ## Why MARLlib?
 
