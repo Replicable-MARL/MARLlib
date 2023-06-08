@@ -1,0 +1,166 @@
+{
+  "batch_mode": "truncate_episodes",
+  "clip_param": 0.3,
+  "entropy_coeff": 0.01,
+  "env": "mpe_simple_spread",
+  "evaluation_interval": 50,
+  "framework": "torch",
+  "kl_coeff": 0.2,
+  "lambda": 1.0,
+  "lr": 0.0005,
+  "model": {
+    "custom_model": "Centralized_Critic_Model",
+    "custom_model_config": {
+      "agent_level_batch_update": false,
+      "agent_name_ls": [
+        "agent_0",
+        "agent_1",
+        "agent_2"
+      ],
+      "algo_args": {
+        "batch_episode": 128,
+        "batch_mode": "truncate_episodes",
+        "clip_param": 0.3,
+        "entropy_coeff": 0.01,
+        "kl_coeff": 0.2,
+        "lambda": 1.0,
+        "lr": 0.0005,
+        "num_sgd_iter": 10,
+        "use_gae": true,
+        "vf_clip_param": 20.0,
+        "vf_loss_coeff": 1.0
+      },
+      "algorithm": "mappo",
+      "checkpoint_end": true,
+      "checkpoint_freq": 500,
+      "env": "mpe",
+      "env_args": {
+        "continuous_actions": false,
+        "map_name": "simple_spread",
+        "max_cycles": 25
+      },
+      "episode_limit": 25,
+      "evaluation_interval": 50,
+      "force_coop": true,
+      "framework": "torch",
+      "global_state_flag": false,
+      "local_dir": "",
+      "local_mode": false,
+      "mask_flag": false,
+      "model_arch_args": {
+        "core_arch": "mlp",
+        "encode_layer": "128-256",
+        "fc_layer": 2,
+        "hidden_state_size": 256,
+        "out_dim_fc_0": 128,
+        "out_dim_fc_1": 64
+      },
+      "num_agents": 3,
+      "num_cpus_per_worker": 1,
+      "num_gpus": 1,
+      "num_gpus_per_worker": 0,
+      "num_workers": 10,
+      "opp_action_in_cc": true,
+      "policy_mapping_info": {
+        "simple_adversary": {
+          "all_agents_one_policy": false,
+          "description": "one team attack, one team survive",
+          "one_agent_one_policy": true,
+          "team_prefix": [
+            "adversary_",
+            "agent_"
+          ]
+        },
+        "simple_crypto": {
+          "all_agents_one_policy": false,
+          "description": "two team cooperate, one team attack",
+          "one_agent_one_policy": true,
+          "team_prefix": [
+            "eve_",
+            "bob_",
+            "alice_"
+          ]
+        },
+        "simple_push": {
+          "all_agents_one_policy": false,
+          "description": "one team target on landmark, one team attack",
+          "one_agent_one_policy": true,
+          "team_prefix": [
+            "adversary_",
+            "agent_"
+          ]
+        },
+        "simple_reference": {
+          "all_agents_one_policy": true,
+          "description": "one team cooperate",
+          "one_agent_one_policy": true,
+          "team_prefix": [
+            "agent_"
+          ]
+        },
+        "simple_speaker_listener": {
+          "all_agents_one_policy": true,
+          "description": "two team cooperate",
+          "one_agent_one_policy": true,
+          "team_prefix": [
+            "speaker_",
+            "listener_"
+          ]
+        },
+        "simple_spread": {
+          "all_agents_one_policy": true,
+          "description": "one team cooperate",
+          "one_agent_one_policy": true,
+          "team_prefix": [
+            "agent_"
+          ]
+        },
+        "simple_tag": {
+          "all_agents_one_policy": false,
+          "description": "one team attack, one team survive",
+          "one_agent_one_policy": true,
+          "team_prefix": [
+            "adversary_",
+            "agent_"
+          ]
+        },
+        "simple_world_comm": {
+          "all_agents_one_policy": false,
+          "description": "two team cooperate and attack, one team survive",
+          "one_agent_one_policy": true,
+          "team_prefix": [
+            "adversary_",
+            "leadadversary_",
+            "agent_"
+          ]
+        }
+      },
+      "restore_path": {
+        "model_path": "",
+        "params_path": ""
+      },
+      "seed": 321,
+      "share_policy": "all",
+      "space_act": "Discrete(5)",
+      "space_obs": "Dict(obs:Box([-100. -100. -100. -100. -100. -100. -100. -100. -100. -100. -100. -100.\n -100. -100. -100. -100. -100. -100.], [100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100. 100.\n 100. 100. 100. 100.], (18,), float32))",
+      "stop_iters": 9999999,
+      "stop_reward": 999999,
+      "stop_timesteps": 2000000
+    }
+  },
+  "multiagent": {
+    "policies": "{'shared_policy'}",
+    "policy_mapping_fn": "<function run_cc.<locals>.<lambda> at 0x7f4bada5fd08>"
+  },
+  "num_gpus": 1,
+  "num_gpus_per_worker": 0,
+  "num_sgd_iter": 10,
+  "num_workers": 10,
+  "seed": 321,
+  "sgd_minibatch_size": 3200,
+  "simple_optimizer": false,
+  "train_batch_size": 3200,
+  "use_gae": true,
+  "vf_clip_param": 20.0,
+  "vf_loss_coeff": 1.0
+}

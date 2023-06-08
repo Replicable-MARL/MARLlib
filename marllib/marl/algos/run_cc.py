@@ -79,13 +79,15 @@ def run_cc(exp_info, env, model, stop=None):
     else:
         policy_mapping_info = policy_mapping_info[map_name]
 
+    # whether to agent level batch update when shared model parameter:
+    # True -> default_policy | False -> shared_policy
+    shared_policy_name = "default_policy" if exp_info["agent_level_batch_update"] else "shared_policy"
     if exp_info["share_policy"] == "all":
         if not policy_mapping_info["all_agents_one_policy"]:
             raise ValueError("in {}, policy can not be shared, change it to 1. group 2. individual".format(map_name))
-
-        policies = {"av"}
+        policies = {shared_policy_name}
         policy_mapping_fn = (
-            lambda agent_id, episode, **kwargs: "av")
+            lambda agent_id, episode, **kwargs: shared_policy_name)
 
     elif exp_info["share_policy"] == "group":
         groups = policy_mapping_info["team_prefix"]
@@ -95,9 +97,9 @@ def run_cc(exp_info, env, model, stop=None):
                 raise ValueError(
                     "in {}, policy can not be shared, change it to 1. group 2. individual".format(map_name))
 
-            policies = {"shared_policy"}
+            policies = {shared_policy_name}
             policy_mapping_fn = (
-                lambda agent_id, episode, **kwargs: "shared_policy")
+                lambda agent_id, episode, **kwargs: shared_policy_name)
 
         else:
             policies = {

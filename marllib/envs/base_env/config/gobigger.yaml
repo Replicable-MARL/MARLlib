@@ -27,7 +27,9 @@ env_args:
   #num_teams: 1
   #num_agents: 2
   frame_limit: 1600
+
 mask_flag: False
 global_state_flag: False
 opp_action_in_cc: True
-fixed_batch_timesteps: 3200 # optional, all scenario will use this batch size, only valid for on-policy algorithms
+fixed_batch_timesteps: 3200
+agent_level_batch_update: True

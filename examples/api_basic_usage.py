@@ -59,7 +59,7 @@ from marllib import marl
 
 # prepare the environment academy_pass_and_shoot_with_keeper
 #env = marl.make_env(environment_name="hanabi", map_name="Hanabi-Very-Small")
-env = marl.make_env(environment_name="mpe", map_name="simple_spread", force_coop=True, continuous_actions=False)
+env = marl.make_env(environment_name="mpe", map_name="simple_spread", force_coop=True)
 
 # can add extra env params. remember to check env configuration before use
 # env = marl.make_env(environment_name='smac', map_name='3m', difficulty="6", reward_scale_rate=15)
@@ -74,5 +74,5 @@ mappo = marl.algos.mappo(hyperparam_source="mpe")
 model = marl.build_model(env, mappo, {"core_arch": "mlp", "encode_layer": "128-256"})
 
 # start learning + extra experiment settings if needed. remember to check ray.yaml before use
-mappo.fit(env, model, stop={'episode_reward_mean': 2000, 'timesteps_total': 10000000}, local_mode=False, num_gpus=1,
-          num_workers=5, share_policy='group', checkpoint_freq=50)
+mappo.fit(env, model, stop={'episode_reward_mean': 2000, 'timesteps_total': 20000000}, local_mode=False, num_gpus=1,
+          num_workers=10, share_policy='all', checkpoint_freq=500)

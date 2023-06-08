@@ -21,9 +21,10 @@
 # SOFTWARE.
 
 env: mate
-# 'MATE-4v2-9-v0''MATE-4v2-0-v0''MATE-4v4-9-v0''MATE-4v4-0-v0''MATE-4v8-9-v0''MATE-4v8-0-v0''MATE-8v8-9-v0''MATE-8v8-0-v0'
+
 env_args:
   map_name: "MATE-4v2-9-v0"
+  # or MATE-{4v2-9-v0} | {4v2-0-v0} | {4v4-9-v0} | {4v4-0-v0} | {4v8-9-v0} | {4v8-0-v0} | {8v8-9-v0} | {8v8-0-v0}
   continuous_actions_camera: Discrete
   continuous_actions_target: True
   discrete_levels: 5
@@ -32,3 +33,4 @@ env_args:
 mask_flag: False
 global_state_flag: False
 opp_action_in_cc: True
+agent_level_batch_update: False
