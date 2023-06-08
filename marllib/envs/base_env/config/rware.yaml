@@ -36,3 +36,4 @@ env_args:
 mask_flag: False
 global_state_flag: False
 opp_action_in_cc: True
+agent_level_batch_update: True

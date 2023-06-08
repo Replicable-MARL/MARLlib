@@ -38,7 +38,7 @@ def restore_model(restore: Dict, exp: Dict):
         with open(restore["params_path"], 'r') as JSON:
             raw_exp = json.load(JSON)
             raw_exp = raw_exp["model"]["custom_model_config"]['model_arch_args']
-            check_exp = exp["model"]["custom_model_config"]['model_arch_args']
+            check_exp = exp['model_arch_args']
             if check_exp != raw_exp:
                 raise ValueError("is not using the params required by the checkpoint model")
         model_path = restore["model_path"]
