@@ -78,6 +78,16 @@ Installation
 or you can just follow the error log (when the process can not found the game's location)
 and put it in the right place.
 
+API usage
+-----------------
+
+.. code-block:: python
+
+    from marllib import marl
+
+    env = marl.make_env(environment_name="smac", map_name="3m", difficulty="7", reward_scale_rate=20)
+
+
 .. _MAMuJoCo:
 
 MAMuJoCo
@@ -141,8 +151,14 @@ Installation
 **Note**: To access the MuJoCo API, you may get a mjkey (free now) and put it under /home/YourUserName/.mujoco.
 
 
+API usage
+-----------------
 
+.. code-block:: python
 
+    from marllib import marl
+
+    env = marl.make_env(environment_name="mamujoco", map_name="2AgentAnt")
 
 
 .. _Football:
@@ -205,6 +221,17 @@ We provide solutions (may work) for potential bugs
 * `apt-get, unmet dependencies, ... "but it is not going to be installed" <https://askubuntu.com/questions/564282/apt-get-unmet-dependencies-but-it-is-not-going-to-be-installed>`_
 * `Errors related to Could NOT find Boost <https://github.com/google-research/football/issues/317>`_
 
+
+API usage
+-----------------
+
+.. code-block:: python
+
+    from marllib import marl
+
+    env = marl.make_env(environment_name="football", map_name="academy_pass_and_shoot_with_keeper")
+
+
 .. _MPE:
 
 MPE
@@ -258,6 +285,23 @@ We use the pettingzoo version of MPE
 
     pip install pettingzoo[mpe]
 
+API usage
+-----------------
+
+.. code-block:: python
+
+    from marllib import marl
+
+    # discrete control
+    env = marl.make_env(environment_name="mpe", map_name="simple_spread", force_coop=True, continuous_actions=False)
+
+    # continuous control
+    env = marl.make_env(environment_name="mpe", map_name="simple_spread", force_coop=True, continuous_actions=True)
+
+    # turn off teamwork setting
+    env = marl.make_env(environment_name="mpe", map_name="simple_spread")
+
+
 .. _LBF:
 
 LBF
@@ -303,6 +347,19 @@ Installation
 .. code-block:: shell
 
     pip install lbforaging==1.0.15
+
+API usage
+-----------------
+
+.. code-block:: python
+
+    from marllib import marl
+
+    # use default setting marllib/envs/base_env/config/lbf.yaml
+    env = marl.make_env(environment_name="lbf", map_name="default_map")
+
+    # customize yours
+    env = marl.make_env(environment_name="lbf", map_name="customized_map", force_coop=True, players=4, field_size_x=8)
 
 .. _RWARE:
 
@@ -350,6 +407,20 @@ Installation
 .. code-block:: shell
 
     pip install rware==1.0.1
+
+API usage
+-----------------
+
+.. code-block:: python
+
+    from marllib import marl
+
+    # use default setting marllib/envs/base_env/config/rware.yaml
+    env = marl.make_env(environment_name="rware", map_name="default_map")
+
+    # customize yours
+    env = marl.make_env(environment_name="rware", map_name="customized_map", players=4, map_size="tiny")
+
 
 .. _MAgent:
 
@@ -399,9 +470,20 @@ Installation
 
     pip install pettingzoo[magent]
 
+API usage
+-----------------
+
+.. code-block:: python
+
+    from marllib import marl
+
+    env = marl.make_env(environment_name="magent", map_name="adversarial_pursuit")
+
+    # turn off minimap; need to change global_state_flag to False
+    env = marl.make_env(environment_name="magent", map_name="adversarial_pursuit", minimap_mode=True)
+
+
 .. _Pommerman:
-
-
 
 Pommerman
 ==============
@@ -453,6 +535,20 @@ Installation
     python add_patch.py --pommerman
     pip install gym==0.21.0
 
+API usage
+-----------------
+
+.. code-block:: python
+
+    from marllib import marl
+
+    # competitive mode
+    env = marl.make_env(environment_name="pommerman", map_name="PommeFFACompetition-v0")
+
+    # cooperative mode
+    env = marl.make_env(environment_name="pommerman", map_name="PommeTeamCompetition-v0", force_coop=True)
+
+
 .. _MetaDrive:
 
 
@@ -502,6 +598,16 @@ Installation
 .. code-block:: shell
 
     pip install metadrive-simulator==0.2.3
+
+API usage
+-----------------
+
+.. code-block:: python
+
+    from marllib import marl
+
+    env = marl.make_env(environment_name="metadrive", map_name="Bottleneck")
+
 
 .. _Hanabi:
 
@@ -560,6 +666,15 @@ To install, execute the following:
     cmake ..
     make -j
 
+API usage
+-----------------
+
+.. code-block:: python
+
+    from marllib import marl
+
+    env = marl.make_env(environment_name="hanabi", map_name="Hanabi-Small", num_agents=3)
+
 
 .. _MATE:
 
@@ -606,6 +721,15 @@ Installation
 .. code-block:: shell
 
     pip3 install git+https://github.com/XuehaiPan/mate.git#egg=mate
+
+API usage
+-----------------
+
+.. code-block:: python
+
+    from marllib import marl
+
+    env = marl.make_env(environment_name="mate", map_name="MATE-4v2-9-v0", coop_team="camera")
 
 
 .. _GoBigger:
@@ -655,6 +779,14 @@ Installation
 
     conda install -c opendilab gobigger
 
+API usage
+-----------------
+
+.. code-block:: python
+
+    from marllib import marl
+
+    env = marl.make_env(environment_name="gobigger", map_name="st_t1p2")
 
 .. _Overcooked-AI:
 
@@ -704,6 +836,15 @@ Installation
     git clone https://github.com/Replicable-MARL/overcooked_ai.git
     cd overcooked_ai
     pip install -e .
+
+API usage
+-----------------
+
+.. code-block:: python
+
+    from marllib import marl
+
+    env = marl.make_env(environment_name="overcooked", map_name="asymmetric_advantages")
 
 
 .. _Active_Voltage_Control_on_Power_Distribution_Networks:
@@ -759,6 +900,17 @@ Please follow this `data link <https://github.com/Future-Power-Networks/MAPDN#do
     pip install pandas==1.1.3
 
 
+API usage
+-----------------
+
+.. code-block:: python
+
+    from marllib import marl
+
+    env = marl.make_env(environment_name="voltage", map_name="case33_3min_final")
+
+
+
 .. _Light_Aircraft_Game:
 
 Air Combat
@@ -812,3 +964,18 @@ Installation
     cd Path/To/MARLlib
     # we use commit 8c13fd6 on JBSim, version is not restricted but may trigger potential bugs
     git submodule add --force https://github.com/JSBSim-Team/jsbsim.git marllib/patch/aircombat/JBSim/data
+
+
+API usage
+-----------------
+
+.. code-block:: python
+
+    from marllib import marl
+
+    # competitive mode
+    env = marl.make_env(environment_name="aircombat", map_name="MultipleCombat_2v2/NoWeapon/Selfplay")
+
+    # cooperative mode
+    env = marl.make_env(environment_name="aircombat", map_name="MultipleCombat_2v2/NoWeapon/vsBaseline")
+
