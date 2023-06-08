@@ -480,7 +480,7 @@ API usage
     env = marl.make_env(environment_name="magent", map_name="adversarial_pursuit")
 
     # turn off minimap; need to change global_state_flag to False
-    env = marl.make_env(environment_name="magent", map_name="adversarial_pursuit", minimap_mode=True)
+    env = marl.make_env(environment_name="magent", map_name="adversarial_pursuit", minimap_mode=False)
 
 
 .. _Pommerman:

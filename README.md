@@ -4,6 +4,12 @@
 
 </div>
 
+<div align="center">
+
+<img src=docs/source/images/logo1.png width=85% />
+
+</div>
+
 <h1 align="center"> MARLlib: A Multi-agent Reinforcement Learning Library </h1>
 
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)]()
