@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mujoco>
+	<asset>
+		<texture name='smiley' file="smiley.png" gridsize="3 4" gridlayout=".U..LFRB.D.."/>
+		<material name="matSmiley" texture="smiley" specular="1" shininess=".3" reflectance="0"/>
+	</asset>
+	<option timestep="0.005"/>
+	<worldbody>
+		<body name="particle" pos="0.15 0.15 0.15">
+			<joint axis="1 0 0" damping="10" name="tx" pos="0 0 0" type="slide"></joint>
+			<joint axis="0 1 0" damping="10" name="ty" pos="0 0 0" type="slide"></joint>
+			<joint axis="0 0 1" damping="10000" name="tz" pos="0 0 0" type="slide"></joint>
+			<joint axis="0 0 1" damping="10" name="rz" pos="0 0 0" type="hinge"></joint>
+			<geom name="agent" material="matSmiley" mass="1" pos="0 0 0" rgba="1 0 0 1" size="0.15" type="sphere" euler="1.57 0 0"></geom>
+			<geom name="arm1" mass="0" pos="-0.13 -0.075 -0.05" rgba="1 0 0 1" size="0.05" type="sphere" euler="1.57 0 0"></geom>
+			<geom name="arm2" mass="0" pos="0.13 -0.075 -0.05" rgba="1 0 0 1" size="0.05" type="sphere" euler="1.57 0 0"></geom>
+		</body>
+		<body name="annotation:outer_bound" pos="0.15 0.15 0.15">
+			<geom conaffinity="0" contype="0" mass="0" pos="0 0 0" rgba="0.417 0.7203 0.0001 0.1" size="0.15 0.15 0.15" type="box"></geom>
+		</body>
+	</worldbody>
+	<actuator>
+		<motor name="motortx" gear="100" joint="tx"></motor>
+		<motor name="motorty" gear="100" joint="ty"></motor>
+		<motor name="motorrz" gear="100" joint="rz"></motor>
+	</actuator>
+</mujoco>

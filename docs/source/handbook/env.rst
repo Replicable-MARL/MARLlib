@@ -979,3 +979,71 @@ API usage
     # cooperative mode
     env = marl.make_env(environment_name="aircombat", map_name="MultipleCombat_2v2/NoWeapon/vsBaseline")
 
+
+.. _Hide_and_Seek:
+
+Hide and Seek
+==============================
+.. only:: html
+
+    .. figure:: ../images/hns.gif
+       :width: 700
+       :align: center
+
+
+OpenAI Hide and Seek is a multi-agent reinforcement learning environment where artificial intelligence agents play a game inspired by hide and seek. Hiders and seekers navigate a virtual 3D environment, with hiders attempting to find clever hiding spots and stay hidden, while seekers aim to locate and tag the hiders within a time limit. With unique abilities and strategies, the agents learn and adapt through reinforcement learning algorithms, making it an engaging and competitive platform to explore advanced techniques in multi-agent AI and showcase the potential of complex behaviors in interactive environments.
+Official Link: https://github.com/openai/multi-agent-emergence-environments
+
+.. list-table::
+   :widths: 25 25
+   :header-rows: 0
+
+   * - ``Original Learning Mode``
+     - Competitive + Cooperative
+   * - ``MARLlib Learning Mode``
+     - Cooperative + Mixed
+   * - ``Observability``
+     - Partial
+   * - ``Action Space``
+     - MultiDiscrete
+   * - ``Observation Space Dim``
+     - 1D
+   * - ``Action Mask``
+     - No
+   * - ``Global State``
+     - No
+   * - ``Global State Space Dim``
+     - 1D
+   * - ``Reward``
+     - Dense
+   * - ``Agent-Env Interact Mode``
+     - Simultaneous
+
+
+Installation
+-----------------
+
+To execute the following command, it is necessary to install MuJoCo.
+The installation process is identical to the one explained for MAMuJoCo in the previous section.
+
+.. code-block:: shell
+
+    cd marllib/patch/envs/hns/mujoco-worldgen/
+    pip install -e .
+    pip install xmltodict
+    # if encounter enum error, excute uninstall
+    pip uninstall enum34
+
+
+API usage
+-----------------
+
+.. code-block:: python
+
+    from marllib import marl
+
+    # sub task
+    env = marl.make_env(environment_name="hns", map_name="BoxLocking")
+
+    # full game
+    env = marl.make_env(environment_name="hns", map_name="hidenseek")
