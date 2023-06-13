@@ -948,7 +948,7 @@ Our fork: https://github.com/Theohhhu/CloseAirCombat_baseline
    * - ``Global State``
      - No
    * - ``Global State Space Dim``
-     - 1D
+     - No
    * - ``Reward``
      - Dense
    * - ``Agent-Env Interact Mode``
@@ -999,9 +999,9 @@ Official Link: https://github.com/openai/multi-agent-emergence-environments
    :header-rows: 0
 
    * - ``Original Learning Mode``
-     - Competitive + Cooperative
+     - Competitive + Mixed
    * - ``MARLlib Learning Mode``
-     - Cooperative + Mixed
+     - Competitive + Mixed
    * - ``Observability``
      - Partial
    * - ``Action Space``
@@ -1013,7 +1013,7 @@ Official Link: https://github.com/openai/multi-agent-emergence-environments
    * - ``Global State``
      - No
    * - ``Global State Space Dim``
-     - 1D
+     - No
    * - ``Reward``
      - Dense
    * - ``Agent-Env Interact Mode``
