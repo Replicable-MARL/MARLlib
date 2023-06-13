@@ -32,6 +32,7 @@
 | **March 2023** We are excited to announce that a major update has just been released. For detailed version information, please refer to the [version info](https://github.com/Replicable-MARL/MARLlib/releases/tag/1.0.2).|
 | **May 2023** Exciting news! MARLlib now supports three more tasks: [MATE](https://marllib.readthedocs.io/en/latest/handbook/env.html#mate), [GoBigger](https://marllib.readthedocs.io/en/latest/handbook/env.html#gobigger), [Overcooked-AI](https://marllib.readthedocs.io/en/latest/handbook/env.html#overcooked-ai). Give them a try!|
 | **May 2023 (update)** Supports two more tasks: [MAPDN](https://marllib.readthedocs.io/en/latest/handbook/env.html#power-distribution-networks) and [AirCombat](https://marllib.readthedocs.io/en/latest/handbook/env.html#air-combat). Give them a try!|
+| **June 2023** OpenAI: [Hide and Seek](https://marllib.readthedocs.io/en/latest/handbook/env.html#hideandseek) incorporated into MARLlib.|
 
 
 **Multi-agent Reinforcement Learning Library ([MARLlib](https://arxiv.org/abs/2210.13708))** is ***a MARL library*** that utilizes [**Ray**](https://github.com/ray-project/ray) and one of its toolkits [**RLlib**](https://github.com/ray-project/ray/tree/master/rllib). It offers a comprehensive platform for developing, training, and testing MARL algorithms across various tasks and environments. 
@@ -208,6 +209,7 @@ Most of the popular environments in MARL research are supported by MARLlib:
 | **[Overcooked-AI](https://marllib.readthedocs.io/en/latest/handbook/env.html#overcooked-ai)** | cooperative | Full | Discrete | 1D |
 | **[PDN](https://marllib.readthedocs.io/en/latest/handbook/env.html#power-distribution-networks)** | cooperative | Partial | Continuous | 1D |
 | **[AirCombat](https://marllib.readthedocs.io/en/latest/handbook/env.html#air-combat)** | cooperative + mixed | Partial | MultiDiscrete | 1D |
+| **[HideAndSeek](https://marllib.readthedocs.io/en/latest/handbook/env.html#hideandseek)** | competitive + mixed | Partial | MultiDiscrete | 1D |
 
 Each environment has a readme file, standing as the instruction for this task, including env settings, installation, and
 important notes.

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 45 Degree Ramp -->
+<mujoco>
+	<asset>
+		 <mesh file="ramp.stl" name="ramp" scale="0.5 0.5 0.5"/>
+		 <material name="rampmat" specular="1" shininess=".3" reflectance="0" rgba="0.0 0.5 1.0 1.0"/>
+	</asset>
+	<worldbody>
+		<body name="ramp" pos="0.25 0.25 0.25">
+			<geom name="ramp" pos="0 0 0" type="mesh" mesh="ramp" mass="1.0" material="rampmat"/>
+			<joint axis="1 0 0" damping="0.1" name="tx" pos="0.0 0.0 0.0" type="slide"></joint>
+			<joint axis="0 1 0" damping="0.1" name="ty" pos="0.0 0.0 0.0" type="slide"></joint>
+			<joint axis="0 0 1" damping="0.1" name="tz" pos="0.0 0.0 0.0" type="slide"></joint>
+			<joint axis="0 0 1" damping="0.1" name="rz" pos="0.0 0.0 0.0" type="hinge"></joint>
+		</body>
+		<body name="annotation:outer_bound" pos="0.25 0.25 0.25">
+			<geom conaffinity="0" contype="0" mass="0" pos="0 0 0" rgba="0.417 0.7203 0.0001 0.1" size="0.25 0.25 0.25" type="box"></geom>
+		</body>
+	</worldbody>
+</mujoco>
