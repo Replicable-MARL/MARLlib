@@ -126,3 +126,11 @@ try:
     ENV_REGISTRY["aircombat"] = RLlibCloseAirCombatEnv
 except Exception as e:
     ENV_REGISTRY["aircombat"] = str(e)
+
+
+try:
+    from marllib.envs.base_env.hns import RLlibHideAndSeek
+
+    ENV_REGISTRY["hns"] = RLlibHideAndSeek
+except Exception as e:
+    ENV_REGISTRY["hns"] = str(e)
