@@ -134,3 +134,11 @@ try:
     ENV_REGISTRY["hns"] = RLlibHideAndSeek
 except Exception as e:
     ENV_REGISTRY["hns"] = str(e)
+
+
+try:
+    from marllib.envs.base_env.sisl import RLlibSISL
+
+    ENV_REGISTRY["sisl"] = RLlibSISL
+except Exception as e:
+    ENV_REGISTRY["sisl"] = str(e)

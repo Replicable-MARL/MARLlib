@@ -112,3 +112,10 @@ try:
     COOP_ENV_REGISTRY["aircombat"] = RLlibCloseAirCombatEnv_FCOOP
 except Exception as e:
     COOP_ENV_REGISTRY["aircombat"] = str(e)
+
+try:
+    from marllib.envs.global_reward_env.sisl_fcoop import RLlibSISL_FCOOP
+
+    COOP_ENV_REGISTRY["sisl"] = RLlibSISL_FCOOP
+except Exception as e:
+    COOP_ENV_REGISTRY["sisl"] = str(e)
