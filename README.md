@@ -197,6 +197,7 @@ Most of the popular environments in MARL research are supported by MARLlib:
 | **[LBF](https://marllib.readthedocs.io/en/latest/handbook/env.html#lbf)**  | cooperative + collaborative | Both | Discrete | 1D  |
 | **[RWARE](https://marllib.readthedocs.io/en/latest/handbook/env.html#rware)**  | cooperative | Partial | Discrete | 1D  |
 | **[MPE](https://marllib.readthedocs.io/en/latest/handbook/env.html#mpe)**  | cooperative + collaborative + mixed | Both | Both | 1D  |
+| **[SISL](https://marllib.readthedocs.io/en/latest/handbook/env.html#sisl)** | cooperative + collaborative | Full | Both | 1D |
 | **[SMAC](https://marllib.readthedocs.io/en/latest/handbook/env.html#smac)**  | cooperative | Partial | Discrete | 1D |
 | **[MetaDrive](https://marllib.readthedocs.io/en/latest/handbook/env.html#metadrive)**  | collaborative | Partial | Continuous | 1D |
 | **[MAgent](https://marllib.readthedocs.io/en/latest/handbook/env.html#magent)** | collaborative + mixed | Partial | Discrete | 2D |
