@@ -32,7 +32,7 @@
 | **March 2023** We are excited to announce that a major update has just been released. For detailed version information, please refer to the [version info](https://github.com/Replicable-MARL/MARLlib/releases/tag/1.0.2).|
 | **May 2023** Exciting news! MARLlib now supports three more tasks: [MATE](https://marllib.readthedocs.io/en/latest/handbook/env.html#mate), [GoBigger](https://marllib.readthedocs.io/en/latest/handbook/env.html#gobigger), [Overcooked-AI](https://marllib.readthedocs.io/en/latest/handbook/env.html#overcooked-ai). Give them a try!|
 | **May 2023 (update)** Supports two more tasks: [MAPDN](https://marllib.readthedocs.io/en/latest/handbook/env.html#power-distribution-networks) and [AirCombat](https://marllib.readthedocs.io/en/latest/handbook/env.html#air-combat). Give them a try!|
-| **June 2023** OpenAI: [Hide and Seek](https://marllib.readthedocs.io/en/latest/handbook/env.html#hide-and-seek) incorporated into MARLlib.|
+| **June 2023** [OpenAI: Hide and Seek](https://marllib.readthedocs.io/en/latest/handbook/env.html#hide-and-seek) and [SISL](https://marllib.readthedocs.io/en/latest/handbook/env.html#sisl) environments are incorporated into MARLlib.|
 
 
 **Multi-agent Reinforcement Learning Library ([MARLlib](https://arxiv.org/abs/2210.13708))** is ***a MARL library*** that utilizes [**Ray**](https://github.com/ray-project/ray) and one of its toolkits [**RLlib**](https://github.com/ray-project/ray/tree/master/rllib). It offers a comprehensive platform for developing, training, and testing MARL algorithms across various tasks and environments. 
@@ -68,7 +68,7 @@ Here we provide a table for the comparison of MARLlib and existing work.
 | [MAPPO Benchmark](https://github.com/marlbenchmark/on-policy) |       4 cooperative       |      1     |          share + separate        |          MLP + GRU        |         :x:              |
 | [MAlib](https://github.com/sjtu-marl/malib) |  4 self-play  | 10 | share + group + separate | MLP + LSTM | [![Documentation Status](https://readthedocs.org/projects/malib/badge/?version=latest)](https://malib.readthedocs.io/en/latest/?badge=latest)
 |    [EPyMARL](https://github.com/uoe-agents/epymarl)|        4 cooperative      |    9    |        share + separate       |      GRU             |           :x:            |
-|    **[MARLlib](https://github.com/Replicable-MARL/MARLlib)** |       15 **no task mode restriction**     |    18     |   share + group + separate + **customizable**         |         MLP + CNN + GRU + LSTM          |           [![Documentation Status](https://readthedocs.org/projects/marllib/badge/?version=latest)](https://marllib.readthedocs.io/en/latest/) |
+|    **[MARLlib](https://github.com/Replicable-MARL/MARLlib)** |       17 **no task mode restriction**     |    18     |   share + group + separate + **customizable**         |         MLP + CNN + GRU + LSTM          |           [![Documentation Status](https://readthedocs.org/projects/marllib/badge/?version=latest)](https://marllib.readthedocs.io/en/latest/) |
 
 |   Library   | Github Stars  | Documentation | Issues Open | Activity | Last Update
 |:-------------:|:-------------:|:-------------:|:-------------:|:-------------:|:-------------:|

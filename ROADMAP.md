@@ -16,7 +16,8 @@ This list describes the planned features including breaking changes.
   - [x] Voltage Control: https://github.com/Future-Power-Networks/MAPDN
   - [x] Overcooked: https://github.com/HumanCompatibleAI/overcooked_ai
   - [x] CloseAirCombat: https://github.com/liuqh16/CloseAirCombat
-  - [ ] HideAndSeek: https://github.com/jiayu-ch15/Variational-Automatic-Curriculum-Learning#3-train-hide-and-seek
+  - [x] HideAndSeek: https://github.com/jiayu-ch15/Variational-Automatic-Curriculum-Learning#3-train-hide-and-seek
+  - [x] SISL: https://github.com/sisl/MADRL 
   - [ ] Melting Pot: https://github.com/deepmind/meltingpot
 
 - [ ] support Transformers
