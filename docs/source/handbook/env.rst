@@ -246,7 +246,7 @@ communicate, see each other, push each other around, and interact with fixed lan
 
 Official Link: https://github.com/openai/multiagent-particle-envs
 
-Our version: https://github.com/Farama-Foundation/PettingZoo/tree/master/pettingzoo/mpe
+Our version: https://github.com/Farama-Foundation/PettingZoo/tree/1.12.0/pettingzoo/mpe
 
 .. list-table::
    :widths: 25 25
@@ -300,6 +300,71 @@ API usage
 
     # turn off teamwork setting
     env = marl.make_env(environment_name="mpe", map_name="simple_spread")
+
+
+.. _SISL:
+
+SISL
+==============
+
+.. figure:: ../images/sisl.gif
+    :width: 550
+    :align: center
+
+The SISL environments are a set of three cooperative multi-agent benchmark environments, created at SISL (Stanford Intelligent Systems Laboratory))
+and released as part of “Cooperative multi-agent control using deep reinforcement learning.”
+
+Official Link: https://github.com/sisl/MADRL
+
+Our version: https://github.com/Farama-Foundation/PettingZoo/tree/1.12.0/pettingzoo/sisl
+
+.. list-table::
+   :widths: 25 25
+   :header-rows: 0
+
+   * - ``Original Learning Mode``
+     - Cooperative
+   * - ``MARLlib Learning Mode``
+     - Cooperative + Collaborative
+   * - ``Observability``
+     - Full
+   * - ``Action Space``
+     - Discrete + Continuous
+   * - ``Observation Space Dim``
+     - 1D
+   * - ``Action Mask``
+     - No
+   * - ``Global State``
+     - No
+   * - ``Global State Space Dim``
+     - /
+   * - ``Reward``
+     - Dense
+   * - ``Agent-Env Interact Mode``
+     - Simultaneous / Asynchronous
+
+
+Installation
+-----------------
+
+We use the pettingzoo version of SISL
+
+.. code-block:: shell
+
+    pip install pettingzoo[sisl]
+
+API usage
+-----------------
+
+.. code-block:: python
+
+    from marllib import marl
+
+    # cooperative mode
+    env = marl.make_env(environment_name="sisl", map_name="multiwalker", force_coop=True)
+
+    # Collaborative mode
+    env = marl.make_env(environment_name="sisl", map_name="multiwalker")
 
 
 .. _LBF:
