@@ -23,6 +23,13 @@
 COOP_ENV_REGISTRY = {}
 
 try:
+    from marllib.envs.global_reward_env.gymnasium_mamujoco_fcoop import RLlibGymnasiumRoboticsMAMujoco_FCOOP
+    COOP_ENV_REGISTRY["gymnasium_mamujoco"] = RLlibGymnasiumRoboticsMAMujoco_FCOOP
+
+except Exception as e:
+    COOP_ENV_REGISTRY["gymnasium_mamujoco"] = str(e)
+
+try:
     from marllib.envs.global_reward_env.mpe_fcoop import RLlibMPE_FCOOP
 
     COOP_ENV_REGISTRY["mpe"] = RLlibMPE_FCOOP

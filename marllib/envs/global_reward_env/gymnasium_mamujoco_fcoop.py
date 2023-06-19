@@ -20,21 +20,4 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# MATRPO parameters
-
-algo_args:
-  use_gae: True
-  lambda: 1.0
-  gamma: 0.99
-  batch_episode: 10
-  kl_coeff: 0.2
-  num_sgd_iter: 1
-  grad_clip: 10
-  clip_param: 0.3
-  vf_loss_coeff: 1.0
-  entropy_coeff: 0.01
-  vf_clip_param: 100.0
-  batch_mode: "truncate_episodes"
-  kl_threshold: 0.00001
-  accept_ratio: 0.5
-  critic_lr: 0.0005
+from marllib.envs.base_env.gymnasium_mamujoco import RLlibGymnasiumRoboticsMAMujoco as RLlibGymnasiumRoboticsMAMujoco_FCOOP
