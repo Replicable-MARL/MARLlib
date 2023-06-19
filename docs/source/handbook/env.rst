@@ -94,7 +94,7 @@ MAMuJoCo
 ==============
 
 .. figure:: ../images/mamujoco.gif
-    :width: 400
+    :width: 320
     :align: center
 
 Multi-Agent Mujoco (MAMuJoCo) is an environment for continuous cooperative multi-agent robotic control.
@@ -150,6 +150,35 @@ Installation
 
 **Note**: To access the MuJoCo API, you may get a mjkey (free now) and put it under /home/YourUserName/.mujoco.
 
+API usage
+-----------------
+
+.. code-block:: python
+
+    from marllib import marl
+
+    env = marl.make_env(environment_name="mamujoco", map_name="2AgentHalfCheetah")
+
+
+.. _Gymnasium_MAMuJoCo:
+
+Gymnasium MAMuJoCo
+===================
+
+.. figure:: ../images/mamujoco.gif
+    :width: 320
+    :align: center
+
+We have recently updated the MAMuJoCo to its latest version, which is now maintained by Gymnasium Robotics.
+You can find the updated version at the following link: https://robotics.farama.org/envs/MaMuJoCo/
+
+The task characteristics remain the same as described in the :ref:`MAMuJoCo`.
+
+Installing the updated version is a straightforward process if you already get MuJoCo at hand.
+
+.. code-block:: shell
+
+    pip install gymnasium-robotics==1.2.2
 
 API usage
 -----------------
@@ -158,8 +187,7 @@ API usage
 
     from marllib import marl
 
-    env = marl.make_env(environment_name="mamujoco", map_name="2AgentAnt")
-
+    env = marl.make_env(environment_name="gymnasium_mamujoco", map_name="2AgentHalfCheetah")
 
 .. _Football:
 
