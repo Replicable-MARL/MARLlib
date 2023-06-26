@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 import ray
+import gym
 from gym.spaces import Dict as GymDict, Discrete, Tuple
 from ray.tune import register_env
 from ray import tune
@@ -46,6 +47,31 @@ def run_vd(exp_info, env, model, stop=None):
     agent_name_ls = env.agents
     env_info["agent_name_ls"] = agent_name_ls
     env.close()
+
+    ###################
+    ### space check ###
+    ###################
+
+    action_discrete = isinstance(env_info["space_act"], gym.spaces.Discrete)
+    action_multi_discrete = isinstance(env_info["space_act"], gym.spaces.MultiDiscrete)
+
+    if action_discrete or action_multi_discrete:
+        if exp_info["algorithm"] in ["facmac"]:
+            raise ValueError(
+                "Algo -facmac- only supports continuous action space,  Env {} requires Discrete action space".format(
+                    exp_info["env"]))
+        if action_multi_discrete:
+            if exp_info["algorithm"] in ["vdn", "qmix"]:
+                raise ValueError(
+                    "Algo -{}- only supports discrete action space,  Env -{}- requires MultiDiscrete action space".format(
+                        env_info["algorithm"],
+                        exp_info["env"]))
+    else:  # continuous
+        if exp_info["algorithm"] in ["coma", "vdn", "qmix"]:
+            raise ValueError(
+                "Algo -{}- only supports discrete action space, Env -{}- requires continuous action space".format(
+                    env_info["algorithm"],
+                    exp_info["env"]))
 
     ######################
     ### policy sharing ###
