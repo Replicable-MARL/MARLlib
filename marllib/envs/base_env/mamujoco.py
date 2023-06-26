@@ -116,9 +116,9 @@ class RLlibMAMujoco(MultiAgentEnv):
         s = self.env.get_state()  # g state
         # to float32 for RLLIB check
         obs = {}
-        for x in range(self.num_agents):
-            obs["agent_%d" % x] = {
-                "obs": np.float32(o[x]),
+        for agent_index, agent_name in enumerate(self.agents):
+            obs[agent_name] = {
+                "obs": np.float32(o[agent_index]),
                 "state": np.float32(s),
             }
         return obs

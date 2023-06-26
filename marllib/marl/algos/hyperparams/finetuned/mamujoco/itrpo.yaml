@@ -33,7 +33,7 @@ algo_args:
   clip_param: 0.3
   vf_loss_coeff: 1.0
   entropy_coeff: 0.01
-  vf_clip_param: 10.0
+  vf_clip_param: 100.0
   batch_mode: "truncate_episodes"
   kl_threshold: 0.00001
   accept_ratio: 0.5

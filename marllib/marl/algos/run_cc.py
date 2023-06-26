@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 import ray
+import gym
 from ray import tune
 from ray.rllib.utils.framework import try_import_tf, try_import_torch
 from marllib.marl.algos.scripts import POlICY_REGISTRY
@@ -67,6 +68,23 @@ def run_cc(exp_info, env, model, stop=None):
     agent_name_ls = env.agents
     env_info["agent_name_ls"] = agent_name_ls
     env.close()
+
+    ######################
+    ### space checking ###
+    ######################
+
+    action_discrete = isinstance(env_info["space_act"], gym.spaces.Discrete) or isinstance(env_info["space_act"],
+                                                                                           gym.spaces.MultiDiscrete)
+    if action_discrete:
+        if exp_info["algorithm"] in ["maddpg"]:
+            raise ValueError(
+                "Algo -maddpg- only supports continuous action space, Env -{}- requires Discrete action space".format(
+                    exp_info["env"]))
+    else:  # continuous
+        if exp_info["algorithm"] in ["coma"]:
+            raise ValueError(
+                "Algo -coma- only supports discrete action space, Env -{}- requires continuous action space".format(
+                    exp_info["env"]))
 
     ######################
     ### policy sharing ###
