@@ -33,6 +33,7 @@
 | **May 2023** Exciting news! MARLlib now supports three more tasks: [MATE](https://marllib.readthedocs.io/en/latest/handbook/env.html#mate), [GoBigger](https://marllib.readthedocs.io/en/latest/handbook/env.html#gobigger), [Overcooked-AI](https://marllib.readthedocs.io/en/latest/handbook/env.html#overcooked-ai). Give them a try!|
 | **May 2023 (update)** Supports two more tasks: [MAPDN](https://marllib.readthedocs.io/en/latest/handbook/env.html#power-distribution-networks) and [AirCombat](https://marllib.readthedocs.io/en/latest/handbook/env.html#air-combat). Give them a try!|
 | **June 2023** [OpenAI: Hide and Seek](https://marllib.readthedocs.io/en/latest/handbook/env.html#hide-and-seek) and [SISL](https://marllib.readthedocs.io/en/latest/handbook/env.html#sisl) environments are incorporated into MARLlib.|
+| **June 2023 (update)** latest [MAMuJoCo](https://marllib.readthedocs.io/en/latest/handbook/env.html#gymnasium-mamujoco) maintained by *robotics.farama.org* is available on MARLlib.|
 
 
 **Multi-agent Reinforcement Learning Library ([MARLlib](https://arxiv.org/abs/2210.13708))** is ***a MARL library*** that utilizes [**Ray**](https://github.com/ray-project/ray) and one of its toolkits [**RLlib**](https://github.com/ray-project/ray/tree/master/rllib). It offers a comprehensive platform for developing, training, and testing MARL algorithms across various tasks and environments. 
@@ -132,10 +133,9 @@ $ pip install -r requirements.txt
 Please follow [this guide](https://marllib.readthedocs.io/en/latest/handbook/env.html).
 
 > __Note__:
-> We recommend always keeping the gym version at 0.21.0.
-
+> We recommend the gym version between 0.20.0~0.22.0.
 ```bash
-$ pip install gym==0.21.0
+pip install "gym>=0.20.0,<0.22.0"
 ```
 
 #### 3. install patches (basic)

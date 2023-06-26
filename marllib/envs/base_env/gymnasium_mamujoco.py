@@ -67,6 +67,7 @@ class RLlibGymnasiumRoboticsMAMujoco(MultiAgentEnv):
         scenario_name = env_args_dict[map_name]["scenario"]
         partition = env_args_dict[map_name]["agent_conf"]
         agent_obsk = env_args_dict[map_name]["agent_obsk"]
+        self.episode_limit = env_args_dict[map_name]["episode_limit"]
 
         self.env = MultiAgentMujocoEnv(scenario_name, agent_conf=partition, agent_obsk=agent_obsk)
         self.action_space = Box(-1.0, 1.0, shape=(self.env.action_spaces["agent_0"].shape[0],), dtype=np.float32)
@@ -111,7 +112,7 @@ class RLlibGymnasiumRoboticsMAMujoco(MultiAgentEnv):
                 "state": np.float32(s),
             }
         dones = {"__all__": False if sum(d.values()) == 0 else True}
-        if self.step_count == 1000:  # terminate:
+        if self.step_count == self.episode_limit:  # terminate:
             dones = {"__all__": True}
         return obs, rewards, dones, info
 
@@ -128,7 +129,7 @@ class RLlibGymnasiumRoboticsMAMujoco(MultiAgentEnv):
             "space_obs": self.observation_space,
             "space_act": self.action_space,
             "num_agents": self.num_agents,
-            "episode_limit": 1000,
+            "episode_limit": self.episode_limit,
             "policy_mapping_info": policy_mapping_dict
         }
         return env_info
