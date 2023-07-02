@@ -165,10 +165,6 @@ API usage
 Gymnasium MAMuJoCo
 ===================
 
-.. figure:: ../images/mamujoco.gif
-    :width: 320
-    :align: center
-
 We have recently updated the MAMuJoCo to its latest version, which is now maintained by Gymnasium Robotics.
 You can find the updated version at the following link: https://robotics.farama.org/envs/MaMuJoCo/
 
