@@ -87,6 +87,8 @@ def run_hatrpo(model: Any, exp: Dict, run: Dict, env: Dict,
     vf_loss_coeff = _param["vf_loss_coeff"]
     entropy_coeff = _param["entropy_coeff"]
     vf_clip_param = _param["vf_clip_param"]
+    back_up_config = merge_dicts(exp, env)
+    back_up_config.pop("algo_args")  # clean for grid_search
 
     config = {
         "batch_mode": batch_mode,
@@ -105,7 +107,7 @@ def run_hatrpo(model: Any, exp: Dict, run: Dict, env: Dict,
         "model": {
             "custom_model": "Centralized_Critic_Model",
             "max_seq_len": episode_limit,
-            "custom_model_config": merge_dicts(exp, env),
+            "custom_model_config": back_up_config,
         },
     }
     config.update(run)

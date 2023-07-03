@@ -17,11 +17,11 @@
 
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)]()
 ![test](https://github.com/Replicable-MARL/MARLlib/workflows/test/badge.svg)
-![coverage](https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/coverage.svg)
+![coverage](https://github.com/Replicable-MARL/MARLlib/blob/rllib_1.8.0_dev/coverage.svg)
 [![Documentation Status](https://readthedocs.org/projects/marllib/badge/?version=latest)](https://marllib.readthedocs.io/en/latest/)
 [![GitHub issues](https://img.shields.io/github/issues/Replicable-MARL/MARLlib)](https://github.com/Replicable-MARL/MARLlib/issues)
 [![PyPI version](https://badge.fury.io/py/marllib.svg)](https://badge.fury.io/py/marllib)
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Replicable-MARL/MARLlib/blob/sy_dev/marllib.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Replicable-MARL/MARLlib/blob/rllib_1.8.0_dev/marllib.ipynb)
 [![Organization](https://img.shields.io/badge/Organization-ReLER_RL-blue.svg)](https://github.com/Replicable-MARL/MARLlib)
 [![Organization](https://img.shields.io/badge/Organization-PKU_MARL-blue.svg)](https://github.com/Replicable-MARL/MARLlib)
 [![Awesome](https://awesome.re/badge.svg)](https://marllib.readthedocs.io/en/latest/resources/awesome.html)
@@ -340,21 +340,23 @@ For a list of all the existing results, you can visit [this link](https://github
 
 MARLlib provides some practical examples for you to refer to.
 
-- [Detailed API usage](https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/examples/api_basic_usage.py): show how to use MARLlib api in
+- [Detailed API usage](https://github.com/Replicable-MARL/MARLlib/blob/rllib_1.8.0_dev/examples/api_basic_usage.py): show how to use MARLlib api in
   detail, e.g. cmd + api combined running.
-- [Policy sharing cutomization](https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/examples/customize_policy_sharing.py):
+- [Policy sharing cutomization](https://github.com/Replicable-MARL/MARLlib/blob/rllib_1.8.0_dev/examples/customize_policy_sharing.py):
   define your group policy-sharing strategy as you like based on current tasks.
-- [Loading model and rendering](https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/examples/load_and_render_model.py):
+- [Loading model and rendering](https://github.com/Replicable-MARL/MARLlib/blob/rllib_1.8.0_dev/examples/load_and_render_model.py):
   render the environment based on the pre-trained model.
-- [Incorporating new environment](https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/examples/add_new_env.py):
+- [Incorporating new environment](https://github.com/Replicable-MARL/MARLlib/blob/rllib_1.8.0_dev/examples/add_new_env.py):
   add your new environment following MARLlib's env-agent interaction interface.
-- [Incorporating new algorithm](https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/examples/add_new_algorithm.py):
+- [Incorporating new algorithm](https://github.com/Replicable-MARL/MARLlib/blob/rllib_1.8.0_dev/examples/add_new_algorithm.py):
   add your new algorithm following MARLlib learning pipeline.
-
+- [Parallelized finetuning](https://github.com/Replicable-MARL/MARLlib/blob/rllib_1.8.0_dev/examples/grid_search_usage.py):
+  fintune your policy/model performance with `ray.tune`.
+  
 ## Tutorials
 
 Try MPE + MAPPO examples on Google Colaboratory!
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Replicable-MARL/MARLlib/blob/sy_dev/marllib.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Replicable-MARL/MARLlib/blob/rllib_1.8.0_dev/marllib.ipynb)
 More tutorial documentations are available [here](https://marllib.readthedocs.io/).
 
 ## Awesome List
@@ -378,7 +380,7 @@ The roadmap to the future release is available in [ROADMAP.md](https://github.co
 ## Contributing
 
 We are a small team on multi-agent reinforcement learning, and we will take all the help we can get! 
-If you would like to get involved, here is information on [contribution guidelines and how to test the code locally](https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/CONTRIBUTING.md).
+If you would like to get involved, here is information on [contribution guidelines and how to test the code locally](https://github.com/Replicable-MARL/MARLlib/blob/rllib_1.8.0_dev/CONTRIBUTING.md).
 
 You can contribute in multiple ways, e.g., reporting bugs, writing or translating documentation, reviewing or refactoring code, requesting or implementing new features, etc.
 
