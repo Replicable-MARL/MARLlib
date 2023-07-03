@@ -69,6 +69,8 @@ def run_iddpg(model: Any, exp: Dict, run: Dict, env: Dict,
     target_network_update_freq = _param["target_network_update_freq_episode"] * episode_limit
     tau = _param["tau"]
     batch_mode = _param["batch_mode"]
+    back_up_config = merge_dicts(exp, env)
+    back_up_config.pop("algo_args")  # clean for grid_search
 
     config = {
         "batch_mode": batch_mode,
@@ -85,7 +87,7 @@ def run_iddpg(model: Any, exp: Dict, run: Dict, env: Dict,
         "n_step": n_step,
         "model": {
             "max_seq_len": episode_limit,
-            "custom_model_config": merge_dicts(exp, env),
+            "custom_model_config": back_up_config,
         },
         "zero_init_states": True,
     }

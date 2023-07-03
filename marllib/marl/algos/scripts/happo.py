@@ -87,6 +87,8 @@ def run_happo(model: Any, exp: Dict, run: Dict, env: Dict,
     exp['gain'] = _param['gain']
 
     seed = random.randint(0, 10)
+    back_up_config = merge_dicts(exp, env)
+    back_up_config.pop("algo_args")  # clean for grid_search
 
     config = {
         "seed": seed,
@@ -107,7 +109,7 @@ def run_happo(model: Any, exp: Dict, run: Dict, env: Dict,
         "model": {
             "custom_model": "Centralized_Critic_Model",
             "max_seq_len": episode_limit,
-            "custom_model_config": merge_dicts(exp, env),
+            "custom_model_config": back_up_config,
             "vf_share_layers": True,
         },
     }

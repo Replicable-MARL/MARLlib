@@ -33,7 +33,6 @@ from ray.tune.analysis import ExperimentAnalysis
 
 
 def restore_model(restore: Dict, exp: Dict):
-
     if restore is not None:
         with open(restore["params_path"], 'r') as JSON:
             raw_exp = json.load(JSON)
@@ -80,6 +79,8 @@ def run_coma(model: Any, exp: Dict, run: Dict, env: Dict,
     gae_lambda = _param["lambda"]
     vf_loss_coeff = _param["vf_loss_coeff"]
     entropy_coeff = _param["entropy_coeff"]
+    back_up_config = merge_dicts(exp, env)
+    back_up_config.pop("algo_args")  # clean for grid_search
 
     config = {
         "train_batch_size": train_batch_size,
@@ -92,7 +93,7 @@ def run_coma(model: Any, exp: Dict, run: Dict, env: Dict,
         "model": {
             "custom_model": "Centralized_Critic_Model",
             "max_seq_len": episode_limit,
-            "custom_model_config": merge_dicts(exp, env),
+            "custom_model_config": back_up_config,
         },
     }
 

@@ -66,6 +66,8 @@ def run_joint_q(model: Any, exp: Dict, run: Dict, env: Dict,
     epsilon_timesteps = _param["epsilon_timesteps"]
     reward_standardize = _param["reward_standardize"]
     optimizer = _param["optimizer"]
+    back_up_config = merge_dicts(exp, env)
+    back_up_config.pop("algo_args")  # clean for grid_search
 
     mixer_dict = {
         "qmix": "qmix",
@@ -76,7 +78,7 @@ def run_joint_q(model: Any, exp: Dict, run: Dict, env: Dict,
     config = {
         "model": {
             "max_seq_len": episode_limit,  # dynamic
-            "custom_model_config": merge_dicts(exp, env),
+            "custom_model_config": back_up_config,
         },
     }
 
