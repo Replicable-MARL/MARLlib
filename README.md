@@ -34,6 +34,7 @@
 | **May 2023 (update)** Supports two more tasks: [MAPDN](https://marllib.readthedocs.io/en/latest/handbook/env.html#power-distribution-networks) and [AirCombat](https://marllib.readthedocs.io/en/latest/handbook/env.html#air-combat). Give them a try!|
 | **June 2023** [OpenAI: Hide and Seek](https://marllib.readthedocs.io/en/latest/handbook/env.html#hide-and-seek) and [SISL](https://marllib.readthedocs.io/en/latest/handbook/env.html#sisl) environments are incorporated into MARLlib.|
 | **June 2023 (update)** latest [MAMuJoCo](https://marllib.readthedocs.io/en/latest/handbook/env.html#gymnasium-mamujoco) maintained by *robotics.farama.org* is available on MARLlib.|
+| **July 2023** MARLlib supports [Grid Search](https://github.com/Replicable-MARL/MARLlib/blob/rllib_1.8.0_dev/examples/grid_search_usage.py) for finetuning.|
 
 
 **Multi-agent Reinforcement Learning Library ([MARLlib](https://arxiv.org/abs/2210.13708))** is ***a MARL library*** that utilizes [**Ray**](https://github.com/ray-project/ray) and one of its toolkits [**RLlib**](https://github.com/ray-project/ray/tree/master/rllib). It offers a comprehensive platform for developing, training, and testing MARL algorithms across various tasks and environments. 
@@ -344,6 +345,8 @@ MARLlib provides some practical examples for you to refer to.
   detail, e.g. cmd + api combined running.
 - [Policy sharing cutomization](https://github.com/Replicable-MARL/MARLlib/blob/rllib_1.8.0_dev/examples/customize_policy_sharing.py):
   define your group policy-sharing strategy as you like based on current tasks.
+- [Loading model](https://github.com/Replicable-MARL/MARLlib/blob/rllib_1.8.0_dev/examples/load_model.py):
+  load the pre-trained model and keep training.
 - [Loading model and rendering](https://github.com/Replicable-MARL/MARLlib/blob/rllib_1.8.0_dev/examples/load_and_render_model.py):
   render the environment based on the pre-trained model.
 - [Incorporating new environment](https://github.com/Replicable-MARL/MARLlib/blob/rllib_1.8.0_dev/examples/add_new_env.py):
