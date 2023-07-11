@@ -21,7 +21,7 @@
 # SOFTWARE.
 
 """
-example of how to render a trajectory on MPE
+example of how to load a model and keep training for timesteps_total steps
 """
 
 from marllib import marl
@@ -37,9 +37,10 @@ model = marl.build_model(env, mappo, {"core_arch": "mlp", "encode_layer": "128-2
 
 # rendering
 mappo.render(env, model,
+             stop={'timesteps_total': 40000000},
              restore_path={'params_path': "checkpoint/params.json",  # experiment configuration
-                           'model_path': "checkpoint/checkpoint-6250", # checkpoint path
-                           'render': True},  # render
-             local_mode=True,
+                           'model_path': "checkpoint/checkpoint-6250"},  # checkpoint path
+             num_workers=10,
+             local_mode=False,
              share_policy="all",
-             checkpoint_end=False)
+             checkpoint_end=True)
