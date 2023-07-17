@@ -84,7 +84,7 @@ if __name__ == '__main__':
     # register new env
     ENV_REGISTRY["two_teams_smac"] = Two_Teams_SMAC
     # initialize env
-    env = marl.make_env(environment_name="two_teams_smac", map_name="3m")
+    env = marl.make_env(environment_name="two_teams_smac", map_name="3m", abs_path="../../examples/config/env_config/two_teams_smac.yaml")
     # pick mappo algorithms
     mappo = marl.algos.mappo(hyperparam_source="test")
     # customize model

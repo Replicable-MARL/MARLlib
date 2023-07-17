@@ -73,6 +73,7 @@ def make_env(
         environment_name: str,
         map_name: str,
         force_coop: bool = False,
+        abs_path: str = "",
         **env_params
 ) -> Tuple[MultiAgentEnv, Dict]:
     """
@@ -81,18 +82,18 @@ def make_env(
         :param environment_name: name of the environment
         :param map_name: name of the scenario
         :param force_coop: enforce the reward return of the environment to be global
+        :param abs_path: env configuration path
         :param env_params: parameters that can be pass to the environment for customizing the environment
 
     Returns:
         Tuple[MultiAgentEnv, Dict]: env instance & env configuration dict
     """
-
-    # default config
-    env_config_file_path = os.path.join(os.path.dirname(__file__),
-                                        "../envs/base_env/config/{}.yaml".format(environment_name))
-    if not os.path.exists(env_config_file_path):
+    if abs_path != "":
+        env_config_file_path = os.path.join(os.path.dirname(__file__), abs_path)
+    else:
+        # default config
         env_config_file_path = os.path.join(os.path.dirname(__file__),
-                                            "../../examples/config/env_config/{}.yaml".format(environment_name))
+                                            "../envs/base_env/config/{}.yaml".format(environment_name))
 
     with open(env_config_file_path, "r") as f:
         env_config_dict = yaml.load(f, Loader=yaml.FullLoader)
