@@ -125,7 +125,7 @@ if __name__ == '__main__':
     # register new env
     ENV_REGISTRY["magym"] = RLlibMAGym
     # initialize env
-    env = marl.make_env(environment_name="magym", map_name="Checkers")
+    env = marl.make_env(environment_name="magym", map_name="Checkers", abs_path="../../examples/config/env_config/magym.yaml")
     # pick mappo algorithms
     mappo = marl.algos.mappo(hyperparam_source="test")
     # customize model

@@ -31,3 +31,4 @@ mask_flag: True
 global_state_flag: True
 opp_action_in_cc: True
 fixed_batch_timesteps: 3200
+agent_level_batch_update: False
