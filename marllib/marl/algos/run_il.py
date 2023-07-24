@@ -56,13 +56,14 @@ def run_il(exp_info, env, model, stop=None):
     else:
         policy_mapping_info = policy_mapping_info[map_name]
 
+    shared_policy_name = "default_policy" if exp_info["agent_level_batch_update"] else "shared_policy"
     if exp_info["share_policy"] == "all":
         if not policy_mapping_info["all_agents_one_policy"]:
             raise ValueError("in {}, policy can not be shared".format(map_name))
 
-        policies = {"shared_policy"}
+        policies = {shared_policy_name}
         policy_mapping_fn = (
-            lambda agent_id, episode, **kwargs: "shared_policy")
+            lambda agent_id, episode, **kwargs: shared_policy_name)
 
     elif exp_info["share_policy"] == "group":
         groups = policy_mapping_info["team_prefix"]

@@ -1,10 +1,19 @@
 <div align="center">
 
-<img src=docs/source/images/allenv.gif width=95% />
+<img src=docs/source/images/logo1.png width=75% />
+</div>
+
+
+
+<h1 align="center"> MARLlib: A Multi-agent Reinforcement Learning Library </h1>
+
+<div align="center">
+
+<img src=docs/source/images/allenv.gif width=99% />
 
 </div>
 
-<h1 align="center"> MARLlib: A Multi-agent Reinforcement Learning Library </h1>
+&emsp;
 
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)]()
 ![test](https://github.com/Replicable-MARL/MARLlib/workflows/test/badge.svg)
@@ -23,6 +32,7 @@
 | **March 2023** We are excited to announce that a major update has just been released. For detailed version information, please refer to the [version info](https://github.com/Replicable-MARL/MARLlib/releases/tag/1.0.2).|
 | **May 2023** Exciting news! MARLlib now supports three more tasks: [MATE](https://marllib.readthedocs.io/en/latest/handbook/env.html#mate), [GoBigger](https://marllib.readthedocs.io/en/latest/handbook/env.html#gobigger), [Overcooked-AI](https://marllib.readthedocs.io/en/latest/handbook/env.html#overcooked-ai). Give them a try!|
 | **May 2023 (update)** Supports two more tasks: [MAPDN](https://marllib.readthedocs.io/en/latest/handbook/env.html#power-distribution-networks) and [AirCombat](https://marllib.readthedocs.io/en/latest/handbook/env.html#air-combat). Give them a try!|
+| **June 2023** OpenAI: [Hide and Seek](https://marllib.readthedocs.io/en/latest/handbook/env.html#hideandseek) incorporated into MARLlib.|
 
 
 **Multi-agent Reinforcement Learning Library ([MARLlib](https://arxiv.org/abs/2210.13708))** is ***a MARL library*** that utilizes [**Ray**](https://github.com/ray-project/ray) and one of its toolkits [**RLlib**](https://github.com/ray-project/ray/tree/master/rllib). It offers a comprehensive platform for developing, training, and testing MARL algorithms across various tasks and environments. 
@@ -33,20 +43,18 @@ Here's an example of how MARLlib can be used:
 from marllib import marl
 
 # prepare env
-env = marl.make_env(environment_name="mpe", map_name="simple_spread")
+env = marl.make_env(environment_name="mpe", map_name="simple_spread", force_coop=True)
 
 # initialize algorithm with appointed hyper-parameters
 mappo = marl.algos.mappo(hyperparam_source='mpe')
 
 # build agent model based on env + algorithms + user preference
-model = marl.build_model(env, mappo, {"core_arch": "gru", "encode_layer": "128-256"})
+model = marl.build_model(env, mappo, {"core_arch": "mlp", "encode_layer": "128-256"})
 
 # start training
 mappo.fit(env, model, stop={'timesteps_total': 1000000}, share_policy='group')
-
-# ready to control
-mappo.render(env, model, share_policy='group', restore_path='path_to_checkpoint')
 ```
+
 
 
 ## Why MARLlib?
@@ -201,6 +209,7 @@ Most of the popular environments in MARL research are supported by MARLlib:
 | **[Overcooked-AI](https://marllib.readthedocs.io/en/latest/handbook/env.html#overcooked-ai)** | cooperative | Full | Discrete | 1D |
 | **[PDN](https://marllib.readthedocs.io/en/latest/handbook/env.html#power-distribution-networks)** | cooperative | Partial | Continuous | 1D |
 | **[AirCombat](https://marllib.readthedocs.io/en/latest/handbook/env.html#air-combat)** | cooperative + mixed | Partial | MultiDiscrete | 1D |
+| **[HideAndSeek](https://marllib.readthedocs.io/en/latest/handbook/env.html#hideandseek)** | competitive + mixed | Partial | MultiDiscrete | 1D |
 
 Each environment has a readme file, standing as the instruction for this task, including env settings, installation, and
 important notes.
@@ -286,11 +295,11 @@ Choose `mlp`, `gru`, or `lstm` as you like to build the complete model.
 from marllib import marl
 
 # prepare env
-env = marl.make_env(environment_name="mpe", map_name="simple_spread")
+env = marl.make_env(environment_name="smac", map_name="5m_vs_6m")
 # initialize algorithm with appointed hyper-parameters
-mappo = marl.algos.mappo(hyperparam_source="mpe")
+mappo = marl.algos.mappo(hyperparam_source="smac")
 # build agent model based on env + algorithms + user preference
-model = marl.build_model(env, mappo, {"core_arch": "mlp", "encode_layer": "128-256"})
+model = marl.build_model(env, mappo, {"core_arch": "gru", "encode_layer": "128-256"})
 # start training
 mappo.fit(
   env, model, 
@@ -302,8 +311,8 @@ mappo.fit(
 mappo.render(
   env, model, 
   local_mode=True, 
-  restore_path={'params_path': "checkpoint_000010/params.json",
-                'model_path': "checkpoint_000010/checkpoint-10"}
+  restore_path={'params_path': "checkpoint/params.json",
+                'model_path': "checkpoint/checkpoint-10"}
 )
 ```
 </details>
@@ -345,7 +354,6 @@ MARLlib provides some practical examples for you to refer to.
 
 Try MPE + MAPPO examples on Google Colaboratory!
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Replicable-MARL/MARLlib/blob/sy_dev/marllib.ipynb)
-
 More tutorial documentations are available [here](https://marllib.readthedocs.io/).
 
 ## Awesome List
@@ -379,7 +387,7 @@ If you use MARLlib in your research, please cite the [MARLlib paper](https://arx
 
 ```tex
 @article{hu2022marllib,
-      title={MARLlib: Extending RLlib for Multi-agent Reinforcement Learning},
+      title={MARLlib: A Scalable Multi-agent Reinforcement Learning Library},
       author={Hu, Siyi and Zhong, Yifan and Gao, Minquan and Wang, Weixun and Dong, Hao and Li, Zhihui and Liang, Xiaodan and Chang, Xiaojun and Yang, Yaodong},
       journal={arXiv preprint arXiv:2210.13708},
       year={2022}

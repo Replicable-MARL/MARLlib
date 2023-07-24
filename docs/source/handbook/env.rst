@@ -78,6 +78,16 @@ Installation
 or you can just follow the error log (when the process can not found the game's location)
 and put it in the right place.
 
+API usage
+-----------------
+
+.. code-block:: python
+
+    from marllib import marl
+
+    env = marl.make_env(environment_name="smac", map_name="3m", difficulty="7", reward_scale_rate=20)
+
+
 .. _MAMuJoCo:
 
 MAMuJoCo
@@ -141,8 +151,14 @@ Installation
 **Note**: To access the MuJoCo API, you may get a mjkey (free now) and put it under /home/YourUserName/.mujoco.
 
 
+API usage
+-----------------
 
+.. code-block:: python
 
+    from marllib import marl
+
+    env = marl.make_env(environment_name="mamujoco", map_name="2AgentAnt")
 
 
 .. _Football:
@@ -205,6 +221,17 @@ We provide solutions (may work) for potential bugs
 * `apt-get, unmet dependencies, ... "but it is not going to be installed" <https://askubuntu.com/questions/564282/apt-get-unmet-dependencies-but-it-is-not-going-to-be-installed>`_
 * `Errors related to Could NOT find Boost <https://github.com/google-research/football/issues/317>`_
 
+
+API usage
+-----------------
+
+.. code-block:: python
+
+    from marllib import marl
+
+    env = marl.make_env(environment_name="football", map_name="academy_pass_and_shoot_with_keeper")
+
+
 .. _MPE:
 
 MPE
@@ -219,7 +246,7 @@ communicate, see each other, push each other around, and interact with fixed lan
 
 Official Link: https://github.com/openai/multiagent-particle-envs
 
-Our version: https://github.com/Farama-Foundation/PettingZoo/tree/master/pettingzoo/mpe
+Our version: https://github.com/Farama-Foundation/PettingZoo/tree/1.12.0/pettingzoo/mpe
 
 .. list-table::
    :widths: 25 25
@@ -257,6 +284,88 @@ We use the pettingzoo version of MPE
 .. code-block:: shell
 
     pip install pettingzoo[mpe]
+
+API usage
+-----------------
+
+.. code-block:: python
+
+    from marllib import marl
+
+    # discrete control
+    env = marl.make_env(environment_name="mpe", map_name="simple_spread", force_coop=True, continuous_actions=False)
+
+    # continuous control
+    env = marl.make_env(environment_name="mpe", map_name="simple_spread", force_coop=True, continuous_actions=True)
+
+    # turn off teamwork setting
+    env = marl.make_env(environment_name="mpe", map_name="simple_spread")
+
+
+.. _SISL:
+
+SISL
+==============
+
+.. figure:: ../images/sisl.gif
+    :width: 550
+    :align: center
+
+The SISL environments are a set of three cooperative multi-agent benchmark environments, created at SISL (Stanford Intelligent Systems Laboratory))
+and released as part of “Cooperative multi-agent control using deep reinforcement learning.”
+
+Official Link: https://github.com/sisl/MADRL
+
+Our version: https://github.com/Farama-Foundation/PettingZoo/tree/1.12.0/pettingzoo/sisl
+
+.. list-table::
+   :widths: 25 25
+   :header-rows: 0
+
+   * - ``Original Learning Mode``
+     - Cooperative
+   * - ``MARLlib Learning Mode``
+     - Cooperative + Collaborative
+   * - ``Observability``
+     - Full
+   * - ``Action Space``
+     - Discrete + Continuous
+   * - ``Observation Space Dim``
+     - 1D
+   * - ``Action Mask``
+     - No
+   * - ``Global State``
+     - No
+   * - ``Global State Space Dim``
+     - /
+   * - ``Reward``
+     - Dense
+   * - ``Agent-Env Interact Mode``
+     - Simultaneous / Asynchronous
+
+
+Installation
+-----------------
+
+We use the pettingzoo version of SISL
+
+.. code-block:: shell
+
+    pip install pettingzoo[sisl]
+
+API usage
+-----------------
+
+.. code-block:: python
+
+    from marllib import marl
+
+    # cooperative mode
+    env = marl.make_env(environment_name="sisl", map_name="multiwalker", force_coop=True)
+
+    # Collaborative mode
+    env = marl.make_env(environment_name="sisl", map_name="multiwalker")
+
 
 .. _LBF:
 
@@ -304,6 +413,19 @@ Installation
 
     pip install lbforaging==1.0.15
 
+API usage
+-----------------
+
+.. code-block:: python
+
+    from marllib import marl
+
+    # use default setting marllib/envs/base_env/config/lbf.yaml
+    env = marl.make_env(environment_name="lbf", map_name="default_map")
+
+    # customize yours
+    env = marl.make_env(environment_name="lbf", map_name="customized_map", force_coop=True, players=4, field_size_x=8)
+
 .. _RWARE:
 
 
@@ -350,6 +472,20 @@ Installation
 .. code-block:: shell
 
     pip install rware==1.0.1
+
+API usage
+-----------------
+
+.. code-block:: python
+
+    from marllib import marl
+
+    # use default setting marllib/envs/base_env/config/rware.yaml
+    env = marl.make_env(environment_name="rware", map_name="default_map")
+
+    # customize yours
+    env = marl.make_env(environment_name="rware", map_name="customized_map", players=4, map_size="tiny")
+
 
 .. _MAgent:
 
@@ -399,9 +535,20 @@ Installation
 
     pip install pettingzoo[magent]
 
+API usage
+-----------------
+
+.. code-block:: python
+
+    from marllib import marl
+
+    env = marl.make_env(environment_name="magent", map_name="adversarial_pursuit")
+
+    # turn off minimap; need to change global_state_flag to False
+    env = marl.make_env(environment_name="magent", map_name="adversarial_pursuit", minimap_mode=False)
+
+
 .. _Pommerman:
-
-
 
 Pommerman
 ==============
@@ -453,6 +600,20 @@ Installation
     python add_patch.py --pommerman
     pip install gym==0.21.0
 
+API usage
+-----------------
+
+.. code-block:: python
+
+    from marllib import marl
+
+    # competitive mode
+    env = marl.make_env(environment_name="pommerman", map_name="PommeFFACompetition-v0")
+
+    # cooperative mode
+    env = marl.make_env(environment_name="pommerman", map_name="PommeTeamCompetition-v0", force_coop=True)
+
+
 .. _MetaDrive:
 
 
@@ -502,6 +663,16 @@ Installation
 .. code-block:: shell
 
     pip install metadrive-simulator==0.2.3
+
+API usage
+-----------------
+
+.. code-block:: python
+
+    from marllib import marl
+
+    env = marl.make_env(environment_name="metadrive", map_name="Bottleneck")
+
 
 .. _Hanabi:
 
@@ -560,6 +731,15 @@ To install, execute the following:
     cmake ..
     make -j
 
+API usage
+-----------------
+
+.. code-block:: python
+
+    from marllib import marl
+
+    env = marl.make_env(environment_name="hanabi", map_name="Hanabi-Small", num_agents=3)
+
 
 .. _MATE:
 
@@ -606,6 +786,15 @@ Installation
 .. code-block:: shell
 
     pip3 install git+https://github.com/XuehaiPan/mate.git#egg=mate
+
+API usage
+-----------------
+
+.. code-block:: python
+
+    from marllib import marl
+
+    env = marl.make_env(environment_name="mate", map_name="MATE-4v2-9-v0", coop_team="camera")
 
 
 .. _GoBigger:
@@ -655,6 +844,14 @@ Installation
 
     conda install -c opendilab gobigger
 
+API usage
+-----------------
+
+.. code-block:: python
+
+    from marllib import marl
+
+    env = marl.make_env(environment_name="gobigger", map_name="st_t1p2")
 
 .. _Overcooked-AI:
 
@@ -704,6 +901,15 @@ Installation
     git clone https://github.com/Replicable-MARL/overcooked_ai.git
     cd overcooked_ai
     pip install -e .
+
+API usage
+-----------------
+
+.. code-block:: python
+
+    from marllib import marl
+
+    env = marl.make_env(environment_name="overcooked", map_name="asymmetric_advantages")
 
 
 .. _Active_Voltage_Control_on_Power_Distribution_Networks:
@@ -759,6 +965,17 @@ Please follow this `data link <https://github.com/Future-Power-Networks/MAPDN#do
     pip install pandas==1.1.3
 
 
+API usage
+-----------------
+
+.. code-block:: python
+
+    from marllib import marl
+
+    env = marl.make_env(environment_name="voltage", map_name="case33_3min_final")
+
+
+
 .. _Light_Aircraft_Game:
 
 Air Combat
@@ -796,7 +1013,7 @@ Our fork: https://github.com/Theohhhu/CloseAirCombat_baseline
    * - ``Global State``
      - No
    * - ``Global State Space Dim``
-     - 1D
+     - No
    * - ``Reward``
      - Dense
    * - ``Agent-Env Interact Mode``
@@ -812,3 +1029,86 @@ Installation
     cd Path/To/MARLlib
     # we use commit 8c13fd6 on JBSim, version is not restricted but may trigger potential bugs
     git submodule add --force https://github.com/JSBSim-Team/jsbsim.git marllib/patch/aircombat/JBSim/data
+
+
+API usage
+-----------------
+
+.. code-block:: python
+
+    from marllib import marl
+
+    # competitive mode
+    env = marl.make_env(environment_name="aircombat", map_name="MultipleCombat_2v2/NoWeapon/Selfplay")
+
+    # cooperative mode
+    env = marl.make_env(environment_name="aircombat", map_name="MultipleCombat_2v2/NoWeapon/vsBaseline")
+
+
+.. _Hide_and_Seek:
+
+Hide and Seek
+==============================
+.. only:: html
+
+    .. figure:: ../images/hns.gif
+       :width: 700
+       :align: center
+
+
+OpenAI Hide and Seek is a multi-agent reinforcement learning environment where artificial intelligence agents play a game inspired by hide and seek. Hiders and seekers navigate a virtual 3D environment, with hiders attempting to find clever hiding spots and stay hidden, while seekers aim to locate and tag the hiders within a time limit. With unique abilities and strategies, the agents learn and adapt through reinforcement learning algorithms, making it an engaging and competitive platform to explore advanced techniques in multi-agent AI and showcase the potential of complex behaviors in interactive environments.
+Official Link: https://github.com/openai/multi-agent-emergence-environments
+
+.. list-table::
+   :widths: 25 25
+   :header-rows: 0
+
+   * - ``Original Learning Mode``
+     - Competitive + Mixed
+   * - ``MARLlib Learning Mode``
+     - Competitive + Mixed
+   * - ``Observability``
+     - Partial
+   * - ``Action Space``
+     - MultiDiscrete
+   * - ``Observation Space Dim``
+     - 1D
+   * - ``Action Mask``
+     - No
+   * - ``Global State``
+     - No
+   * - ``Global State Space Dim``
+     - No
+   * - ``Reward``
+     - Dense
+   * - ``Agent-Env Interact Mode``
+     - Simultaneous
+
+
+Installation
+-----------------
+
+To execute the following command, it is necessary to install MuJoCo.
+The installation process is identical to the one explained for MAMuJoCo in the previous section.
+
+.. code-block:: shell
+
+    cd marllib/patch/envs/hns/mujoco-worldgen/
+    pip install -e .
+    pip install xmltodict
+    # if encounter enum error, excute uninstall
+    pip uninstall enum34
+
+
+API usage
+-----------------
+
+.. code-block:: python
+
+    from marllib import marl
+
+    # sub task
+    env = marl.make_env(environment_name="hns", map_name="BoxLocking")
+
+    # full game
+    env = marl.make_env(environment_name="hns", map_name="hidenseek")

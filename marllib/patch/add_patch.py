@@ -89,7 +89,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--yes", "-y", action="store_true", help="RLlib_patch.")
     parser.add_argument(
-        "--pommerman", "-p", action="store_true", help="pommerman_patch.")
+        "--pommerman", "-p", action="store_true", help="pommerman.")
     args = parser.parse_args()
 
     do_link("rllib/execution/replay_buffer.py", force=args.yes, local_path="./rllib/execution/replay_buffer.py",
@@ -112,13 +112,13 @@ if __name__ == "__main__":
     if args.pommerman:
         import pommerman
 
-        do_link('graphics.py', force=args.yes, local_path='./pommerman_patch/graphics.py', packagent=pommerman)
+        do_link('graphics.py', force=args.yes, local_path='pommerman/graphics.py', packagent=pommerman)
 
-        do_link("__init__.py", force=args.yes, local_path='./pommerman_patch/__init__.py', packagent=pommerman)
+        do_link("__init__.py", force=args.yes, local_path='pommerman/__init__.py', packagent=pommerman)
 
-        do_link("forward_model.py", force=args.yes, local_path="./pommerman_patch/forward_model.py",
+        do_link("forward_model.py", force=args.yes, local_path="pommerman/forward_model.py",
                 packagent=pommerman)
 
-        do_link("envs/v0.py", force=args.yes, local_path="./pommerman_patch/v0.py", packagent=pommerman)
+        do_link("envs/v0.py", force=args.yes, local_path="pommerman/v0.py", packagent=pommerman)
 
     print("finish soft link")

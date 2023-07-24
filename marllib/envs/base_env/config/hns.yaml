@@ -1,0 +1,46 @@
+# MIT License
+
+# Copyright (c) 2023 Replicable-MARL
+
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+env: hns
+
+# refer to https://github.com/jiayu-ch15/Variational-Automatic-Curriculum-Learning/blob/0846f191a1b6af558b87cb79881dd3beac4f95c5/config.py#L36
+env_args:
+  scenario_name: "quadrant" # "quadrant" only for hidenseek | otherwise "empty"
+  task_type: "all-return"
+  num_agents: 2
+  num_seekers: 1
+  num_hiders: 1
+  num_boxes: 1
+  num_ramps: 1
+  num_food: 0
+  floor_size: 6.0
+  grid_size: 30
+  fixed_door: True
+  spawn_obs: False
+  env_horizon: 100
+  share_reward: False
+  seed: 123
+
+mask_flag: False
+global_state_flag: False
+opp_action_in_cc: True
+agent_level_batch_update: True

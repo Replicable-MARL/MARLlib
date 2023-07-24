@@ -31,4 +31,5 @@ env_args:
 mask_flag: False
 global_state_flag: False
 opp_action_in_cc: True
-#fixed_batch_timesteps: 4000 # optional, all scenario will use this batch size, only valid for on-policy algorithms
+#fixed_batch_timesteps: 4000
+agent_level_batch_update: True
