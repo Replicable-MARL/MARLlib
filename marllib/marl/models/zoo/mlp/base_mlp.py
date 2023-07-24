@@ -121,4 +121,5 @@ class BaseMLP(TorchModelV2, nn.Module):
         return reduce(lambda x, y: x + y, map(lambda p: list(p.parameters()), self.actors))
 
     def critic_parameters(self):
-        return list(self.vf_branch.parameters())
+        critics = [self.vf_branch, self.vf_encoder]
+        return reduce(lambda x, y: x + y, map(lambda p: list(p.parameters()), critics))
