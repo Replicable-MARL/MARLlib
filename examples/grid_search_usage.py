@@ -28,6 +28,7 @@ examples on how to grid search based on MARLlib api:
 Notes:
     1. local_mode must set to (False) to enable parallelized training;
     2. other tunable parameters can be found in model arch and algorithm config
+    3. grid_search function not available on: trpo family and joint Q family
 """
 
 from marllib import marl
