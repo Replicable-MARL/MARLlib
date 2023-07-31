@@ -80,6 +80,7 @@ class BaseMLP(TorchModelV2, nn.Module):
         self.q_flag = False
 
         self.actors = [self.p_encoder, self.p_branch]
+        self.critics = [self.vf_encoder, self.vf_branch]
         self.actor_initialized_parameters = self.actor_parameters()
 
     @override(TorchModelV2)
@@ -121,4 +122,4 @@ class BaseMLP(TorchModelV2, nn.Module):
         return reduce(lambda x, y: x + y, map(lambda p: list(p.parameters()), self.actors))
 
     def critic_parameters(self):
-        return list(self.vf_branch.parameters())
+        return reduce(lambda x, y: x + y, map(lambda p: list(p.parameters()), self.critics))
