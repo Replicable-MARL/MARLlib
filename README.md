@@ -144,7 +144,7 @@ pip install "gym==0.20.0"
 Fix bugs of RLlib using patches by running the following command:
 
 ```bash
-$ cd /Path/To/MARLlib/marl/patch
+$ cd /Path/To/MARLlib/marllib/patch
 $ python add_patch.py -y
 ```
 
