@@ -36,7 +36,7 @@ torch, nn = try_import_torch()
 
 
 def run_vd(exp_info, env, model, stop=None):
-    ray.init(local_mode=exp_info["local_mode"])
+    ray.init(local_mode=exp_info["local_mode"], num_gpus=exp_info["num_gpus"])
 
     ########################
     ### environment info ###

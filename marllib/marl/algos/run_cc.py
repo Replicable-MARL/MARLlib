@@ -59,7 +59,7 @@ def restore_config_update(exp_info, run_config, stop_config):
 
 
 def run_cc(exp_info, env, model, stop=None):
-    ray.init(local_mode=exp_info["local_mode"])
+    ray.init(local_mode=exp_info["local_mode"], num_gpus=exp_info["num_gpus"])
 
     ########################
     ### environment info ###
