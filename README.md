@@ -134,9 +134,9 @@ $ pip install -r requirements.txt
 Please follow [this guide](https://marllib.readthedocs.io/en/latest/handbook/env.html).
 
 > __Note__:
-> We recommend the gym version between 0.20.0~0.22.0.
+> We recommend the gym version around 0.20.0.
 ```bash
-pip install "gym>=0.20.0,<0.22.0"
+pip install "gym==0.20.0"
 ```
 
 #### 3. install patches (basic)
