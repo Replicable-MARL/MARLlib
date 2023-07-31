@@ -8,5 +8,5 @@ pettingzoo[mpe]==1.12.0
 supersuit==3.2.0
 numpy==1.20.3
 importlib-metadata==4.13.0
-gym==0.22.0
+gym==0.20.0
 PyYAML
