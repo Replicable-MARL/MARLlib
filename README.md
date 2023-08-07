@@ -155,6 +155,10 @@ $ pip install --upgrade pip
 $ pip install marllib
 ```
 
+### Docker-based usage
+
+We provide a Dockerfile for building the MARLlib docker image in `MARLlib/docker/Dockerfile` and a devcontainer setup in `MARLlib/.devcontainer` folder. If you use the devcontainer, one thing to note is that you may need to customise certain arguments in `runArgs`  of `devcontainer.json` according to your hardware, for example the `--shm-size` argument.
+
 ## Getting started
 
 <details>
