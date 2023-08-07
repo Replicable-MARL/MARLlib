@@ -1,0 +1,24 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/ubuntu
+{
+	"name": "dev-container-MARLlib",
+
+	// Use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+	"build": {
+        // Path is relative to the devcontainer.json file.
+        "dockerfile": "Dockerfile"
+    },
+	
+	// An array of Docker CLI arguments that should be used when running the container
+	"runArgs": [
+		// Use available GPUs
+		"--gpus","all",
+		"--shm-size","16gb" //Make sure to set this to more than 30% of available RAM.
+	],
+
+	// Use 'postCreateCommand' to run commands after the container is created.
+	"postCreateCommand": "bash ./.devcontainer/postCreateCommand.sh",
+
+	// Connect as root. More info: https://aka.ms/dev-containers-non-root.
+	"remoteUser": "root"
+}
