@@ -195,3 +195,5 @@ def run_cc(exp_info, env, model, stop=None):
                                                      restore_config)
 
     ray.shutdown()
+
+    return results

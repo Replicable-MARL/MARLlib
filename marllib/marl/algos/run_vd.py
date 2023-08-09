@@ -208,3 +208,6 @@ def run_vd(exp_info, env, model, stop=None):
     results = POlICY_REGISTRY[exp_info["algorithm"]](model, exp_info, run_config, env_info, stop_config,
                                                      restore_config)
     ray.shutdown()
+
+    return results
+
