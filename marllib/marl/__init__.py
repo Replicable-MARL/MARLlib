@@ -309,11 +309,11 @@ class _Algo:
         self.config_dict['algorithm'] = self.name
 
         if self.algo_type == "IL":
-            run_il(self.config_dict, env_instance, model_class, stop=stop)
+            return run_il(self.config_dict, env_instance, model_class, stop=stop)
         elif self.algo_type == "VD":
-            run_vd(self.config_dict, env_instance, model_class, stop=stop)
+            return run_vd(self.config_dict, env_instance, model_class, stop=stop)
         elif self.algo_type == "CC":
-            run_cc(self.config_dict, env_instance, model_class, stop=stop)
+            return run_cc(self.config_dict, env_instance, model_class, stop=stop)
         else:
             raise ValueError("not supported type {}".format(self.algo_type))
 
