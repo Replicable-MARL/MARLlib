@@ -38,4 +38,4 @@ algo_args:
   entropy_coeff: 0.01
   vf_clip_param: 10.0
   min_lr_schedule: 1e-11
-  batch_mode: "truncate_episodes"
+  batch_mode: "complete_episodes"
