@@ -88,6 +88,79 @@ API usage
     env = marl.make_env(environment_name="smac", map_name="3m", difficulty="7", reward_scale_rate=20)
 
 
+.. _MPE:
+
+MPE
+==============
+
+.. figure:: ../images/mpe.gif
+    :width: 550
+    :align: center
+
+Multi-particle Environments (MPE) are a set of communication-oriented environments where particle agents can (sometimes) move,
+communicate, see each other, push each other around, and interact with fixed landmarks.
+
+Official Link: https://github.com/openai/multiagent-particle-envs
+
+Our version: https://github.com/Farama-Foundation/PettingZoo/tree/1.12.0/pettingzoo/mpe
+
+.. list-table::
+   :widths: 25 25
+   :header-rows: 0
+
+   * - ``Original Learning Mode``
+     - Collaborative + Competitive
+   * - ``MARLlib Learning Mode``
+     - Cooperative + Collaborative + Competitive + Mixed
+   * - ``Observability``
+     - Full
+   * - ``Action Space``
+     - Discrete + Continuous
+   * - ``Observation Space Dim``
+     - 1D
+   * - ``Action Mask``
+     - No
+   * - ``Global State``
+     - No
+   * - ``Global State Space Dim``
+     - /
+   * - ``Reward``
+     - Dense
+   * - ``Agent-Env Interact Mode``
+     - Simultaneous / Asynchronous
+
+
+.. _PettingZoo:
+
+PettingZoo
+===================
+
+.. figure:: ../images/pettingzoo.png
+    :width: 550
+    :align: center
+
+PettingZoo has undergone significant updates, and we have made the decision to seamlessly integrate its latest version with Gymnasium, using Multi-Agent Particle Environment (MPE) as a prime example. This integration serves as a blueprint for incorporating any task from the most recent PettingZoo library into MARLlib.
+
+For detailed information and access to the official PettingZoo repository, please visit the following link: https://github.com/Farama-Foundation/PettingZoo.
+
+In addition, there are some optional installation steps you may want to consider for your specific use case.
+
+.. code-block:: shell
+
+    pip install pettingzoo==1.23.1
+    pip install supersuit==3.9.0
+    pip install pygame==2.3.0
+
+API usage
+-----------------
+
+.. code-block:: python
+
+    from marllib import marl
+
+    env = marl.make_env(environment_name="gymnasium_mpe", map_name="simple_spread")
+
+
 .. _MAMuJoCo:
 
 MAMuJoCo
@@ -254,76 +327,6 @@ API usage
     from marllib import marl
 
     env = marl.make_env(environment_name="football", map_name="academy_pass_and_shoot_with_keeper")
-
-
-.. _MPE:
-
-MPE
-==============
-
-.. figure:: ../images/mpe.gif
-    :width: 550
-    :align: center
-
-Multi-particle Environments (MPE) are a set of communication-oriented environments where particle agents can (sometimes) move,
-communicate, see each other, push each other around, and interact with fixed landmarks.
-
-Official Link: https://github.com/openai/multiagent-particle-envs
-
-Our version: https://github.com/Farama-Foundation/PettingZoo/tree/1.12.0/pettingzoo/mpe
-
-.. list-table::
-   :widths: 25 25
-   :header-rows: 0
-
-   * - ``Original Learning Mode``
-     - Collaborative + Competitive
-   * - ``MARLlib Learning Mode``
-     - Cooperative + Collaborative + Competitive + Mixed
-   * - ``Observability``
-     - Full
-   * - ``Action Space``
-     - Discrete + Continuous
-   * - ``Observation Space Dim``
-     - 1D
-   * - ``Action Mask``
-     - No
-   * - ``Global State``
-     - No
-   * - ``Global State Space Dim``
-     - /
-   * - ``Reward``
-     - Dense
-   * - ``Agent-Env Interact Mode``
-     - Simultaneous / Asynchronous
-
-
-
-
-Installation
------------------
-
-We use the pettingzoo version of MPE
-
-.. code-block:: shell
-
-    pip install pettingzoo[mpe]
-
-API usage
------------------
-
-.. code-block:: python
-
-    from marllib import marl
-
-    # discrete control
-    env = marl.make_env(environment_name="mpe", map_name="simple_spread", force_coop=True, continuous_actions=False)
-
-    # continuous control
-    env = marl.make_env(environment_name="mpe", map_name="simple_spread", force_coop=True, continuous_actions=True)
-
-    # turn off teamwork setting
-    env = marl.make_env(environment_name="mpe", map_name="simple_spread")
 
 
 .. _SISL:
