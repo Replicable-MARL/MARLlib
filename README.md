@@ -33,6 +33,7 @@
 | **May 2023** Exciting news! MARLlib now supports five more tasks: [MATE](https://marllib.readthedocs.io/en/latest/handbook/env.html#mate), [GoBigger](https://marllib.readthedocs.io/en/latest/handbook/env.html#gobigger), [Overcooked-AI](https://marllib.readthedocs.io/en/latest/handbook/env.html#overcooked-ai), [MAPDN](https://marllib.readthedocs.io/en/latest/handbook/env.html#power-distribution-networks), and [AirCombat](https://marllib.readthedocs.io/en/latest/handbook/env.html#air-combat). Give them a try!|
 | **June 2023** [OpenAI: Hide and Seek](https://marllib.readthedocs.io/en/latest/handbook/env.html#hide-and-seek) and [SISL](https://marllib.readthedocs.io/en/latest/handbook/env.html#sisl) environments are incorporated into MARLlib.|
 | **Aug 2023** :tada:MARLlib has been accepted for publication in [JMLR](https://www.jmlr.org/).|
+| **Sept 2023** Latest [PettingZoo](https://marllib.readthedocs.io/en/latest/handbook/env.html#pettingzoo) with [Gymnasium](https://gymnasium.farama.org) are compatiable within MARLlib.|
 
 **Multi-agent Reinforcement Learning Library ([MARLlib](https://arxiv.org/abs/2210.13708))** is ***a MARL library*** that utilizes [**Ray**](https://github.com/ray-project/ray) and one of its toolkits [**RLlib**](https://github.com/ray-project/ray/tree/master/rllib). It offers a comprehensive platform for developing, training, and testing MARL algorithms across various tasks and environments. 
 
