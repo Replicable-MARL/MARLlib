@@ -50,7 +50,7 @@ def dict_update(target_dict: Dict, new_dict: Dict, check: bool = False) -> Dict:
                     raise ValueError("{} illegal, not in default config".format(key))
                 else:  # update
                     target_dict[key] = value
-            if key in target_dict:
+            else:
                 target_dict[key] = value
 
     return target_dict
