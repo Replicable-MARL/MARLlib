@@ -36,5 +36,5 @@ algo_args:
   buffer_size_episode: 1000
   target_network_update_freq_episode: 1
   tau: 0.002
-  batch_mode: "truncate_episodes"
+  batch_mode: "complete_episodes"
 

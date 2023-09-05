@@ -20,15 +20,29 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# MAA2C parameters
+from marllib.envs.base_env.gymnasium_mpe import RLlibMPE_Gymnasium
 
-# Detailed explanation for each hyper parameter can be found in ray/rllib/agents/a3c/ia2c.py
+legal_scenarios = ["simple_spread", "simple_reference", "simple_speaker_listener"]
 
-algo_args:
-  use_gae: True
-  lambda: 1.0
-  vf_loss_coeff: 1.0
-  batch_episode:  128
-  batch_mode: "complete_episodes"
-  lr: 0.0003
-  entropy_coeff: 0.01
+
+class RLlibMPE_Gymnasium_FCOOP(RLlibMPE_Gymnasium):
+
+    def __init__(self, env_config):
+        if env_config["map_name"] not in legal_scenarios:
+            raise ValueError("must in: 1.simple_spread, 2.simple_reference, 3.simple_speaker_listener")
+        super().__init__(env_config)
+
+    def step(self, action_dict):
+        o, r, d, t, info = self.env.step(action_dict)
+        reward = 0
+        for key in r.keys():
+            reward += r[key]
+        rewards = {}
+        obs = {}
+        for agent in self.agents:
+            rewards[agent] = reward/self.num_agents
+            obs[agent] = {
+                "obs": o[agent]
+            }
+        dones = {"__all__": d.popitem()[1] or t.popitem()[1]}
+        return obs, rewards, dones, info

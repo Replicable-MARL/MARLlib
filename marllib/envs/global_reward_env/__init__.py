@@ -37,6 +37,13 @@ except Exception as e:
     COOP_ENV_REGISTRY["mpe"] = str(e)
 
 try:
+    from marllib.envs.global_reward_env.gymnasium_mpe_fcoop import RLlibMPE_Gymnasium_FCOOP
+
+    COOP_ENV_REGISTRY["gymnasium_mpe"] = RLlibMPE_Gymnasium_FCOOP
+except Exception as e:
+    COOP_ENV_REGISTRY["gymnasium_mpe"] = str(e)
+
+try:
     from marllib.envs.global_reward_env.magent_fcoop import RLlibMAgent_FCOOP
 
     COOP_ENV_REGISTRY["magent"] = RLlibMAgent_FCOOP

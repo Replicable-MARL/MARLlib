@@ -20,15 +20,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# MAA2C parameters
+env: gymnasium_mpe # latest pettingzoo with gymnasium
 
-# Detailed explanation for each hyper parameter can be found in ray/rllib/agents/a3c/ia2c.py
+env_args:
+  map_name: "simple_adversary" # others can be found in mpe.py
+  continuous_actions: False
+  max_cycles: 25
 
-algo_args:
-  use_gae: True
-  lambda: 1.0
-  vf_loss_coeff: 1.0
-  batch_episode:  128
-  batch_mode: "complete_episodes"
-  lr: 0.0003
-  entropy_coeff: 0.01
+mask_flag: False
+global_state_flag: False
+opp_action_in_cc: True
+agent_level_batch_update: False
