@@ -38,7 +38,12 @@ except Exception as e:
     ENV_REGISTRY["mpe"] = str(e)
 
 
+try:
+    from marllib.envs.base_env.gymnasium_mpe import RLlibMPE_Gymnasium
 
+    ENV_REGISTRY["gymnasium_mpe"] = RLlibMPE_Gymnasium
+except Exception as e:
+    ENV_REGISTRY["gymnasium_mpe"] = str(e)
 
 try:
     from marllib.envs.base_env.mamujoco import RLlibMAMujoco
