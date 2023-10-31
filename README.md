@@ -396,10 +396,10 @@ If you use MARLlib in your research, please cite the [MARLlib paper](https://arx
 
 ```tex
 @article{hu2022marllib,
-      title={MARLlib: A Scalable Multi-agent Reinforcement Learning Library},
-      author={Hu, Siyi and Zhong, Yifan and Gao, Minquan and Wang, Weixun and Dong, Hao and Li, Zhihui and Liang, Xiaodan and Chang, Xiaojun and Yang, Yaodong},
-      journal={arXiv preprint arXiv:2210.13708},
-      year={2022}
+  author  = {Siyi Hu and Yifan Zhong and Minquan Gao and Weixun Wang and Hao Dong and Xiaodan Liang and Zhihui Li and Xiaojun Chang and Yaodong Yang},
+  title   = {MARLlib: A Scalable and Efficient Multi-agent Reinforcement Learning Library},
+  journal = {Journal of Machine Learning Research},
+  year    = {2023},
 }
 ```
 
