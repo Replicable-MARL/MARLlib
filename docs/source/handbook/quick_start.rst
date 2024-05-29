@@ -59,7 +59,7 @@ Ray/RLlib Running Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Ray/RLlib provides a flexible multi-processing scheduling mechanism for MARLlib.
-You can modify the `file of ray configuration <https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/marllib/marl/ray.yaml>`_ to adjust sampling speed (worker number, CPU number), training speed (GPU acceleration),
+You can modify the `file of ray configuration <https://github.com/Replicable-MARL/MARLlib/blob/sy_dev/marllib/marl/ray/ray.yaml>`_ to adjust sampling speed (worker number, CPU number), training speed (GPU acceleration),
 running mode (locally or distributed), parameter sharing strategy (all, group, individual), and stop condition (iteration, reward, timestep).
 
 How to Customize
